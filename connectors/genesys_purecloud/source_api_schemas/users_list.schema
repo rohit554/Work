@@ -1,0 +1,431 @@
+{
+    "fields": [
+        {
+            "metadata": {},
+            "name": "acdAutoAnswer",
+            "nullable": true,
+            "type": "boolean"
+        },
+        {
+            "metadata": {},
+            "name": "addresses",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": {
+                    "fields": [
+                        {
+                            "metadata": {},
+                            "name": "address",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "display",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "extension",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "mediaType",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "type",
+                            "nullable": true,
+                            "type": "string"
+                        }
+                    ],
+                    "type": "struct"
+                },
+                "type": "array"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "authorization",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "permissionPolicies",
+                        "nullable": true,
+                        "type": {
+                            "containsNull": true,
+                            "elementType": {
+                                "fields": [
+                                    {
+                                        "metadata": {},
+                                        "name": "actionSet",
+                                        "nullable": true,
+                                        "type": {
+                                            "containsNull": true,
+                                            "elementType": "string",
+                                            "type": "array"
+                                        }
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "allowConditions",
+                                        "nullable": true,
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "domain",
+                                        "nullable": true,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "entityName",
+                                        "nullable": true,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "namedResources",
+                                        "nullable": true,
+                                        "type": {
+                                            "containsNull": true,
+                                            "elementType": "string",
+                                            "type": "array"
+                                        }
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "resourceCondition",
+                                        "nullable": true,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "resourceConditionNode",
+                                        "nullable": true,
+                                        "type": {
+                                            "fields": [
+                                                {
+                                                    "metadata": {},
+                                                    "name": "conjunction",
+                                                    "nullable": true,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "metadata": {},
+                                                    "name": "operands",
+                                                    "nullable": true,
+                                                    "type": {
+                                                        "containsNull": true,
+                                                        "elementType": "string",
+                                                        "type": "array"
+                                                    }
+                                                },
+                                                {
+                                                    "metadata": {},
+                                                    "name": "terms",
+                                                    "nullable": true,
+                                                    "type": {
+                                                        "containsNull": true,
+                                                        "elementType": {
+                                                            "fields": [
+                                                                {
+                                                                    "metadata": {},
+                                                                    "name": "operands",
+                                                                    "nullable": true,
+                                                                    "type": {
+                                                                        "containsNull": true,
+                                                                        "elementType": {
+                                                                            "fields": [
+                                                                                {
+                                                                                    "metadata": {},
+                                                                                    "name": "type",
+                                                                                    "nullable": true,
+                                                                                    "type": "string"
+                                                                                },
+                                                                                {
+                                                                                    "metadata": {},
+                                                                                    "name": "value",
+                                                                                    "nullable": true,
+                                                                                    "type": "string"
+                                                                                }
+                                                                            ],
+                                                                            "type": "struct"
+                                                                        },
+                                                                        "type": "array"
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "metadata": {},
+                                                                    "name": "operator",
+                                                                    "nullable": true,
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "metadata": {},
+                                                                    "name": "terms",
+                                                                    "nullable": true,
+                                                                    "type": {
+                                                                        "containsNull": true,
+                                                                        "elementType": "string",
+                                                                        "type": "array"
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "metadata": {},
+                                                                    "name": "variableName",
+                                                                    "nullable": true,
+                                                                    "type": "string"
+                                                                }
+                                                            ],
+                                                            "type": "struct"
+                                                        },
+                                                        "type": "array"
+                                                    }
+                                                }
+                                            ],
+                                            "type": "struct"
+                                        }
+                                    }
+                                ],
+                                "type": "struct"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    {
+                        "metadata": {},
+                        "name": "permissions",
+                        "nullable": true,
+                        "type": {
+                            "containsNull": true,
+                            "elementType": "string",
+                            "type": "array"
+                        }
+                    },
+                    {
+                        "metadata": {},
+                        "name": "roles",
+                        "nullable": true,
+                        "type": {
+                            "containsNull": true,
+                            "elementType": {
+                                "fields": [
+                                    {
+                                        "metadata": {},
+                                        "name": "id",
+                                        "nullable": true,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "name",
+                                        "nullable": true,
+                                        "type": "string"
+                                    }
+                                ],
+                                "type": "struct"
+                            },
+                            "type": "array"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "chat",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "jabberId",
+                        "nullable": true,
+                        "type": "string"
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "department",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "division",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "name",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "email",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "images",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": {
+                    "fields": [
+                        {
+                            "metadata": {},
+                            "name": "imageUri",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "resolution",
+                            "nullable": true,
+                            "type": "string"
+                        }
+                    ],
+                    "type": "struct"
+                },
+                "type": "array"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "manager",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "name",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "primaryContactInfo",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": {
+                    "fields": [
+                        {
+                            "metadata": {},
+                            "name": "address",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "display",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "mediaType",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "type",
+                            "nullable": true,
+                            "type": "string"
+                        }
+                    ],
+                    "type": "struct"
+                },
+                "type": "array"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "selfUri",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "state",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "title",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "username",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "version",
+            "nullable": true,
+            "type": "long"
+        }
+    ],
+    "type": "struct"
+}

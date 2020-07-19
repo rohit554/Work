@@ -1,0 +1,68 @@
+{
+    "fields": [{
+        "metadata": {},
+        "name": "primaryPresence",
+        "nullable": true,
+        "type": {
+            "containsNull": true,
+            "elementType": {
+                "fields": [{
+                    "metadata": {},
+                    "name": "endTime",
+                    "nullable": true,
+                    "type": "string"
+                }, {
+                    "metadata": {},
+                    "name": "organizationPresenceId",
+                    "nullable": true,
+                    "type": "string"
+                }, {
+                    "metadata": {},
+                    "name": "startTime",
+                    "nullable": true,
+                    "type": "string"
+                }, {
+                    "metadata": {},
+                    "name": "systemPresence",
+                    "nullable": true,
+                    "type": "string"
+                }],
+                "type": "struct"
+            },
+            "type": "array"
+        }
+    }, {
+        "metadata": {},
+        "name": "routingStatus",
+        "nullable": true,
+        "type": {
+            "containsNull": true,
+            "elementType": {
+                "fields": [{
+                    "metadata": {},
+                    "name": "endTime",
+                    "nullable": true,
+                    "type": "string"
+                }, {
+                    "metadata": {},
+                    "name": "routingStatus",
+                    "nullable": true,
+                    "type": "string"
+                }, {
+                    "metadata": {},
+                    "name": "startTime",
+                    "nullable": true,
+                    "type": "string"
+                }],
+                "type": "struct"
+            },
+            "type": "array"
+        }
+    }, {
+        "metadata": {},
+        "name": "userId",
+        "nullable": true,
+        "type": "string"
+    }],
+    "type": "struct"
+}

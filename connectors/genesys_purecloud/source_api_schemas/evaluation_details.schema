@@ -1,0 +1,363 @@
+{
+    "fields": [
+        {
+            "metadata": {},
+            "name": "agent",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "agentHasRead",
+            "nullable": true,
+            "type": "boolean"
+        },
+        {
+            "metadata": {},
+            "name": "answers",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "anyFailedKillQuestions",
+                        "nullable": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "comments",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "questionGroupScores",
+                        "nullable": true,
+                        "type": {
+                            "containsNull": true,
+                            "elementType": {
+                                "fields": [
+                                    {
+                                        "metadata": {},
+                                        "name": "markedNA",
+                                        "nullable": true,
+                                        "type": "boolean"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "maxTotalCriticalScore",
+                                        "nullable": true,
+                                        "type": "double"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "maxTotalCriticalScoreUnweighted",
+                                        "nullable": true,
+                                        "type": "double"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "maxTotalNonCriticalScore",
+                                        "nullable": true,
+                                        "type": "double"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "maxTotalNonCriticalScoreUnweighted",
+                                        "nullable": true,
+                                        "type": "double"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "maxTotalScore",
+                                        "nullable": true,
+                                        "type": "double"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "maxTotalScoreUnweighted",
+                                        "nullable": true,
+                                        "type": "double"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "questionGroupId",
+                                        "nullable": true,
+                                        "type": "string"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "questionScores",
+                                        "nullable": true,
+                                        "type": {
+                                            "containsNull": true,
+                                            "elementType": {
+                                                "fields": [
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "answerId",
+                                                        "nullable": true,
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "comments",
+                                                        "nullable": true,
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "failedKillQuestion",
+                                                        "nullable": true,
+                                                        "type": "boolean"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "markedNA",
+                                                        "nullable": true,
+                                                        "type": "boolean"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "questionId",
+                                                        "nullable": true,
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "score",
+                                                        "nullable": true,
+                                                        "type": "long"
+                                                    }
+                                                ],
+                                                "type": "struct"
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "totalCriticalScore",
+                                        "nullable": true,
+                                        "type": "double"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "totalCriticalScoreUnweighted",
+                                        "nullable": true,
+                                        "type": "double"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "totalNonCriticalScore",
+                                        "nullable": true,
+                                        "type": "double"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "totalNonCriticalScoreUnweighted",
+                                        "nullable": true,
+                                        "type": "double"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "totalScore",
+                                        "nullable": true,
+                                        "type": "double"
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "totalScoreUnweighted",
+                                        "nullable": true,
+                                        "type": "double"
+                                    }
+                                ],
+                                "type": "struct"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    {
+                        "metadata": {},
+                        "name": "totalCriticalScore",
+                        "nullable": true,
+                        "type": "double"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "totalNonCriticalScore",
+                        "nullable": true,
+                        "type": "double"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "totalScore",
+                        "nullable": true,
+                        "type": "double"
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "assignedDate",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "changedDate",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "conversation",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "conversationDate",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "evaluationForm",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "name",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "published",
+                        "nullable": true,
+                        "type": "boolean"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "evaluator",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "mediaType",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": "string",
+                "type": "array"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "neverRelease",
+            "nullable": true,
+            "type": "boolean"
+        },
+        {
+            "metadata": {},
+            "name": "releaseDate",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "resourceType",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "selfUri",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "status",
+            "nullable": true,
+            "type": "string"
+        }
+    ],
+    "type": "struct"
+}

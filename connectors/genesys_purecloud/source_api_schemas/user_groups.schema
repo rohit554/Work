@@ -1,0 +1,37 @@
+{
+   "fields":[
+      {
+         "metadata":{
+
+         },
+         "name":"id",
+         "nullable":true,
+         "type":"string"
+      },
+      {
+         "metadata":{
+
+         },
+         "name":"name",
+         "nullable":true,
+         "type":"string"
+      },
+      {
+         "metadata":{
+
+         },
+         "name":"memberCount",
+         "nullable":true,
+         "type":"integer"
+      },
+      {
+         "metadata":{
+
+         },
+         "name":"version",
+         "nullable":true,
+         "type":"integer"
+      }
+   ],
+   "type":"struct"
+}

@@ -1,0 +1,531 @@
+{
+    "fields": [{
+        "metadata": {},
+        "name": "acwSettings",
+        "nullable": true,
+        "type": {
+            "fields": [{
+                "metadata": {},
+                "name": "timeoutMs",
+                "nullable": true,
+                "type": "long"
+            }, {
+                "metadata": {},
+                "name": "wrapupPrompt",
+                "nullable": true,
+                "type": "string"
+            }],
+            "type": "struct"
+        }
+    }, {
+        "metadata": {},
+        "name": "autoAnswerOnly",
+        "nullable": true,
+        "type": "boolean"
+    }, {
+        "metadata": {},
+        "name": "callingPartyName",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "callingPartyNumber",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "createdBy",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "dateCreated",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "dateModified",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "defaultScripts",
+        "nullable": true,
+        "type": {
+            "fields": [{
+                "metadata": {},
+                "name": "CALL",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    }, {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }],
+                    "type": "struct"
+                }
+            }, {
+                "metadata": {},
+                "name": "CHAT",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    }, {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }],
+                    "type": "struct"
+                }
+            }, {
+                "metadata": {},
+                "name": "EMAIL",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    }, {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }],
+                    "type": "struct"
+                }
+            }, {
+                "metadata": {},
+                "name": "MESSAGE",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    }, {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }],
+                    "type": "struct"
+                }
+            }],
+            "type": "struct"
+        }
+    }, {
+        "metadata": {},
+        "name": "division",
+        "nullable": true,
+        "type": {
+            "fields": [{
+                "metadata": {},
+                "name": "id",
+                "nullable": true,
+                "type": "string"
+            }, {
+                "metadata": {},
+                "name": "name",
+                "nullable": true,
+                "type": "string"
+            }, {
+                "metadata": {},
+                "name": "selfUri",
+                "nullable": true,
+                "type": "string"
+            }],
+            "type": "struct"
+        }
+    }, {
+        "metadata": {},
+        "name": "id",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "mediaSettings",
+        "nullable": true,
+        "type": {
+            "fields": [{
+                "metadata": {},
+                "name": "call",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "alertingTimeoutSeconds",
+                        "nullable": true,
+                        "type": "long"
+                    }, {
+                        "metadata": {},
+                        "name": "serviceLevel",
+                        "nullable": true,
+                        "type": {
+                            "fields": [{
+                                "metadata": {},
+                                "name": "durationMs",
+                                "nullable": true,
+                                "type": "long"
+                            }, {
+                                "metadata": {},
+                                "name": "percentage",
+                                "nullable": true,
+                                "type": "double"
+                            }],
+                            "type": "struct"
+                        }
+                    }],
+                    "type": "struct"
+                }
+            }, {
+                "metadata": {},
+                "name": "callback",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "alertingTimeoutSeconds",
+                        "nullable": true,
+                        "type": "long"
+                    }, {
+                        "metadata": {},
+                        "name": "serviceLevel",
+                        "nullable": true,
+                        "type": {
+                            "fields": [{
+                                "metadata": {},
+                                "name": "durationMs",
+                                "nullable": true,
+                                "type": "long"
+                            }, {
+                                "metadata": {},
+                                "name": "percentage",
+                                "nullable": true,
+                                "type": "double"
+                            }],
+                            "type": "struct"
+                        }
+                    }],
+                    "type": "struct"
+                }
+            }, {
+                "metadata": {},
+                "name": "chat",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "alertingTimeoutSeconds",
+                        "nullable": true,
+                        "type": "long"
+                    }, {
+                        "metadata": {},
+                        "name": "serviceLevel",
+                        "nullable": true,
+                        "type": {
+                            "fields": [{
+                                "metadata": {},
+                                "name": "durationMs",
+                                "nullable": true,
+                                "type": "long"
+                            }, {
+                                "metadata": {},
+                                "name": "percentage",
+                                "nullable": true,
+                                "type": "double"
+                            }],
+                            "type": "struct"
+                        }
+                    }],
+                    "type": "struct"
+                }
+            }, {
+                "metadata": {},
+                "name": "email",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "alertingTimeoutSeconds",
+                        "nullable": true,
+                        "type": "long"
+                    }, {
+                        "metadata": {},
+                        "name": "serviceLevel",
+                        "nullable": true,
+                        "type": {
+                            "fields": [{
+                                "metadata": {},
+                                "name": "durationMs",
+                                "nullable": true,
+                                "type": "long"
+                            }, {
+                                "metadata": {},
+                                "name": "percentage",
+                                "nullable": true,
+                                "type": "double"
+                            }],
+                            "type": "struct"
+                        }
+                    }],
+                    "type": "struct"
+                }
+            }, {
+                "metadata": {},
+                "name": "message",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "alertingTimeoutSeconds",
+                        "nullable": true,
+                        "type": "long"
+                    }, {
+                        "metadata": {},
+                        "name": "serviceLevel",
+                        "nullable": true,
+                        "type": {
+                            "fields": [{
+                                "metadata": {},
+                                "name": "durationMs",
+                                "nullable": true,
+                                "type": "long"
+                            }, {
+                                "metadata": {},
+                                "name": "percentage",
+                                "nullable": true,
+                                "type": "double"
+                            }],
+                            "type": "struct"
+                        }
+                    }],
+                    "type": "struct"
+                }
+            }, {
+                "metadata": {},
+                "name": "socialExpression",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "alertingTimeoutSeconds",
+                        "nullable": true,
+                        "type": "long"
+                    }, {
+                        "metadata": {},
+                        "name": "serviceLevel",
+                        "nullable": true,
+                        "type": {
+                            "fields": [{
+                                "metadata": {},
+                                "name": "durationMs",
+                                "nullable": true,
+                                "type": "long"
+                            }, {
+                                "metadata": {},
+                                "name": "percentage",
+                                "nullable": true,
+                                "type": "double"
+                            }],
+                            "type": "struct"
+                        }
+                    }],
+                    "type": "struct"
+                }
+            }, {
+                "metadata": {},
+                "name": "videoComm",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "alertingTimeoutSeconds",
+                        "nullable": true,
+                        "type": "long"
+                    }, {
+                        "metadata": {},
+                        "name": "serviceLevel",
+                        "nullable": true,
+                        "type": {
+                            "fields": [{
+                                "metadata": {},
+                                "name": "durationMs",
+                                "nullable": true,
+                                "type": "long"
+                            }, {
+                                "metadata": {},
+                                "name": "percentage",
+                                "nullable": true,
+                                "type": "double"
+                            }],
+                            "type": "struct"
+                        }
+                    }],
+                    "type": "struct"
+                }
+            }],
+            "type": "struct"
+        }
+    }, {
+        "metadata": {},
+        "name": "memberCount",
+        "nullable": true,
+        "type": "long"
+    }, {
+        "metadata": {},
+        "name": "modifiedBy",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "name",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "outboundEmailAddress",
+        "nullable": true,
+        "type": {
+            "fields": [{
+                "metadata": {},
+                "name": "domain",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    }, {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }],
+                    "type": "struct"
+                }
+            }, {
+                "metadata": {},
+                "name": "route",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "autoBcc",
+                        "nullable": true,
+                        "type": {
+                            "containsNull": true,
+                            "elementType": "string",
+                            "type": "array"
+                        }
+                    }, {
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    }, {
+                        "metadata": {},
+                        "name": "pattern",
+                        "nullable": true,
+                        "type": "string"
+                    }, {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }],
+                    "type": "struct"
+                }
+            }],
+            "type": "struct"
+        }
+    }, {
+        "metadata": {},
+        "name": "outboundMessagingAddresses",
+        "nullable": true,
+        "type": {
+            "fields": [{
+                "metadata": {},
+                "name": "smsAddress",
+                "nullable": true,
+                "type": {
+                    "fields": [{
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    }, {
+                        "metadata": {},
+                        "name": "name",
+                        "nullable": true,
+                        "type": "string"
+                    }, {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }],
+                    "type": "struct"
+                }
+            }],
+            "type": "struct"
+        }
+    }, {
+        "metadata": {},
+        "name": "queueFlow",
+        "nullable": true,
+        "type": {
+            "fields": [{
+                "metadata": {},
+                "name": "id",
+                "nullable": true,
+                "type": "string"
+            }, {
+                "metadata": {},
+                "name": "name",
+                "nullable": true,
+                "type": "string"
+            }, {
+                "metadata": {},
+                "name": "selfUri",
+                "nullable": true,
+                "type": "string"
+            }],
+            "type": "struct"
+        }
+    }, {
+        "metadata": {},
+        "name": "routingRules",
+        "nullable": true,
+        "type": {
+            "containsNull": true,
+            "elementType": "string",
+            "type": "array"
+        }
+    }, {
+        "metadata": {},
+        "name": "selfUri",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "skillEvaluationMethod",
+        "nullable": true,
+        "type": "string"
+    }],
+    "type": "struct"
+}

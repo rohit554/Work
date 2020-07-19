@@ -1,0 +1,197 @@
+{
+    "fields": [
+        {
+            "metadata": {},
+            "name": "contextId",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "modifiedDate",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "name",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "published",
+            "nullable": true,
+            "type": "boolean"
+        },
+        {
+            "metadata": {},
+            "name": "questionGroups",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": {
+                    "fields": [
+                        {
+                            "metadata": {},
+                            "name": "defaultAnswersToHighest",
+                            "nullable": true,
+                            "type": "boolean"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "defaultAnswersToNA",
+                            "nullable": true,
+                            "type": "boolean"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "id",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "manualWeight",
+                            "nullable": true,
+                            "type": "boolean"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "naEnabled",
+                            "nullable": true,
+                            "type": "boolean"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "name",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "questions",
+                            "nullable": true,
+                            "type": {
+                                "containsNull": true,
+                                "elementType": {
+                                    "fields": [
+                                        {
+                                            "metadata": {},
+                                            "name": "answerOptions",
+                                            "nullable": true,
+                                            "type": {
+                                                "containsNull": true,
+                                                "elementType": {
+                                                    "fields": [
+                                                        {
+                                                            "metadata": {},
+                                                            "name": "id",
+                                                            "nullable": true,
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "metadata": {},
+                                                            "name": "text",
+                                                            "nullable": true,
+                                                            "type": "string"
+                                                        },
+                                                        {
+                                                            "metadata": {},
+                                                            "name": "value",
+                                                            "nullable": true,
+                                                            "type": "long"
+                                                        }
+                                                    ],
+                                                    "type": "struct"
+                                                },
+                                                "type": "array"
+                                            }
+                                        },
+                                        {
+                                            "metadata": {},
+                                            "name": "commentsRequired",
+                                            "nullable": true,
+                                            "type": "boolean"
+                                        },
+                                        {
+                                            "metadata": {},
+                                            "name": "helpText",
+                                            "nullable": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "metadata": {},
+                                            "name": "id",
+                                            "nullable": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "metadata": {},
+                                            "name": "isCritical",
+                                            "nullable": true,
+                                            "type": "boolean"
+                                        },
+                                        {
+                                            "metadata": {},
+                                            "name": "isKill",
+                                            "nullable": true,
+                                            "type": "boolean"
+                                        },
+                                        {
+                                            "metadata": {},
+                                            "name": "naEnabled",
+                                            "nullable": true,
+                                            "type": "boolean"
+                                        },
+                                        {
+                                            "metadata": {},
+                                            "name": "text",
+                                            "nullable": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "metadata": {},
+                                            "name": "type",
+                                            "nullable": true,
+                                            "type": "string"
+                                        }
+                                    ],
+                                    "type": "struct"
+                                },
+                                "type": "array"
+                            }
+                        },
+                        {
+                            "metadata": {},
+                            "name": "type",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "weight",
+                            "nullable": true,
+                            "type": "double"
+                        }
+                    ],
+                    "type": "struct"
+                },
+                "type": "array"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "selfUri",
+            "nullable": true,
+            "type": "string"
+        }
+    ],
+    "type": "struct"
+}
