@@ -3,22 +3,19 @@ from pyspark.sql import SparkSession
 import time
 import email.utils as eut
 import datetime
+from pyspark.conf import SparkConf
 
 
 def get_dbutils(spark):
-    try:
-        from pyspark.dbutils import DBUtils
-        dbutils = DBUtils(spark)
-    except ImportError:
-        import IPython
-        dbutils = IPython.get_ipython().user_ns["dbutils"]
+    import IPython
+    dbutils = IPython.get_ipython().user_ns["dbutils"]
 
     return dbutils
 
 
 def authorize(tenant: str, dbutils):
     auth_key = dbutils.secrets.get(
-        scope='dgsecretscope', key='{}genesysapikey'.format(tenant))
+        scope='dgsecretscope', key='{}gpcapikey'.format(tenant))
 
     headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -33,7 +30,23 @@ def authorize(tenant: str, dbutils):
     else:
         print("Autohrization failed while requesting Access Token for tenant - {}".format(tenant))
         raise Exception
-    return access_token
+    api_headers = {
+                "Authorization": "Bearer {}".format(access_token),
+                "Content-Type": "application/json"
+                }
+    return api_headers
+
+def get_spark_session(local: bool):
+    conf = SparkConf()
+    if local:
+        import findspark
+        findspark.init()
+        conf = conf.set("spark.sql.warehouse.dir", "file:///C:/Users/naga_/datagamz/hivescratch").set("spark.sql.catalogImplementation","hive")
+
+    spark = SparkSession.builder.config(conf=conf).appName(
+        "GPC Test Setup").getOrCreate().newSession()
+    return spark
+
 
 
 def get_key_vars(tenant: str):

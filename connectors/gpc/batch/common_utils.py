@@ -5,6 +5,8 @@ from azure.storage.filedatalake import DataLakeServiceClient
 def get_dbutils(spark):
     try:
         from pyspark.dbutils import DBUtils
+
+        from pyspark.dbutils
         dbutils = DBUtils(spark)
     except ImportError:
         import IPython
