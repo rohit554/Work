@@ -4,6 +4,7 @@ import time
 import email.utils as eut
 import datetime
 from pyspark.conf import SparkConf
+import base64
 
 
 def get_dbutils(spark):
@@ -14,13 +15,19 @@ def get_dbutils(spark):
 
 
 def authorize(tenant: str, dbutils):
+    '''
     auth_key = dbutils.secrets.get(
         scope='dgsecretscope', key='{}gpcapikey'.format(tenant))
+    '''
+    client_id = dbutils.secrets.get(
+        scope='dgsecretscope', key='{}gpcclientid'.format(tenant))
+    client_secret = dbutils.secrets.get(
+        scope='dgsecretscope', key='{}gpcclientsecret'.format(tenant))
+    auth_key = base64.b64encode(
+        bytes(client_id + ":" + client_secret, "ISO-8859-1")).decode("ascii")
 
-    headers = {
-        "Content-Type": "application/x-www-form-urlencoded",
-        "Authorization": "Basic {}".format(auth_key)
-    }
+    headers = {"Content-Type": "application/x-www-form-urlencoded",
+               "Authorization": f"Basic {auth_key}"}
 
     auth_request = requests.post(
         "https://login.mypurecloud.com/oauth/token?grant_type=client_credentials", headers=headers)
@@ -31,22 +38,23 @@ def authorize(tenant: str, dbutils):
         print("Autohrization failed while requesting Access Token for tenant - {}".format(tenant))
         raise Exception
     api_headers = {
-                "Authorization": "Bearer {}".format(access_token),
-                "Content-Type": "application/json"
-                }
+        "Authorization": "Bearer {}".format(access_token),
+        "Content-Type": "application/json"
+    }
     return api_headers
+
 
 def get_spark_session(local: bool):
     conf = SparkConf()
     if local:
         import findspark
         findspark.init()
-        conf = conf.set("spark.sql.warehouse.dir", "file:///C:/Users/naga_/datagamz/hivescratch").set("spark.sql.catalogImplementation","hive")
+        conf = conf.set("spark.sql.warehouse.dir", "file:///C:/Users/naga_/datagamz/hivescratch").set(
+            "spark.sql.catalogImplementation", "hive")
 
     spark = SparkSession.builder.config(conf=conf).appName(
         "GPC Test Setup").getOrCreate().newSession()
     return spark
-
 
 
 def get_key_vars(tenant: str):

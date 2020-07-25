@@ -25,6 +25,7 @@ def get_users(api_headers: dict):
 
     users_list = [item for sublist in users_list for item in sublist]
     print(users_list)
+    
 
 
 if __name__ == "__main__":

@@ -9,8 +9,6 @@ import logging
 import numpy as np
 import pathlib
 
-
-client = os.environ['client']
 tenant = os.environ['tenant']
 api_acces_key = os.environ['genesysAPIKey']
 # mongoDbUrl = os.environ['mongoDbUrl']
