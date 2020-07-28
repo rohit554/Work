@@ -4,41 +4,50 @@ from pyspark.conf import SparkConf
 from pyspark.sql import SparkSession
 
 
-def get_spark_session(local: bool):
-    conf = SparkConf()
-    if local:
+def get_spark_session(env: str):
+    if env == "local":
         import findspark
-        findspark.init()
-        conf = conf.set("spark.sql.warehouse.dir", "file:///C:/Users/naga_/datagamz/hivescratch").set("spark.sql.catalogImplementation","hive")
-
-    spark = SparkSession.builder.config(conf=conf).appName(
-        "Tenant Setup").getOrCreate().newSession()
+        findspark.init(os.environ['SPARK_HOME'])
+        pass
+    spark = SparkSession.builder.appName("Tenant Setup").getOrCreate().newSession()
     return spark
 
+def get_dbutils(spark):
+    import IPython
+    dbutils = IPython.get_ipython().user_ns["dbutils"]
 
-def get_localdev_path(tenant: str) -> str:
-    from os.path import expanduser
-    home = expanduser("~")
-    path_prefix = os.path.join("file:///",
-                               home, "datagamz", "analytics", "{}".format(tenant))
-
-    return path_prefix
+    return dbutils
 
 
-def setup_tenant_localdev(tenant: str):
-    path_prefix = get_localdev_path(tenant)
+def get_localdev_path(tenant: str, env: str) -> str:
+    local_path = ""
+    db_path = ""
+    if env == "local":
+        from os.path import expanduser
+        home = expanduser("~")
+        local_path = os.path.join(
+            home, "datagamz", "analytics", "{}".format(tenant))
+        db_path = "file:///" + \
+            local_path.replace("\\", "/") + "/data/databases/"
+    else:
+        db_path = "/mnt/datagamz/{}".format(tenant) + "data/databases/"
+    return local_path, db_path
+
+
+def setup_tenant_localdev(tenant: str, env: str):
+    local_path, db_path = get_localdev_path(tenant, env)
 
     from pathlib import Path
-    Path(path_prefix).mkdir(parents=True, exist_ok=True)
-    Path(os.path.join(path_prefix, "data")).mkdir(parents=True, exist_ok=True)
+    Path(local_path).mkdir(parents=True, exist_ok=True)
+    Path(os.path.join(local_path, "data")).mkdir(parents=True, exist_ok=True)
 
-    Path(os.path.join(path_prefix, "data", "databases",
+    Path(os.path.join(local_path, "data", "databases",
                       "dg_{}".format(tenant))).mkdir(parents=True, exist_ok=True)
-    Path(os.path.join(path_prefix, "data", "raw")).mkdir(
+    Path(os.path.join(local_path, "data", "raw")).mkdir(
         parents=True, exist_ok=True)
-    Path(os.path.join(path_prefix, "data", "pb_datasets")).mkdir(
+    Path(os.path.join(local_path, "data", "pb_datasets")).mkdir(
         parents=True, exist_ok=True)
-    Path(os.path.join(path_prefix, "data", "adhoc")).mkdir(
+    Path(os.path.join(local_path, "data", "adhoc")).mkdir(
         parents=True, exist_ok=True)
 
 
@@ -61,20 +70,22 @@ def setup_tenant_databricks(tenant: str, dbutils):
     fs_client.create_directory("data/adhoc")
     print("setting container completed")
 
+
 def mount_tenant_container(tenant: str, env: str, dbutils) -> None:
     configs = {"fs.azure.account.auth.type": "OAuth",
-           "fs.azure.account.oauth.provider.type": "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider",
-           "fs.azure.account.oauth2.client.id": dbutils.secrets.get(scope="dgsecretscope",key="storagegen2mountappclientid"),
-           "fs.azure.account.oauth2.client.secret": dbutils.secrets.get(scope="dgsecretscope",key="storagegen2mountappsecret"),
-           "fs.azure.account.oauth2.client.endpoint": "https://login.microsoftonline.com/{}/oauth2/token".format(dbutils.secrets.get(scope="dgsecretscope",key="storagegen2mountapptenantid"))}
+               "fs.azure.account.oauth.provider.type": "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider",
+               "fs.azure.account.oauth2.client.id": dbutils.secrets.get(scope="dgsecretscope", key="storagegen2mountappclientid"),
+               "fs.azure.account.oauth2.client.secret": dbutils.secrets.get(scope="dgsecretscope", key="storagegen2mountappsecret"),
+               "fs.azure.account.oauth2.client.endpoint": "https://login.microsoftonline.com/{}/oauth2/token".format(dbutils.secrets.get(scope="dgsecretscope", key="storagegen2mountapptenantid"))}
     if not any(mount.mountPoint == '/mnt/datagamz/{}'.format(tenant) for mount in dbutils.fs.mounts()):
         dbutils.fs.mount(source="abfss://{}@{}.dfs.core.windows.net/".format(
             tenant, dbutils.secrets.get(scope="dgsecretscope", key="storageadlsgen2name")), mount_point="/mnt/datagamz/{}".format(tenant), extra_configs=configs)
 
 
-def create_tenant_database(tenant: str, spark: SparkSession, path: str, env: str):
+def create_tenant_database(tenant: str, spark: SparkSession, path: str):
     db_name = "dg_{}".format(tenant)
-    spark.sql("create database if not exists {}  LOCATION '".format(db_name) + ("file:///" if env == 'local' else "") + os.path.join(path, 'data', 'databases', db_name) + "'")
+    spark.sql(
+        "create database if not exists {}  LOCATION '{}'".format(db_name, path))
 
 
 if __name__ == "__main__":
@@ -84,32 +95,33 @@ if __name__ == "__main__":
     args = parser.parse_args()
     tenant = args.tenant
 
-    path_prefix = ""
     try:
         env = os.environ['datagamz_env']
-    except:
+        if env not in ["local", "dev", "uat", "prd"]:
+            raise Exception(
+                "Please configure datagamz_env - local/dev/uat/prd")
+    except Exception as e:
         raise Exception("Please configure datagamz_env - local/dev/uat/prd")
 
+    spark = get_spark_session(env)
+    local_path, db_path = get_localdev_path(tenant, env)
+
     if env == 'local':
-        spark = get_spark_session(local=True)
-        setup_tenant_localdev(tenant)
-        path_prefix = get_localdev_path(tenant)
-        create_tenant_database(tenant, spark, path_prefix, env)
+        setup_tenant_localdev(tenant, env)
+        create_tenant_database(tenant, spark, db_path)
     elif env in ['dev', 'uat', 'prd']:
-        spark = get_spark_session(local=False)
         '''
         try:
             from pyspark.dbutils import DBUtils
             dbutils = DBUtils(spark)
         except ImportError:
         '''
-        import IPython
-        dbutils = IPython.get_ipython().user_ns["dbutils"]
-        
+        dbutils = get_dbutils(spark)
+
         setup_tenant_databricks(tenant, dbutils)
         mount_tenant_container(tenant, env, dbutils)
-        create_tenant_database(
-            tenant, spark, "/mnt/datagamz/{}".format(tenant), env)
+        create_tenant_database(tenant, spark, db_path)
+
     else:
         raise Exception(
             "datagamz_env environment not configured correctly- local/dev/uat/prd")

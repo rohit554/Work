@@ -5,26 +5,51 @@ import email.utils as eut
 import datetime
 from pyspark.conf import SparkConf
 import base64
+import os
+import json
 
+dbutils = None
+secrets = None
 
-def get_dbutils(spark):
+def get_dbutils():
+    global dbutils
     import IPython
     dbutils = IPython.get_ipython().user_ns["dbutils"]
 
     return dbutils
 
+def get_secret(secret_key: str):
+    global dbutils
+    global secrets
+    if os.environ['datagamz_env'] == "local":
+        if secrets is None:
+            with open(os.path.join(os.path.expanduser("~"), "datagamz", "analytics", "secrets.json")) as f:
+                secrets = json.loads(f.read())
+        return secrets[secret_key]
+    else:
+        if dbutils is None:
+            dbutils = get_dbutils()
+        return dbutils.secrets.get(scope='dgsecretscope', key='{}'.format(secret_key))
+
+
+def get_spark_session(app_name: str):
+    if os.environ['datagamz_env'] == "local":
+        import findspark
+        findspark.init(os.environ['SPARK_HOME'])
+        pass
+    spark = SparkSession.builder.appName("Tenant Setup").getOrCreate().newSession()
+    return spark
+
 
 def authorize(tenant: str, dbutils):
+    global secrets
     '''
     auth_key = dbutils.secrets.get(
         scope='dgsecretscope', key='{}gpcapikey'.format(tenant))
     '''
-    client_id = dbutils.secrets.get(
-        scope='dgsecretscope', key='{}gpcclientid'.format(tenant))
-    client_secret = dbutils.secrets.get(
-        scope='dgsecretscope', key='{}gpcclientsecret'.format(tenant))
-    auth_key = base64.b64encode(
-        bytes(client_id + ":" + client_secret, "ISO-8859-1")).decode("ascii")
+    client_id = secrets(f'{tenant}gpcoauthclientid')
+    client_secret = secrets(f'{tenant}gpcclientsecret')
+    auth_key = base64.b64encode(bytes(client_id + ":" + client_secret, "ISO-8859-1")).decode("ascii")
 
     headers = {"Content-Type": "application/x-www-form-urlencoded",
                "Authorization": f"Basic {auth_key}"}
@@ -44,24 +69,11 @@ def authorize(tenant: str, dbutils):
     return api_headers
 
 
-def get_spark_session(local: bool):
-    conf = SparkConf()
-    if local:
-        import findspark
-        findspark.init()
-        conf = conf.set("spark.sql.warehouse.dir", "file:///C:/Users/naga_/datagamz/hivescratch").set(
-            "spark.sql.catalogImplementation", "hive")
-
-    spark = SparkSession.builder.config(conf=conf).appName(
-        "GPC Test Setup").getOrCreate().newSession()
-    return spark
-
-
 def get_key_vars(tenant: str):
     spark = SparkSession.builder.appName(
         "Genesys Extraction {}".format(tenant)).getOrCreate().newSession()
 
-    dbutils = get_dbutils(spark)
+    dbutils = get_dbutils()
 
     spark.conf.set("fs.azure.account.auth.type", "OAuth")
     spark.conf.set("fs.azure.account.oauth.provider.type",
@@ -92,7 +104,7 @@ def check_api_response(resp: requests.Response, message: str):
     return "OK"
 
 
-def paging_request(tenant: str, access_token: str, api_name: str, endpoint: str, req_type: str, pagesize: int, params: dict, body: dict,
+def paging_request(tenant: str, access_token: str, api_name: str, endpoint: str, pagesize: int = 100, params: dict, body: dict,
                    write_batch_size: int, entity_name: str, interval_start: str = None, interval_end: str = None):
 
     print("Extracting API {} - using endpoint - {}".format(api_name, endpoint))

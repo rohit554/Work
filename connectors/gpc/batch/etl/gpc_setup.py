@@ -9,10 +9,9 @@ def get_spark_session(local: bool):
     if local:
         import findspark
         findspark.init()
-        conf = conf.set("spark.sql.warehouse.dir", "file:///C:/Users/naga_/datagamz/hivescratch").set("spark.sql.catalogImplementation","hive")
+        #conf = conf.set("spark.sql.warehouse.dir", "file:///C:/Users/naga_/datagamz/hivescratch").set("spark.sql.catalogImplementation","hive")
 
-    spark = SparkSession.builder.config(conf=conf).appName(
-        "Tenant Setup").getOrCreate().newSession()
+    spark = SparkSession.builder.config().appName("Tenant Setup").getOrCreate().newSession()
     return spark
 
 
@@ -24,10 +23,12 @@ def get_localdev_path(tenant: str) -> str:
 
     return path_prefix
 
-def create_database(dbutils):
+def create_database(tenant: str, spark: SparkSession, path: str):
+    db_name = "dg_{}".format(tenant)
+    p1 = path + "/data/databases/{}".format(db_name)
     print("Creating Client Database for Genesys PureCloud")
     spark.sql(
-        "create database if not exists gpc_{tenant}  LOCATION '/mnt/datagamz/{tenant}/data/databases/gpc_{tenant}'".format(tenant=tenant))
+        "create database if not exists gpc_{}  LOCATION '{}'".format(tenant, p1))
 
     return True
 
@@ -76,7 +77,9 @@ if __name__ == "__main__":
         spark = get_spark_session(local=True)
         # setup_tenant_localdev(tenant)
         path_prefix = get_localdev_path(tenant)
-        #create_tenant_database(tenant, spark, path_prefix, env)
+        path = "file:///" + path_prefix.replace("\\", "/")
+        create_database(tenant, spark, path)
+        create_ingestion_stats_table(tenant, spark, path)
     elif env in ['dev', 'uat', 'prd']:
         spark = get_spark_session(local=False)
         '''
@@ -93,8 +96,8 @@ if __name__ == "__main__":
         #create_tenant_database(tenant, spark, "/mnt/datagamz/{}".format(tenant), env)
 
         create_folder_struct(dbutils)
-        create_database(dbutils)
-        create_ingestion_stats_table(dbutils)
+        create_database(tenant, spark, path_prefix)
+        create_ingestion_stats_table(tenant, spark, path_prefix)
     else:
         raise Exception(
             "datagamz_env environment not configured correctly- local/dev/uat/prd")

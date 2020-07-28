@@ -25,7 +25,6 @@ def get_users(api_headers: dict):
 
     users_list = [item for sublist in users_list for item in sublist]
     print(users_list)
-    
 
 
 if __name__ == "__main__":
@@ -44,7 +43,6 @@ if __name__ == "__main__":
     sys.path.append("/dbfs/mnt/datagamz/{}/code/dganalytics/connectors/gpc/batch/etl".format(tenant))
 
     from gpc_utils import authorize, get_spark_session, get_dbutils
-
 
     print("gpc extract users", tenant)
     print("gpc extract users", run_id)
