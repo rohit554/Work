@@ -1,41 +1,20 @@
 import argparse
 import os
-from pyspark.conf import SparkConf
 from pyspark.sql import SparkSession
+from gpc_utils import get_spark_session, get_env, get_path_vars, get_schema
+from gpc_api_config import gpc_end_points
 
-
-def get_spark_session(local: bool):
-    conf = SparkConf()
-    if local:
-        import findspark
-        findspark.init()
-        #conf = conf.set("spark.sql.warehouse.dir", "file:///C:/Users/naga_/datagamz/hivescratch").set("spark.sql.catalogImplementation","hive")
-
-    spark = SparkSession.builder.config().appName("Tenant Setup").getOrCreate().newSession()
-    return spark
-
-
-def get_localdev_path(tenant: str) -> str:
-    from os.path import expanduser
-    home = expanduser("~")
-    path_prefix = os.path.join("file:///",
-                               home, "datagamz", "analytics", "{}".format(tenant))
-
-    return path_prefix
-
-def create_database(tenant: str, spark: SparkSession, path: str):
-    db_name = "dg_{}".format(tenant)
-    p1 = path + "/data/databases/{}".format(db_name)
-    print("Creating Client Database for Genesys PureCloud")
+def create_database(spark: SparkSession, path: str, db_name: str):
     spark.sql(
-        "create database if not exists gpc_{}  LOCATION '{}'".format(tenant, p1))
+        f"create database if not exists {db_name}  LOCATION '{path}/{db_name}'")
 
     return True
 
-def create_ingestion_stats_table(dbutils) -> bool:
+
+def create_ingestion_stats_table(spark: SparkSession, db_name: str, db_path: str):
     print("Creating Ingestion stats table for genesys")
-    spark.sql("""
-                create table if not exists gpc_{tenant}.ingestion_stats
+    spark.sql(f"""
+                create table if not exists {db_name}.ingestion_stats
                 (
                     api_name bigint,
                     end_point bigint,
@@ -52,12 +31,42 @@ def create_ingestion_stats_table(dbutils) -> bool:
                     load_date_time timestamp
                 )
                     using delta
-            LOCATION '/mnt/datagamz/{tenant}/data/databases/gpc_{tenant}/ingestion_stats'""".format(tenant=tenant))
+            LOCATION '{db_path}/{db_name}/ingestion_stats'""")
     return True
 
+
+def create_table(api_name: str, spark: SparkSession, db_name: str):
+    schema = get_schema(api_name, tenant_path)
+    table_name = f"r_{api_name}"
+    print(table_name)
+    if gpc_end_points[api_name]['raw_table_update']['partition'] is not None:
+        partition = "partitioned by (" + ",".join(gpc_end_points[api_name]['raw_table_update']['partition']) + ")"
+    else:
+        partition = ""
+    spark.createDataFrame(spark.sparkContext.emptyRDD(),
+                          schema=schema).registerTempTable(table_name)
+    create_qry = f"""create table if not exists {db_name}.{table_name} using delta {partition} as
+                    select *, cast('1900-01-01' as date) extract_date from {table_name} limit 0"""
+    spark.sql(create_qry)
+
+    return True
+
+
+def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str):
+    create_table('users', spark, db_name)
+    create_table('routing_queues', spark, db_name)
+    create_table('groups', spark, db_name)
+    create_table('users_details', spark, db_name)
+    create_table('conversation_details', spark, db_name)
+
+    return True
+
+
 def create_folder_struct(dbutils):
-    dbutils.fs.mkdirs("/mnt/datagamz/{tenant}/data/databases/gpc_{tenant}".format(tenant=tenant))
-    dbutils.fs.mkdirs("/mnt/datagamz/{tenant}/data/raw/gpc".format(tenant=tenant))
+    dbutils.fs.mkdirs(
+        "/mnt/datagamz/{tenant}/data/databases/gpc_{tenant}".format(tenant=tenant))
+    dbutils.fs.mkdirs(
+        "/mnt/datagamz/{tenant}/data/raw/gpc".format(tenant=tenant))
 
 
 if __name__ == "__main__":
@@ -67,37 +76,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
     tenant = args.tenant
 
-    path_prefix = ""
-    try:
-        env = os.environ['datagamz_env']
-    except:
-        raise Exception("Please configure datagamz_env - local/dev/uat/prd")
+    env = get_env()
+    tenant_path, db_path, log_path, db_name = get_path_vars(tenant, env)
 
-    if env == 'local':
-        spark = get_spark_session(local=True)
-        # setup_tenant_localdev(tenant)
-        path_prefix = get_localdev_path(tenant)
-        path = "file:///" + path_prefix.replace("\\", "/")
-        create_database(tenant, spark, path)
-        create_ingestion_stats_table(tenant, spark, path)
-    elif env in ['dev', 'uat', 'prd']:
-        spark = get_spark_session(local=False)
-        '''
-        try:
-            from pyspark.dbutils import DBUtils
-            dbutils = DBUtils(spark)
-        except ImportError:
-        '''
-        import IPython
-        dbutils = IPython.get_ipython().user_ns["dbutils"]
-        
-        #setup_tenant_databricks(tenant, dbutils)
-        #mount_tenant_container(tenant, env, dbutils)
-        #create_tenant_database(tenant, spark, "/mnt/datagamz/{}".format(tenant), env)
-
-        create_folder_struct(dbutils)
-        create_database(tenant, spark, path_prefix)
-        create_ingestion_stats_table(tenant, spark, path_prefix)
-    else:
-        raise Exception(
-            "datagamz_env environment not configured correctly- local/dev/uat/prd")
+    spark = get_spark_session(app_name="gpc_setup", env=env, tenant=tenant)
+    create_database(spark, db_path, db_name)
+    create_ingestion_stats_table(spark, db_name, db_path)
+    raw_tables(spark, db_name, db_path, tenant_path)

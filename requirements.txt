@@ -2,3 +2,5 @@ pandas
 pyspark
 azure-datalake-store
 findspark
+compress_json
+inflection

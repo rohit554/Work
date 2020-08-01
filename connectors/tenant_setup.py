@@ -9,8 +9,13 @@ def get_spark_session(env: str):
         import findspark
         findspark.init(os.environ['SPARK_HOME'])
         pass
-    spark = SparkSession.builder.appName("Tenant Setup").getOrCreate().newSession()
+    spark = SparkSession.builder.appName("Tenant Setup") \
+        .config("spark.jars.packages", "io.delta:delta-core_2.12:0.7.0") \
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
+        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
+        .getOrCreate().newSession()
     return spark
+
 
 def get_dbutils(spark):
     import IPython
@@ -19,7 +24,7 @@ def get_dbutils(spark):
     return dbutils
 
 
-def get_localdev_path(tenant: str, env: str) -> str:
+def get_paths(tenant: str, env: str) -> str:
     local_path = ""
     db_path = ""
     if env == "local":
@@ -35,7 +40,7 @@ def get_localdev_path(tenant: str, env: str) -> str:
 
 
 def setup_tenant_localdev(tenant: str, env: str):
-    local_path, db_path = get_localdev_path(tenant, env)
+    local_path, db_path = get_paths(tenant, env)
 
     from pathlib import Path
     Path(local_path).mkdir(parents=True, exist_ok=True)
@@ -104,7 +109,7 @@ if __name__ == "__main__":
         raise Exception("Please configure datagamz_env - local/dev/uat/prd")
 
     spark = get_spark_session(env)
-    local_path, db_path = get_localdev_path(tenant, env)
+    local_path, db_path = get_paths(tenant, env)
 
     if env == 'local':
         setup_tenant_localdev(tenant, env)
