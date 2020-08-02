@@ -8,7 +8,7 @@ import json
 def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_start_date: str):
     api_headers = authorize(tenant, env)
     body = {
-        "interval": f"{extract_start_date}T00:00:00Z/{extract_start_date}T23:59:59Z"
+        "interval": f"{extract_start_date}T00:00:00Z/{extract_start_date}T01:00:00Z"
     }
     job_resp = rq.post("https://api.mypurecloud.com/api/v2/analytics/conversations/details/jobs",
                        headers=api_headers, data=json.dumps(body))
