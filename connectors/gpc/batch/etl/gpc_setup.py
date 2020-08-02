@@ -1,8 +1,8 @@
 import argparse
 import os
 from pyspark.sql import SparkSession
-from gpc_utils import get_spark_session, get_env, get_path_vars, get_schema
-from gpc_api_config import gpc_end_points
+from .gpc_utils import get_spark_session, get_env, get_path_vars, get_schema
+from .gpc_api_config import gpc_end_points
 
 def create_database(spark: SparkSession, path: str, db_name: str):
     spark.sql(

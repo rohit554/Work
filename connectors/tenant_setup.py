@@ -2,7 +2,7 @@ import argparse
 import os
 from pyspark.conf import SparkConf
 from pyspark.sql import SparkSession
-
+from azure.core.exceptions import ResourceExistsError
 
 def get_spark_session(env: str):
     if env == "local":
@@ -62,19 +62,21 @@ def setup_tenant_databricks(tenant: str, dbutils):
     service_client = DataLakeServiceClient(account_url="{}://{}.dfs.core.windows.net".format(
         "https", dbutils.secrets.get(scope="dgsecretscope", key="storageadlsgen2name")),
         credential=dbutils.secrets.get(scope="dgsecretscope", key="storageaccesskey"))
+    try:
+        fs_client = service_client.create_file_system(tenant)
+        fs_client.create_directory("code")
+        fs_client.create_directory("data")
+        fs_client.create_directory("logs")
 
-    fs_client = service_client.create_file_system(tenant)
-    fs_client.create_directory("code")
-    fs_client.create_directory("data")
-    fs_client.create_directory("logs")
-
-    fs_client.create_directory("data/databases")
-    fs_client.create_directory("data/databases/dg_{}".format(tenant))
-    fs_client.create_directory("data/raw")
-    fs_client.create_directory("data/pb_datasets")
-    fs_client.create_directory("data/adhoc")
-    print("setting container completed")
-
+        fs_client.create_directory("data/databases")
+        fs_client.create_directory("data/databases/dg_{}".format(tenant))
+        fs_client.create_directory("data/raw")
+        fs_client.create_directory("data/pb_datasets")
+        fs_client.create_directory("data/adhoc")
+    except ResourceExistsError as e:
+        print("setting container completed")
+    except Exception as e:
+        raise Exception("Error waiting container in datalake for {}".format(tenant))
 
 def mount_tenant_container(tenant: str, env: str, dbutils) -> None:
     configs = {"fs.azure.account.auth.type": "OAuth",
