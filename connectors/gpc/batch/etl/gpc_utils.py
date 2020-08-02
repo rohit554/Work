@@ -162,13 +162,14 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
     if "message" in resp.json().keys() and \
             "pagination may not exceed 400000 results" in (resp.json()['message']).lower():
         print("exceeded 40k limit of cursor. ignoring error as delta conversations will be extracted tomorrow.")
-        return OK
+        return "OK"
 
     if resp.status_code in [200, 201, 202]:
         return "OK"
     elif resp.status_code == 429:
         # sleep if too many request error occurs
         retry = retry + 1
+        print(f"retrying - {tenant} - {api_name} - {run_id} - {retry}")
         time.sleep(180)
         if retry > 5:
             message = f"GPC API Extraction failed - {tenant} - {api_name} - {run_id}"
@@ -198,14 +199,17 @@ def write_api_resp(resp: requests.Response, api_name: str, run_id: str, tenant_p
     compress_json.dump(resp.json(), path)
     return path
 
+
 def write_api_resp_new(resp: list, api_name: str, run_id: str, tenant_path: str, part: str, extract_date: str):
-    path = os.path.join(tenant_path, 'data', 'raw', 'gpc', extract_date, run_id)
+    path = os.path.join(tenant_path, 'data', 'raw',
+                        'gpc', extract_date, run_id)
     Path(path).mkdir(parents=True, exist_ok=True)
     file_name = f'{api_name}.json.gz'
 
     with gzip.open(os.path.join(path, file_name), 'wt', encoding="utf-16") as zipfile:
         json.dump(resp, zipfile)
     return path
+
 
 def update_raw_table(spark: SparkSession, db_name: str, df: DataFrame, api_name: str, extract_date: str, mode: str,
                      partition: list = None):
@@ -282,7 +286,7 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str, db
     cursor_param = ""
 
     if interval:
-        params['interval'] = f"{extract_date}T00:00:00Z/{extract_date}T23:59:59Z"
+        params['interval'] = f"{extract_date}T00:00:00Z/{extract_date}T01:00:00Z"
 
     while True:
         if paging:
@@ -338,12 +342,19 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str, db
             else:
                 cursor_param = resp.json()['cursor']
         '''
-    raw_file = write_api_resp_new(resp_list, api_name, run_id, tenant_path, page_count, extract_date)
+    raw_file = write_api_resp_new(
+        resp_list, api_name, run_id, tenant_path, page_count, extract_date)
     df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
-        sc.parallelize(resp_list), schema=schema).repartition(n_partitions)
+        sc.parallelize(resp_list, n_partitions), schema=schema)
+    record_count = len(resp_list)
     del resp_list
     update_raw_table(spark, db_name, df, api_name,
                      extract_date, mode, partition)
+
+    stats_insert = f"""insert into {db_name}.ingestion_stats
+        values ('{api_name}', '{url}', {page_count - 1}, {record_count}, '{raw_file}', '{run_id}', '{extract_date}',
+        current_timestamp)"""
+    spark.sql(stats_insert)
     return True
 
 

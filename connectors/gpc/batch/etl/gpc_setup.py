@@ -16,24 +16,18 @@ def create_ingestion_stats_table(spark: SparkSession, db_name: str, db_path: str
     spark.sql(f"""
                 create table if not exists {db_name}.ingestion_stats
                 (
-                    api_name bigint,
-                    end_point bigint,
-                    interval_start timestamp,
-                    interval_end timestamp,
+                    api_name string,
+                    end_point string,
+                    page_count int,
                     records_fetched bigint,
-                    raw_op_file_name string,
+                    raw_data_file_loc string,
                     adf_run_id string,
-                    batch_api boolean,
-                    batch_api_job_id string,
-                    last_successful_cursor string,
-                    instant_api boolean,
-                    last_successful_pagenum int,
+                    extract_date date,
                     load_date_time timestamp
                 )
                     using delta
             LOCATION '{db_path}/{db_name}/ingestion_stats'""")
     return True
-
 
 def create_table(api_name: str, spark: SparkSession, db_name: str):
     schema = get_schema(api_name, tenant_path)
