@@ -44,6 +44,7 @@ def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_
             "params": {
                         "pageSize": 1000,
             },
+            "spark_partitions": 6,
             "entity_name": "conversations",
             "raw_table_update": {
                 "mode": "overwrite",

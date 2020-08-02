@@ -84,7 +84,7 @@
             "apiVersion": "2018-06-01",
             "properties": {
                 "activities": [
-                    {
+                                        {
                         "name": "Extract Users",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],
@@ -97,16 +97,136 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/extract_users_list.py')]",
+                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/users.py')]",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--start_time",
-                                "@pipeline().parameters.start_time",
-                                "--end_time",
-                                "@pipeline().parameters.end_time"
+                                "--extract_start_date",
+                                "@pipeline().parameters.extract_start_date",
+                                "--extract_end_date",
+                                "@pipeline().parameters.extract_end_date"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "Extract Conversation Details",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 1,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/conversation_details.py')]",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_start_date",
+                                "@pipeline().parameters.extract_start_date",
+                                "--extract_end_date",
+                                "@pipeline().parameters.extract_end_date"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "Extract Users Details",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 1,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/users_details.py')]",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_start_date",
+                                "@pipeline().parameters.extract_start_date",
+                                "--extract_end_date",
+                                "@pipeline().parameters.extract_end_date"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "Extract Routing Queues",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 1,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/routing_queues.py')]",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_start_date",
+                                "@pipeline().parameters.extract_start_date",
+                                "--extract_end_date",
+                                "@pipeline().parameters.extract_end_date"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "Extract Groups",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 1,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/groups.py')]",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_start_date",
+                                "@pipeline().parameters.extract_start_date",
+                                "--extract_end_date",
+                                "@pipeline().parameters.extract_end_date"
                             ]
                         },
                         "linkedServiceName": {
@@ -147,8 +267,8 @@
                         },
                         "parameters": {
                             "tenant": "[parameters('tenant')]",
-                            "start_time": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH-mm-ss')}",
-                            "end_time": "@{formatDateTime(addseconds(trigger().outputs.windowEndTime, -1),'yyyy-MM-ddTHH-mm-ss')}"
+                            "extract_start_date": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-dd')}",
+                            "extract_end_date": "@{formatDateTime(addseconds(trigger().outputs.windowEndTime, -1),'yyyy-MM-dd')}"
                         }
                     }
                 ],
