@@ -75,6 +75,24 @@ gpc_end_points = {
             "partition": ["extract_date"]
         }
     },
+    "wrapupcodes": {
+        "endpoint": "api/v2/routing/wrapupcodes",
+        "request_type": "GET",
+        "paging": True,
+        "cursor": False,
+        "interval": False,
+        "params": {
+            "pageSize": 100
+        },
+        "params_to_replace": [],
+        "write_batch_size": None,
+        "entity_name": "entities",
+        "spark_partitions": 1,
+        "raw_table_update": {
+            "mode": "overwrite",
+            "partition": None
+        }
+    },
     "conversation_details": {
         "endpoint": "api/v2/analytics/conversations/details/query",
         "request_type": "POST",

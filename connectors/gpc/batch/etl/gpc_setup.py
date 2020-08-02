@@ -52,6 +52,7 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     create_table('groups', spark, db_name)
     create_table('users_details', spark, db_name)
     create_table('conversation_details', spark, db_name)
+    create_table('wrapupcodes', spark, db_name)
 
     return True
 

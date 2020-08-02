@@ -1,0 +1,39 @@
+{
+    "fields": [{
+        "metadata": {},
+        "name": "id",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "name",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "dateCreated",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "dateModified",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "modifiedBy",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "createdBy",
+        "nullable": true,
+        "type": "string"
+    }, {
+        "metadata": {},
+        "name": "selfUri",
+        "nullable": true,
+        "type": "string"
+    }],
+    "type": "struct"
+}
