@@ -239,10 +239,10 @@
                     "tenant": {
                         "type": "string"
                     },
-                    "start_time": {
+                    "extract_start_date": {
                         "type": "string"
                     },
-                    "end_time": {
+                    "extract_end_date": {
                         "type": "string"
                     }
                 },
