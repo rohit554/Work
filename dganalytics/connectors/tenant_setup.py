@@ -83,7 +83,7 @@ if __name__ == "__main__":
         dbutils = get_dbutils()
 
         setup_tenant_databricks(tenant)
-        mount_tenant_container(tenant, env, dbutils)
+        mount_tenant_container(tenant, dbutils)
         create_tenant_database(tenant, spark)
 
     else:
