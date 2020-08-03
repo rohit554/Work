@@ -133,7 +133,7 @@ def update_raw_table(spark: SparkSession, db_name: str, df: DataFrame, api_name:
 
 
 def get_schema(api_name: str, tenant_path: str):
-    schema_path = os.path.join(tenant_path, 'code', 'dganalytics', 'connectors',
+    schema_path = os.path.join(tenant_path, 'code', 'dganalytics', 'dganalytics', 'connectors',
                                'gpc', 'source_api_schemas', '{}.json'.format(api_name))
     with open(schema_path, 'r') as f:
         schema = f.read()

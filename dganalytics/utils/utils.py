@@ -33,9 +33,9 @@ def get_path_vars(tenant: str) -> str:
         log_path = "file:///" + \
             tenant_path.replace("\\", "/") + "/logs"
     else:
-        tenant_path = "/mnt/datagamz/{}".format(tenant) + "data"
-        db_path = "/mnt/datagamz/{}".format(tenant) + "data/databases"
-        log_path = "/mnt/datagamz/{}".format(tenant) + "logs"
+        tenant_path = "/mnt/datagamz/{}/data".format(tenant)
+        db_path = "/mnt/datagamz/{}/data/databases".format(tenant)
+        log_path = "/mnt/datagamz/{}/logs".format(tenant)
     return tenant_path, db_path, log_path
 
 
