@@ -1,12 +1,12 @@
 import requests as rq
-from pyspark.sql import SparkSession, DataFrame
-from connectors.gpc_utils import get_spark_session, env, gpc_request, get_path_vars, parser, authorize
-from connectors.gpc_api_config import gpc_end_points
 import json
-
+from pyspark.sql import SparkSession
+from dganalytics.utils.utils import get_spark_session, env, get_path_vars
+from dganalytics.connectors.gpc.gpc_utils import gpc_request, parser, authorize, get_dbname
+from dganalytics.connectors.gpc.batch.etl.extract_api.gpc_api_config import gpc_end_points, gpc_base_url
 
 def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_start_date: str):
-    api_headers = authorize(tenant, env)
+    api_headers = authorize(tenant)
     body = {
         "interval": f"{extract_start_date}T00:00:00Z/{extract_start_date}T01:00:00Z"
     }
@@ -59,13 +59,8 @@ def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_
 
 if __name__ == "__main__":
     tenant, run_id, extract_start_date, extract_end_date = parser()
-    tenant_path, db_path, log_path, db_name = get_path_vars(tenant, env)
+    db_name = get_dbname(tenant)
+    spark = get_spark_session(app_name="gpc_conversation_batch_job", tenant=tenant)
 
-    spark = get_spark_session(app_name="gpc_setup", env=env, tenant=tenant)
-
-    print("gpc extract users", tenant)
-    print("gpc extract users", run_id)
-
-    # df = gpc_request(spark, tenant, 'conversation_details', run_id, db_name, extract_start_date)
-    # update_raw_table(spark, db_name, df)
+    print("gpc extracting conversation detail jobs", tenant)
     exec_conv_details_job_api(spark, tenant, run_id, db_name, extract_start_date)

@@ -14,106 +14,28 @@ from pyspark.sql.types import StructType
 import string
 import random
 import argparse
-from connectors.gpc_api_config import gpc_base_url, gpc_end_points
+from dganalytics.connectors.gpc.batch.etl.extract_api.gpc_api_config import gpc_base_url, gpc_end_points
+from dganalytics.utils.utils import env, get_path_vars
 from pyspark.sql.functions import lit, to_date
 import gzip
+from dganalytics.utils.utils import get_secret
 
 retry = 1
 
 
-def get_env():
-    try:
-        env = os.environ['datagamz_env']
-        if env not in ["local", "dev", "uat", "prd"]:
-            raise Exception(
-                "Please configure datagamz_env - local/dev/uat/prd")
-    except Exception as e:
-        raise Exception(
-            "Please configure datagamz_env - local/dev/uat/prd")
-    return env
-
-
-env = get_env()
-
-
-def get_path_vars(tenant: str, env: str) -> str:
-    tenant_path = ""
-    db_path = ""
-    log_path = ""
+def get_dbname(tenant: str):
     db_name = "gpc_{}".format(tenant)
-    if env == "local":
-        from os.path import expanduser
-        home = expanduser("~")
-        tenant_path = os.path.join(
-            home, "datagamz", "analytics", "{}".format(tenant))
-        db_path = "file:///" + \
-            tenant_path.replace("\\", "/") + "/data/databases"
-        log_path = "file:///" + \
-            tenant_path.replace("\\", "/") + "/logs"
-    else:
-        tenant_path = "/mnt/datagamz/{}".format(tenant) + "data"
-        db_path = "/mnt/datagamz/{}".format(tenant) + "data/databases"
-        log_path = "/mnt/datagamz/{}".format(tenant) + "logs"
-    return tenant_path, db_path, log_path, db_name
+    return db_name
 
 
-def get_logger(tenant: str, app_name: str):
-    log_name = "app_name/"
-    if os.environ['datagamz_env'] == "local":
-        logging.basicConfig()
-
-
-dbutils = None
-secrets = None
-
-
-def get_dbutils():
-    global dbutils
-    import IPython
-    dbutils = IPython.get_ipython().user_ns["dbutils"]
-
-    return dbutils
-
-
-def get_secret(secret_key: str, env: str):
-    global dbutils
-    global secrets
-    if env == "local":
-        if secrets is None:
-            with open(os.path.join(os.path.expanduser("~"), "datagamz", "analytics", "secrets.json")) as f:
-                secrets = json.loads(f.read())
-        return secrets[secret_key]
-    else:
-        if dbutils is None:
-            dbutils = get_dbutils()
-        return dbutils.secrets.get(scope='dgsecretscope', key='{}'.format(secret_key))
-
-
-def get_spark_session(app_name: str, env: str, tenant: str):
-    time = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
-    if env == "local":
-        import findspark
-        findspark.init(os.environ['SPARK_HOME'])
-
-    spark = SparkSession.builder.appName(f"{tenant}-{app_name}-{time}") \
-        .config("spark.jars.packages", "io.delta:delta-core_2.12:0.7.0") \
-        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
-        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
-        .config("spark.sql.sources.partitionOverwriteMode", "dynamic") \
-        .config("spark.rpc.message.maxSize", 1024) \
-        .config("spark.databricks.session.share", False) \
-        .getOrCreate().newSession()
-    return spark
-
-
-def authorize(tenant: str, env: str):
+def authorize(tenant: str):
     global secrets
     '''
     auth_key = dbutils.secrets.get(
         scope='dgsecretscope', key='{}gpcapikey'.format(tenant))
     '''
-    client_id = get_secret(f'{tenant}gpcOAuthClientId', env)
-    client_secret = get_secret(f'{tenant}gpcOAuthClientSecret', env)
+    client_id = get_secret(f'{tenant}gpcOAuthClientId')
+    client_secret = get_secret(f'{tenant}gpcOAuthClientSecret')
     auth_key = base64.b64encode(
         bytes(client_id + ":" + client_secret, "ISO-8859-1")).decode("ascii")
 
@@ -133,27 +55,6 @@ def authorize(tenant: str, env: str):
         "Content-Type": "application/json"
     }
     return api_headers
-
-
-def get_key_vars(tenant: str):
-    spark = SparkSession.builder.appName(
-        "Genesys Extraction {}".format(tenant)).getOrCreate().newSession()
-
-    dbutils = get_dbutils()
-
-    spark.conf.set("fs.azure.account.auth.type", "OAuth")
-    spark.conf.set("fs.azure.account.oauth.provider.type",
-                   "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
-    spark.conf.set("fs.azure.account.oauth2.client.id", dbutils.secrets.get(
-        scope="dgsecretscope", key="storagegen2mountappclientid"))
-    spark.conf.set("fs.azure.account.oauth2.client.secret", dbutils.secrets.get(
-        scope="dgsecretscope", key="storagegen2mountappsecret"))
-    spark.conf.set("fs.azure.account.oauth2.client.endpoint", "https://login.microsoftonline.com/{}/oauth2/token".format(
-        dbutils.secrets.get(scope="dgsecretscope", key="storagegen2mountapptenantid")))
-
-    access_token = authorize(tenant, dbutils)
-
-    return spark, dbutils, access_token
 
 
 def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_id: str):
@@ -258,15 +159,15 @@ def parser():
     return tenant, run_id, extract_start_date, extract_end_date
 
 
-def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str, db_name: str,
+def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_date: str = None, params_to_replace: dict = None, overwrite_gpc_config: dict = None):
     op_files = []
-    env = get_env()
-    tenant_path, db_path, log_path, db_name = get_path_vars(tenant, env)
+    db_name = get_dbname(tenant)
+    tenant_path, db_path, log_path = get_path_vars(tenant)
     schema = get_schema(api_name, tenant_path)
     sc = spark.sparkContext
 
-    auth_headers = authorize(tenant, env)
+    auth_headers = authorize(tenant)
 
     gepc = overwrite_gpc_config if overwrite_gpc_config is not None else gpc_end_points
     req_type = gepc[api_name]['request_type']
@@ -328,20 +229,6 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str, db
 
         page_count = page_count + 1
 
-        '''
-        if paging:
-            if 'pageCount' in resp.json().keys():
-                if page_count > resp.json()['pageCount']:
-                    break
-            else:
-                if resp.text == '{}':
-                    break
-        elif cursor:
-            if 'cursor' not in resp.json().keys():
-                break
-            else:
-                cursor_param = resp.json()['cursor']
-        '''
     raw_file = write_api_resp_new(
         resp_list, api_name, run_id, tenant_path, page_count, extract_date)
     df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
@@ -357,52 +244,3 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str, db
     spark.sql(stats_insert)
     return True
 
-
-'''
-        print("pageNumber: ", page_num)
-        params['pageNumber'] = page_num + 1
-
-        response = requests.get(url, headers=headers, params=params)
-
-        if response.status_code in [502, 503, 504]:
-            print("Too many request for tenant {} for api {}".format(
-                tenant, api_name))
-            retry = retry + 1
-            time.sleep(60 * retry)
-
-            page_num = page_num - 1
-            if retry > 5:
-                print("API {} retried failed for tenant {} for api {}".format(
-                    retry, tenant, api_name))
-                raise Exception
-        elif response.status_code == 429:
-            print("API rate limit reached for tenant {} for api {}".format(
-                retry, tenant, api_name))
-            retry = retry + 1
-
-            if type(response.headers["retry-after"]) is int:
-                time.sleep(3 * int(response.headers["retry-after"]))
-            else:
-                retry_after = datetime.datetime(
-                    *list(eut.parsedate(response.headers["retry-after"]))[0:6])
-                time_now = datetime.datetime.now()
-                if (retry_after - time_now).total_seconds() > 0:
-                    time.sleep((retry_after - time_now).total_seconds())
-
-            if retry > 5:
-                print("API {} retried failed for tenant {} for api {}".format(
-                    retry, tenant, api_name))
-                raise Exception
-
-            page_num = page_num - 1
-
-        elif response.status_code != 200:
-            print("API request failed for tenant {} for api {}".format(
-                tenant, api_name))
-            print(response.text)
-            raise Exception
-        else:
-            response_list.append(response.json()[entity_name])
-
-    return response_list
-'''
