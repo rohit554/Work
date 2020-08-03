@@ -97,7 +97,7 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/users.py')]",
+                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/extract_api/users.py')]",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
@@ -127,7 +127,7 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/conversation_details.py')]",
+                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/extract_api/conversation_details.py')]",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
@@ -157,7 +157,7 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/users_details.py')]",
+                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/extract_api/users_details.py')]",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
@@ -187,7 +187,7 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/routing_queues.py')]",
+                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/extract_api/routing_queues.py')]",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
@@ -217,7 +217,7 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/groups.py')]",
+                            "pythonFile": "[concat('dbfs:/mnt/datagamz/', parameters('tenant'), '/code/dganalytics/connectors/gpc/batch/etl/extract_api/groups.py')]",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
