@@ -2,7 +2,7 @@ import argparse
 import requests as rq
 import sys
 from pyspark.sql import SparkSession, DataFrame
-from gpc_utils import get_spark_session, env, gpc_request, get_path_vars, parser
+from connectors.gpc_utils import get_spark_session, env, gpc_request, get_path_vars, parser
 
 
 if __name__ == "__main__":

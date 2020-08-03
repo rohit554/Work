@@ -1,7 +1,7 @@
 import requests as rq
 from pyspark.sql import SparkSession, DataFrame
-from gpc_utils import get_spark_session, env, gpc_request, get_path_vars, parser, authorize
-from gpc_api_config import gpc_end_points
+from connectors.gpc_utils import get_spark_session, env, gpc_request, get_path_vars, parser, authorize
+from connectors.gpc_api_config import gpc_end_points
 import json
 
 

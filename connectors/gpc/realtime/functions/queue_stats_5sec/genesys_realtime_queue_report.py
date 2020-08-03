@@ -25,8 +25,8 @@ client_secret = key_vault_client.get_secret(key_vault_uri, f"{tenant}gpcOAuthCli
 powerbi_username = key_vault_client.get_secret(key_vault_uri, "powerbiusername", "")
 powerbi_password = key_vault_client.get_secret(key_vault_uri, "powerbipassword", "")
 powerbi_client_id = key_vault_client.get_secret(key_vault_uri, "powerbiclientid", "")
-powerbi_group_id = key_vault_client.get_secret(key_vault_uri, f"{tenant}powerbigroupid", "")
-powerbi_dataset_id = key_vault_client.get_secret(key_vault_uri, f"{tenant}powerbirealtimedatasetid", "")
+powerbi_group_id = key_vault_client.get_secret(key_vault_uri, f"{tenant}pbigroupid", "")
+powerbi_dataset_id = key_vault_client.get_secret(key_vault_uri, f"{tenant}pbirealtimedatasetid", "")
 
 
 def get_powerbi_token():

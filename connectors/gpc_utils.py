@@ -14,7 +14,7 @@ from pyspark.sql.types import StructType
 import string
 import random
 import argparse
-from gpc_api_config import gpc_base_url, gpc_end_points
+from connectors.gpc_api_config import gpc_base_url, gpc_end_points
 from pyspark.sql.functions import lit, to_date
 import gzip
 
