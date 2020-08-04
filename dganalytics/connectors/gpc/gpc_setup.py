@@ -2,7 +2,7 @@ import argparse
 from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session, env, get_path_vars
 from dganalytics.connectors.gpc.gpc_utils import get_schema, get_dbname
-from dganalytics.connectors.gpc.batch.etl.gpc_api_config import gpc_end_points, gpc_base_url
+from dganalytics.connectors.gpc.batch.etl.extract_api.gpc_api_config import gpc_end_points, gpc_base_url
 
 def create_database(spark: SparkSession, path: str, db_name: str):
     spark.sql(
