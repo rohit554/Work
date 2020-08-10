@@ -3,3 +3,4 @@ requests
 pandas
 msrestazure
 azure-mgmt-resource
+azure-keyvault
