@@ -34,6 +34,7 @@ def get_powerbi_token():
                       data={"grant_type": "password", "scope": "openid", "resource": "https://analysis.windows.net/powerbi/api",
                             "client_id": powerbi_client_id, "username": powerbi_username, "password": powerbi_password})
 
+    print("Power BiRealtime Check")
     if pb_auth.status_code != 200:
         logging.info("Power Bi Authentication failed")
         raise Exception
@@ -46,6 +47,7 @@ def get_queue_status():
     import random
 
     final = pd.DataFrame(random.sample(range(10, 30), 5), columns=['test'])
+    logging.info("Power Bi realtime Queue - start")
 
     headers = {"Content-Type": "application/json",
                "Authorization": "Bearer {}".format(pb_access_token)}
@@ -66,6 +68,6 @@ def get_queue_status():
         logging.info("Power BI Posting to dataset failed")
 
     logging.info("Realtime Report Extraction Completed")
-
+    print("Power BiRealtime Check completed")
     return True
 
