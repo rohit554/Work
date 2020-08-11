@@ -1,0 +1,36 @@
+{
+    "configurations": [
+        {
+            "name": "Python: Current File (Integrated Terminal)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "PYTHONPATH": "${env:PYTHONPATH};${workspaceRoot}",
+                "datagamz_env": "local",
+                "SPARK_HOME": "${env:SPARK_HOME}",
+                "PYSPARK_PYTHON": "python",
+                "PYSPARK_DRIVER_PYTHON": "python",
+                "AZURE_CLIENT_ID": "${env:AZURE_CLIENT_ID}",
+                "AZURE_USERNAME": "${env:AZURE_USERNAME}",
+                "AZURE_PASSWORD": "${env:AZURE_PASSWORD}"
+            },
+            "console": "integratedTerminal",
+            "args": [
+                "--tenant=test",
+                "--run_id=t1",
+                "--extract_start_date=2020-07-01",
+                "--extract_end_date=2020-07-02"
+            ]
+        },
+        {
+            "name": "Attach to Python Functions",
+            "type": "python",
+            "request": "attach",
+            "port": 9091,
+            "preLaunchTask": "func: host start"
+        }
+    ],
+    "version": "0.2.0"
+}

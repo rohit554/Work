@@ -1,0 +1,20 @@
+{
+    "azureFunctions.projectSubpath": "dganalytics\\connectors\\gpc\\realtime\\functions",
+    "env": {
+        "PYTHONPATH": "${env:PYTHONPATH};${workspaceRoot}",
+        "datagamz_env": "local",
+        "SPARK_HOME": "${env:SPARK_HOME}",
+        "PYSPARK_PYTHON": "python",
+        "PYSPARK_DRIVER_PYTHON": "python",
+        "AZURE_CLIENT_ID": "${env:AZURE_CLIENT_ID}",
+        "AZURE_USERNAME": "${env:AZURE_USERNAME}",
+        "AZURE_PASSWORD": "${env:AZURE_PASSWORD}"
+    },
+    "azureFunctions.deploySubpath": "dganalytics\\connectors\\gpc\\realtime\\functions",
+    "azureFunctions.scmDoBuildDuringDeployment": true,
+    "azureFunctions.pythonVenv": ".venv",
+    "azureFunctions.projectLanguage": "Python",
+    "azureFunctions.projectRuntime": "~3",
+    "debug.internalConsoleOptions": "neverOpen",
+    "python.pythonPath": ".venv\\Scripts\\python.exe"
+}

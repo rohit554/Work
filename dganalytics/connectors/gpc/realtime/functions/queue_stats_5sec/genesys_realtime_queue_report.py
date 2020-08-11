@@ -10,23 +10,27 @@ import numpy as np
 import pathlib
 from msrestazure.azure_active_directory import MSIAuthentication
 from azure.mgmt.resource import ResourceManagementClient, SubscriptionClient
-from azure.keyvault.key_vault_client import KeyVaultClient
-
+# from azure.keyvault.key_vault_client import KeyVaultClient
+from azure.keyvault.secrets._client import SecretClient
+from azure.identity import DefaultAzureCredential
 
 tenant = os.environ['tenant']
 env = os.environ['env']
 
-credentials = MSIAuthentication(
-    resource='https://dgdevsecrets.vault.azure.net/')
-key_vault_client = KeyVaultClient(credentials)
+#credentials = MSIAuthentication(resource='https://dgdevsecrets.vault.azure.net/')
+
+credentials = DefaultAzureCredential()
+
+# key_vault_client = KeyVaultClient(credentials)
 key_vault_uri = 'https://dgdevsecrets.vault.azure.net/'
-client_id = key_vault_client.get_secret(key_vault_uri, f"{tenant}gpcOAuthClientId", "")
-client_secret = key_vault_client.get_secret(key_vault_uri, f"{tenant}gpcOAuthClientSecret", "")
-powerbi_username = key_vault_client.get_secret(key_vault_uri, "powerbiusername", "")
-powerbi_password = key_vault_client.get_secret(key_vault_uri, "powerbipassword", "")
-powerbi_client_id = key_vault_client.get_secret(key_vault_uri, "powerbiclientid", "")
-powerbi_group_id = key_vault_client.get_secret(key_vault_uri, f"{tenant}pbigroupid", "")
-powerbi_dataset_id = key_vault_client.get_secret(key_vault_uri, f"{tenant}pbirealtimedatasetid", "")
+key_vault_client = SecretClient(vault_url=key_vault_uri, credential=credentials)
+client_id = key_vault_client.get_secret(f"{tenant}gpcOAuthClientId")
+client_secret = key_vault_client.get_secret(f"{tenant}gpcOAuthClientSecret")
+powerbi_username = key_vault_client.get_secret("powerbiusername")
+powerbi_password = key_vault_client.get_secret("powerbipassword")
+powerbi_client_id = key_vault_client.get_secret("powerbiclientid")
+powerbi_group_id = key_vault_client.get_secret(f"{tenant}pbigroupid")
+powerbi_dataset_id = key_vault_client.get_secret(f"{tenant}pbirealtimedatasetid")
 
 
 def get_powerbi_token():
