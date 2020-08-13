@@ -120,7 +120,7 @@ def update_raw_table(spark: SparkSession, db_name: str, df: DataFrame, api_name:
     df.registerTempTable(temp_table)
     spark.sql(f"insert overwrite table {db_name}.r_users select * from {temp_table}")
     '''
-    df = df.withColumn("extract_date", to_date(lit(extract_date)))
+    df = df.withColumn("extractDate", to_date(lit(extract_date)))
 
     if mode == 'overwrite' and partition is None:
         df = df.coalesce(1)
