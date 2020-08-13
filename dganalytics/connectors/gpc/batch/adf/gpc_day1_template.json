@@ -103,10 +103,8 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_start_date",
-                                "@pipeline().parameters.extract_start_date",
-                                "--extract_end_date",
-                                "@pipeline().parameters.extract_end_date"
+                                "--extract_date",
+                                "@pipeline().parameters.extract_date"
                             ]
                         },
                         "linkedServiceName": {
@@ -133,10 +131,8 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_start_date",
-                                "@pipeline().parameters.extract_start_date",
-                                "--extract_end_date",
-                                "@pipeline().parameters.extract_end_date"
+                                "--extract_date",
+                                "@pipeline().parameters.extract_date"
                             ]
                         },
                         "linkedServiceName": {
@@ -163,10 +159,8 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_start_date",
-                                "@pipeline().parameters.extract_start_date",
-                                "--extract_end_date",
-                                "@pipeline().parameters.extract_end_date"
+                                "--extract_date",
+                                "@pipeline().parameters.extract_date"
                             ]
                         },
                         "linkedServiceName": {
@@ -193,10 +187,8 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_start_date",
-                                "@pipeline().parameters.extract_start_date",
-                                "--extract_end_date",
-                                "@pipeline().parameters.extract_end_date"
+                                "--extract_date",
+                                "@pipeline().parameters.extract_date"
                             ]
                         },
                         "linkedServiceName": {
@@ -223,10 +215,8 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_start_date",
-                                "@pipeline().parameters.extract_start_date",
-                                "--extract_end_date",
-                                "@pipeline().parameters.extract_end_date"
+                                "--extract_date",
+                                "@pipeline().parameters.extract_date"
                             ]
                         },
                         "linkedServiceName": {
@@ -260,10 +250,8 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_start_date",
-                                "@pipeline().parameters.extract_start_date",
-                                "--extract_end_date",
-                                "@pipeline().parameters.extract_end_date"
+                                "--extract_date",
+                                "@pipeline().parameters.extract_date"
                             ]
                         },
                         "linkedServiceName": {
@@ -276,10 +264,7 @@
                     "tenant": {
                         "type": "string"
                     },
-                    "extract_start_date": {
-                        "type": "string"
-                    },
-                    "extract_end_date": {
+                    "extract_date": {
                         "type": "string"
                     }
                 },
@@ -304,8 +289,7 @@
                         },
                         "parameters": {
                             "tenant": "[parameters('tenant')]",
-                            "extract_start_date": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-dd')}",
-                            "extract_end_date": "@{formatDateTime(addseconds(trigger().outputs.windowEndTime, -1),'yyyy-MM-dd')}"
+                            "extract_date": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-dd')}"
                         }
                     }
                 ],

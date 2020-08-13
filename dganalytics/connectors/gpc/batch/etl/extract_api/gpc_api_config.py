@@ -72,7 +72,7 @@ gpc_end_points = {
         "spark_partitions": 1,
         "raw_table_update": {
             "mode": "overwrite",
-            "partition": ["extract_date"]
+            "partition": ["extractDate"]
         }
     },
     "wrapupcodes": {
@@ -108,7 +108,7 @@ gpc_end_points = {
         "spark_partitions": 6,
         "raw_table_update": {
             "mode": "overwrite",
-            "partition": ["extract_date"]
+            "partition": ["extractDate"]
         }
     },
     "conversation_details_job": {
@@ -119,7 +119,7 @@ gpc_end_points = {
         "table_name": "conversations_details",
         "raw_table_update": {
             "mode": "overwrite",
-            "partition": ["extract_date"]
+            "partition": ["extractDate"]
         }
     }
 }

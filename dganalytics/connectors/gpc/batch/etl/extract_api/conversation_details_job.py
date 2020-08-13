@@ -5,10 +5,10 @@ from dganalytics.utils.utils import get_spark_session, env, get_path_vars
 from dganalytics.connectors.gpc.gpc_utils import gpc_request, parser, authorize, get_dbname
 from dganalytics.connectors.gpc.batch.etl.extract_api.gpc_api_config import gpc_end_points, gpc_base_url
 
-def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_start_date: str):
+def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
     api_headers = authorize(tenant)
     body = {
-        "interval": f"{extract_start_date}T00:00:00Z/{extract_start_date}T01:00:00Z"
+        "interval": f"{extract_date}T00:00:00Z/{extract_date}T01:00:00Z"
     }
     job_resp = rq.post("https://api.mypurecloud.com/api/v2/analytics/conversations/details/jobs",
                        headers=api_headers, data=json.dumps(body))
@@ -54,13 +54,13 @@ def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_
     }
 
     df = gpc_request(spark, tenant, 'conversation_details',
-                     run_id, db_name, extract_start_date, overwrite_gpc_config=api_config)
+                     run_id, db_name, extract_date, overwrite_gpc_config=api_config)
 
 
 if __name__ == "__main__":
-    tenant, run_id, extract_start_date, extract_end_date = parser()
+    tenant, run_id, extract_date = parser()
     db_name = get_dbname(tenant)
     spark = get_spark_session(app_name="gpc_conversation_batch_job", tenant=tenant)
 
     print("gpc extracting conversation detail jobs", tenant)
-    exec_conv_details_job_api(spark, tenant, run_id, db_name, extract_start_date)
+    exec_conv_details_job_api(spark, tenant, run_id, db_name, extract_date)

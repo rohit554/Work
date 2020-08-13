@@ -145,18 +145,15 @@ def parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--tenant', required=True)
     parser.add_argument('--run_id', required=True)
-    parser.add_argument('--extract_start_date', required=True,
-                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
-    parser.add_argument('--extract_end_date', required=True,
+    parser.add_argument('--extract_date', required=True,
                         type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
 
     args = parser.parse_args()
     tenant = args.tenant
     run_id = args.run_id
-    extract_start_date = args.extract_start_date.strftime('%Y-%m-%d')
-    extract_end_date = args.extract_end_date.strftime('%Y-%m-%d')
+    extract_date = args.extract_date.strftime('%Y-%m-%d')
 
-    return tenant, run_id, extract_start_date, extract_end_date
+    return tenant, run_id, extract_date
 
 
 def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,

@@ -24,19 +24,19 @@ credentials = DefaultAzureCredential()
 # key_vault_client = KeyVaultClient(credentials)
 key_vault_uri = 'https://dgdevsecrets.vault.azure.net/'
 key_vault_client = SecretClient(vault_url=key_vault_uri, credential=credentials)
-client_id = key_vault_client.get_secret(f"{tenant}gpcOAuthClientId")
-client_secret = key_vault_client.get_secret(f"{tenant}gpcOAuthClientSecret")
-powerbi_username = key_vault_client.get_secret("powerbiusername")
-powerbi_password = key_vault_client.get_secret("powerbipassword")
-powerbi_client_id = key_vault_client.get_secret("powerbiclientid")
-powerbi_group_id = key_vault_client.get_secret(f"{tenant}pbigroupid")
-powerbi_dataset_id = key_vault_client.get_secret(f"{tenant}pbirealtimedatasetid")
+client_id = key_vault_client.get_secret(f"{tenant}gpcOAuthClientId").value
+client_secret = key_vault_client.get_secret(f"{tenant}gpcOAuthClientSecret").value
+powerbi_username = key_vault_client.get_secret("powerbiusername").value
+powerbi_password = key_vault_client.get_secret("powerbipassword").value
+powerbi_client_id = key_vault_client.get_secret("powerbiclientid").value
+powerbi_group_id = key_vault_client.get_secret(f"{tenant}pbigroupid").value
+powerbi_dataset_id = key_vault_client.get_secret(f"{tenant}pbirealtimedatasetid").value
 
 
 def get_powerbi_token():
     pb_auth = rq.post("https://login.microsoftonline.com/common/oauth2/token", headers={"Content-Type": "application/x-www-form-urlencoded"},
                       data={"grant_type": "password", "scope": "openid", "resource": "https://analysis.windows.net/powerbi/api",
-                            "client_id": powerbi_client_id, "username": powerbi_username, "password": powerbi_password})
+                            "client_id": powerbi_client_id, "username": powerbi_username, "password": powerbi_password.encode()})
 
     print("Power BiRealtime Check")
     if pb_auth.status_code != 200:

@@ -4,7 +4,7 @@ import os
 import shutil
 
 if __name__ == "__main__":
-    tenant, run_id, extract_start_date, extract_end_date = parser()
+    tenant, run_id, extract_date = parser()
     spark = get_spark_session(app_name="gen_powerbi_dataset_conv_metrics", tenant=tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
 

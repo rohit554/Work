@@ -20,8 +20,7 @@
             "args": [
                 "--tenant=test",
                 "--run_id=t1",
-                "--extract_start_date=2020-07-01",
-                "--extract_end_date=2020-07-02"
+                "--extract_date=2020-08-11"
             ]
         },
         {
