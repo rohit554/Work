@@ -121,7 +121,7 @@ def create_raw_table(api_name: str, spark: SparkSession, db_name: str):
         partition = ""
     spark.createDataFrame(spark.sparkContext.emptyRDD(), schema=schema).registerTempTable(table_name)
     create_qry = f"""create table if not exists {db_name}.{table_name}
-                        using delta {partition} LOCATION '{db_path}/{db_name}/{table_name} as
+                        using delta {partition} LOCATION '{db_path}/{db_name}/{table_name}' as
                     select *, cast('1900-01-01' as date) extract_date from {table_name} limit 0"""
     spark.sql(create_qry)
 
