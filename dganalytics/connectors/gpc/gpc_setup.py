@@ -64,10 +64,11 @@ def create_dim_tables(spark: SparkSession, db_name: str):
             (
                 sessionId string,
                 metricDateTime timestamp,
+                metricDate date
                 
             )
             using delta
-            PARTITIONED BY (metricDate date)
+            PARTITIONED BY (metricDate)
             LOCATION '{db_path}/{db_name}/gDimConversationMetrics'
             """
     )
