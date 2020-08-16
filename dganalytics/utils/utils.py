@@ -5,7 +5,6 @@ import json
 from datetime import datetime
 import logging
 
-
 def get_env():
     try:
         environment = os.environ['datagamz_env']
@@ -67,13 +66,25 @@ def get_secret(secret_key: str):
         return dbutils.secrets.get(scope='dgsecretscope', key='{}'.format(secret_key))
 
 
-def get_spark_session(app_name: str, tenant: str):
+def get_spark_session(app_name: str, tenant: str, default_db: str):
     global env
     time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
     app_name = f"{tenant}-{app_name}-{time}"
     conf = SparkConf().setAll([("spark.sql.sources.partitionOverwriteMode", "dynamic"),
                                ("spark.rpc.message.maxSize", 1024),
-                               ("spark.databricks.session.share", False)])
+                               ("spark.databricks.session.share", False),
+                               ("spark.sql.adaptive.enabled", True),
+                               ("spark.sql.adaptive.coalescePartitions.enabled", True),
+                               ("spark.sql.adaptive.advisoryPartitionSizeInBytes", 262144000),
+                               ("spark.sql.cbo.enabled", True),
+                               ("spark.sql.execution.arrow.pyspark.enabled", True),
+                               ("spark.sql.execution.arrow.fallback.enabled", True),
+                               ("spark.sql.execution.arrow.maxRecordsPerBatch", 20000),
+                               ("spark.sql.files.maxRecordsPerFile", 20000),
+                               ("spark.sql.optimizer.dynamicPartitionPruning.enabled", True),
+                               ("spark.sql.parquet.filterPushdown", True),
+                               ("spark.sql.shuffle.partitions", 5)
+                               ])
 
     if env == "local":
         import findspark
@@ -86,6 +97,8 @@ def get_spark_session(app_name: str, tenant: str):
 
     spark = SparkSession.builder.appName(app_name).config(
         conf=conf).getOrCreate().newSession()
+
+    spark.sql(f"use {default_db}")
     return spark
 
 

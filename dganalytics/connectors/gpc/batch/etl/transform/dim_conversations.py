@@ -1,16 +1,13 @@
 from dganalytics.utils.utils import get_spark_session
 from dganalytics.connectors.gpc.gpc_utils import parser, get_dbname
+from delta.tables import DeltaTable
 
 if __name__ == "__main__":
     tenant, run_id, extract_date = parser()
-    spark = get_spark_session(app_name="gDimConversations", tenant=tenant)
-    db_name = get_dbname()
+    spark = get_spark_session(app_name="dim_conversations", tenant=tenant, default_db=get_dbname(tenant))
 
-    convs = spark.sql(f"""
-				merge into {db_name}.gDimConversations as target
-				using (
-					select
-					/*+ REPARTITION(2) */
+    conversations = spark.sql(f"""
+								select
 					distinct 
 					conversationId,
 					conversationStart,
@@ -42,16 +39,11 @@ if __name__ == "__main__":
 							select
 								conversationId, conversationStart, conversationEnd, originatingDirection, explode(participants) as participants
 							from
-								{db_name}.r_conversation_details where extract_date = '{extract_date}')
+								raw_conversation_details where extractDate = '{extract_date}')
 						where
 							participants.purpose = 'agent' ) )
-			) as source
-	
-		on source.conversationStartDate = target.conversationStartDate
+								""")
+    DeltaTable.forName(spark, "dim_conversations").alias("target").merge(conversations.coalesce(2).alias("source"),
+                                                                         """source.conversationStartDate = target.conversationStartDate
 			and source.conversationId = target.conversationId
-			and source.sessionId = target.sessionId
-		WHEN MATCHED
-			THEN UPDATE SET *
-		WHEN NOT MATCHED
-		THEN INSERT *
-	""")
+			and source.sessionId = target.sessionId""").whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()

@@ -16,7 +16,7 @@ def create_ingestion_stats_table(spark: SparkSession, db_name: str, db_path: str
     print("Creating Ingestion stats table for genesys")
     spark.sql(
         f"""
-                create table if not exists {db_name}.ingestionStats
+                create table if not exists {db_name}.ingestion_stats
                 (
                     apiName string,
                     endPoint string,
@@ -28,14 +28,14 @@ def create_ingestion_stats_table(spark: SparkSession, db_name: str, db_path: str
                     loadDateTime timestamp
                 )
                     using delta
-            LOCATION '{db_path}/{db_name}/ingestionStats'"""
+            LOCATION '{db_path}/{db_name}/ingestion_stats'"""
     )
     return True
 
 
 def create_dim_tables(spark: SparkSession, db_name: str):
     spark.sql(
-        f"""create table {db_name}.gDimConversations
+        f"""create table if not exists {db_name}.dim_conversations
             (
                 conversationId string,
                 conversationStart timestamp,
@@ -55,15 +55,15 @@ def create_dim_tables(spark: SparkSession, db_name: str):
             )
             using delta
             PARTITIONED BY (conversationStartDate)
-            LOCATION '{db_path}/{db_name}/gDimConversations'
+            LOCATION '{db_path}/{db_name}/dim_conversations'
             """
     )
 
     spark.sql(
-        f"""create table {db_name}.gDimConversationMetrics
+        f"""create table if not exists {db_name}.fact_conversation_metrics
             (
                 sessionId string,
-                emitDateTime timestamp,
+                emitDateTime timestamp comment 'aggregated values into 15 min interval buckets',
                 nAbandon int,
                 nAcd int,
                 nAcw int,
@@ -104,24 +104,118 @@ def create_dim_tables(spark: SparkSession, db_name: str):
             )
             using delta
             PARTITIONED BY (emitDate)
-            LOCATION '{db_path}/{db_name}/gDimConversationMetrics'
+            LOCATION '{db_path}/{db_name}/fact_conversation_metrics'
             """
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.dim_users
+                (
+                    userName string,
+                    userId string,
+                    userFullName string,
+                    userEmail string,
+                    userTitle string,
+                    department string,
+                    city string, 
+                    country string,
+                    region string,
+                    managerId string,
+                    state string
+                )
+                    using delta
+            LOCATION '{db_path}/{db_name}/dim_users'"""
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.dim_user_groups
+                (
+                    userId string,
+                    groupId string, 
+                    groupName string, 
+                    groupDescription string,
+                    groupState string
+                )
+                    using delta
+            LOCATION '{db_path}/{db_name}/dim_user_groups'"""
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.dim_routing_queues
+                (
+                    queueId string,
+                    queueName string, 
+                    wrapupPrompt string, 
+                    callSLDuration float,
+                    callSLPercentage float,
+                    callbackSLDuration float,
+                    callbackSLPercentage float,
+                    chatSLDuration float,
+                    chatSLPercentage float,
+                    emailSLDuration float,
+                    emailSLPercentage float,
+                    messageSLDuration float,
+                    messageSLPercentage float
+                )
+                    using delta
+            LOCATION '{db_path}/{db_name}/dim_routing_queues'"""
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.fact_routing_status
+                (
+                    userId string,
+                    startTime timestamp, 
+                    endTime timestamp, 
+                    routingStatus string,
+                    startDate date
+                )
+                    using delta
+                    PARTITIONED BY (startDate)
+            LOCATION '{db_path}/{db_name}/fact_routing_status'"""
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.fact_primary_presence
+                (
+                    userId string,
+                    startTime timestamp, 
+                    endTime timestamp, 
+                    systemPresence string,
+                    startDate date
+                )
+                    using delta
+                    PARTITIONED BY (startDate)
+            LOCATION '{db_path}/{db_name}/fact_primary_presence'"""
     )
 
     return True
 
 
 def create_raw_table(api_name: str, spark: SparkSession, db_name: str):
-    schema = get_schema(api_name, tenant_path)
-    table_name = "raw" + camelize(f"{api_name}")
+    schema = get_schema(api_name)
+    table_name = "raw_" + f"{api_name}"
     print(table_name)
+    '''
     if gpc_end_points[api_name]["raw_table_update"]["partition"] is not None:
         partition = "partitioned by (" + ",".join(gpc_end_points[api_name]["raw_table_update"]["partition"]) + ")"
     else:
         partition = ""
+    
     spark.createDataFrame(spark.sparkContext.emptyRDD(), schema=schema).registerTempTable(table_name)
+
     create_qry = f"""create table if not exists {db_name}.{table_name}
                         using delta {partition} LOCATION '{db_path}/{db_name}/{table_name}' as
+                    select *, cast('1900-01-01' as date) extractDate from {table_name} limit 0"""
+    '''
+    spark.createDataFrame(spark.sparkContext.emptyRDD(), schema=schema).registerTempTable(table_name)
+    create_qry = f"""create table if not exists {db_name}.{table_name}
+                        using delta partitioned by(extractDate) LOCATION '{db_path}/{db_name}/{table_name}' as
                     select *, cast('1900-01-01' as date) extractDate from {table_name} limit 0"""
     spark.sql(create_qry)
 
@@ -134,7 +228,9 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     create_raw_table("groups", spark, db_name)
     create_raw_table("users_details", spark, db_name)
     create_raw_table("conversation_details", spark, db_name)
-    create_raw_table("wrapupcodes", spark, db_name)
+    create_raw_table("wfm_adherence", spark, db_name)
+    create_raw_table("wrapup_codes", spark, db_name)
+    create_raw_table("evaluations", spark, db_name)
 
     return True
 
@@ -149,8 +245,9 @@ if __name__ == "__main__":
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
 
-    spark = get_spark_session(app_name="GPC_Setup", tenant=tenant)
+    spark = get_spark_session(app_name="GPC_Setup", tenant=tenant, default_db=db_name)
 
     create_database(spark, db_path, db_name)
     create_ingestion_stats_table(spark, db_name, db_path)
     raw_tables(spark, db_name, db_path, tenant_path)
+    create_dim_tables(spark, db_name)

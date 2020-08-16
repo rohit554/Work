@@ -17,7 +17,7 @@ def setup_tenant_localdev(tenant: str):
                       "dg_{}".format(tenant))).mkdir(parents=True, exist_ok=True)
     Path(os.path.join(tenant_path, "data", "raw")).mkdir(
         parents=True, exist_ok=True)
-    Path(os.path.join(tenant_path, "data", "pb_datasets")).mkdir(
+    Path(os.path.join(tenant_path, "data", "pbdatasets")).mkdir(
         parents=True, exist_ok=True)
     Path(os.path.join(tenant_path, "data", "adhoc")).mkdir(
         parents=True, exist_ok=True)
@@ -38,7 +38,7 @@ def setup_tenant_databricks(tenant: str):
         fs_client.create_directory("data/databases")
         fs_client.create_directory("data/databases/dg_{}".format(tenant))
         fs_client.create_directory("data/raw")
-        fs_client.create_directory("data/pb_datasets")
+        fs_client.create_directory("data/pbdatasets")
         fs_client.create_directory("data/adhoc")
     except ResourceExistsError as e:
         print("setting container completed")
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
 
-    spark = get_spark_session(app_name="Tenant_Setup", tenant=tenant)
+    spark = get_spark_session(app_name="Tenant_Setup", tenant=tenant, default_db='default')
 
     if env == 'local':
         setup_tenant_localdev(tenant)

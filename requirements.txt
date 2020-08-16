@@ -4,3 +4,5 @@ azure-datalake-store
 findspark
 compress_json
 inflection
+websocket_client
+pyarrow

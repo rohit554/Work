@@ -1,9 +1,7 @@
 import requests
 from pyspark.sql import SparkSession, DataFrame
 import time
-import email.utils as eut
 import datetime
-from pyspark.conf import SparkConf
 import base64
 import os
 import json
@@ -11,14 +9,13 @@ import logging
 from pathlib import Path
 import compress_json
 from pyspark.sql.types import StructType
-import string
-import random
 import argparse
 from dganalytics.connectors.gpc.batch.etl.extract_api.gpc_api_config import gpc_base_url, gpc_end_points
 from dganalytics.utils.utils import env, get_path_vars
 from pyspark.sql.functions import lit, to_date
 import gzip
 from dganalytics.utils.utils import get_secret
+from inflection import camelize
 
 retry = 1
 
@@ -112,29 +109,23 @@ def write_api_resp_new(resp: list, api_name: str, run_id: str, tenant_path: str,
     return path
 
 
-def update_raw_table(spark: SparkSession, db_name: str, df: DataFrame, api_name: str, extract_date: str, mode: str,
-                     partition: list = None):
+def update_raw_table(db_name: str, df: DataFrame, api_name: str, extract_date: str):
     '''
     letters = string.ascii_lowercase
     temp_table = ''.join(random.choice(letters) for i in range(10))
     df.registerTempTable(temp_table)
-    spark.sql(f"insert overwrite table {db_name}.r_users select * from {temp_table}")
+    spark.sql(f"insert overwrite table {db_name}.raw_users select * from {temp_table}")
     '''
     df = df.withColumn("extractDate", to_date(lit(extract_date)))
-
-    if mode == 'overwrite' and partition is None:
-        df = df.coalesce(1)
-        df.write.mode("overwrite").format(
-            "delta").saveAsTable(f"{db_name}.r_{api_name}")
-    if partition is not None:
-        df.write.partitionBy(partition).mode(mode).format(
-            "delta").saveAsTable(f"{db_name}.r_{api_name}")
+    df = df.coalesce(1).write.partitionBy('extractDate').mode("overwrite").format(
+            "delta").saveAsTable(f"{db_name}.raw_{api_name}")
     return True
 
 
-def get_schema(api_name: str, tenant_path: str):
-    schema_path = os.path.join(tenant_path, 'code', 'dganalytics', 'dganalytics', 'connectors',
-                               'gpc', 'source_api_schemas', '{}.json'.format(api_name))
+def get_schema(api_name: str):
+    # schema_path = os.path.join(tenant_path, 'code', 'dganalytics', 'dganalytics', 'connectors',
+    #                           'gpc', 'source_api_schemas', '{}.json'.format(api_name))
+    schema_path = os.path.join(Path(__file__).parent, 'source_api_schemas', '{}.json'.format(api_name))
     with open(schema_path, 'r') as f:
         schema = f.read()
     schema = StructType.fromJson(json.loads(schema))
@@ -157,11 +148,11 @@ def parser():
 
 
 def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
-                extract_date: str = None, params_to_replace: dict = None, overwrite_gpc_config: dict = None):
+                extract_date: str = None, overwrite_gpc_config: dict = None, skip_raw_table: bool = False):
     op_files = []
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
-    schema = get_schema(api_name, tenant_path)
+    schema = get_schema(api_name)
     sc = spark.sparkContext
 
     auth_headers = authorize(tenant)
@@ -225,6 +216,11 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
             print(f"{tenant}-{api_name}-{extract_date}-{page_count}")
 
         page_count = page_count + 1
+        if cursor:
+            if 'cursor' in resp.json().keys():
+                cursor_param = resp.json()['cursor']
+            else:
+                break
 
     raw_file = write_api_resp_new(
         resp_list, api_name, run_id, tenant_path, page_count, extract_date)
@@ -232,12 +228,12 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
         sc.parallelize(resp_list, n_partitions), schema=schema)
     record_count = len(resp_list)
     del resp_list
-    update_raw_table(spark, db_name, df, api_name,
-                     extract_date, mode, partition)
+    if not skip_raw_table:
+        update_raw_table(db_name, df, api_name, extract_date)
 
     stats_insert = f"""insert into {db_name}.ingestion_stats
         values ('{api_name}', '{url}', {page_count - 1}, {record_count}, '{raw_file}', '{run_id}', '{extract_date}',
         current_timestamp)"""
     spark.sql(stats_insert)
-    return True
+    return df
 

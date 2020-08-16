@@ -1,15 +1,13 @@
 from dganalytics.utils.utils import get_spark_session
 from dganalytics.connectors.gpc.gpc_utils import parser, get_dbname
+from delta.tables import DeltaTable
+
 
 if __name__ == "__main__":
     tenant, run_id, extract_date = parser()
-    spark = get_spark_session(app_name="gDimConversations", tenant=tenant)
-    db_name = get_dbname()
-
-    convs = spark.sql(f"""
-				merge into {db_name}.gDimConversationMetrics as target
-                using (
-                select 
+    spark = get_spark_session(app_name="fact_conversation_metrics", tenant=tenant, default_db=get_dbname(tenant))
+    conversation_metrics = spark.sql(f"""
+                                        select 
                 sessionId,  
                 cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as emitDateTime,
                 cast(cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as date) as emitDate,
@@ -68,9 +66,9 @@ if __name__ == "__main__":
                             select
                                 explode(participants) as participants
                             from
-                                {db_name}.r_conversation_details )
+                                raw_conversation_details where extractDate = '{extract_date}')
                         where
-                            participants.purpose = 'agent' and extract_date = {extract_date}) )
+                            participants.purpose = 'agent') )
                 )
                 pivot (
                         sum(coalesce(value,0))
@@ -85,13 +83,12 @@ if __name__ == "__main__":
                     
                 )
                 group by sessionId, cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp)
-                        ) as source
-                    
-                    on source.sessionId = target.sessionId
+                                        """)
+
+    DeltaTable.forName(spark, "fact_conversation_metrics").alias("target").merge(conversation_metrics.coalesce(2).alias("source"),
+                        """source.sessionId = target.sessionId
                         and source.emitDateTime = target.emitDateTime
-                        and cast(source.emitDateTime as date) = target.emitDate
-                    WHEN MATCHED
-                        THEN UPDATE SET *
-                    WHEN NOT MATCHED
-                    THEN INSERT *
-	""")
+                        and cast(source.emitDateTime as date) = target.emitDate""").whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
+
+    spark.stop()
+
