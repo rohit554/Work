@@ -14,7 +14,7 @@ if __name__ == "__main__":
                                     evaluationForm.name as evaluationFormName, 
                                     evaluationForm.published as evaluationFormPublished, neverRelease,
                                     resourceType, cast(assignedDate as date) as assignedDatePart
-                                from gpc_test.raw_evaluations  where extractDate = '{extract_date}'
+                                from raw_evaluations  where extractDate = '{extract_date}'
 								""")
     DeltaTable.forName(spark, "dim_evaluations").alias("target").merge(evaluations.coalesce(1).alias("source"),
                                                                          """source.evaluationId = target.evaluationId

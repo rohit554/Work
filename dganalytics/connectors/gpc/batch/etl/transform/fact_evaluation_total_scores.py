@@ -9,7 +9,7 @@ if __name__ == "__main__":
     evaluations = spark.sql(f"""
 								select id as evaluationId, answers.totalCriticalScore, 		
 		                    answers.totalNonCriticalScore, answers.totalScore
-	            from gpc_test.raw_evaluations  where extractDate = '{extract_date}'
+	            from raw_evaluations  where extractDate = '{extract_date}'
 								""")
     DeltaTable.forName(spark, "fact_evaluation_total_scores").alias("target").merge(evaluations.coalesce(1).alias("source"),
                                                                          """source.evaluationId = target.evaluationId

@@ -116,5 +116,12 @@ gpc_end_points = {
         "spark_partitions": 1,
         "table_name": "evaluations",
         "tbl_overwrite": False
+    },
+    "evaluation_forms": {
+        "endpoint": "api/v2/quality/forms/evaluations/{}",
+        "extract_type": "custom",
+        "spark_partitions": 1,
+        "table_name": "evaluation_forms",
+        "tbl_overwrite": True
     }
 }

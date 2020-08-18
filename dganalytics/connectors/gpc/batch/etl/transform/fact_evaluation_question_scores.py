@@ -12,7 +12,7 @@ if __name__ == "__main__":
                                         from (
                                 select id as evaluationId, 
                                 questionGroupScores.questionGroupId, questionGroupScores.questionScores
-                                    from gpc_test.raw_evaluations
+                                    from raw_evaluations
                                     lateral view explode(answers.questionGroupScores) as questionGroupScores
                                     where extractDate = '{extract_date}'
                                 )

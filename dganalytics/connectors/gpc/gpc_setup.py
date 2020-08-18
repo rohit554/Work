@@ -319,6 +319,69 @@ def create_dim_tables(spark: SparkSession, db_name: str):
             LOCATION '{db_path}/{db_name}/fact_wfm_actuals'"""
     )
 
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.dim_evaluation_forms
+                (
+                    evaluationFormId string,
+                    evaluationFormName string,
+                    published boolean
+                )
+                    using delta
+            LOCATION '{db_path}/{db_name}/dim_evaluation_forms'"""
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.dim_evaluation_form_question_groups
+                (
+                    evaluationFormId string,
+                    questionGroupId string,
+                    questionGroupName string,
+                    defaultAnswersToHighest boolean,
+                    defaultAnswersToNA boolean,
+                    manualWeight boolean,
+                    naEnabled boolean,
+                    weight float
+                )
+                    using delta
+            LOCATION '{db_path}/{db_name}/dim_evaluation_form_question_groups'"""
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.dim_evaluation_form_questions
+                (
+                    evaluationFormId string,
+                    questionGroupId string,
+                    questionId string,
+                    questionText string,
+                    commentsRequired boolean,
+                    helpText string,
+                    isCritical boolean,
+                    isKill boolean,
+                    naEnabled boolean,
+                    questionType string
+                )
+                    using delta
+            LOCATION '{db_path}/{db_name}/dim_evaluation_form_questions'"""
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.dim_evaluation_form_answer_options
+                (
+                    evaluationFormId string,
+                    questionGroupId string,
+                    questionId string,
+                    answerOptionId string,
+                    answerOptionText string,
+                    answerOptionValue string
+                )
+                    using delta
+            LOCATION '{db_path}/{db_name}/dim_evaluation_form_answer_options'"""
+    )
+
     return True
 
 
@@ -356,6 +419,7 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     create_raw_table("wfm_adherence", spark, db_name)
     create_raw_table("wrapup_codes", spark, db_name)
     create_raw_table("evaluations", spark, db_name)
+    create_raw_table("evaluation_forms", spark, db_name)
 
     return True
 

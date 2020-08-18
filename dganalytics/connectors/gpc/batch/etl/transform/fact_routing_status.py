@@ -10,7 +10,7 @@ if __name__ == "__main__":
     routing_status = spark.sql(f"""
 								select userId, routingStatus.startTime, routingStatus.endTime, routingStatus.routingStatus,
                                 cast(routingStatus.startTime as date) as startDate from (
-	select userId, explode(routingStatus) as routingStatus from gpc_test.raw_users_details where extractDate = '{extract_date}')
+	select userId, explode(routingStatus) as routingStatus from raw_users_details where extractDate = '{extract_date}')
 								""")
     DeltaTable.forName(spark, "fact_routing_status").alias("target").merge(routing_status.coalesce(2).alias("source"),
                                                                          """source.userId = target.userId

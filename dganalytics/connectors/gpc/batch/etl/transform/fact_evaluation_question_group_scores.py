@@ -14,7 +14,7 @@ if __name__ == "__main__":
                         questionGroupScores.maxTotalScoreUnweighted, questionGroupScores.totalCriticalScore,
                         questionGroupScores.totalCriticalScoreUnweighted, questionGroupScores.totalNonCriticalScore,
                         questionGroupScores.totalNonCriticalScoreUnweighted, questionGroupScores.totalScore, questionGroupScores.totalScoreUnweighted
-                            from gpc_test.raw_evaluations
+                            from raw_evaluations
 	lateral view explode(answers.questionGroupScores) as questionGroupScores  where extractDate = '{extract_date}'
 								""")
     DeltaTable.forName(spark, "fact_evaluation_question_group_scores").alias("target").merge(evaluations.coalesce(1).alias("source"),
