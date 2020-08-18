@@ -8,7 +8,7 @@ import ast
 from websocket import create_connection
 
 def get_users_list(spark: SparkSession):
-    users_list = spark.sql("select id as userId from raw_users").toPandas()['userId'].tolist()
+    users_list = spark.sql("select distinct id as userId from raw_users").toPandas()['userId'].tolist()
     return users_list
 
 
@@ -45,9 +45,9 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
     for i in range(0, len(user_ids), batchsize):
         print(i)
         body = {
-            "startDate": f"{extract_date}T00:00:00",
-            "endDate": f"{extract_date}T01:00:00",
-            "timeZone": "UTC",
+            "startDate": f"{extract_date}T18:00:00Z",
+            "endDate": f"{extract_date}T23:00:00Z",
+            "timeZone": "Etc/UTC",
             "userIds": user_ids[i:i + batchsize]
         }
         resp = rq.post("https://api.mypurecloud.com/api/v2/workforcemanagement/adherence/historical",
@@ -78,7 +78,7 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
     df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
         spark._sc.parallelize(wfm_resps, 2), schema=get_schema('wfm_adherence'))
 
-    update_raw_table(db_name, df, 'wfm_adherence', extract_date)
+    update_raw_table(db_name, df, 'wfm_adherence', extract_date, False)
 
     stats_insert = f"""insert into {db_name}.ingestion_stats
         values ('wfm_adherence', 'https://api.mypurecloud.com/api/v2/workforcemanagement/adherence/historical',

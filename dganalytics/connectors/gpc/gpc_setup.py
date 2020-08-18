@@ -194,6 +194,131 @@ def create_dim_tables(spark: SparkSession, db_name: str):
             LOCATION '{db_path}/{db_name}/fact_primary_presence'"""
     )
 
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.dim_evaluations
+                (
+                    evaluationId string,
+                    evaluatorId string,
+                    agentId string,
+                    conversationId string,
+                    evaluationFormId string,
+                    status string,
+                    assignedDate timestamp, 
+                    releaseDate timestamp, 
+                    changedDate timestamp, 
+                    conversationDate timestamp, 
+                    mediaType string, 
+                    agentHasRead boolean, 
+                    anyFailedKillQuestions boolean,
+                    comments string,
+                    evaluationFormName string,
+                    evaluationFormPublished boolean,
+                    neverRelease boolean,
+                    resourceType string
+                )
+                    using delta
+            LOCATION '{db_path}/{db_name}/dim_evaluations'"""
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.fact_evaluation_total_scores
+                (
+                    evaluationId string,
+                    totalCriticalScore float,
+                    totalNonCriticalScore float,
+                    totalScore float
+                )
+                    using delta
+            LOCATION '{db_path}/{db_name}/fact_evaluation_total_scores'"""
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.fact_evaluation_question_group_scores
+                (
+                    evaluationId string,
+                    questionGroupId string,
+                    markedNA boolean,
+                    maxTotalCriticalScore float,
+                    maxTotalCriticalScoreUnweighted float,
+                    maxTotalNonCriticalScore float,
+                    maxTotalNonCriticalScoreUnweighted float,
+                    maxTotalScore float,
+                    maxTotalScoreUnweighted float,
+                    totalCriticalScore float,
+                    totalCriticalScoreUnweighted float,
+                    totalNonCriticalScore float,
+                    totalNonCriticalScoreUnweighted float,
+                    totalScore float,
+                    totalScoreUnweighted float
+                )
+                    using delta
+            LOCATION '{db_path}/{db_name}/fact_evaluation_question_group_scores'"""
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.fact_evaluation_question_scores
+                (
+                    evaluationId string,
+                    questionGroupId string,
+                    questionId string,
+                    answerId string,
+                    comments string,
+                    failedKillQuestion boolean,
+                    markedNA boolean,
+                    score float
+                )
+                    using delta
+            LOCATION '{db_path}/{db_name}/fact_evaluation_question_scores'"""
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.fact_wfm_day_metrics
+                (
+                    userId string,
+                    startDate timestamp,
+                    actualsEndDate timestamp,
+                    endDate timestamp,
+                    impact string,
+                    actualLengthSecs int,
+                    adherencePercentage float,
+                    adherenceScheduleSecs int,
+                    conformanceActualSecs int,
+                    conformancePercentage float,
+                    conformanceScheduleSecs int,
+                    dayStartOffsetSecs int,
+                    exceptionCount int,
+                    exceptionDurationSecs int,
+                    impactSeconds int,
+                    scheduleLengthSecs int,
+                    startDatePart date
+                )
+                    using delta
+                    PARTITIONED BY (startDatePart)
+            LOCATION '{db_path}/{db_name}/fact_wfm_day_metrics'"""
+    )
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.fact_wfm_actuals
+                (
+                    userId string,
+                    startDate timestamp,
+                    actualsEndDate timestamp,
+                    endDate timestamp,
+                    actualActivityCategory string,
+                    endOffsetSeconds int,
+                    startOffsetSeconds int,
+                    startDatePart date
+                )
+                    using delta
+                    PARTITIONED BY (startDatePart)
+            LOCATION '{db_path}/{db_name}/fact_wfm_actuals'"""
+    )
+
     return True
 
 

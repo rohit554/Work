@@ -27,10 +27,7 @@ def get_dbname(tenant: str):
 
 def authorize(tenant: str):
     global secrets
-    '''
-    auth_key = dbutils.secrets.get(
-        scope='dgsecretscope', key='{}gpcapikey'.format(tenant))
-    '''
+
     client_id = get_secret(f'{tenant}gpcOAuthClientId')
     client_secret = get_secret(f'{tenant}gpcOAuthClientSecret')
     auth_key = base64.b64encode(
@@ -82,21 +79,6 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
         print(resp.text)
         raise Exception
 
-    return "OK"
-
-
-def write_api_resp(resp: requests.Response, api_name: str, run_id: str, tenant_path: str, part: str, extract_date: str):
-    path = os.path.join(tenant_path, 'data', 'raw', 'gpc',
-                        run_id, extract_date, f'{api_name}', f'{api_name}_{part}.json.gz')
-
-    # Path(path).mkdir(parents=True, exist_ok=True)
-    '''
-    with open(os.path.join(path, f'{api_name}.json'), 'w+') as f:
-        json.dump(resp.json(), f)
-    '''
-    compress_json.dump(resp.json(), path)
-    return path
-
 
 def write_api_resp_new(resp: list, api_name: str, run_id: str, tenant_path: str, part: str, extract_date: str):
     path = os.path.join(tenant_path, 'data', 'raw',
@@ -109,7 +91,7 @@ def write_api_resp_new(resp: list, api_name: str, run_id: str, tenant_path: str,
     return path
 
 
-def update_raw_table(db_name: str, df: DataFrame, api_name: str, extract_date: str):
+def update_raw_table(db_name: str, df: DataFrame, api_name: str, extract_date: str, tbl_overwrite: bool = False):
     '''
     letters = string.ascii_lowercase
     temp_table = ''.join(random.choice(letters) for i in range(10))
@@ -117,8 +99,11 @@ def update_raw_table(db_name: str, df: DataFrame, api_name: str, extract_date: s
     spark.sql(f"insert overwrite table {db_name}.raw_users select * from {temp_table}")
     '''
     df = df.withColumn("extractDate", to_date(lit(extract_date)))
-    df = df.coalesce(1).write.partitionBy('extractDate').mode("overwrite").format(
-            "delta").saveAsTable(f"{db_name}.raw_{api_name}")
+    if tbl_overwrite:
+        df = df.write.mode("overwrite").format("delta").saveAsTable(f"{db_name}.raw_{api_name}")
+    else:
+        df = df.write.partitionBy('extractDate').mode("overwrite").format(
+                "delta").saveAsTable(f"{db_name}.raw_{api_name}")
     return True
 
 
@@ -149,7 +134,6 @@ def parser():
 
 def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_date: str = None, overwrite_gpc_config: dict = None, skip_raw_table: bool = False):
-    op_files = []
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
     schema = get_schema(api_name)
@@ -165,9 +149,8 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
     paging = gepc[api_name]['paging']
     cursor = gepc[api_name]['cursor']
     interval = gepc[api_name]['interval']
-    mode = gepc[api_name]['raw_table_update']['mode']
-    partition = gepc[api_name]['raw_table_update']['partition']
     n_partitions = gepc[api_name]['spark_partitions']
+    tbl_overwrite = gepc[api_name]['tbl_overwrite']
 
     resp_list = []
     page_count = 1
@@ -186,9 +169,8 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                     "pageSize": params['pageSize'],
                     "pageNumber": page_count
                 }
-        if cursor:
-            if cursor_param != "":
-                params['cursor'] = cursor_param
+        if cursor and cursor_param != "":
+            params['cursor'] = cursor_param
 
         if req_type == "GET":
             resp = requests.request(method=req_type, url=url,
@@ -202,8 +184,6 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
         if check_api_response(resp, api_name, tenant, run_id) == "SLEEP":
             continue
 
-        # raw_file = write_api_resp(resp, api_name, run_id, tenant_path, page_count, extract_date)
-        # op_files.append(raw_file)
         if resp.text == '{}' or (entity in resp.json().keys() and len(resp.json()[entity]) == 0):
             break
 
@@ -229,7 +209,7 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
     record_count = len(resp_list)
     del resp_list
     if not skip_raw_table:
-        update_raw_table(db_name, df, api_name, extract_date)
+        update_raw_table(db_name, df, api_name, extract_date, tbl_overwrite)
 
     stats_insert = f"""insert into {db_name}.ingestion_stats
         values ('{api_name}', '{url}', {page_count - 1}, {record_count}, '{raw_file}', '{run_id}', '{extract_date}',

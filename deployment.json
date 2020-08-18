@@ -1,5 +1,6 @@
 {
     "testhf": {
-        "adf": ["dganalytics/connectors/gpc/batch/adf/gpc_day1_template.json"]
+        "adf": ["dganalytics/connectors/gpc/batch/adf/gpc_day1_template.json"],
+        "realtime":  "dganalytics/connectors/gpc/realtime/functions"
     }
 }

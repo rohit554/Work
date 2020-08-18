@@ -7,11 +7,11 @@ if __name__ == "__main__":
     spark = get_spark_session(
         app_name="fact_primary_presence", tenant=tenant, default_db=get_dbname(tenant))
 
-    outing_status = spark.sql(f"""
+    primary_presence = spark.sql(f"""
 								select userId, primaryPresence.startTime, primaryPresence.endTime, primaryPresence.systemPresence, 
 		cast(primaryPresence.startTime as date) as startDate from (
 	select userId, explode(primaryPresence) as primaryPresence from raw_users_details where extractDate = '{extract_date}')
 								""")
-    DeltaTable.forName(spark, "fact_primary_presence").alias("target").merge(outing_status.coalesce(2).alias("source"),
+    DeltaTable.forName(spark, "fact_primary_presence").alias("target").merge(primary_presence.coalesce(2).alias("source"),
                                                                           """source.userId = target.userId
-			and source.startTime = target.startTime""").whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
+			and source.startTime = target.startTime and cast(target.startTime as date) = source.startDate""").whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()

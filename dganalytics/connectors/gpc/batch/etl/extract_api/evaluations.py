@@ -41,7 +41,7 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_
     df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
         spark._sc.parallelize(evaluation_details_list, 1), schema=get_schema('evaluations'))
 
-    update_raw_table(db_name, df, 'evaluations', extract_date)
+    update_raw_table(db_name, df, 'evaluations', extract_date, False)
 
     stats_insert = f"""insert into {db_name}.ingestion_stats
         values ('evaluations', 'https://api.mypurecloud.com/api/v2/quality/evaluations/query',
