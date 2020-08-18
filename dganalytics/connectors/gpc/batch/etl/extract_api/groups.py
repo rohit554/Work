@@ -1,4 +1,3 @@
-from dganalytics.connectors.gpc.gpc_setup import db_name
 from dganalytics.utils.utils import get_spark_session
 from dganalytics.connectors.gpc.gpc_utils import get_dbname, gpc_request, parser
 

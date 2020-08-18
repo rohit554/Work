@@ -99,11 +99,12 @@ def update_raw_table(db_name: str, df: DataFrame, api_name: str, extract_date: s
     spark.sql(f"insert overwrite table {db_name}.raw_users select * from {temp_table}")
     '''
     df = df.withColumn("extractDate", to_date(lit(extract_date)))
-    if tbl_overwrite:
-        df = df.write.mode("overwrite").format("delta").saveAsTable(f"{db_name}.raw_{api_name}")
-    else:
-        df = df.write.partitionBy('extractDate').mode("overwrite").format(
-                "delta").saveAsTable(f"{db_name}.raw_{api_name}")
+    df = df.write.mode("overwrite").format("delta")
+
+    if not tbl_overwrite:
+        df = df.partitionBy('extractDate').option("replaceWhere", "extractDate='" + extract_date + "'")
+
+    df = df.saveAsTable(f"{db_name}.raw_{api_name}")
     return True
 
 

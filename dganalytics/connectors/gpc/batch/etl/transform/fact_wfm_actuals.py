@@ -1,12 +1,11 @@
 from dganalytics.utils.utils import get_spark_session
 from dganalytics.connectors.gpc.gpc_utils import parser, get_dbname, env
-from delta.tables import DeltaTable
 
 if __name__ == "__main__":
     tenant, run_id, extract_date = parser()
     spark = get_spark_session(
         app_name="fact_wfm_actuals", tenant=tenant, default_db=get_dbname(tenant))
-    
+    from delta.tables import DeltaTable
     actuals = spark.sql(f"""
     create temporary view actuals as 
     select userId,startDate,actualsEndDate, endDate, actuals.actualActivityCategory,actuals.endOffsetSeconds, actuals.startOffsetSeconds,
@@ -18,7 +17,7 @@ select explode(data) as data from raw_wfm_adherence where extractDate = '{extrac
 ) 
                         """)
     
-    if env == 'local':
+    if env != 'local':
         actuals_delete = spark.sql(f"""
         delete from fact_wfm_actuals target where exists (
                                     select actuals.userId
