@@ -370,7 +370,7 @@ if __name__ == "__main__":
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
 
-    spark = get_spark_session(app_name="GPC_Setup", tenant=tenant, default_db=db_name)
+    spark = get_spark_session(app_name="GPC_Setup", tenant=tenant, default_db='default')
 
     create_database(spark, db_path, db_name)
     create_ingestion_stats_table(spark, db_name, db_path)

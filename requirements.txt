@@ -6,3 +6,9 @@ compress_json
 inflection
 websocket_client
 pyarrow
+azure-core
+azure-common
+azure-mgmt-resource
+azure-keyvault
+azure-keyvault-secrets
+azure-identity
