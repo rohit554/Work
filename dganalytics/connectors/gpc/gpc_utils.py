@@ -19,6 +19,9 @@ from inflection import camelize
 
 retry = 1
 
+def get_interval(extract_date: str):
+    interval = f"{extract_date}T00:00:00Z/{extract_date}T05:00:00Z"
+    return interval
 
 def get_dbname(tenant: str):
     db_name = "gpc_{}".format(tenant)
@@ -118,7 +121,24 @@ def get_schema(api_name: str):
     return schema
 
 
-def parser():
+def extract_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--tenant', required=True)
+    parser.add_argument('--run_id', required=True)
+    parser.add_argument('--extract_date', required=True,
+                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
+    parser.add_argument('--api_name', required=True)
+
+    args = parser.parse_args()
+    tenant = args.tenant
+    run_id = args.run_id
+    api_name = args.api_name
+    extract_date = args.extract_date.strftime('%Y-%m-%d')
+
+    return tenant, run_id, extract_date, api_name
+
+
+def transform_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--tenant', required=True)
     parser.add_argument('--run_id', required=True)
@@ -131,7 +151,6 @@ def parser():
     extract_date = args.extract_date.strftime('%Y-%m-%d')
 
     return tenant, run_id, extract_date
-
 
 def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_date: str = None, overwrite_gpc_config: dict = None, skip_raw_table: bool = False):
@@ -159,7 +178,7 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
     cursor_param = ""
 
     if interval:
-        params['interval'] = f"{extract_date}T00:00:00Z/{extract_date}T01:00:00Z"
+        params['interval'] = get_interval(extract_date)
 
     while True:
         if paging:

@@ -2,12 +2,12 @@ import requests as rq
 import json
 from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import gpc_request, parser, authorize, get_dbname
+from dganalytics.connectors.gpc.gpc_utils import gpc_request, extract_parser, authorize, get_dbname, get_interval
 
 def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
     api_headers = authorize(tenant)
     body = {
-        "interval": f"{extract_date}T00:00:00Z/{extract_date}T01:00:00Z"
+        "interval": get_interval(extract_date)
     }
     job_resp = rq.post("https://api.mypurecloud.com/api/v2/analytics/conversations/details/jobs",
                        headers=api_headers, data=json.dumps(body))
@@ -57,7 +57,7 @@ def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_
 
 
 if __name__ == "__main__":
-    tenant, run_id, extract_date = parser()
+    tenant, run_id, extract_date, api_name = extract_parser()
     db_name = get_dbname(tenant)
     spark = get_spark_session(app_name="gpc_conversation_batch_job", tenant=tenant, default_db=db_name)
 

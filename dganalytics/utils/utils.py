@@ -83,7 +83,8 @@ def get_spark_session(app_name: str, tenant: str, default_db: str):
                                ("spark.sql.files.maxRecordsPerFile", 20000),
                                ("spark.sql.optimizer.dynamicPartitionPruning.enabled", True),
                                ("spark.sql.parquet.filterPushdown", True),
-                               ("spark.sql.shuffle.partitions", 5)
+                               ("spark.sql.shuffle.partitions", 5),
+                               ("spark.databricks.delta.snapshotPartitions", 3)
                                ])
 
     if env == "local":

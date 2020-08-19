@@ -1,9 +1,9 @@
 from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import parser, get_dbname
+from dganalytics.connectors.gpc.gpc_utils import transform_parser, get_dbname
 from delta.tables import DeltaTable
 
 if __name__ == "__main__":
-    tenant, run_id, extract_date = parser()
+    tenant, run_id, extract_date = transform_parser()
     spark = get_spark_session(app_name="fact_evaluation_question_scores", tenant=tenant, default_db=get_dbname(tenant))
 
     evaluations = spark.sql(f"""
