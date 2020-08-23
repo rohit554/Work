@@ -93,4 +93,4 @@ if __name__ == "__main__":
     else:
         logger.exception("datagamz_env environment not configured correctly- local/dev/uat/prd")
     
-    logger.ino("Tenant setup completed")
+    logger.info("Tenant setup completed")
