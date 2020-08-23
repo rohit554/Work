@@ -32,7 +32,7 @@ def setup_tenant_databricks(tenant: str):
         credential=get_secret("storageaccesskey"))
     try:
         fs_client = service_client.create_file_system(tenant)
-        fs_client.create_directory("code")
+        # fs_client.create_directory("code")
         fs_client.create_directory("data")
         fs_client.create_directory("logs")
 
