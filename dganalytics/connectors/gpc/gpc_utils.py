@@ -20,7 +20,7 @@ from dganalytics.utils.utils import get_secret
 retry = 1
 
 def get_api_url(tenant: str) -> str:
-    return get_secret(f'{tenant}gpcApiUrl')
+    return get_secret(f'{tenant}gpcAPIURL')
 
 def get_interval(extract_date: str):
     if env == "local":
