@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     spark = get_spark_session(app_name="Tenant_Setup",
                               tenant=tenant, default_db='default')
-    logger = get_logger("datagamz", "Tenant_Setup")
+    logger = get_logger("Tenant_Setup", "Tenant_Setup")
 
     logger.info("Setting up tenant %s", tenant)
     if env == 'local':
