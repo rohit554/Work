@@ -179,7 +179,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Users",
+                                "activity": "users",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -283,7 +283,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Groups",
+                                "activity": "groups",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -320,25 +320,25 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Transform Dimension Evaluation Forms",
+                                "activity": "dim_evaluation_forms",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
                             },
                             {
-                                "activity": "Transform Dimension Evaluation Form Questions",
+                                "activity": "dim_evaluation_form_questions",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
                             },
                             {
-                                "activity": "Transform Dimension Evaluation Question Groups",
+                                "activity": "dim_evaluation_form_question_groups",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
                             },
                             {
-                                "activity": "Transform Dimension Evaluation Answer Options",
+                                "activity": "dim_evaluation_form_answer_options",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -375,7 +375,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Conversation Details",
+                                "activity": "conversation_details",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -410,7 +410,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Evaluations",
+                                "activity": "evaluations",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -445,7 +445,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Routing Queues",
+                                "activity": "routing_queues",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -480,13 +480,13 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Transform Dimension Users",
+                                "activity": "dim_users",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
                             },
                             {
-                                "activity": "Extract Groups",
+                                "activity": "groups",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -521,7 +521,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Users",
+                                "activity": "users",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -554,7 +554,12 @@
                     {
                         "name": "fact_conversation_metrics",
                         "type": "DatabricksSparkPython",
-                        "dependsOn": [],
+                        "dependsOn": [{
+                                "activity": "dim_conversations",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }],
                         "policy": {
                             "timeout": "00:30:00",
                             "retry": 0,
@@ -584,7 +589,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Evaluations",
+                                "activity": "evaluations",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -619,7 +624,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Evaluations",
+                                "activity": "evaluations",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -654,7 +659,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Evaluations",
+                                "activity": "evaluations",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -689,7 +694,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Users Details",
+                                "activity": "users_details",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -724,7 +729,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Users Details",
+                                "activity": "users_details",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -759,7 +764,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract WFM Adherence",
+                                "activity": "wfm_adherence",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -794,7 +799,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract WFM Adherence",
+                                "activity": "wfm_adherence",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -859,7 +864,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Evaluation Forms",
+                                "activity": "evaluation_forms",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -894,7 +899,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Evaluation Forms",
+                                "activity": "evaluation_forms",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -929,7 +934,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Evaluation Forms",
+                                "activity": "evaluation_forms",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -964,7 +969,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Evaluation Forms",
+                                "activity": "evaluation_forms",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
