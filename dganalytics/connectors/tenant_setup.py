@@ -3,8 +3,9 @@ import os
 from pyspark.conf import SparkConf
 from pyspark.sql import SparkSession
 from azure.core.exceptions import ResourceExistsError
-from dganalytics.utils.utils import env, get_spark_session, get_path_vars, get_secret, get_dbutils
+from dganalytics.utils.utils import env, get_spark_session, get_path_vars, get_secret, get_dbutils, get_logger
 
+global logger
 
 def setup_tenant_localdev(tenant: str):
     tenant_path = get_path_vars(tenant)[0]
@@ -25,7 +26,7 @@ def setup_tenant_localdev(tenant: str):
 
 def setup_tenant_databricks(tenant: str):
     from azure.storage.filedatalake import DataLakeServiceClient
-    print("setting container")
+    logger.info("Creating ADLS container for tenant")
     service_client = DataLakeServiceClient(account_url="{}://{}.dfs.core.windows.net".format(
         "https", get_secret("storageadlsgen2name")),
         credential=get_secret("storageaccesskey"))
@@ -41,10 +42,9 @@ def setup_tenant_databricks(tenant: str):
         fs_client.create_directory("data/pbdatasets")
         fs_client.create_directory("data/adhoc")
     except ResourceExistsError as e:
-        print("setting container completed")
+        logger.warn("Container already exists")
     except Exception as e:
-        raise Exception(
-            "Error waiting container in datalake for {}".format(tenant))
+        logger.exception("Error waiting container in datalake for {}".format(tenant), str(e))
 
 
 def mount_tenant_container(tenant: str, dbutils) -> None:
@@ -74,18 +74,23 @@ if __name__ == "__main__":
     args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
 
-    spark = get_spark_session(app_name="Tenant_Setup", tenant=tenant, default_db='default')
+    spark = get_spark_session(app_name="Tenant_Setup",
+                              tenant=tenant, default_db='default')
+    logger = get_logger(tenant, "Tenant_Setup")
 
+    logger.info("Setting up tenant %s", tenant)
     if env == 'local':
+        logger.debug("setting up tenant in local development")
         setup_tenant_localdev(tenant)
         create_tenant_database(tenant, spark)
     elif env in ['dev', 'uat', 'prd']:
+        logger.debug("setting up tenant in databricks env %s", env)
         dbutils = get_dbutils()
-
         setup_tenant_databricks(tenant)
         mount_tenant_container(tenant, dbutils)
         create_tenant_database(tenant, spark)
 
     else:
-        raise Exception(
-            "datagamz_env environment not configured correctly- local/dev/uat/prd")
+        logger.exception("datagamz_env environment not configured correctly- local/dev/uat/prd")
+    
+    logger.ino("Tenant setup completed")

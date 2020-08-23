@@ -5,6 +5,7 @@ import json
 from datetime import datetime
 import logging
 
+
 def get_env():
     try:
         environment = os.environ['datagamz_env']
@@ -29,8 +30,7 @@ def get_path_vars(tenant: str) -> str:
             home, "datagamz", "analytics", "{}".format(tenant))
         db_path = "file:///" + \
             tenant_path.replace("\\", "/") + "/data/databases"
-        log_path = "file:///" + \
-            tenant_path.replace("\\", "/") + "/logs"
+        log_path = os.path.join(tenant_path, 'logs')
     else:
         tenant_path = "/dbfs/mnt/datagamz/{}".format(tenant)
         db_path = "/dbfs/mnt/datagamz/{}/data/databases".format(tenant)
@@ -39,8 +39,16 @@ def get_path_vars(tenant: str) -> str:
 
 
 def get_logger(tenant: str, app_name: str):
-    log = logging.getLevelName("py4j")
-    return log
+    tenant_path, db_path, log_path = get_path_vars(tenant)
+    log_file = os.path.join(log_path, datetime.utcnow().strftime('%Y%m%d'), tenant + '_' + app_name + '.log')
+    os.makedirs(os.path.dirname(log_file), exist_ok=True)
+    logging.basicConfig(filename=log_file, level=os.environ['datagamz_logging'],
+                        format='%(asctime)s-dganalytics-%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+    logger = logging.getLogger(__name__)
+
+    py4j_logger = logging.getLogger("py4j").setLevel(logging.INFO)
+
+    return logger
 
 
 def get_dbutils():
@@ -78,7 +86,7 @@ def get_spark_session(app_name: str, tenant: str, default_db: str):
                                ("spark.sql.adaptive.advisoryPartitionSizeInBytes", 262144000),
                                ("spark.sql.cbo.enabled", True),
                                ("spark.sql.execution.arrow.pyspark.enabled", True),
-                               ("spark.sql.execution.arrow.fallback.enabled", True),
+                               ("spark.sql.execution.arrow.pyspark.fallback.enabled", True),
                                ("spark.sql.execution.arrow.maxRecordsPerBatch", 20000),
                                ("spark.sql.files.maxRecordsPerFile", 20000),
                                ("spark.sql.optimizer.dynamicPartitionPruning.enabled", True),

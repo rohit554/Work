@@ -2,20 +2,23 @@ import requests as rq
 import json
 from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session, get_secret, get_path_vars
-from dganalytics.connectors.gpc.gpc_utils import extract_parser, authorize, get_dbname, get_schema
+from dganalytics.connectors.gpc.gpc_utils import extract_parser, authorize, get_api_url, get_dbname, get_schema
 from dganalytics.connectors.gpc.gpc_utils import update_raw_table, write_api_resp_new, get_interval
 import ast
 from websocket import create_connection
 
+
 def get_users_list(spark: SparkSession):
-    users_list = spark.sql("select distinct id as userId from raw_users").toPandas()['userId'].tolist()
+    users_list = spark.sql("select distinct id as userId from raw_users").toPandas()[
+        'userId'].tolist()
     return users_list
+
 
 def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
     api_headers = authorize(tenant)
 
     steaming_channel = rq.post(
-        "https://api.mypurecloud.com/api/v2/notifications/channels", headers=api_headers)
+        f"{get_api_url(tenant)}/api/v2/notifications/channels", headers=api_headers)
     if steaming_channel.status_code != 200:
         print("steaming_channel API Failed")
         print(steaming_channel.text)
@@ -25,7 +28,7 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
     steaming_channel_id = steaming_channel['id']
 
     ouath_client_id = get_secret(f'{tenant}gpcOAuthClientId')
-    subscribe = rq.post("https://api.mypurecloud.com/api/v2/notifications/channels/{}/subscriptions".format(steaming_channel_id), headers=api_headers,
+    subscribe = rq.post(f"{get_api_url(tenant)}/api/v2/notifications/channels/{steaming_channel_id}/subscriptions", headers=api_headers,
                         data=json.dumps([{
                             "id": "v2.users.{}.workforcemanagement.historicaladherencequery".format(ouath_client_id)
                         }]))
@@ -34,7 +37,9 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
         print(subscribe.text)
         raise Exception
 
-    ws = create_connection("wss://streaming.mypurecloud.com/channels/{}".format(steaming_channel_id),
+    wss_url = f"{get_api_url(tenant)}".replace(
+        "https://api.", "wss://streaming.")
+    ws = create_connection(f"{wss_url}/channels/{steaming_channel_id}",
                            header=["Authorization:{}".format(api_headers['Authorization']), "Content-Type:application/json"])
 
     user_ids = get_users_list(spark)
@@ -52,8 +57,8 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
             "timeZone": "UTC",
             "userIds": user_ids[i:i + batchsize]
         }
-        resp = rq.post("https://api.mypurecloud.com/api/v2/workforcemanagement/adherence/historical",
-                            headers=api_headers, data=json.dumps(body))
+        resp = rq.post(f"{get_api_url(tenant)}/api/v2/workforcemanagement/adherence/historical",
+                       headers=api_headers, data=json.dumps(body))
         if resp.status_code != 202:
             print("WFM Historical Adherence API Failed")
             print(resp.text)
@@ -75,7 +80,8 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
     wfm_resps = [json.dumps(l) for l in wfm_resps]
 
     tenant_path, db_path, log_path = get_path_vars(tenant)
-    raw_file = write_api_resp_new(wfm_resps, 'wfm_adherence', run_id, tenant_path, 1, extract_date)
+    raw_file = write_api_resp_new(
+        wfm_resps, 'wfm_adherence', run_id, tenant_path, 1, extract_date)
 
     df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
         spark._sc.parallelize(wfm_resps, 2), schema=get_schema('wfm_adherence'))
@@ -92,7 +98,8 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
 if __name__ == "__main__":
     tenant, run_id, extract_date, api_name = extract_parser()
     db_name = get_dbname(tenant)
-    spark = get_spark_session(app_name="gpc_conversation_batch_job", tenant=tenant, default_db=db_name)
+    spark = get_spark_session(
+        app_name="gpc_conversation_batch_job", tenant=tenant, default_db=db_name)
 
     print("gpc extracting conversation detail jobs", tenant)
     exec_wfm_adherence_api(spark, tenant, run_id, db_name, extract_date)

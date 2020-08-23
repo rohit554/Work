@@ -2,7 +2,7 @@ import requests as rq
 import json
 from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import extract_parser, authorize, get_dbname, get_schema
+from dganalytics.connectors.gpc.gpc_utils import extract_parser, authorize, get_api_url, get_dbname, get_schema
 from dganalytics.connectors.gpc.gpc_utils import get_path_vars, update_raw_table, write_api_resp_new, get_interval
 
 
@@ -27,7 +27,7 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_
         "evaluatorUserId": e,
         "expandAnswerTotalScores": True
         }
-        resp = rq.get("https://api.mypurecloud.com/api/v2/quality/evaluations/query", headers=api_headers, params=body)
+        resp = rq.get(f"{get_api_url(tenant)}/api/v2/quality/evaluations/query", headers=api_headers, params=body)
         if resp.status_code != 200:
             print("Detailed Evaluations API Failed")
             print(resp.text)

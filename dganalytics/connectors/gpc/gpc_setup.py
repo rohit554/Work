@@ -1,10 +1,10 @@
 import argparse
 from pyspark.sql import SparkSession
-from dganalytics.utils.utils import get_spark_session, env, get_path_vars
+from dganalytics.utils.utils import get_spark_session, get_path_vars, get_logger
 from dganalytics.connectors.gpc.gpc_utils import get_schema, get_dbname
-from dganalytics.connectors.gpc.batch.etl.extract_api.gpc_api_config import gpc_end_points, gpc_base_url
-from inflection import camelize
 
+
+global logger
 
 def create_database(spark: SparkSession, path: str, db_name: str):
     spark.sql(f"create database if not exists {db_name}  LOCATION '{path}/{db_name}'")
@@ -433,9 +433,8 @@ if __name__ == "__main__":
 
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
-
     spark = get_spark_session(app_name="GPC_Setup", tenant=tenant, default_db='default')
-
+    logger = get_logger(tenant, "gpc_setup")
     create_database(spark, db_path, db_name)
     create_ingestion_stats_table(spark, db_name, db_path)
     raw_tables(spark, db_name, db_path, tenant_path)

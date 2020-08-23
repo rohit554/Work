@@ -1,3 +1,4 @@
+from typing import List
 import requests
 from pyspark.sql import SparkSession, DataFrame
 import time
@@ -10,17 +11,22 @@ from pathlib import Path
 import compress_json
 from pyspark.sql.types import StructType
 import argparse
-from dganalytics.connectors.gpc.batch.etl.extract_api.gpc_api_config import gpc_base_url, gpc_end_points
+from dganalytics.connectors.gpc.batch.etl.extract_api.gpc_api_config import gpc_end_points
 from dganalytics.utils.utils import env, get_path_vars
 from pyspark.sql.functions import lit, to_date
 import gzip
 from dganalytics.utils.utils import get_secret
-from inflection import camelize
 
 retry = 1
 
+def get_api_url(tenant: str) -> str:
+    return get_secret(f'{tenant}gpcApiUrl')
+
 def get_interval(extract_date: str):
-    interval = f"{extract_date}T00:00:00Z/{extract_date}T05:00:00Z"
+    if env == "local":
+        interval = f"{extract_date}T00:00:00Z/{extract_date}T02:00:00Z"
+    else:
+        interval = f"{extract_date}T00:00:00Z/{extract_date}T23:59:59Z"
     return interval
 
 def get_dbname(tenant: str):
@@ -39,8 +45,9 @@ def authorize(tenant: str):
     headers = {"Content-Type": "application/x-www-form-urlencoded",
                "Authorization": f"Basic {auth_key}"}
 
+    auth_url = get_api_url(tenant).replace("https://api.", "https://login.")
     auth_request = requests.post(
-        "https://login.mypurecloud.com/oauth/token?grant_type=client_credentials", headers=headers)
+        f"{auth_url}/oauth/token?grant_type=client_credentials", headers=headers)
 
     if auth_request.status_code == 200:
         access_token = auth_request.json()['access_token']
@@ -152,6 +159,24 @@ def transform_parser():
 
     return tenant, run_id, extract_date
 
+def pb_export_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--tenant', required=True)
+    parser.add_argument('--run_id', required=True)
+    parser.add_argument('--table_name', required=True)
+    parser.add_argument('--output_file_name', required=True)
+    parser.add_argument('--skip_cols', required=False, type=List)
+
+    args = parser.parse_args()
+    tenant = args.tenant
+    run_id = args.run_id
+    table_name = args.table_name
+    output_file_name = args.output_file_name
+    skip_cols = args.skip_cols
+
+    return tenant, run_id, table_name, output_file_name, skip_cols
+
+
 def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_date: str = None, overwrite_gpc_config: dict = None, skip_raw_table: bool = False):
     db_name = get_dbname(tenant)
@@ -163,7 +188,7 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
 
     gepc = overwrite_gpc_config if overwrite_gpc_config is not None else gpc_end_points
     req_type = gepc[api_name]['request_type']
-    url = gpc_base_url + gepc[api_name]['endpoint']
+    url = get_api_url(tenant) + gepc[api_name]['endpoint']
     params = gepc[api_name]['params']
     entity = gepc[api_name]['entity_name']
     paging = gepc[api_name]['paging']

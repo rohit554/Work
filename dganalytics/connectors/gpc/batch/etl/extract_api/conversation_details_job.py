@@ -2,14 +2,15 @@ import requests as rq
 import json
 from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import gpc_request, extract_parser, authorize, get_dbname, get_interval
+from dganalytics.connectors.gpc.gpc_utils import gpc_request, extract_parser, authorize, get_dbname, get_interval, get_api_url
+
 
 def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
     api_headers = authorize(tenant)
     body = {
         "interval": get_interval(extract_date)
     }
-    job_resp = rq.post("https://api.mypurecloud.com/api/v2/analytics/conversations/details/jobs",
+    job_resp = rq.post(f"{get_api_url(tenant)}/api/v2/analytics/conversations/details/jobs",
                        headers=api_headers, data=json.dumps(body))
     if job_resp.status_code != 202:
         print("Conversation Details Job Submit API Failed")
@@ -17,10 +18,8 @@ def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_
         raise Exception
     job_id = job_resp.json()['jobId']
     while True:
-        job_status_resp = rq.get(
-            "https://api.mypurecloud.com/api/v2/analytics/conversations/details/jobs/{}".format(
-                job_id),
-            headers=api_headers)
+        job_status_resp = rq.get(f"{get_api_url(tenant)}/api/v2/analytics/conversations/details/jobs/{job_id}",
+                                 headers=api_headers)
         if job_status_resp.status_code not in [200, 202]:
             print("Conversation Details Job Status API Failed")
             print(job_status_resp.text)
@@ -59,7 +58,8 @@ def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_
 if __name__ == "__main__":
     tenant, run_id, extract_date, api_name = extract_parser()
     db_name = get_dbname(tenant)
-    spark = get_spark_session(app_name="gpc_conversation_batch_job", tenant=tenant, default_db=db_name)
+    spark = get_spark_session(
+        app_name="gpc_conversation_batch_job", tenant=tenant, default_db=db_name)
 
     print("gpc extracting conversation detail jobs", tenant)
     exec_conv_details_job_api(spark, tenant, run_id, db_name, extract_date)

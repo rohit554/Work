@@ -1,7 +1,6 @@
-gpc_base_url = "https://api.mypurecloud.com/"
 gpc_end_points = {
     "users": {
-        "endpoint": "api/v2/users",
+        "endpoint": "/api/v2/users",
         "request_type": "GET",
         "paging": True,
         "cursor": False,
@@ -18,7 +17,7 @@ gpc_end_points = {
         "tbl_overwrite": True
     },
     "routing_queues": {
-        "endpoint": "api/v2/routing/queues",
+        "endpoint": "/api/v2/routing/queues",
         "request_type": "GET",
         "paging": True,
         "cursor": False,
@@ -32,7 +31,7 @@ gpc_end_points = {
         "tbl_overwrite": True
     },
     "groups": {
-        "endpoint": "api/v2/groups",
+        "endpoint": "/api/v2/groups",
         "request_type": "GET",
         "paging": True,
         "cursor": False,
@@ -46,7 +45,7 @@ gpc_end_points = {
         "tbl_overwrite": True
     },
     "users_details": {
-        "endpoint": "api/v2/analytics/users/details/query",
+        "endpoint": "/api/v2/analytics/users/details/query",
         "request_type": "POST",
         "paging": True,
         "cursor": False,
@@ -60,7 +59,7 @@ gpc_end_points = {
         "tbl_overwrite": False
     },
     "users_details_job": {
-        "endpoint": "api/v2/analytics/users/details/jobs",
+        "endpoint": "/api/v2/analytics/users/details/jobs",
         "extract_type": "custom",
         "entity_name": "userDetails",
         "spark_partitions": 1,
@@ -68,7 +67,7 @@ gpc_end_points = {
         "tbl_overwrite": False
     },
     "wrapup_codes": {
-        "endpoint": "api/v2/routing/wrapupcodes",
+        "endpoint": "/api/v2/routing/wrapupcodes",
         "request_type": "GET",
         "paging": True,
         "cursor": False,
@@ -82,7 +81,7 @@ gpc_end_points = {
         "tbl_overwrite": True
     },
     "conversation_details": {
-        "endpoint": "api/v2/analytics/conversations/details/query",
+        "endpoint": "/api/v2/analytics/conversations/details/query",
         "request_type": "POST",
         "paging": True,
         "cursor": False,
@@ -96,7 +95,7 @@ gpc_end_points = {
         "tbl_overwrite": False
     },
     "conversation_details_job": {
-        "endpoint": "api/v2/analytics/conversations/details/jobs",
+        "endpoint": "/api/v2/analytics/conversations/details/jobs",
         "extract_type": "custom",
         "entity_name": "conversations",
         "spark_partitions": 2,
@@ -104,21 +103,21 @@ gpc_end_points = {
         "tbl_overwrite": False
     },
     "wfm_adherence": {
-        "endpoint": "api/v2/workforcemanagement/adherence/historical",
+        "endpoint": "/api/v2/workforcemanagement/adherence/historical",
         "extract_type": "custom",
         "spark_partitions": 2,
         "table_name": "wfm_adherence",
         "tbl_overwrite": False
     },
     "evaluations": {
-        "endpoint": "api/v2/quality/evaluations/query",
+        "endpoint": "/api/v2/quality/evaluations/query",
         "extract_type": "custom",
         "spark_partitions": 1,
         "table_name": "evaluations",
         "tbl_overwrite": False
     },
     "evaluation_forms": {
-        "endpoint": "api/v2/quality/forms/evaluations/{}",
+        "endpoint": "/api/v2/quality/forms/evaluations/{}",
         "extract_type": "custom",
         "spark_partitions": 1,
         "table_name": "evaluation_forms",

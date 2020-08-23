@@ -2,7 +2,9 @@ import requests as rq
 import json
 from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import get_schema, gpc_request, extract_parser, authorize, get_dbname, get_path_vars, update_raw_table, write_api_resp_new
+from dganalytics.connectors.gpc.gpc_utils import get_api_url, get_schema, extract_parser
+from dganalytics.connectors.gpc.gpc_utils import authorize, get_dbname, get_path_vars
+from dganalytics.connectors.gpc.gpc_utils import update_raw_table, write_api_resp_new
 
 
 def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
@@ -17,7 +19,7 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_
             "pageSize": 100,
             "pageNumber": i
         }
-        resp = rq.get("https://api.mypurecloud.com/api/v2/quality/forms/evaluations",
+        resp = rq.get(f"{get_api_url(tenant)}/api/v2/quality/forms/evaluations",
                       headers=api_headers, params=body)
         if resp.status_code != 200:
             print("Evaluation Forms API Failed")
@@ -31,7 +33,7 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_
 
     for e in evaluation_forms:
         versions_resp = rq.get(
-            "https://api.mypurecloud.com/api/v2/quality/forms/evaluations/{}/versions".format(e), headers=api_headers)
+            f"{get_api_url(tenant)}/api/v2/quality/forms/evaluations/{e}/versions", headers=api_headers)
         if versions_resp.status_code != 200:
             print("Evaluation Form Versions API Failed")
             print(versions_resp.text)
@@ -43,7 +45,7 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_
 
     for e in versions_list:
         resp = rq.get(
-            "https://api.mypurecloud.com/api/v2/quality/forms/evaluations/{}".format(e), headers=api_headers)
+            f"{get_api_url(tenant)}/api/v2/quality/forms/evaluations/{e}", headers=api_headers)
         if resp.status_code != 200:
             print("Evaluation Forms API Failed")
             print(resp.text)

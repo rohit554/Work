@@ -85,7 +85,7 @@
             "properties": {
                 "activities": [
                     {
-                        "name": "Extract Users",
+                        "name": "users",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],
                         "policy": {
@@ -115,7 +115,7 @@
                         }
                     },
                     {
-                        "name": "Extract Conversation Details",
+                        "name": "conversation_details",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],
                         "policy": {
@@ -145,7 +145,7 @@
                         }
                     },
                     {
-                        "name": "Extract Users Details",
+                        "name": "users_details",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],
                         "policy": {
@@ -175,7 +175,7 @@
                         }
                     },
                     {
-                        "name": "Extract Routing Queues",
+                        "name": "routing_queues",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -212,7 +212,7 @@
                         }
                     },
                     {
-                        "name": "Extract Groups",
+                        "name": "groups",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -249,7 +249,7 @@
                         }
                     },
                     {
-                        "name": "Extract WFM Adherence",
+                        "name": "wfm_adherence",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],
                         "policy": {
@@ -279,7 +279,7 @@
                         }
                     },
                     {
-                        "name": "Extract Wrapup Codes",
+                        "name": "wrapup_codes",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -316,7 +316,7 @@
                         }
                     },
                     {
-                        "name": "Extract Evaluations",
+                        "name": "evaluations",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -371,7 +371,7 @@
                         }
                     },
                     {
-                        "name": "Transform Dimension Conversations",
+                        "name": "dim_conversations",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -406,7 +406,7 @@
                         }
                     },
                     {
-                        "name": "Transform Dimension Evaluations",
+                        "name": "dim_evaluations",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -441,7 +441,7 @@
                         }
                     },
                     {
-                        "name": "Transform Dimension Routing Queues",
+                        "name": "dim_routing_queues",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -476,7 +476,7 @@
                         }
                     },
                     {
-                        "name": "Transform Dimension User Groups",
+                        "name": "dim_user_groups",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -517,7 +517,7 @@
                         }
                     },
                     {
-                        "name": "Transform Dimension Users",
+                        "name": "dim_users",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -552,7 +552,7 @@
                         }
                     },
                     {
-                        "name": "Transform Fact Conversation Metrics",
+                        "name": "fact_conversation_metrics",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],
                         "policy": {
@@ -580,7 +580,7 @@
                         }
                     },
                     {
-                        "name": "Transform Fact Evaluation Question Group Scores",
+                        "name": "fact_evaluation_question_group_scores",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -615,7 +615,7 @@
                         }
                     },
                     {
-                        "name": "Transform Fact Evaluation Question Scores",
+                        "name": "fact_evaluation_question_scores",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -650,7 +650,7 @@
                         }
                     },
                     {
-                        "name": "Transform Fact Evaluation Total Scores",
+                        "name": "fact_evaluation_total_scores",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -685,7 +685,7 @@
                         }
                     },
                     {
-                        "name": "Fact Users Primary Presence",
+                        "name": "fact_primary_presence",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -720,7 +720,7 @@
                         }
                     },
                     {
-                        "name": "Fact Users Routing Status",
+                        "name": "fact_routing_status",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -755,7 +755,7 @@
                         }
                     },
                     {
-                        "name": "Fact WFM Actuals",
+                        "name": "fact_wfm_actuals",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -790,7 +790,7 @@
                         }
                     },
                     {
-                        "name": "Fact WFM Day Metrics",
+                        "name": "fact_wfm_day_metrics",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -825,7 +825,7 @@
                         }
                     },
                     {
-                        "name": "Extract Evaluation Forms",
+                        "name": "evaluation_forms",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],
                         "policy": {
@@ -855,7 +855,7 @@
                         }
                     },
                     {
-                        "name": "Transform Dimension Evaluation Answer Options",
+                        "name": "dim_evaluation_form_answer_options",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -890,7 +890,7 @@
                         }
                     },
                     {
-                        "name": "Transform Dimension Evaluation Question Groups",
+                        "name": "dim_evaluation_form_question_groups",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -925,7 +925,7 @@
                         }
                     },
                     {
-                        "name": "Transform Dimension Evaluation Form Questions",
+                        "name": "dim_evaluation_form_questions",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -960,7 +960,7 @@
                         }
                     },
                     {
-                        "name": "Transform Dimension Evaluation Forms",
+                        "name": "dim_evaluation_forms",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {

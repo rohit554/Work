@@ -9,6 +9,7 @@
             "env": {
                 "PYTHONPATH": "${env:PYTHONPATH};${workspaceRoot}",
                 "datagamz_env": "local",
+                "datagamz_logging": "DEBUG",
                 "SPARK_HOME": "${env:SPARK_HOME}",
                 "PYSPARK_PYTHON": "python",
                 "PYSPARK_DRIVER_PYTHON": "python",
@@ -20,7 +21,8 @@
             "args": [
                 "--tenant=test",
                 "--run_id=t1",
-                "--extract_date=2020-07-28"
+                "--extract_date=2020-07-28",
+                "--api_name=users"
             ]
         },
         {

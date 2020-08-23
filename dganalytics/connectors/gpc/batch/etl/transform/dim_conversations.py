@@ -6,7 +6,8 @@ if __name__ == "__main__":
     tenant, run_id, extract_date = transform_parser()
     spark = get_spark_session(app_name="dim_conversations", tenant=tenant, default_db=get_dbname(tenant))
 
-    conversations = spark.sql(f"""
+    conversations = spark.sql(
+        f"""
 								select
 					distinct 
 					conversationId,
@@ -42,8 +43,11 @@ if __name__ == "__main__":
 								raw_conversation_details where extractDate = '{extract_date}')
 						where
 							participants.purpose = 'agent' ) )
-								""")
-    DeltaTable.forName(spark, "dim_conversations").alias("target").merge(conversations.coalesce(2).alias("source"),
-                                                                         """source.conversationStartDate = target.conversationStartDate
+								"""
+    )
+    DeltaTable.forName(spark, "dim_conversations").alias("target").merge(
+        conversations.coalesce(2).alias("source"),
+        """source.conversationStartDate = target.conversationStartDate
 			and source.conversationId = target.conversationId
-			and source.sessionId = target.sessionId""").whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
+			and source.sessionId = target.sessionId""",
+    ).whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
