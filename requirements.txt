@@ -12,3 +12,5 @@ azure-mgmt-resource
 azure-keyvault
 azure-keyvault-secrets
 azure-identity
+azure-storage-blob
+azure-storage-file-datalake

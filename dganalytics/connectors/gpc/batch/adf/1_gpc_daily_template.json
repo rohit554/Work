@@ -62,7 +62,7 @@
                             "referenceName": "AzureKeyVault",
                             "type": "LinkedServiceReference"
                         },
-                        "secretName": "dabaricksaccesstoken"
+                        "secretName": "databricksaccesstoken"
                     },
                     "existingClusterId": {
                         "type": "AzureKeyVaultSecret",
@@ -216,7 +216,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Extract Routing Queues",
+                                "activity": "routing_queues",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]

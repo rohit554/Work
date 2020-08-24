@@ -33,7 +33,7 @@ def get_path_vars(tenant: str) -> str:
         log_path = os.path.join(tenant_path, 'logs')
     else:
         tenant_path = "/dbfs/mnt/datagamz/{}".format(tenant)
-        db_path = "/dbfs/mnt/datagamz/{}/data/databases".format(tenant)
+        db_path = "dbfs:/mnt/datagamz/{}/data/databases".format(tenant)
         log_path = "/dbfs/mnt/datagamz/{}/logs".format(tenant)
     return tenant_path, db_path, log_path
 

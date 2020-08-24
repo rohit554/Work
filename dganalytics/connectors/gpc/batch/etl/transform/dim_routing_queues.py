@@ -10,16 +10,16 @@ if __name__ == "__main__":
                         id as queueId,
                         name as queueName,
                         acwSettings.wrapupPrompt as wrapupPrompt,
-                        mediaSettings.call.serviceLevel.durationMs/1000 as callSLDuration,
-                        mediaSettings.call.serviceLevel.percentage * 100 as callSLPercentage,
-                        mediaSettings.callback.serviceLevel.durationMs/1000 as callbackSLDuration,
-                        mediaSettings.callback.serviceLevel.percentage * 100 as callbackSLPercentage,
-                        mediaSettings.chat.serviceLevel.durationMs/1000 as chatSLDuration,
-                        mediaSettings.chat.serviceLevel.percentage * 100 as chatSLPercentage,
-                        mediaSettings.email.serviceLevel.durationMs/1000 as emailSLDuration,
-                        mediaSettings.email.serviceLevel.percentage * 100 as emailSLPercentage,
-                        mediaSettings.message.serviceLevel.durationMs/1000 as messageSLDuration,
-                        mediaSettings.message.serviceLevel.percentage * 100 as messageSLPercentage
+                        cast(mediaSettings.call.serviceLevel.durationMs/1000 as float) as callSLDuration,
+                        cast(mediaSettings.call.serviceLevel.percentage * 100 as float) as callSLPercentage,
+                        cast(mediaSettings.callback.serviceLevel.durationMs/1000 as float) as callbackSLDuration,
+                        cast(mediaSettings.callback.serviceLevel.percentage * 100 as float) as callbackSLPercentage,
+                        cast(mediaSettings.chat.serviceLevel.durationMs/1000 as float) as chatSLDuration,
+                        cast(mediaSettings.chat.serviceLevel.percentage * 100 as float) as chatSLPercentage,
+                        cast(mediaSettings.email.serviceLevel.durationMs/1000 as float) as emailSLDuration,
+                        cast(mediaSettings.email.serviceLevel.percentage * 100 as float) as emailSLPercentage,
+                        cast(mediaSettings.message.serviceLevel.durationMs/1000 as float) as messageSLDuration,
+                        cast(mediaSettings.message.serviceLevel.percentage * 100 as float) as messageSLPercentage
                         from raw_routing_queues 
 	            """)
     queues.coalesce(1).write.format("delta").saveAsTable("dim_routing_queues", mode="overwrite")

@@ -98,7 +98,7 @@
                                 "--table_name",
                                 "dim_conversations",
                                 "--output_file_name",
-                                "dimConversations"
+                                "gDimConversations"
                             ]
                         },
                         "linkedServiceName": {
@@ -128,7 +128,7 @@
                                 "--table_name",
                                 "dim_evaluation_form_answer_options",
                                 "--output_file_name",
-                                "dimEvaluationFormAnswerOptions"
+                                "gDimEvaluationFormAnswerOptions"
                             ]
                         },
                         "linkedServiceName": {
@@ -158,7 +158,7 @@
                                 "--table_name",
                                 "dim_evaluation_form_question_groups",
                                 "--output_file_name",
-                                "dimEvaluationFormQuestionGroups"
+                                "gDimEvaluationFormQuestionGroups"
                             ]
                         },
                         "linkedServiceName": {
@@ -188,7 +188,7 @@
                                 "--table_name",
                                 "dim_evaluation_form_questions",
                                 "--output_file_name",
-                                "dimEvaluationFormQuestions"
+                                "gDimEvaluationFormQuestions"
                             ]
                         },
                         "linkedServiceName": {
@@ -225,7 +225,7 @@
                                 "--table_name",
                                 "dim_evaluation_forms",
                                 "--output_file_name",
-                                "dimEvaluationForms"
+                                "gDimEvaluationForms"
                             ]
                         },
                         "linkedServiceName": {
@@ -268,7 +268,7 @@
                                 "--table_name",
                                 "dim_evaluations",
                                 "--output_file_name",
-                                "dimEvaluations"
+                                "gDimEvaluations"
                             ]
                         },
                         "linkedServiceName": {
@@ -298,7 +298,7 @@
                                 "--table_name",
                                 "dim_routing_queues",
                                 "--output_file_name",
-                                "dimRoutingQueues"
+                                "gDimRoutingQueues"
                             ]
                         },
                         "linkedServiceName": {
@@ -335,7 +335,7 @@
                                 "--table_name",
                                 "dim_user_groups",
                                 "--output_file_name",
-                                "dimUserGroups"
+                                "gDimUserGroups"
                             ]
                         },
                         "linkedServiceName": {
@@ -372,7 +372,7 @@
                                 "--table_name",
                                 "dim_users",
                                 "--output_file_name",
-                                "dimUsers"
+                                "gDimUsers"
                             ]
                         },
                         "linkedServiceName": {
@@ -409,7 +409,7 @@
                                 "--table_name",
                                 "fact_conversation_metrics",
                                 "--output_file_name",
-                                "factConversationMetrics"
+                                "gFactConversationMetrics"
                             ]
                         },
                         "linkedServiceName": {
@@ -446,7 +446,7 @@
                                 "--table_name",
                                 "fact_evaluation_question_group_scores",
                                 "--output_file_name",
-                                "factEvaluationQuestionGroupScores"
+                                "gFactEvaluationQuestionGroupScores"
                             ]
                         },
                         "linkedServiceName": {
@@ -483,7 +483,7 @@
                                 "--table_name",
                                 "fact_evaluation_question_scores",
                                 "--output_file_name",
-                                "factEvaluationQuestionScores"
+                                "gFactEvaluationQuestionScores"
                             ]
                         },
                         "linkedServiceName": {
@@ -520,7 +520,7 @@
                                 "--table_name",
                                 "fact_evaluation_total_scores",
                                 "--output_file_name",
-                                "factEvaluationTotalScores"
+                                "gFactEvaluationTotalScores"
                             ]
                         },
                         "linkedServiceName": {
@@ -550,7 +550,7 @@
                                 "--table_name",
                                 "fact_primary_presence",
                                 "--output_file_name",
-                                "factPrimaryPresence"
+                                "gFactPrimaryPresence"
                             ]
                         },
                         "linkedServiceName": {
@@ -587,7 +587,7 @@
                                 "--table_name",
                                 "fact_routing_status",
                                 "--output_file_name",
-                                "factRoutingStatus"
+                                "gFactRoutingStatus"
                             ]
                         },
                         "linkedServiceName": {
@@ -624,7 +624,7 @@
                                 "--table_name",
                                 "fact_wfm_actuals",
                                 "--output_file_name",
-                                "factWfmActuals"
+                                "gFactWfmActuals"
                             ]
                         },
                         "linkedServiceName": {
@@ -654,7 +654,7 @@
                                 "--table_name",
                                 "fact_wfm_day_metrics",
                                 "--output_file_name",
-                                "factWfmDayMetrics"
+                                "gFactWfmDayMetrics"
                             ]
                         },
                         "linkedServiceName": {
