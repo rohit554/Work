@@ -1,3 +1,4 @@
+from dganalytics.connectors.tenant_setup import logger
 from typing import List
 import requests
 from pyspark.sql import SparkSession, DataFrame
@@ -12,12 +13,13 @@ import compress_json
 from pyspark.sql.types import StructType
 import argparse
 from dganalytics.connectors.gpc.batch.etl.extract_api.gpc_api_config import gpc_end_points
-from dganalytics.utils.utils import env, get_path_vars
+from dganalytics.utils.utils import env, get_path_vars, get_logger
 from pyspark.sql.functions import lit, to_date
 import gzip
 from dganalytics.utils.utils import get_secret
 
 retry = 1
+global logger
 
 def get_api_url(tenant: str) -> str:
     return get_secret(f'{tenant}gpcAPIURL')
@@ -36,6 +38,7 @@ def get_dbname(tenant: str):
 
 def authorize(tenant: str):
     global secrets
+    logger.info("Authorizing GPC")
 
     client_id = get_secret(f'{tenant}gpcOAuthClientId')
     client_secret = get_secret(f'{tenant}gpcOAuthClientSecret')
@@ -52,8 +55,7 @@ def authorize(tenant: str):
     if auth_request.status_code == 200:
         access_token = auth_request.json()['access_token']
     else:
-        print("Autohrization failed while requesting Access Token for tenant - {}".format(tenant))
-        raise Exception
+        logger.error("Autohrization failed while requesting Access Token for tenant - {}".format(tenant))
     api_headers = {
         "Authorization": "Bearer {}".format(access_token),
         "Content-Type": "application/json"
@@ -66,7 +68,7 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
     # handling conversation details job failure scenario
     if "message" in resp.json().keys() and \
             "pagination may not exceed 400000 results" in (resp.json()['message']).lower():
-        print("exceeded 40k limit of cursor. ignoring error as delta conversations will be extracted tomorrow.")
+        logger.info("exceeded 40k limit of cursor. ignoring error as delta conversations will be extracted tomorrow.")
         return "OK"
 
     if resp.status_code in [200, 201, 202]:
@@ -74,20 +76,16 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
     elif resp.status_code == 429:
         # sleep if too many request error occurs
         retry = retry + 1
-        print(f"retrying - {tenant} - {api_name} - {run_id} - {retry}")
+        logger.info(f"retrying - {tenant} - {api_name} - {run_id} - {retry}")
         time.sleep(180)
         if retry > 5:
             message = f"GPC API Extraction failed - {tenant} - {api_name} - {run_id}"
-            print("API Extraction Failed - ", message)
-            print(resp.text)
-            raise Exception
+            logger.error(message + str(resp.text))
         return "SLEEP"
     else:
 
         message = f"GPC API Extraction failed - {tenant} - {api_name} - {run_id}"
-        print("API Extraction Failed - ", message)
-        print(resp.text)
-        raise Exception
+        logger.error(message + str(resp.text))
 
 
 def write_api_resp_new(resp: list, api_name: str, run_id: str, tenant_path: str, part: str, extract_date: str):

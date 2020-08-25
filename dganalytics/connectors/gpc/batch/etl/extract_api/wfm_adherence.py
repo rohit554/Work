@@ -45,7 +45,6 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
     user_ids = get_users_list(spark)
     wfm_resps_urls = []
 
-    user_ids = ["b347ebe0-2594-4be8-8ca5-18e70aeca3a7"]
     batchsize = 1000
     start_time = get_interval(extract_date).split("/")[0]
     end_time = get_interval(extract_date).split("/")[1]

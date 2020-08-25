@@ -45,6 +45,7 @@ def get_logger(tenant: str, app_name: str):
     logging.basicConfig(filename=log_file, level=os.environ['datagamz_logging'],
                         format='%(asctime)s-dganalytics-%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
     logger = logging.getLogger(__name__)
+    # logger.addHandler(logging.StreamHandler())
 
     py4j_logger = logging.getLogger("py4j").setLevel(logging.INFO)
 
@@ -95,6 +96,8 @@ def get_spark_session(app_name: str, tenant: str, default_db: str):
                                ("spark.databricks.delta.snapshotPartitions", 3)
                                ])
 
+    import findspark
+    findspark.init(os.environ['SPARK_HOME'])
     if env == "local":
         import findspark
         findspark.init(os.environ['SPARK_HOME'])
