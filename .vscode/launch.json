@@ -21,7 +21,7 @@
             "args": [
                 "--tenant=test",
                 "--run_id=t1",
-                "--extract_date=2020-07-28",
+                "--extract_date=2020-01-10",
                 "--api_name=users"
             ]
         },

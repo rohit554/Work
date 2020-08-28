@@ -1,7 +1,7 @@
 import argparse
 from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session, get_path_vars, get_logger
-from dganalytics.connectors.gpc.gpc_utils import get_schema, get_dbname
+from dganalytics.connectors.gpc.gpc_utils import get_schema, get_dbname, t
 
 
 global logger
@@ -120,14 +120,27 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     userEmail string,
                     userTitle string,
                     department string,
-                    city string, 
-                    country string,
-                    region string,
                     managerId string,
                     state string
                 )
                     using delta
             LOCATION '{db_path}/{db_name}/dim_users'"""
+    )
+
+    spark.sql(
+        f"""
+                create table if not exists {db_name}.dim_managers
+                (
+                    managerName string,
+                    managerId string,
+                    managerFullName string,
+                    managerEmail string,
+                    managerTitle string,
+                    department string,
+                    state string
+                )
+                    using delta
+            LOCATION '{db_path}/{db_name}/dim_managers'"""
     )
 
     spark.sql(
@@ -422,6 +435,8 @@ if __name__ == "__main__":
     args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
     logger = get_logger(tenant, "gpc_setup")
+
+    print(t)
 
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)

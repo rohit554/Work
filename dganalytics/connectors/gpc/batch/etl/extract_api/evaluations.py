@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session
 from dganalytics.connectors.gpc.gpc_utils import extract_parser, authorize, get_api_url, get_dbname, get_schema
 from dganalytics.connectors.gpc.gpc_utils import get_path_vars, update_raw_table, write_api_resp_new, get_interval
-
+from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger
 
 def get_evaluators(spark: SparkSession) -> list:
     evaluators = spark.sql(f"""select distinct userId  from (
@@ -29,9 +29,8 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_
         }
         resp = rq.get(f"{get_api_url(tenant)}/api/v2/quality/evaluations/query", headers=api_headers, params=body)
         if resp.status_code != 200:
-            print("Detailed Evaluations API Failed")
-            print(resp.text)
-            raise Exception
+            logger.error("Detailed Evaluations API Failed" + resp.text)
+
         evaluation_details_list.append(resp.json()['entities'])
 
     evaluation_details_list = [item for sublist in evaluation_details_list for item in sublist]
@@ -55,7 +54,14 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_
 if __name__ == "__main__":
     tenant, run_id, extract_date, api_name = extract_parser()
     db_name = get_dbname(tenant)
-    spark = get_spark_session(app_name="gpc_evaluations", tenant=tenant, default_db=db_name)
+    
+    app_name = "gpc_evaluations"
+    spark = get_spark_session(app_name=app_name, tenant=tenant, default_db=db_name)
 
-    print("gpc extracting evaluations details", tenant)
-    exec_evaluations_api(spark, tenant, run_id, extract_date)
+    logger = gpc_utils_logger(tenant, app_name)
+
+    try:
+        logger.info(f"Extracting GPC API evaluations")
+        exec_evaluations_api(spark, tenant, run_id, extract_date)
+    except Exception as e:
+        logger.error(str(e))

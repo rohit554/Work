@@ -1,3 +1,4 @@
+from numpy.lib.utils import lookfor
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
 import os
@@ -40,14 +41,35 @@ def get_path_vars(tenant: str) -> str:
 
 def get_logger(tenant: str, app_name: str):
     tenant_path, db_path, log_path = get_path_vars(tenant)
-    log_file = os.path.join(log_path, datetime.utcnow().strftime('%Y%m%d'), tenant + '_' + app_name + '.log')
+    log_file = os.path.join(log_path, datetime.utcnow().strftime(
+        '%Y%m%d'), tenant + '_' + app_name + '.log')
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
-    logging.basicConfig(filename=log_file, level=os.environ['datagamz_logging'],
-                        format='%(asctime)s-dganalytics-%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
-    logger = logging.getLogger(__name__)
-    # logger.addHandler(logging.StreamHandler())
 
-    py4j_logger = logging.getLogger("py4j").setLevel(logging.INFO)
+    logger = logging.getLogger(f'dganalytics-{tenant}-{app_name}')
+    logger.setLevel(logging.DEBUG)
+
+    existing_handlers = [handler.__class__.__name__ for handler in logger.handlers]
+    if len(logger.handlers) == 2 and set(['FileHandler', 'StreamHandler']) == set(existing_handlers):
+        return logger
+    elif len(logger.handlers) == 0:
+        pass
+    else:
+        logger.error("unable to get logging. multiple loggers exist")
+
+    fh = logging.FileHandler(log_file)
+    fh.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.INFO)
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+
+    logger.addHandler(fh)
+    logger.addHandler(ch)
+
+    py4j_logger = logging.getLogger("py4j").setLevel(logging.WARN)
 
     return logger
 

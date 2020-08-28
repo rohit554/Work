@@ -1,5 +1,5 @@
-from dganalytics.connectors.tenant_setup import logger
 from typing import List
+from numpy.lib.utils import lookfor
 import requests
 from pyspark.sql import SparkSession, DataFrame
 import time
@@ -7,9 +7,7 @@ import datetime
 import base64
 import os
 import json
-import logging
 from pathlib import Path
-import compress_json
 from pyspark.sql.types import StructType
 import argparse
 from dganalytics.connectors.gpc.batch.etl.extract_api.gpc_api_config import gpc_end_points
@@ -17,9 +15,12 @@ from dganalytics.utils.utils import env, get_path_vars, get_logger
 from pyspark.sql.functions import lit, to_date
 import gzip
 from dganalytics.utils.utils import get_secret
+import logging
 
-retry = 1
-global logger
+def gpc_utils_logger(tenant, app_name):
+    global logger
+    logger = get_logger(tenant, app_name)
+    return logger
 
 def get_api_url(tenant: str) -> str:
     return get_secret(f'{tenant}gpcAPIURL')
@@ -117,8 +118,7 @@ def update_raw_table(db_name: str, df: DataFrame, api_name: str, extract_date: s
 
 
 def get_schema(api_name: str):
-    # schema_path = os.path.join(tenant_path, 'code', 'dganalytics', 'dganalytics', 'connectors',
-    #                           'gpc', 'source_api_schemas', '{}.json'.format(api_name))
+    logger.info(f"read spark schema for {api_name}")
     schema_path = os.path.join(Path(__file__).parent, 'source_api_schemas', '{}.json'.format(api_name))
     with open(schema_path, 'r') as f:
         schema = f.read()
@@ -134,7 +134,7 @@ def extract_parser():
                         type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
     parser.add_argument('--api_name', required=True)
 
-    args = parser.parse_args()
+    args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
     run_id = args.run_id
     api_name = args.api_name
@@ -150,7 +150,7 @@ def transform_parser():
     parser.add_argument('--extract_date', required=True,
                         type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
 
-    args = parser.parse_args()
+    args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
     run_id = args.run_id
     extract_date = args.extract_date.strftime('%Y-%m-%d')
@@ -165,7 +165,7 @@ def pb_export_parser():
     parser.add_argument('--output_file_name', required=True)
     parser.add_argument('--skip_cols', required=False, type=List)
 
-    args = parser.parse_args()
+    args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
     run_id = args.run_id
     table_name = args.table_name
@@ -177,6 +177,8 @@ def pb_export_parser():
 
 def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_date: str = None, overwrite_gpc_config: dict = None, skip_raw_table: bool = False):
+    
+    logger.info("in gpc request")
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
     schema = get_schema(api_name)
