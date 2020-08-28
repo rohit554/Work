@@ -23,7 +23,9 @@ def gpc_utils_logger(tenant, app_name):
     return logger
 
 def get_api_url(tenant: str) -> str:
-    return get_secret(f'{tenant}gpcAPIURL')
+    url = get_secret(f'{tenant}gpcAPIURL')
+    url = "https://api." + url
+    return url
 
 def get_interval(extract_date: str):
     if env == "local":

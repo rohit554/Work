@@ -1,7 +1,7 @@
 import argparse
 from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session, get_path_vars, get_logger
-from dganalytics.connectors.gpc.gpc_utils import get_schema, get_dbname, t
+from dganalytics.connectors.gpc.gpc_utils import get_schema, get_dbname
 
 
 global logger
