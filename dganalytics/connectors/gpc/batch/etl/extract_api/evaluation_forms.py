@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session
 from dganalytics.connectors.gpc.gpc_utils import get_api_url, get_schema, extract_parser
 from dganalytics.connectors.gpc.gpc_utils import authorize, get_dbname, get_path_vars
-from dganalytics.connectors.gpc.gpc_utils import update_raw_table, write_api_resp_new, gpc_utils_logger
+from dganalytics.connectors.gpc.gpc_utils import update_raw_table, write_api_resp, gpc_utils_logger
 
 
 def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
@@ -52,13 +52,13 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_
     evaluation_forms_list = [json.dumps(form) for form in evaluation_forms_list]
 
     tenant_path, db_path, log_path = get_path_vars(tenant)
-    raw_file = write_api_resp_new(
+    raw_file = write_api_resp(
         evaluation_forms_list, 'evaluation_forms', run_id, tenant_path, 1, extract_date)
 
     df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
         spark._sc.parallelize(evaluation_forms_list, 1), schema=get_schema('evaluation_forms'))
 
-    update_raw_table(db_name, df, 'evaluation_forms', extract_date, True)
+    update_raw_table(db_path, df, 'evaluation_forms', extract_date, True)
 
     stats_insert = f"""insert into {db_name}.ingestion_stats
         values ('evaluation_forms', 'https://api.mypurecloud.com/api/v2/quality/forms/evaluations/',

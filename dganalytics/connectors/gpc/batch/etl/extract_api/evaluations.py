@@ -3,7 +3,7 @@ import json
 from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session
 from dganalytics.connectors.gpc.gpc_utils import extract_parser, authorize, get_api_url, get_dbname, get_schema
-from dganalytics.connectors.gpc.gpc_utils import get_path_vars, update_raw_table, write_api_resp_new, get_interval
+from dganalytics.connectors.gpc.gpc_utils import get_path_vars, update_raw_table, write_api_resp, get_interval
 from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger
 
 def get_evaluators(spark: SparkSession) -> list:
@@ -37,12 +37,12 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_
     evaluation_details_list = [json.dumps(l) for l in evaluation_details_list]
 
     tenant_path, db_path, log_path = get_path_vars(tenant)
-    raw_file = write_api_resp_new(evaluation_details_list, 'evaluations', run_id, tenant_path, 1, extract_date)
+    raw_file = write_api_resp(evaluation_details_list, 'evaluations', run_id, tenant_path, 1, extract_date)
 
     df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
         spark._sc.parallelize(evaluation_details_list, 1), schema=get_schema('evaluations'))
 
-    update_raw_table(db_name, df, 'evaluations', extract_date, False)
+    update_raw_table(db_path, df, 'evaluations', extract_date, False)
 
     stats_insert = f"""insert into {db_name}.ingestion_stats
         values ('evaluations', 'https://api.mypurecloud.com/api/v2/quality/evaluations/query',
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     logger = gpc_utils_logger(tenant, app_name)
 
     try:
-        logger.info(f"Extracting GPC API evaluations")
+        logger.info("Extracting GPC API evaluations")
         exec_evaluations_api(spark, tenant, run_id, extract_date)
     except Exception as e:
         logger.error(str(e))

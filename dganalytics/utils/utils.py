@@ -48,7 +48,8 @@ def get_logger(tenant: str, app_name: str):
     logger = logging.getLogger(f'dganalytics-{tenant}-{app_name}')
     logger.setLevel(logging.DEBUG)
 
-    existing_handlers = [handler.__class__.__name__ for handler in logger.handlers]
+    existing_handlers = [
+        handler.__class__.__name__ for handler in logger.handlers]
     if len(logger.handlers) == 2 and set(['FileHandler', 'StreamHandler']) == set(existing_handlers):
         return logger
     elif len(logger.handlers) == 0:

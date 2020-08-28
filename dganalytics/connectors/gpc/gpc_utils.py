@@ -91,9 +91,10 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
         logger.error(message + str(resp.text))
 
 
-def write_api_resp_new(resp: list, api_name: str, run_id: str, tenant_path: str, part: str, extract_date: str):
+def write_api_resp(resp: list, api_name: str, run_id: str, tenant_path: str, part: str, extract_date: str):
     path = os.path.join(tenant_path, 'data', 'raw',
                         'gpc', extract_date, run_id)
+    logger.info("tenant path" + str(path))
     Path(path).mkdir(parents=True, exist_ok=True)
     file_name = f'{api_name}.json.gz'
 
@@ -102,20 +103,16 @@ def write_api_resp_new(resp: list, api_name: str, run_id: str, tenant_path: str,
     return path
 
 
-def update_raw_table(db_name: str, df: DataFrame, api_name: str, extract_date: str, tbl_overwrite: bool = False):
-    '''
-    letters = string.ascii_lowercase
-    temp_table = ''.join(random.choice(letters) for i in range(10))
-    df.registerTempTable(temp_table)
-    spark.sql(f"insert overwrite table {db_name}.raw_users select * from {temp_table}")
-    '''
+def update_raw_table(db_path: str, df: DataFrame, api_name: str, extract_date: str, tbl_overwrite: bool = False):
+
     df = df.withColumn("extractDate", to_date(lit(extract_date)))
     df = df.write.mode("overwrite").format("delta")
 
     if not tbl_overwrite:
         df = df.partitionBy('extractDate').option("replaceWhere", "extractDate='" + extract_date + "'")
 
-    df = df.saveAsTable(f"{db_name}.raw_{api_name}")
+    # df = df.saveAsTable(f"{db_name}.raw_{api_name}")
+    df.save(f"{db_path}/raw_{api_name}")
     return True
 
 
@@ -176,7 +173,7 @@ def pb_export_parser():
 
     return tenant, run_id, table_name, output_file_name, skip_cols
 
-
+@profile
 def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_date: str = None, overwrite_gpc_config: dict = None, skip_raw_table: bool = False):
     
@@ -249,14 +246,14 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
             else:
                 break
 
-    raw_file = write_api_resp_new(
+    raw_file = write_api_resp(
         resp_list, api_name, run_id, tenant_path, page_count, extract_date)
     df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
         sc.parallelize(resp_list, n_partitions), schema=schema)
     record_count = len(resp_list)
     del resp_list
     if not skip_raw_table:
-        update_raw_table(db_name, df, api_name, extract_date, tbl_overwrite)
+        update_raw_table(db_path, df, api_name, extract_date, tbl_overwrite)
 
     stats_insert = f"""insert into {db_name}.ingestion_stats
         values ('{api_name}', '{url}', {page_count - 1}, {record_count}, '{raw_file}', '{run_id}', '{extract_date}',

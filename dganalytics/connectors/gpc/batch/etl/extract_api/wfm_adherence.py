@@ -3,7 +3,7 @@ import json
 from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session, get_secret, get_path_vars
 from dganalytics.connectors.gpc.gpc_utils import extract_parser, authorize, get_api_url, get_dbname, get_schema
-from dganalytics.connectors.gpc.gpc_utils import update_raw_table, write_api_resp_new, get_interval, gpc_utils_logger
+from dganalytics.connectors.gpc.gpc_utils import update_raw_table, write_api_resp, get_interval, gpc_utils_logger
 import ast
 from websocket import create_connection
 
@@ -73,13 +73,13 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
     wfm_resps = [json.dumps(resp) for resp in wfm_resps]
 
     tenant_path, db_path, log_path = get_path_vars(tenant)
-    raw_file = write_api_resp_new(
+    raw_file = write_api_resp(
         wfm_resps, 'wfm_adherence', run_id, tenant_path, 1, extract_date)
 
     df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
         spark._sc.parallelize(wfm_resps, 2), schema=get_schema('wfm_adherence'))
 
-    update_raw_table(db_name, df, 'wfm_adherence', extract_date, False)
+    update_raw_table(db_path, df, 'wfm_adherence', extract_date, False)
 
     stats_insert = f"""insert into {db_name}.ingestion_stats
         values ('wfm_adherence', 'https://api.mypurecloud.com/api/v2/workforcemanagement/adherence/historical',

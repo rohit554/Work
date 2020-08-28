@@ -32,7 +32,7 @@ def exec_users_details_job_api(spark: SparkSession, tenant: str, run_id: str, db
 
     api_config = {
         "users_details": {
-            "endpoint": "api/v2/analytics/users/details/jobs/{}/results".format(job_id),
+            "endpoint": "/api/v2/analytics/users/details/jobs/{}/results".format(job_id),
             "request_type": "GET",
             "paging": False,
             "cursor": True,
@@ -45,7 +45,8 @@ def exec_users_details_job_api(spark: SparkSession, tenant: str, run_id: str, db
             "raw_table_update": {
                 "mode": "overwrite",
                         "partition": ["extractDate"]
-            }
+            },
+            "tbl_overwrite": False
         }
     }
 

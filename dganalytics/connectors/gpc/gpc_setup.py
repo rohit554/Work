@@ -1,10 +1,8 @@
 import argparse
 from pyspark.sql import SparkSession
-from dganalytics.utils.utils import get_spark_session, get_path_vars, get_logger
-from dganalytics.connectors.gpc.gpc_utils import get_schema, get_dbname
+from dganalytics.utils.utils import get_spark_session, get_path_vars
+from dganalytics.connectors.gpc.gpc_utils import get_schema, get_dbname, gpc_utils_logger
 
-
-global logger
 
 def create_database(spark: SparkSession, path: str, db_name: str):
     logger.info("Creating database for genesys")
@@ -434,9 +432,7 @@ if __name__ == "__main__":
 
     args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
-    logger = get_logger(tenant, "gpc_setup")
-
-    print(t)
+    logger = gpc_utils_logger(tenant, "gpc_setup")
 
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)

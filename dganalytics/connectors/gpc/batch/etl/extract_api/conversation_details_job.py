@@ -2,8 +2,7 @@ import requests as rq
 import json
 from pyspark.sql import SparkSession
 from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import gpc_request, extract_parser, authorize
-from dganalytics.connectors.gpc.gpc_utils import get_dbname, get_interval, get_api_url, gpc_utils_logger
+from dganalytics.connectors.gpc.gpc_utils import gpc_request, extract_parser, authorize, get_dbname, get_interval, get_api_url, gpc_utils_logger
 
 
 def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
@@ -30,7 +29,7 @@ def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_
 
     api_config = {
         "conversation_details": {
-            "endpoint": "api/v2/analytics/conversations/details/jobs/{}/results".format(job_id),
+            "endpoint": "/api/v2/analytics/conversations/details/jobs/{}/results".format(job_id),
             "request_type": "GET",
             "paging": False,
             "cursor": True,
@@ -43,7 +42,8 @@ def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_
             "raw_table_update": {
                 "mode": "overwrite",
                         "partition": ["extractDate"]
-            }
+            },
+            "tbl_overwrite": False
         }
     }
 
