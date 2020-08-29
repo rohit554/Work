@@ -1,7 +1,12 @@
 from dganalytics.utils.utils import get_spark_session
 from dganalytics.connectors.gpc.gpc_utils import get_dbname, gpc_request, extract_parser, gpc_utils_logger
-from dganalytics.connectors.gpc.batch.etl import extract_api
 import traceback
+from dganalytics.connectors.gpc.batch.etl.extract_api.conversation_details_job import conversation_details_job
+from dganalytics.connectors.gpc.batch.etl.extract_api.evaluation_forms import exec_evaluation_forms_api
+from dganalytics.connectors.gpc.batch.etl.extract_api.evaluations import exec_evaluations_api
+from dganalytics.connectors.gpc.batch.etl.extract_api.users_details_job import exec_users_details_job_api
+from dganalytics.connectors.gpc.batch.etl.extract_api.wfm_adherence import exec_wfm_adherence_api
+
 
 if __name__ == "__main__":
     tenant, run_id, extract_date, api_name = extract_parser()
@@ -13,24 +18,23 @@ if __name__ == "__main__":
 
     try:
         logger.info(f"Extracting GPC API {api_name}")
-        logger.info(dir(extract_api))
 
         if api_name in ["users", "routing_queues", "groups", "users_details", "wrapup_codes",
                         "conversation_details"]:
             df = gpc_request(spark, tenant, api_name, run_id, extract_date)
         elif api_name == "conversation_details_job":
-            extract_api.conversation_details_job(spark, tenant, run_id, db_name, extract_date)
+            logger.info("Conversation details job kick off")
+            conversation_details_job(spark, tenant, run_id, db_name, extract_date)
         elif api_name == "evaluation_forms":
-            extract_api.exec_evaluation_forms_api(spark, tenant, run_id, db_name, extract_date)
+            exec_evaluation_forms_api(spark, tenant, run_id, db_name, extract_date)
         elif api_name == "evaluations":
-            extract_api.exec_evaluations_api(spark, tenant, run_id, db_name, extract_date)
+            exec_evaluations_api(spark, tenant, run_id, db_name, extract_date)
         elif api_name == "users_details_job":
-            extract_api.exec_users_details_job_api(spark, tenant, run_id, db_name, extract_date)
+            exec_users_details_job_api(spark, tenant, run_id, db_name, extract_date)
         elif api_name == "wfm_adherence":
-            extract_api.exec_wfm_adherence_api(spark, tenant, run_id, db_name, extract_date)
+            exec_wfm_adherence_api(spark, tenant, run_id, db_name, extract_date)
         else:
             logger.exception("invalid api name")
 
     except Exception as e:
-        traceback.print_exc()
-        logger.exception(str(e))
+        logger.exception(traceback.print_exc())

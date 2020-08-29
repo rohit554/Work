@@ -35,5 +35,4 @@ if __name__ == "__main__":
         logger.info(f"Applying transformation {transformation}")
         transform_to_method[transformation](spark, extract_date)
     except Exception as e:
-        traceback.print_exc()
-        logger.error(e)
+        logger.exception(traceback.print_exc())

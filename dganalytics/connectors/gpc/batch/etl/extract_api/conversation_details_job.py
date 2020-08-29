@@ -5,8 +5,9 @@ from dganalytics.connectors.gpc.gpc_utils import gpc_request, authorize
 from dganalytics.connectors.gpc.gpc_utils import get_interval, get_api_url, gpc_utils_logger
 
 
-def exec_conv_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
+def conversation_details_job(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
     logger = gpc_utils_logger(tenant, 'conversation_details_job')
+    logger.info("Conversation job inside")
     api_headers = authorize(tenant)
     body = {
         "interval": get_interval(extract_date)
