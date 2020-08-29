@@ -1,5 +1,4 @@
 from typing import List
-from numpy.lib.utils import lookfor
 import requests
 from pyspark.sql import SparkSession, DataFrame
 import time
@@ -10,12 +9,13 @@ import json
 from pathlib import Path
 from pyspark.sql.types import StructType
 import argparse
-from dganalytics.connectors.gpc.batch.etl.extract_api.gpc_api_config import gpc_end_points
+from dganalytics.connectors.gpc.gpc_api_config import gpc_end_points
 from dganalytics.utils.utils import env, get_path_vars, get_logger
 from pyspark.sql.functions import lit, to_date
 import gzip
 from dganalytics.utils.utils import get_secret
-import logging
+
+retry = 0
 
 def gpc_utils_logger(tenant, app_name):
     global logger
@@ -55,6 +55,7 @@ def authorize(tenant: str):
     auth_request = requests.post(
         f"{auth_url}/oauth/token?grant_type=client_credentials", headers=headers)
 
+    access_token = ""
     if auth_request.status_code == 200:
         access_token = auth_request.json()['access_token']
     else:
@@ -148,13 +149,15 @@ def transform_parser():
     parser.add_argument('--run_id', required=True)
     parser.add_argument('--extract_date', required=True,
                         type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
+    parser.add_argument('--transformation', required=True)
 
     args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
     run_id = args.run_id
     extract_date = args.extract_date.strftime('%Y-%m-%d')
+    transformation = args.transformation
 
-    return tenant, run_id, extract_date
+    return tenant, run_id, extract_date, transformation
 
 def pb_export_parser():
     parser = argparse.ArgumentParser()
@@ -173,10 +176,9 @@ def pb_export_parser():
 
     return tenant, run_id, table_name, output_file_name, skip_cols
 
-@profile
 def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_date: str = None, overwrite_gpc_config: dict = None, skip_raw_table: bool = False):
-    
+
     logger.info("in gpc request")
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
@@ -231,7 +233,7 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
         if resp.text == '{}' or (entity in resp.json().keys() and len(resp.json()[entity]) == 0):
             break
 
-        resp_list = resp_list + [json.dumps(l) for l in resp.json()[entity]]
+        resp_list = resp_list + [json.dumps(entity) for entity in resp.json()[entity]]
 
         if 'pageCount' in resp.json().keys():
             print(
@@ -260,4 +262,3 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
         current_timestamp)"""
     spark.sql(stats_insert)
     return df
-

@@ -1,13 +1,13 @@
 import requests as rq
 import json
 from pyspark.sql import SparkSession
-from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import get_api_url, get_schema, extract_parser
-from dganalytics.connectors.gpc.gpc_utils import authorize, get_dbname, get_path_vars
+from dganalytics.connectors.gpc.gpc_utils import get_api_url, get_schema
+from dganalytics.connectors.gpc.gpc_utils import authorize, get_path_vars
 from dganalytics.connectors.gpc.gpc_utils import update_raw_table, write_api_resp, gpc_utils_logger
 
 
 def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
+    logger = gpc_utils_logger(tenant, "gpc_evaluation_forms_api")
     api_headers = authorize(tenant)
     evaluation_forms_list = []
     evaluation_forms = []
@@ -65,18 +65,3 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_
          1, {df.count()}, '{raw_file}', '{run_id}', '{extract_date}',
         current_timestamp)"""
     spark.sql(stats_insert)
-
-
-if __name__ == "__main__":
-    tenant, run_id, extract_date, api_name = extract_parser()
-    db_name = get_dbname(tenant)
-    app_name = "gpc_evaluation_forms_api"
-    spark = get_spark_session(app_name=app_name, tenant=tenant, default_db=db_name)
-
-    logger = gpc_utils_logger(tenant, app_name)
-
-    try:
-        logger.info("Extracting GPC API evaluation_forms")
-        exec_evaluation_forms_api(spark, tenant, run_id, db_name, extract_date)
-    except Exception as e:
-        logger.error(str(e))

@@ -1,17 +1,8 @@
-from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger, transform_parser, get_dbname
-from delta.tables import DeltaTable
+from pyspark.sql import SparkSession
 
 
-if __name__ == "__main__":
-    tenant, run_id, extract_date = transform_parser()
-    app_name = "fact_conversation_metrics"
-    spark = get_spark_session(app_name=app_name, tenant=tenant, default_db=get_dbname(tenant))
-
-    logger = gpc_utils_logger(tenant, app_name)
-    try:
-        logger.info("Upserting into fact_conversation_metrics")
-        conversation_metrics = spark.sql(f"""
+def fact_conversation_metrics(spark: SparkSession, extract_date: str):
+    conversation_metrics = spark.sql(f"""
                                             select 
                     sessionId,  
                     cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as emitDateTime,
@@ -90,12 +81,15 @@ if __name__ == "__main__":
                     group by sessionId, cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp)
                                             """)
 
-        DeltaTable.forName(spark, "fact_conversation_metrics").alias("target").merge(conversation_metrics.coalesce(2).alias("source"),
-                            """source.sessionId = target.sessionId
+    conversation_metrics.registerTempTable("conversation_metrics")
+    spark.sql(f"""
+                    merge into fact_conversation_metrics as target
+                        using conversation_metrics as source
+                    on source.sessionId = target.sessionId
                             and source.emitDateTime = target.emitDateTime
-                            and cast(source.emitDateTime as date) = target.emitDate""").whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
-
-        spark.stop()
-    except Exception as e:
-        logger.error(str(e))
-
+                            and source.emitDate = target.emitDate
+                    WHEN MATCHED THEN
+                        UPDATE SET *
+                    WHEN NOT MATCHED THEN
+                        INSERT *
+                """)

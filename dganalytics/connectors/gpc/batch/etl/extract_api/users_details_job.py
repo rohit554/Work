@@ -1,12 +1,13 @@
 import requests as rq
 import json
 from pyspark.sql import SparkSession
-from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import get_api_url, gpc_request, extract_parser
-from dganalytics.connectors.gpc.gpc_utils import authorize, get_dbname, get_interval, gpc_utils_logger
+from dganalytics.connectors.gpc.gpc_utils import get_api_url, gpc_request
+from dganalytics.connectors.gpc.gpc_utils import authorize, get_interval, gpc_utils_logger
 
 
 def exec_users_details_job_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
+    logger = gpc_utils_logger(tenant, "gpc_users_details_batch_job")
+
     api_headers = authorize(tenant)
     body = {
         "interval": get_interval(extract_date)
@@ -52,18 +53,3 @@ def exec_users_details_job_api(spark: SparkSession, tenant: str, run_id: str, db
 
     df = gpc_request(spark, tenant, 'users_details',
                      run_id, extract_date, overwrite_gpc_config=api_config)
-
-
-if __name__ == "__main__":
-    tenant, run_id, extract_date, api_name = extract_parser()
-    db_name = get_dbname(tenant)
-    app_name = "gpc_users_details_batch_job"
-    spark = get_spark_session(app_name=app_name, tenant=tenant, default_db=db_name)
-
-    logger = gpc_utils_logger(tenant, app_name)
-
-    try:
-        logger.info("gpc extracting users detail jobs")
-        exec_users_details_job_api(spark, tenant, run_id, db_name, extract_date)
-    except Exception as e:
-        logger.error(str(e))

@@ -1,16 +1,8 @@
-from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import transform_parser, get_dbname, gpc_utils_logger
+from pyspark.sql import SparkSession
 
-if __name__ == "__main__":
-    tenant, run_id, extract_date = transform_parser()
-    app_name = 'dim_user_groups'
-    spark = get_spark_session(app_name=app_name, tenant=tenant, default_db=get_dbname(tenant))
-    gpc_utils_logger(tenant, app_name)
 
-    logger = gpc_utils_logger(tenant, app_name)
-    try:
-        logger.info("Overwriting into dim_user_groups")
-        convs = spark.sql(f"""
+def dim_user_groups(spark: SparkSession, extract_date: str):
+    user_groups = spark.sql(f"""
                     insert overwrite dim_user_groups 
                         select 
                             userId,
@@ -27,5 +19,3 @@ if __name__ == "__main__":
                             ) users, raw_groups 
                             where users.user_groups.id = raw_groups.id
                     """)
-    except Exception as e:
-        logger.error(str(e))

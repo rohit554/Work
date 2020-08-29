@@ -1,17 +1,8 @@
-from numpy.lib.shape_base import apply_along_axis
-from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger, transform_parser, get_dbname
-from delta.tables import DeltaTable
+from pyspark.sql import SparkSession
 
-if __name__ == "__main__":
-    tenant, run_id, extract_date = transform_parser()
-    app_name = "fact_evaluation_question_scores"
-    spark = get_spark_session(app_name=app_name, tenant=tenant, default_db=get_dbname(tenant))
 
-    logger = gpc_utils_logger(tenant, app_name)
-    try:
-        logger.info("Upserting into fact_evaluation_question_scores")
-        evaluations = spark.sql(f"""
+def fact_evaluation_question_scores(spark: SparkSession, extract_date: str):
+    evaluation_question_scores = spark.sql(f"""
                                     select evaluationId,questionGroupId, qa.questionId, qa.answerId, qa.comments,
                                         qa.failedKillQuestion, qa.markedNA, qa.score
                                             from (
@@ -23,10 +14,16 @@ if __name__ == "__main__":
                                     )
                                     lateral view explode(questionScores) as qa  
                                     """)
-        DeltaTable.forName(spark, "fact_evaluation_question_scores").alias("target").merge(evaluations.coalesce(1).alias("source"),
-                                                                            """source.evaluationId = target.evaluationId
-                            and source.questionGroupId = target.questionGroupId 
-                            and source.questionId = target.questionId 
-                            and source.answerId = target.answerId """).whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
-    except Exception as e:
-        logger.error(str(e))
+    evaluation_question_scores.registerTempTable("evaluation_question_scores")
+    spark.sql("""
+                merge into fact_evaluation_question_scores as target
+                    using evaluation_question_scores as source
+                    on source.evaluationId = target.evaluationId
+                        and source.questionGroupId = target.questionGroupId 
+                        and source.questionId = target.questionId 
+                        and source.answerId = target.answerId
+                    WHEN MATCHED THEN
+                        UPDATE SET *
+                    WHEN NOT MATCHED THEN
+                        INSERT *
+            """)

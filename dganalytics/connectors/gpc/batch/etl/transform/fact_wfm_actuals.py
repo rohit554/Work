@@ -1,17 +1,8 @@
-from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger, transform_parser, get_dbname, env
+from pyspark.sql import SparkSession
 
-if __name__ == "__main__":
-    tenant, run_id, extract_date = transform_parser()
-    app_name = "fact_wfm_actuals"
-    spark = get_spark_session(
-        app_name=app_name, tenant=tenant, default_db=get_dbname(tenant))
-    logger = gpc_utils_logger(tenant, app_name)
-    try:
-        logger.info("Upserting into fact_wfm_actuals")
 
-        from delta.tables import DeltaTable
-        actuals = spark.sql(f"""
+def fact_wfm_actuals(spark: SparkSession, extract_date: str):
+    wfm_actuals = spark.sql(f"""
         create temporary view actuals as 
         select userId,startDate,actualsEndDate, endDate, actuals.actualActivityCategory,actuals.endOffsetSeconds, actuals.startOffsetSeconds,
                                     cast(startDate as date) startDatePart
@@ -21,24 +12,16 @@ if __name__ == "__main__":
     select explode(data) as data from raw_wfm_adherence where extractDate = '{extract_date}')
     ) 
                             """)
-        
-        if env != 'local':
-            actuals_delete = spark.sql(f"""
-            delete from fact_wfm_actuals target where exists (
-                                        select actuals.userId
-        from actuals where actuals.userId = target.userId
-                    and actuals.startDate = target.startDate and cast(actuals.startDate as date) = target.startDatePart)
-                                        """)
-        
-        actuals_update = spark.sql(f"""
-                                    insert into fact_wfm_actuals
-                                    select userId,startDate,actualsEndDate, endDate, actuals.actualActivityCategory,actuals.endOffsetSeconds, actuals.startOffsetSeconds,
-                                    cast(startDate as date) startDatePart
-    from (
-    select data.userId, data.startDate, data.actualsEndDate, data.endDate,data.impact,
-    explode(data.actuals) as actuals from (
-    select explode(data) as data from raw_wfm_adherence where extractDate = '{extract_date}')
-    )
-                                    """)
-    except Exception as e:
-        logger.error(str(e))
+    wfm_actuals.registerTempTable("wfm_actuals")
+    spark.sql("""
+            merge into fact_wfm_actuals as target
+                using wfm_actuals as source
+                on source.userId = target.userId
+                    and ource.startDate = target.startDate
+                    and source.startDatePart = target.startDatePart
+                    and source.endDate = target.endDate
+                WHEN MATCHED THEN
+                    UPDATE SET *
+                WHEN NOT MATCHED THEN
+                    INSERT *
+                """)

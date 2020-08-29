@@ -1,15 +1,9 @@
-from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger, transform_parser, get_dbname
+from pyspark.sql import SparkSession
 
-if __name__ == "__main__":
-    tenant, run_id, extract_date = transform_parser()
-    app_name = "dim_routing_queues"
-    spark = get_spark_session(app_name=app_name, tenant=tenant, default_db=get_dbname(tenant))
-    
-    logger = gpc_utils_logger(tenant, app_name)
-    try:
-        logger.info("Overwriting into dim_routing_queues")
-        queues = spark.sql("""
+
+def dim_routing_queues(spark: SparkSession, extract_date: str):
+    routing_queues = spark.sql("""
+                        insert overwrite dim_routing_queues
                         select 
                             id as queueId,
                             name as queueName,
@@ -26,6 +20,3 @@ if __name__ == "__main__":
                             cast(mediaSettings.message.serviceLevel.percentage * 100 as float) as messageSLPercentage
                             from raw_routing_queues 
                     """)
-        queues.coalesce(1).write.format("delta").saveAsTable("dim_routing_queues", mode="overwrite")
-    except Exception as e:
-        logger.error(str(e))

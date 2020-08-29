@@ -390,14 +390,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/dim_conversations.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "dim_conversations"
                             ]
                         },
                         "linkedServiceName": {
@@ -425,14 +427,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/dim_evaluations.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "dim_evaluations"
                             ]
                         },
                         "linkedServiceName": {
@@ -460,14 +464,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/dim_routing_queues.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "dim_routing_queues"
                             ]
                         },
                         "linkedServiceName": {
@@ -501,14 +507,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/dim_user_groups.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "dim_user_groups"
                             ]
                         },
                         "linkedServiceName": {
@@ -536,14 +544,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/dim_users.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "dim_users"
                             ]
                         },
                         "linkedServiceName": {
@@ -571,14 +581,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/dim_managers.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "dim_managers"
                             ]
                         },
                         "linkedServiceName": {
@@ -604,14 +616,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/fact_conversation_metrics.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "fact_conversation_metrics"
                             ]
                         },
                         "linkedServiceName": {
@@ -639,14 +653,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/fact_evaluation_question_group_scores.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "fact_evaluation_question_group_scores"
                             ]
                         },
                         "linkedServiceName": {
@@ -674,14 +690,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/fact_evaluation_question_scores.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "fact_evaluation_question_scores"
                             ]
                         },
                         "linkedServiceName": {
@@ -709,14 +727,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/fact_evaluation_total_scores.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "fact_evaluation_total_scores"
                             ]
                         },
                         "linkedServiceName": {
@@ -744,14 +764,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/fact_primary_presence.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "fact_primary_presence"
                             ]
                         },
                         "linkedServiceName": {
@@ -779,14 +801,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/fact_routing_status.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "fact_routing_status"
                             ]
                         },
                         "linkedServiceName": {
@@ -814,14 +838,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/fact_wfm_actuals.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "fact_wfm_actuals"
                             ]
                         },
                         "linkedServiceName": {
@@ -849,14 +875,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/fact_wfm_day_metrics.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "fact_wfm_day_metrics"
                             ]
                         },
                         "linkedServiceName": {
@@ -914,14 +942,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/dim_evaluation_form_answer_options.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "dim_evaluation_form_answer_options"
                             ]
                         },
                         "linkedServiceName": {
@@ -949,14 +979,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/dim_evaluation_form_question_groups.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "dim_evaluation_form_question_groups"
                             ]
                         },
                         "linkedServiceName": {
@@ -984,14 +1016,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/dim_evaluation_form_questions.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "dim_evaluation_form_questions"
                             ]
                         },
                         "linkedServiceName": {
@@ -1019,14 +1053,16 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/dim_evaluation_forms.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
                                 "--extract_date",
-                                "@pipeline().parameters.extract_date"
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "dim_evaluation_forms"
                             ]
                         },
                         "linkedServiceName": {

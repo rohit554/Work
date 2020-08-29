@@ -1,18 +1,7 @@
-from dganalytics.utils.utils import get_spark_session
-from dganalytics.connectors.gpc.gpc_utils import transform_parser, get_dbname, gpc_utils_logger
-from delta.tables import DeltaTable
+from pyspark.sql import SparkSession
 
-if __name__ == "__main__":
-    tenant, run_id, extract_date = transform_parser()
-    app_name = "dim_conversations"
-    spark = get_spark_session(
-        app_name=app_name, tenant=tenant, default_db=get_dbname(tenant))
-
-    logger = gpc_utils_logger(tenant, app_name)
-    try:
-        logger.info("Upserting into dim_conversations")
-        conversations = spark.sql(
-            f"""
+def dim_conversations(spark: SparkSession, extract_date: str):
+    conversations = spark.sql(f"""
                                     select
                         distinct
                         conversationId,
@@ -52,13 +41,17 @@ if __name__ == "__main__":
                             where
                                 participants.purpose = 'agent' ) )
                                     """
-        )
-        DeltaTable.forName(spark, "dim_conversations").alias("target").merge(
-            conversations.coalesce(2).alias("source"),
-            """source.conversationStartDate = target.conversationStartDate
-                and source.conversationId = target.conversationId
-                and source.sessionId = target.sessionId""",
-        ).whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
+                              )
+    conversations.registerTempTable("conversations")
 
-    except Exception as e:
-        logger.error(str(e))
+    upsert = spark.sql("""
+                            merge into dim_conversations as target
+                                using conversations as source
+                                on source.conversationStartDate = target.conversationStartDate
+                                    and source.conversationId = target.conversationId
+                                    and source.sessionId = target.sessionId
+                                WHEN MATCHED THEN
+                                    UPDATE SET *
+                                WHEN NOT MATCHED THEN
+                                    INSERT *
+                            """)

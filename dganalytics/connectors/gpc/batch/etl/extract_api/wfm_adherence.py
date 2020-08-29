@@ -1,8 +1,8 @@
 import requests as rq
 import json
 from pyspark.sql import SparkSession
-from dganalytics.utils.utils import get_spark_session, get_secret, get_path_vars
-from dganalytics.connectors.gpc.gpc_utils import extract_parser, authorize, get_api_url, get_dbname, get_schema
+from dganalytics.utils.utils import get_secret, get_path_vars
+from dganalytics.connectors.gpc.gpc_utils import authorize, get_api_url, get_schema
 from dganalytics.connectors.gpc.gpc_utils import update_raw_table, write_api_resp, get_interval, gpc_utils_logger
 import ast
 from websocket import create_connection
@@ -15,6 +15,8 @@ def get_users_list(spark: SparkSession):
 
 
 def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
+    logger = gpc_utils_logger(tenant, "wfm_adherence")
+
     api_headers = authorize(tenant)
 
     steaming_channel = rq.post(
@@ -86,19 +88,3 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
          1, {df.count()}, '{raw_file}', '{run_id}', '{extract_date}',
         current_timestamp)"""
     spark.sql(stats_insert)
-
-
-if __name__ == "__main__":
-    tenant, run_id, extract_date, api_name = extract_parser()
-    db_name = get_dbname(tenant)
-    app_name = "wfm_adherence"
-    spark = get_spark_session(
-        app_name=app_name, tenant=tenant, default_db=db_name)
-
-    logger = gpc_utils_logger(tenant, app_name)
-    try:
-        logger.info("gpc extracting wfm_adherence")
-        exec_wfm_adherence_api(spark, tenant, run_id, db_name, extract_date)
-
-    except Exception as e:
-        logger.error(str(e))
