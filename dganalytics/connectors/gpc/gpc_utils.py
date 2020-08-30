@@ -9,6 +9,8 @@ import json
 from pathlib import Path
 from pyspark.sql.types import StructType
 import argparse
+
+from requests import api
 from dganalytics.connectors.gpc.gpc_api_config import gpc_end_points
 from dganalytics.utils.utils import env, get_path_vars, get_logger
 from pyspark.sql.functions import lit, to_date
@@ -17,15 +19,18 @@ from dganalytics.utils.utils import get_secret
 
 retry = 0
 
+
 def gpc_utils_logger(tenant, app_name):
     global logger
     logger = get_logger(tenant, app_name)
     return logger
 
+
 def get_api_url(tenant: str) -> str:
     url = get_secret(f'{tenant}gpcAPIURL')
     url = "https://api." + url
     return url
+
 
 def get_interval(extract_date: str):
     if env == "local":
@@ -33,6 +38,7 @@ def get_interval(extract_date: str):
     else:
         interval = f"{extract_date}T00:00:00Z/{extract_date}T23:59:59Z"
     return interval
+
 
 def get_dbname(tenant: str):
     db_name = "gpc_{}".format(tenant)
@@ -59,7 +65,8 @@ def authorize(tenant: str):
     if auth_request.status_code == 200:
         access_token = auth_request.json()['access_token']
     else:
-        logger.error("Autohrization failed while requesting Access Token for tenant - {}".format(tenant))
+        logger.error(
+            "Autohrization failed while requesting Access Token for tenant - {}".format(tenant))
     api_headers = {
         "Authorization": "Bearer {}".format(access_token),
         "Content-Type": "application/json"
@@ -70,11 +77,13 @@ def authorize(tenant: str):
 def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_id: str):
     global retry
     # handling conversation details job failure scenario
+    '''
     if "message" in resp.json().keys() and \
             "pagination may not exceed 400000 results" in (resp.json()['message']).lower():
-        logger.info("exceeded 40k limit of cursor. ignoring error as delta conversations will be extracted tomorrow.")
+        logger.info(
+            "exceeded 40k limit of cursor. ignoring error as delta conversations will be extracted tomorrow.")
         return "OK"
-
+    '''
     if resp.status_code in [200, 201, 202]:
         return "OK"
     elif resp.status_code == 429:
@@ -87,6 +96,11 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
             logger.error(message + str(resp.text))
         return "SLEEP"
     else:
+        if "message" in resp.json().keys() and \
+                "pagination may not exceed 400000 results" in (resp.json()['message']).lower():
+            logger.info(
+                "exceeded 40k limit of cursor. ignoring error as delta conversations will be extracted tomorrow.")
+            return "OK"
 
         message = f"GPC API Extraction failed - {tenant} - {api_name} - {run_id}"
         logger.error(message + str(resp.text))
@@ -110,7 +124,8 @@ def update_raw_table(db_path: str, df: DataFrame, api_name: str, extract_date: s
     df = df.write.mode("overwrite").format("delta")
 
     if not tbl_overwrite:
-        df = df.partitionBy('extractDate').option("replaceWhere", "extractDate='" + extract_date + "'")
+        df = df.partitionBy('extractDate').option(
+            "replaceWhere", "extractDate='" + extract_date + "'")
 
     # df = df.saveAsTable(f"{db_name}.raw_{api_name}")
     df.save(f"{db_path}/raw_{api_name}")
@@ -119,7 +134,8 @@ def update_raw_table(db_path: str, df: DataFrame, api_name: str, extract_date: s
 
 def get_schema(api_name: str):
     logger.info(f"read spark schema for {api_name}")
-    schema_path = os.path.join(Path(__file__).parent, 'source_api_schemas', '{}.json'.format(api_name))
+    schema_path = os.path.join(
+        Path(__file__).parent, 'source_api_schemas', '{}.json'.format(api_name))
     with open(schema_path, 'r') as f:
         schema = f.read()
     schema = StructType.fromJson(json.loads(schema))
@@ -159,6 +175,7 @@ def transform_parser():
 
     return tenant, run_id, extract_date, transformation
 
+
 def pb_export_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--tenant', required=True)
@@ -176,10 +193,12 @@ def pb_export_parser():
 
     return tenant, run_id, table_name, output_file_name, skip_cols
 
+
 def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_date: str = None, overwrite_gpc_config: dict = None, skip_raw_table: bool = False):
 
-    logger.info("in gpc request")
+    logger.info(
+        f"GPC Request Start for {api_name} with extract_date {extract_date}")
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
     schema = get_schema(api_name)
@@ -218,6 +237,7 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
         if cursor and cursor_param != "":
             params['cursor'] = cursor_param
 
+        logger.info("req start - " + url + str(params))
         if req_type == "GET":
             resp = requests.request(method=req_type, url=url,
                                     params=params, headers=auth_headers)
@@ -226,25 +246,28 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                                     data=json.dumps(params), headers=auth_headers)
         else:
             raise Exception("Unknown request type in config")
+        logger.info("req finish - " + url + str(params))
 
         if check_api_response(resp, api_name, tenant, run_id) == "SLEEP":
             continue
 
-        if resp.text == '{}' or (entity in resp.json().keys() and len(resp.json()[entity]) == 0):
+        resp_json = resp.json()
+        if resp.text == '{}' or (entity in resp_json.keys() and len(resp_json[entity]) == 0):
             break
 
-        resp_list = resp_list + [json.dumps(entity) for entity in resp.json()[entity]]
+        resp_list = resp_list + [json.dumps(entity)
+                                 for entity in resp_json[entity]]
 
-        if 'pageCount' in resp.json().keys():
-            print(
-                f"{tenant}-{api_name}-{extract_date}-{page_count} out of {resp.json()['pageCount']}")
+        if 'pageCount' in resp_json.keys():
+            logger.info(
+                f"{tenant}-{api_name}-{extract_date}-{page_count} out of {resp_json['pageCount']}")
         else:
-            print(f"{tenant}-{api_name}-{extract_date}-{page_count}")
+            logger.info(f"{tenant}-{api_name}-{extract_date}-{page_count}")
 
         page_count = page_count + 1
         if cursor:
-            if 'cursor' in resp.json().keys():
-                cursor_param = resp.json()['cursor']
+            if 'cursor' in resp_json.keys():
+                cursor_param = resp_json['cursor']
             else:
                 break
 

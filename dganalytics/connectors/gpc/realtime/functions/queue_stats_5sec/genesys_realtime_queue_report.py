@@ -6,11 +6,6 @@ import pandas as pd
 import tempfile
 import os
 import logging
-import numpy as np
-import pathlib
-from msrestazure.azure_active_directory import MSIAuthentication
-from azure.mgmt.resource import ResourceManagementClient, SubscriptionClient
-# from azure.keyvault.key_vault_client import KeyVaultClient
 from azure.keyvault.secrets._client import SecretClient
 from azure.identity import DefaultAzureCredential
 

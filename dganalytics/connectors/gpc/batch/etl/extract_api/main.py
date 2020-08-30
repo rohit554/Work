@@ -1,7 +1,7 @@
 from dganalytics.utils.utils import get_spark_session
 from dganalytics.connectors.gpc.gpc_utils import get_dbname, gpc_request, extract_parser, gpc_utils_logger
 import traceback
-from dganalytics.connectors.gpc.batch.etl.extract_api.conversation_details_job import conversation_details_job
+from dganalytics.connectors.gpc.batch.etl.extract_api.conversation_details_job import exec_conversation_details_job
 from dganalytics.connectors.gpc.batch.etl.extract_api.evaluation_forms import exec_evaluation_forms_api
 from dganalytics.connectors.gpc.batch.etl.extract_api.evaluations import exec_evaluations_api
 from dganalytics.connectors.gpc.batch.etl.extract_api.users_details_job import exec_users_details_job_api
@@ -24,7 +24,7 @@ if __name__ == "__main__":
             df = gpc_request(spark, tenant, api_name, run_id, extract_date)
         elif api_name == "conversation_details_job":
             logger.info("Conversation details job kick off")
-            conversation_details_job(spark, tenant, run_id, db_name, extract_date)
+            exec_conversation_details_job(spark, tenant, run_id, db_name, extract_date)
         elif api_name == "evaluation_forms":
             exec_evaluation_forms_api(spark, tenant, run_id, db_name, extract_date)
         elif api_name == "evaluations":
