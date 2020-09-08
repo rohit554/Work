@@ -102,7 +102,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--api_name",
@@ -132,7 +132,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--api_name",
@@ -162,7 +162,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--api_name",
@@ -199,7 +199,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--api_name",
@@ -236,7 +236,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--api_name",
@@ -261,12 +261,12 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/extract_api/wfm_adherence.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/extract_api/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--api_name",
@@ -303,11 +303,48 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--api_name",
                                 "wrapup_codes"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "dim_wrapup_codes",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "wrapup_codes",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().GroupId",
+                                "--extract_date",
+                                "@pipeline().parameters.extract_date",
+                                "--transformation",
+                                "dim_wrapup_codes"
                             ]
                         },
                         "linkedServiceName": {
@@ -353,12 +390,12 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/extract_api/evaluations.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/extract_api/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--api_name",
@@ -395,7 +432,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -432,7 +469,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -469,7 +506,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -512,7 +549,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -549,48 +586,11 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
                                 "dim_users"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "dim_managers",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "dim_users",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 0,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/transform/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "@pipeline().parameters.tenant",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
-                                "--transformation",
-                                "dim_managers"
                             ]
                         },
                         "linkedServiceName": {
@@ -621,7 +621,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -658,7 +658,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -695,7 +695,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -732,7 +732,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -769,7 +769,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -806,7 +806,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -843,7 +843,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -880,7 +880,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -905,12 +905,12 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/extract_api/evaluation_forms.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/extract_api/main.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--api_name",
@@ -947,7 +947,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -984,7 +984,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -1021,7 +1021,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -1058,7 +1058,7 @@
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
-                                "@pipeline().RunId",
+                                "@pipeline().GroupId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
                                 "--transformation",
@@ -1071,6 +1071,7 @@
                         }
                     }
                 ],
+                "concurrency": 1,
                 "parameters": {
                     "tenant": {
                         "type": "string",

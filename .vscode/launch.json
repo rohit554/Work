@@ -21,8 +21,8 @@
             "args": [
                 "--tenant=test",
                 "--run_id=t1",
-                "--extract_date=2020-08-03",
-                "--api_name=conversation_details_job"
+                "--extract_date=2020-09-02",
+                "--api_name=conversation_details"
             ]
         },
         {

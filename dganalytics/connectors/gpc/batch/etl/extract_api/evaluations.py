@@ -1,12 +1,12 @@
 import requests as rq
 import json
 from pyspark.sql import SparkSession
-from dganalytics.connectors.gpc.gpc_utils import authorize, get_api_url, get_schema
+from dganalytics.connectors.gpc.gpc_utils import authorize, get_api_url, process_raw_data
 from dganalytics.connectors.gpc.gpc_utils import get_path_vars, update_raw_table, write_api_resp, get_interval
 from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger
 
 def get_evaluators(spark: SparkSession) -> list:
-    evaluators = spark.sql(f"""select distinct userId  from (
+    evaluators = spark.sql("""select distinct userId  from (
 	select id as userId, explode(authorization.roles) as roles  from raw_users where lower(state) = 'active'
             ) where lower(roles.name) like '%evalua%'""").toPandas()['userId'].tolist()
     return evaluators
@@ -35,18 +35,5 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, db_name:
         evaluation_details_list.append(resp.json()['entities'])
 
     evaluation_details_list = [item for sublist in evaluation_details_list for item in sublist]
-    evaluation_details_list = [json.dumps(l) for l in evaluation_details_list]
-
-    tenant_path, db_path, log_path = get_path_vars(tenant)
-    raw_file = write_api_resp(evaluation_details_list, 'evaluations', run_id, tenant_path, 1, extract_date)
-
-    df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
-        spark._sc.parallelize(evaluation_details_list, 1), schema=get_schema('evaluations'))
-
-    update_raw_table(db_path, df, 'evaluations', extract_date, False)
-
-    stats_insert = f"""insert into {db_name}.ingestion_stats
-        values ('evaluations', 'https://api.mypurecloud.com/api/v2/quality/evaluations/query',
-         1, {df.count()}, '{raw_file}', '{run_id}', '{extract_date}',
-        current_timestamp)"""
-    spark.sql(stats_insert)
+    evaluation_details_list = [json.dumps(ed) for ed in evaluation_details_list]
+    process_raw_data(spark, tenant, 'evaluations', run_id, evaluation_details_list, extract_date, len(evaluators))

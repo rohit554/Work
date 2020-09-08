@@ -15,39 +15,29 @@ def exec_conversation_details_job(spark: SparkSession, tenant: str, run_id: str,
     job_resp = rq.post(f"{get_api_url(tenant)}/api/v2/analytics/conversations/details/jobs",
                        headers=api_headers, data=json.dumps(body))
     if job_resp.status_code != 202:
-        logger.error("Conversation Details Job Submit API Failed" + str(job_resp.text))
+        logger.error(
+            "Conversation Details Job Submit API Failed" + str(job_resp.text))
 
     job_id = job_resp.json()['jobId']
     while True:
         job_status_resp = rq.get(f"{get_api_url(tenant)}/api/v2/analytics/conversations/details/jobs/{job_id}",
                                  headers=api_headers)
         if job_status_resp.status_code not in [200, 202]:
-            logger.error("Conversation Details Job Submit API Failed" + str(job_resp.text))
+            logger.error(
+                "Conversation Details Job Submit API Failed" + str(job_resp.text))
 
         if job_status_resp.json()['state'] == 'FULFILLED':
             break
         if job_status_resp.json()['state'] in ["FAILED", "CANCELLED", "EXPIRED"]:
-            logger.error("Conversation Details Job Status API - Job was either Killed, cancelled or expired" + str(job_resp.text))
+            logger.error("""Conversation Details Job Status API - Job was either Killed,
+                            cancelled or expired""" + str(job_resp.text))
 
     api_config = {
-        "conversation_details": {
+        "conversation_details_job": {
             "endpoint": "/api/v2/analytics/conversations/details/jobs/{}/results".format(job_id),
-            "request_type": "GET",
-            "paging": False,
-            "cursor": True,
-            "interval": False,
-            "params": {
-                        "pageSize": 1000,
-            },
-            "spark_partitions": 6,
-            "entity_name": "conversations",
-            "raw_table_update": {
-                "mode": "overwrite",
-                        "partition": ["extractDate"]
-            },
-            "tbl_overwrite": False
+            "request_type": "GET"
         }
     }
 
-    df = gpc_request(spark, tenant, 'conversation_details',
+    df = gpc_request(spark, tenant, 'conversation_details_job',
                      run_id, extract_date, overwrite_gpc_config=api_config)

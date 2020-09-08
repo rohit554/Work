@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import get_spark_session
+from dganalytics.utils.utils import get_spark_session, flush_utils
 from dganalytics.connectors.gpc.gpc_utils import transform_parser, get_dbname, gpc_utils_logger
 import traceback
 from dganalytics.connectors.gpc.batch.etl import transform
@@ -21,7 +21,8 @@ transform_to_method = {
     "fact_primary_presence": transform.fact_primary_presence,
     "fact_routing_status": transform.fact_routing_status,
     "fact_wfm_actuals": transform.fact_wfm_actuals,
-    "fact_wfm_day_metrics": transform.fact_wfm_day_metrics
+    "fact_wfm_day_metrics": transform.fact_wfm_day_metrics,
+    "dim_wrapup_codes": transform.dim_wrapup_codes
 }
 
 
@@ -35,4 +36,7 @@ if __name__ == "__main__":
         logger.info(f"Applying transformation {transformation}")
         transform_to_method[transformation](spark, extract_date)
     except Exception as e:
-        logger.exception(traceback.print_exc())
+        logger.exception(e, stack_info=True, exc_info=True)
+        raise
+    finally:
+        flush_utils(spark, logger)

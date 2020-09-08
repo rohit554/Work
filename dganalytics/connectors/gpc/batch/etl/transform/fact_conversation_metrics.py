@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 
 def fact_conversation_metrics(spark: SparkSession, extract_date: str):
     conversation_metrics = spark.sql(f"""
-                                            select 
+                                            select distinct 
                     sessionId,  
                     cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as emitDateTime,
                     cast(cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as date) as emitDate,

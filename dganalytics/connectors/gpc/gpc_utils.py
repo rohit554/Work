@@ -5,10 +5,12 @@ import time
 import datetime
 import base64
 import os
+import shutil
 import json
 from pathlib import Path
 from pyspark.sql.types import StructType
 import argparse
+import math
 
 from requests import api
 from dganalytics.connectors.gpc.gpc_api_config import gpc_end_points
@@ -16,8 +18,34 @@ from dganalytics.utils.utils import env, get_path_vars, get_logger
 from pyspark.sql.functions import lit, to_date
 import gzip
 from dganalytics.utils.utils import get_secret
+import tempfile
 
 retry = 0
+
+
+def get_spark_partitions_num(api_name: str, record_count: int):
+    n_partitions = gpc_end_points[api_name]['spark_partitions']
+    n_partitions = math.ceil(
+        record_count / n_partitions['max_records_per_partition'])
+    if n_partitions < 1:
+        n_partitions = 1
+    return n_partitions
+
+
+def get_tbl_overwrite(api_name: str):
+
+    return gpc_end_points[api_name]['tbl_overwrite']
+
+
+def get_raw_tbl_name(api_name: str):
+    if 'table_name' in gpc_end_points[api_name].keys():
+        return 'raw_' + gpc_end_points[api_name]['table_name']
+    else:
+        return 'raw_' + api_name
+
+
+def get_extract_endpoint(api_name: str):
+    return gpc_end_points[api_name]['endpoint']
 
 
 def gpc_utils_logger(tenant, app_name):
@@ -34,7 +62,7 @@ def get_api_url(tenant: str) -> str:
 
 def get_interval(extract_date: str):
     if env == "local":
-        interval = f"{extract_date}T00:00:00Z/{extract_date}T02:00:00Z"
+        interval = f"{extract_date}T00:00:00Z/{extract_date}T05:00:00Z"
     else:
         interval = f"{extract_date}T00:00:00Z/{extract_date}T23:59:59Z"
     return interval
@@ -106,29 +134,96 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
         logger.error(message + str(resp.text))
 
 
-def write_api_resp(resp: list, api_name: str, run_id: str, tenant_path: str, part: str, extract_date: str):
+def write_api_resp(resp: list, api_name: str, run_id: str, tenant: str, extract_date: str):
+    tenant_path, db_path, log_path = get_path_vars(tenant)
+
     path = os.path.join(tenant_path, 'data', 'raw',
                         'gpc', extract_date, run_id)
     logger.info("tenant path" + str(path))
     Path(path).mkdir(parents=True, exist_ok=True)
     file_name = f'{api_name}.json.gz'
-
-    with gzip.open(os.path.join(path, file_name), 'wt', encoding="utf-16") as zipfile:
+    temp_resp_file = tempfile.NamedTemporaryFile('w+', delete=True)
+    temp_resp_file.close()
+    with gzip.open(temp_resp_file.name, 'wt', encoding="utf-16") as zipfile:
         json.dump(resp, zipfile)
+    shutil.copyfile(temp_resp_file.name, os.path.join(path, file_name))
+    temp_resp_file.close()
     return path
 
 
-def update_raw_table(db_path: str, df: DataFrame, api_name: str, extract_date: str, tbl_overwrite: bool = False):
+def ingest_stats(spark: SparkSession, tenant: str, api_name: str, url: str, page_count: int, record_count: int,
+                 raw_file: str, run_id: str, extract_date: str):
+
+    db_name = get_dbname(tenant)
+    stats_insert = f"""insert into {db_name}.ingestion_stats
+        values ('{api_name}', '{get_extract_endpoint(api_name)}', {page_count - 1}, {record_count}, '{raw_file}', '{run_id}',
+                '{extract_date}', current_timestamp)"""
+    spark.sql(stats_insert)
+    return True
+
+
+def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name: str,
+                     extract_date: str, n_partitions: dict):
+    logger.info(f"updating raw table for {api_name} {extract_date}")
+    record_count = len(resp_list)
+    tenant_path, db_path, log_path = get_path_vars(tenant)
+
+    n_partitions = get_spark_partitions_num(api_name, record_count)
+    schema = get_schema(api_name)
+    db_name = get_dbname(tenant)
+    sc = spark.sparkContext
+    df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
+        spark._sc.parallelize(resp_list, n_partitions), schema=schema).drop_duplicates()
 
     df = df.withColumn("extractDate", to_date(lit(extract_date)))
-    df = df.write.mode("overwrite").format("delta")
+    table_name = get_raw_tbl_name(api_name)
+    logger.info(f"updating raw table for {api_name} {db_name}.{table_name}")
 
-    if not tbl_overwrite:
-        df = df.partitionBy('extractDate').option(
-            "replaceWhere", "extractDate='" + extract_date + "'")
+    # df.registerTempTable(api_name)
 
-    # df = df.saveAsTable(f"{db_name}.raw_{api_name}")
-    df.save(f"{db_path}/raw_{api_name}")
+    cols = spark.table(f"{db_name}.{table_name}").columns
+    cols = ",".join(cols)
+
+    partition_spec = ""
+    if not get_tbl_overwrite(api_name):
+        df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
+            'extractDate').option("replaceWhere",
+                                  f" extractDate = '{extract_date}' ").save(f"{db_path}/{db_name}/raw_{api_name}")
+        # partition_spec = "PARTITION (extractDate)"
+    else:
+        df.coalesce(1).write.format("delta").mode(
+            "overwrite").save(f"{db_path}/{db_name}/raw_{api_name}")
+
+    '''
+    spark.sql(f"""insert overwrite TABLE {db_name}.{table_name} {partition_spec}
+                    select {cols} from {api_name}
+                    """)
+    '''
+    '''
+        df.write.saveAsTable(f"{db_name}.{table_name}",
+                             mode="overwrite", format="delta")
+        spark.sql(f"""insert overwrite TABLE {db_name}.{table_name}
+                    """)
+    else:
+        df.write.saveAsTable(f"{db_name}.{table_name}", mode="overwrite",
+                             partitionBy="extractDate", format="delta", replace_where)
+    '''
+    return True
+
+
+def process_raw_data(spark: SparkSession, tenant: str, api_name: str, run_id: str, resp_list: list, extract_date: str,
+                     page_count: int, re_process: bool = False):
+    logger.info(f"processing raw data extracted for {tenant} and {api_name}")
+    if not re_process:
+        raw_file = write_api_resp(
+            resp_list, api_name, run_id, tenant, extract_date)
+    n_partitions = get_spark_partitions_num(api_name, len(resp_list))
+    update_raw_table(spark, tenant, resp_list, api_name,
+                     extract_date, n_partitions)
+    if not re_process:
+        ingest_stats(spark, tenant, api_name, api_name, page_count,
+                     len(resp_list), raw_file, run_id, extract_date)
+
     return True
 
 
@@ -194,19 +289,37 @@ def pb_export_parser():
     return tenant, run_id, table_name, output_file_name, skip_cols
 
 
-def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
-                extract_date: str = None, overwrite_gpc_config: dict = None, skip_raw_table: bool = False):
+def check_prev_gpc_extract(spark: SparkSession, api_name: str, extract_date: str, run_id: str):
 
+    prev_extract_success = spark.sql(f"""select * from (
+                        select * from ingestion_stats
+                            where apiName= '{api_name}' and extractDate = '{extract_date}'
+                                and adfRunId = '{run_id}'
+                        order by loadDateTime desc
+                        ) limit 1
+                """).count()
+    if prev_extract_success == 0:
+        return False
+    return True
+
+
+def get_prev_extract_data(tenant: str, extract_date: str, run_id: str, api_name: str):
+    tenant_path, db_path, log_path = get_path_vars(tenant)
+    with gzip.open(os.path.join(tenant_path, 'data', 'raw', 'gpc', extract_date, run_id, f'{api_name}.json.gz'), 'rb') as f:
+        resp_list = json.loads(f.read())
+
+    return resp_list
+
+
+def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
+                extract_date: str = None, overwrite_gpc_config: dict = None):
     logger.info(
         f"GPC Request Start for {api_name} with extract_date {extract_date}")
-    db_name = get_dbname(tenant)
-    tenant_path, db_path, log_path = get_path_vars(tenant)
-    schema = get_schema(api_name)
-    sc = spark.sparkContext
-
     auth_headers = authorize(tenant)
+    gepc = gpc_end_points
+    if overwrite_gpc_config is not None:
+        gepc[api_name].update(overwrite_gpc_config[api_name])
 
-    gepc = overwrite_gpc_config if overwrite_gpc_config is not None else gpc_end_points
     req_type = gepc[api_name]['request_type']
     url = get_api_url(tenant) + gepc[api_name]['endpoint']
     params = gepc[api_name]['params']
@@ -214,8 +327,6 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
     paging = gepc[api_name]['paging']
     cursor = gepc[api_name]['cursor']
     interval = gepc[api_name]['interval']
-    n_partitions = gepc[api_name]['spark_partitions']
-    tbl_overwrite = gepc[api_name]['tbl_overwrite']
 
     resp_list = []
     page_count = 1
@@ -237,7 +348,6 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
         if cursor and cursor_param != "":
             params['cursor'] = cursor_param
 
-        logger.info("req start - " + url + str(params))
         if req_type == "GET":
             resp = requests.request(method=req_type, url=url,
                                     params=params, headers=auth_headers)
@@ -246,17 +356,17 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                                     data=json.dumps(params), headers=auth_headers)
         else:
             raise Exception("Unknown request type in config")
-        logger.info("req finish - " + url + str(params))
 
         if check_api_response(resp, api_name, tenant, run_id) == "SLEEP":
             continue
-
         resp_json = resp.json()
-        if resp.text == '{}' or (entity in resp_json.keys() and len(resp_json[entity]) == 0):
+        if len(resp_json) == 0 or (entity in resp_json.keys() and len(resp_json[entity]) == 0):
             break
+        # resp_list.append(resp_json[entity])
 
         resp_list = resp_list + [json.dumps(entity)
                                  for entity in resp_json[entity]]
+        # resp_list = resp_list + resp_json[entity]
 
         if 'pageCount' in resp_json.keys():
             logger.info(
@@ -270,18 +380,16 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 cursor_param = resp_json['cursor']
             else:
                 break
+    # resp_list = [json.dumps(entity) for entity in resp_list]
+    # resp_list = [item for sublist in resp_list for item in sublist]
+    '''
+    raw_file = write_api_resp(resp_list, api_name, run_id, tenant, extract_date)
 
-    raw_file = write_api_resp(
-        resp_list, api_name, run_id, tenant_path, page_count, extract_date)
-    df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
-        sc.parallelize(resp_list, n_partitions), schema=schema)
-    record_count = len(resp_list)
-    del resp_list
-    if not skip_raw_table:
-        update_raw_table(db_path, df, api_name, extract_date, tbl_overwrite)
+    if update_raw_table(spark, tenant, resp_list, api_name, extract_date, n_partitions):
+        ingest_stats(spark, tenant, api_name, url, page_count,
+                     len(resp_list), raw_file, run_id, extract_date)
+    '''
+    process_raw_data(spark, tenant, api_name, run_id,
+                     resp_list, extract_date, page_count)
 
-    stats_insert = f"""insert into {db_name}.ingestion_stats
-        values ('{api_name}', '{url}', {page_count - 1}, {record_count}, '{raw_file}', '{run_id}', '{extract_date}',
-        current_timestamp)"""
-    spark.sql(stats_insert)
-    return df
+    return True

@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 
 def fact_evaluation_total_scores(spark: SparkSession, extract_date: str):
     evaluation_total_scores = spark.sql(f"""
-                                    select id as evaluationId, answers.totalCriticalScore, 		
+                                    select distinct id as evaluationId, answers.totalCriticalScore, 		
                                 answers.totalNonCriticalScore, answers.totalScore
                     from raw_evaluations  where extractDate = '{extract_date}'
                                     """)

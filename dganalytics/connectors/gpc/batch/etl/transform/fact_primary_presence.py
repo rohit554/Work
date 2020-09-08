@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 
 def fact_primary_presence(spark: SparkSession, extract_date: str):
     primary_presence = spark.sql(f"""
-                                    select userId, primaryPresence.startTime, primaryPresence.endTime, primaryPresence.systemPresence, 
+                                    select distinct userId, primaryPresence.startTime, primaryPresence.endTime, primaryPresence.systemPresence, 
             cast(primaryPresence.startTime as date) as startDate from (
         select userId, explode(primaryPresence) as primaryPresence from raw_users_details where extractDate = '{extract_date}')
                                     """)

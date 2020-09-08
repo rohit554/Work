@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 def dim_user_groups(spark: SparkSession, extract_date: str):
     user_groups = spark.sql(f"""
                     insert overwrite dim_user_groups 
-                        select 
+                        select distinct 
                             userId,
                             raw_groups.id as groupId, 
                             raw_groups.name as groupName, 

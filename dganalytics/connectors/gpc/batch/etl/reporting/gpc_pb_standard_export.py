@@ -26,4 +26,5 @@ if __name__ == "__main__":
         export_pb_to_csv(spark, table_name, ouput_file_name)
 
     except Exception as e:
-        logger.error(str(e))
+        logger.exception(e, stack_info=True, exc_info=True)
+        raise

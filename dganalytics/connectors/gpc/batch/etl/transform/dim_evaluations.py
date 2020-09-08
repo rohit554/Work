@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 
 def dim_evaluations(spark: SparkSession, extract_date: str):
     evaluations = spark.sql(f"""
-                                    select id as evaluationId, evaluator.id as evaluatorId, agent.id as agentId, conversation.id as conversationId, 
+                                    select distinct id as evaluationId, evaluator.id as evaluatorId, agent.id as agentId, conversation.id as conversationId, 
                                         evaluationForm.id as evaluationFormId, status, assignedDate, releaseDate,
                                         changedDate, conversationDate, mediaType[0] as mediaType, 
                                         agentHasRead, answers.anyFailedKillQuestions, answers.comments, 

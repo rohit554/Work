@@ -11,9 +11,8 @@ gpc_end_points = {
                        "locations", "groups", "skills", "languages", "languagePreference", "employerInfo", "biography"],
             "pageSize": 500
         },
-        "write_batch_size": None,
         "entity_name": "entities",
-        "spark_partitions": 1,
+        "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": True
     },
     "routing_queues": {
@@ -25,9 +24,8 @@ gpc_end_points = {
         "params": {
             "pageSize": 500
         },
-        "write_batch_size": None,
         "entity_name": "entities",
-        "spark_partitions": 1,
+        "spark_partitions": {"max_records_per_partition": 50000},
         "tbl_overwrite": True
     },
     "groups": {
@@ -39,9 +37,8 @@ gpc_end_points = {
         "params": {
             "pageSize": 500
         },
-        "write_batch_size": None,
         "entity_name": "entities",
-        "spark_partitions": 1,
+        "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": True
     },
     "users_details": {
@@ -53,16 +50,21 @@ gpc_end_points = {
         "params": {
             "pageSize": 100
         },
-        "write_batch_size": None,
         "entity_name": "userDetails",
-        "spark_partitions": 1,
+        "spark_partitions": {"max_records_per_partition": 30000},
         "tbl_overwrite": False
     },
     "users_details_job": {
         "endpoint": "/api/v2/analytics/users/details/jobs",
         "extract_type": "custom",
+        "paging": False,
+        "cursor": True,
+        "interval": False,
+        "params": {
+            "pageSize": 1000
+        },
         "entity_name": "userDetails",
-        "spark_partitions": 1,
+        "spark_partitions": {"max_records_per_partition": 30000},
         "table_name": "users_details",
         "tbl_overwrite": False
     },
@@ -75,9 +77,8 @@ gpc_end_points = {
         "params": {
             "pageSize": 100
         },
-        "write_batch_size": None,
         "entity_name": "entities",
-        "spark_partitions": 1,
+        "spark_partitions": {"max_records_per_partition": 50000},
         "tbl_overwrite": True
     },
     "conversation_details": {
@@ -89,37 +90,43 @@ gpc_end_points = {
         "params": {
             "pageSize": 100
         },
-        "write_batch_size": None,
         "entity_name": "conversations",
-        "spark_partitions": 2,
+        "spark_partitions": {"max_records_per_partition": 5000},
         "tbl_overwrite": False
     },
     "conversation_details_job": {
         "endpoint": "/api/v2/analytics/conversations/details/jobs",
         "extract_type": "custom",
+        "request_type": "POST",
+        "paging": False,
+        "cursor": True,
+        "interval": False,
+        "params": {
+            "pageSize": 1000
+        },
         "entity_name": "conversations",
-        "spark_partitions": 2,
-        "table_name": "conversations_details",
+        "spark_partitions": {"max_records_per_partition": 5000},
+        "table_name": "conversation_details",
         "tbl_overwrite": False
     },
     "wfm_adherence": {
         "endpoint": "/api/v2/workforcemanagement/adherence/historical",
         "extract_type": "custom",
-        "spark_partitions": 2,
+        "spark_partitions": {"max_records_per_partition": 30000},
         "table_name": "wfm_adherence",
         "tbl_overwrite": False
     },
     "evaluations": {
         "endpoint": "/api/v2/quality/evaluations/query",
         "extract_type": "custom",
-        "spark_partitions": 1,
+        "spark_partitions": {"max_records_per_partition": 10000},
         "table_name": "evaluations",
         "tbl_overwrite": False
     },
     "evaluation_forms": {
         "endpoint": "/api/v2/quality/forms/evaluations/{}",
         "extract_type": "custom",
-        "spark_partitions": 1,
+        "spark_partitions": {"max_records_per_partition": 100000},
         "table_name": "evaluation_forms",
         "tbl_overwrite": True
     }

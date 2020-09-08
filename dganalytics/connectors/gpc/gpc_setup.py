@@ -119,6 +119,7 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     userTitle string,
                     department string,
                     managerId string,
+                    managerFullName string,
                     state string
                 )
                     using delta
@@ -127,18 +128,13 @@ def create_dim_tables(spark: SparkSession, db_name: str):
 
     spark.sql(
         f"""
-                create table if not exists {db_name}.dim_managers
+                create table if not exists {db_name}.dim_wrapup_codes
                 (
-                    managerName string,
-                    managerId string,
-                    managerFullName string,
-                    managerEmail string,
-                    managerTitle string,
-                    department string,
-                    state string
+                    wrapupId string,
+                    wrapupCode string
                 )
                     using delta
-            LOCATION '{db_path}/{db_name}/dim_managers'"""
+            LOCATION '{db_path}/{db_name}/dim_wrapup_codes'"""
     )
 
     spark.sql(

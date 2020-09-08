@@ -2,12 +2,13 @@ import requests as rq
 import json
 from pyspark.sql import SparkSession
 from dganalytics.connectors.gpc.gpc_utils import get_api_url, get_schema
-from dganalytics.connectors.gpc.gpc_utils import authorize, get_path_vars
+from dganalytics.connectors.gpc.gpc_utils import authorize, get_path_vars, process_raw_data
 from dganalytics.connectors.gpc.gpc_utils import update_raw_table, write_api_resp, gpc_utils_logger
 
 
 def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
     logger = gpc_utils_logger(tenant, "gpc_evaluation_forms_api")
+    logger.info("Extracting Evaluation Forms")
     api_headers = authorize(tenant)
     evaluation_forms_list = []
     evaluation_forms = []
@@ -29,7 +30,7 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_
         evaluation_forms.append(resp.json()['entities'])
     evaluation_forms = [item['id']
                         for sublist in evaluation_forms for item in sublist]
-
+    logger.info("Extracting Evaluation Form Versions")
     for e in evaluation_forms:
         versions_resp = rq.get(
             f"{get_api_url(tenant)}/api/v2/quality/forms/evaluations/{e}/versions", headers=api_headers)
@@ -41,6 +42,7 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_
     versions_list = [item for sublist in versions_list for item in sublist]
     versions_list = [item['id'] for item in versions_list]
 
+    logger.info("Extracting Evaluation Form questions for all Versions")
     for e in versions_list:
         resp = rq.get(
             f"{get_api_url(tenant)}/api/v2/quality/forms/evaluations/{e}", headers=api_headers)
@@ -51,17 +53,4 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_
 
     evaluation_forms_list = [json.dumps(form) for form in evaluation_forms_list]
 
-    tenant_path, db_path, log_path = get_path_vars(tenant)
-    raw_file = write_api_resp(
-        evaluation_forms_list, 'evaluation_forms', run_id, tenant_path, 1, extract_date)
-
-    df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
-        spark._sc.parallelize(evaluation_forms_list, 1), schema=get_schema('evaluation_forms'))
-
-    update_raw_table(db_path, df, 'evaluation_forms', extract_date, True)
-
-    stats_insert = f"""insert into {db_name}.ingestion_stats
-        values ('evaluation_forms', 'https://api.mypurecloud.com/api/v2/quality/forms/evaluations/',
-         1, {df.count()}, '{raw_file}', '{run_id}', '{extract_date}',
-        current_timestamp)"""
-    spark.sql(stats_insert)
+    process_raw_data(spark, tenant, 'evaluation_forms', run_id, evaluation_forms_list, extract_date, len(versions_list))

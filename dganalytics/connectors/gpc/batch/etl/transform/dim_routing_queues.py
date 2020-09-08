@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 def dim_routing_queues(spark: SparkSession, extract_date: str):
     routing_queues = spark.sql("""
                         insert overwrite dim_routing_queues
-                        select 
+                        select distinct 
                             id as queueId,
                             name as queueName,
                             acwSettings.wrapupPrompt as wrapupPrompt,

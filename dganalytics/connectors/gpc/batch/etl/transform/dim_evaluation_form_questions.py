@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 def dim_evaluation_form_questions(spark: SparkSession, extract_date: str):
     evaluation_form_questions = spark.sql("""
                     insert overwrite dim_evaluation_form_questions
-                        select evaluationFormId, questionGroupId, questions.id as questionId, 
+                        select distinct evaluationFormId, questionGroupId, questions.id as questionId, 
     questions.text as questionText,
     questions.commentsRequired as commentsRequired, questions.helpText as helpText,
     questions.isCritical as isCritical, questions.isKill as isKill,

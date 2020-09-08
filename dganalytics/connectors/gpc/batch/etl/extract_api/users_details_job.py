@@ -23,7 +23,8 @@ def exec_users_details_job_api(spark: SparkSession, tenant: str, run_id: str, db
             f"{get_api_url(tenant)}/api/v2/analytics/users/details/jobs/{job_id}",
             headers=api_headers)
         if job_status_resp.status_code not in [200, 202]:
-            logger.error("Users Details Job Status API Failed" + job_status_resp.text)
+            logger.error("Users Details Job Status API Failed" +
+                         job_status_resp.text)
 
         if job_status_resp.json()['state'] == 'FULFILLED':
             break
@@ -32,24 +33,11 @@ def exec_users_details_job_api(spark: SparkSession, tenant: str, run_id: str, db
                 "Users Details Job Status API - Job was either Killed, cancelled or expired" + job_status_resp.text)
 
     api_config = {
-        "users_details": {
+        "users_details_job": {
             "endpoint": "/api/v2/analytics/users/details/jobs/{}/results".format(job_id),
-            "request_type": "GET",
-            "paging": False,
-            "cursor": True,
-            "interval": False,
-            "params": {
-                        "pageSize": 1000,
-            },
-            "spark_partitions": 2,
-            "entity_name": "userDetails",
-            "raw_table_update": {
-                "mode": "overwrite",
-                        "partition": ["extractDate"]
-            },
-            "tbl_overwrite": False
+            "request_type": "GET"
         }
     }
 
-    df = gpc_request(spark, tenant, 'users_details',
-                     run_id, extract_date, overwrite_gpc_config=api_config)
+    df = gpc_request(spark, tenant, 'users_details_job', run_id,
+                     extract_date, overwrite_gpc_config=api_config)

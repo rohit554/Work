@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 
 def fact_wfm_day_metrics(spark: SparkSession, extract_date: str):
     wfm_day_metrics = spark.sql(f"""
-                                    select userId, startDate, actualsEndDate, endDate, impact, 
+                                    select distinct userId, startDate, actualsEndDate, endDate, impact, 
     dayMetrics.actualLengthSecs,dayMetrics.adherencePercentage, dayMetrics.adherenceScheduleSecs,
     dayMetrics.conformanceActualSecs, dayMetrics.conformancePercentage, 
     dayMetrics.conformanceScheduleSecs, dayMetrics.dayStartOffsetSecs,

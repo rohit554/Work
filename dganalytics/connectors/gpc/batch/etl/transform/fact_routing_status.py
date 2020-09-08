@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 
 def fact_routing_status(spark: SparkSession, extract_date: str):
     routing_status = spark.sql(f"""
-                                select userId, routingStatus.startTime, routingStatus.endTime, routingStatus.routingStatus,
+                                select distinct userId, routingStatus.startTime, routingStatus.endTime, routingStatus.routingStatus,
                                 cast(routingStatus.startTime as date) as startDate from (
     select userId, explode(routingStatus) as routingStatus from raw_users_details where extractDate = '{extract_date}')
                                 """)

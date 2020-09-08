@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 
 def fact_evaluation_question_scores(spark: SparkSession, extract_date: str):
     evaluation_question_scores = spark.sql(f"""
-                                    select evaluationId,questionGroupId, qa.questionId, qa.answerId, qa.comments,
+                                    select distinct evaluationId,questionGroupId, qa.questionId, qa.answerId, qa.comments,
                                         qa.failedKillQuestion, qa.markedNA, qa.score
                                             from (
                                     select id as evaluationId, 
