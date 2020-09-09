@@ -7,25 +7,25 @@ def fact_conversation_metrics(spark: SparkSession, extract_date: str):
                     sessionId,  
                     cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as emitDateTime,
                     cast(cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as date) as emitDate,
-                    sum(coalesce(tAbandonCount,0)) as nAbandon,
-                    sum(coalesce(tAcdCount,0)) as nAcd,
-                    sum(coalesce(tAcwCount,0)) as nAcw,
-                    sum(coalesce(tAnsweredCount,0)) as nAnswered,
+                    sum(case when coalesce(tAbandon,0) > 0 then 1 else 0 end) as nAbandon,
+                    sum(case when coalesce(tAcd,0) > 0 then 1 else 0 end) as nAcd,
+                    sum(case when coalesce(tAcw,0) > 0 then 1 else 0 end) as nAcw,
+                    sum(case when coalesce(tAnswered,0) > 0 then 1 else 0 end) as nAnswered,
                     sum(coalesce(nBlindTransferred,0)) as nBlindTransferred,
                     sum(coalesce(nConnected,0)) as nConnected,
                     sum(coalesce(nConsult,0)) as nConsult,
                     sum(coalesce(nConsultTransferred,0)) as nConsultTransferred,
                     sum(coalesce(nError,0)) as nError,
-                    sum(coalesce(tHandleCount,0)) as nHandle,
-                    sum(coalesce(tHeldCompleteCount,0)) as nHeldComplete,
+                    sum(case when coalesce(tHandle,0) > 0 then 1 else 0 end) as nHandle,
+                    sum(case when coalesce(tHeldComplete,0) > 0 then 1 else 0 end) as nHeldComplete,
                     sum(coalesce(nOffered,0)) as nOffered,
                     sum(coalesce(nOutbound,0)) as nOutbound,
                     sum(coalesce(nOutboundAbandoned,0)) as nOutboundAbandoned,
                     sum(coalesce(nOutboundAttempted,0)) as nOutboundAttempted,
                     sum(coalesce(nOutboundConnected,0)) as nOutboundConnected,
                     sum(coalesce(nOverSla,0)) as nOverSla,
-                    sum(coalesce(tShortAbandonCount,0)) as nShortAbandon,
-                    sum(coalesce(tTalkComplete,0)) as nTalkComplete,
+                    sum(case when coalesce(tShortAbandon,0) > 0 then 1 else 0 end) as nShortAbandon,
+                    sum(case when coalesce(tTalkComplete,0) > 0 then 1 else 0 end) as nTalkComplete,
                     sum(coalesce(nTransferred,0)) as nTransferred,
                     sum(coalesce(tAbandon,0))/1000.0 as tAbandon,
                     sum(coalesce(tAcd,0))/1000.0 as tAcd,
@@ -63,17 +63,18 @@ def fact_conversation_metrics(spark: SparkSession, extract_date: str):
                                     explode(participants) as participants
                                 from
                                     raw_conversation_details where extractDate = '{extract_date}')
-                            where
-                                participants.purpose = 'agent') )
+                           ) )
                     )
                     pivot (
                             sum(coalesce(value,0))
-                        for name in ('nBlindTransferred', 'nConnected', 'nConsult', 'nConsultTransferred', 'nError', 'nOffered', 'nOutbound',
-                                    'nOutboundAbandoned', 'nOutboundAttempted', 'nOutboundConnected', 'nOverSla', 'nTransferred', 'tAbandon',
-                                    'tAbandonCount', 'tAcd', 'tAcdCount', 'tAcw', 'tAcwCount', 'tAgentResponseTime', 'tAnswered', 'tAnsweredCount',
-                                    'tContacting', 'tDialing', 'tHandle', 'tHandleCount', 'tHeld', 'tHeldComplete', 'tHeldCompleteCount',
-                                    'tHeldCount', 'tIvr', 'tNotResponding', 'tShortAbandon', 'tShortAbandonCount', 'tTalk', 'tTalkComplete',
-                                    'tTalkCompleteCount', 'tVoicemail', 'tWait'
+                        for name in ('nBlindTransferred',
+                                    'nConnected', 'nConsult', 'nConsultTransferred', 'nError', 'nOffered', 'nOutbound', 'nOutboundAbandoned',
+                                    'nOutboundAttempted', 'nOutboundConnected', 'nOverSla', 'nStateTransitionError', 'nTransferred',
+                                    'oExternalMediaCount', 'oInteracting', 'oMediaCount', 'oServiceLevel', 'oServiceTarget', 'oWaiting',
+                                    'tAbandon', 'tAcd', 'tAcw', 'tAgentResponseTime', 'tAlert', 'tAnswered', 'tContacting', 'tDialing',
+                                    'tFlowOut', 'tHandle', 'tHeld', 'tHeldComplete', 'tIvr', 'tMonitoring', 'tNotResponding',
+                                    'tShortAbandon', 'tTalk', 'tTalkComplete', 'tUserResponseTime','tVoicemail',
+                                    'tWait'
                                 )
                             )
                         

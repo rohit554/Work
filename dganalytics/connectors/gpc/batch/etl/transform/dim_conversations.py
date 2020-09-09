@@ -38,8 +38,7 @@ def dim_conversations(spark: SparkSession, extract_date: str):
                                     explode(participants) as participants
                                 from
                                     raw_conversation_details where extractDate = '{extract_date}')
-                            where
-                                participants.purpose = 'agent' ) )
+                                ) )
                                     """
                               )
     conversations.registerTempTable("conversations")

@@ -188,11 +188,11 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
     if not get_tbl_overwrite(api_name):
         df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
             'extractDate').option("replaceWhere",
-                                  f" extractDate = '{extract_date}' ").save(f"{db_path}/{db_name}/raw_{api_name}")
+                                  f" extractDate = '{extract_date}' ").save(f"{db_path}/{db_name}/{table_name}")
         # partition_spec = "PARTITION (extractDate)"
     else:
         df.coalesce(1).write.format("delta").mode(
-            "overwrite").save(f"{db_path}/{db_name}/raw_{api_name}")
+            "overwrite").save(f"{db_path}/{db_name}/{table_name}")
 
     '''
     spark.sql(f"""insert overwrite TABLE {db_name}.{table_name} {partition_spec}
@@ -308,6 +308,7 @@ def get_prev_extract_data(tenant: str, extract_date: str, run_id: str, api_name:
     with gzip.open(os.path.join(tenant_path, 'data', 'raw', 'gpc', extract_date, run_id, f'{api_name}.json.gz'), 'rb') as f:
         resp_list = json.loads(f.read())
 
+    logger.info("length of contents - " + str(len(resp_list)))
     return resp_list
 
 
