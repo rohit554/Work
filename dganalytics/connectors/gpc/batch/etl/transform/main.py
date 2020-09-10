@@ -10,7 +10,6 @@ transform_to_method = {
     "dim_evaluation_form_questions": transform.dim_evaluation_form_questions,
     "dim_evaluation_forms": transform.dim_evaluation_forms,
     "dim_evaluations": transform.dim_evaluations,
-    "dim_managers": transform.dim_managers,
     "dim_routing_queues": transform.dim_routing_queues,
     "dim_user_groups": transform.dim_user_groups,
     "dim_users": transform.dim_users,

@@ -45,6 +45,7 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 sessionStart timestamp comment 'first segment start date',
                 sessionEnd timestamp comment 'last segment end date',
                 sessionDirection string,
+                purpose string,
                 queueId string,
                 mediaType string,
                 messageType string,

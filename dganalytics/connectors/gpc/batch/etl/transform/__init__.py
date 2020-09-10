@@ -4,7 +4,6 @@ from dganalytics.connectors.gpc.batch.etl.transform.dim_evaluation_form_question
 from dganalytics.connectors.gpc.batch.etl.transform.dim_evaluation_form_questions import dim_evaluation_form_questions
 from dganalytics.connectors.gpc.batch.etl.transform.dim_evaluation_forms import dim_evaluation_forms
 from dganalytics.connectors.gpc.batch.etl.transform.dim_evaluations import dim_evaluations
-from dganalytics.connectors.gpc.batch.etl.transform.dim_managers import dim_managers
 from dganalytics.connectors.gpc.batch.etl.transform.dim_routing_queues import dim_routing_queues
 from dganalytics.connectors.gpc.batch.etl.transform.dim_user_groups import dim_user_groups
 from dganalytics.connectors.gpc.batch.etl.transform.dim_users import dim_users

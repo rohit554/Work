@@ -12,6 +12,7 @@ def dim_conversations(spark: SparkSession, extract_date: str):
                         element_at(segments, 1).segmentStart as sessionStart,
                         element_at(segments, size(segments)).segmentEnd as sessionEnd,
                         sessionDirection,
+                        purpose,
                         element_at(segments, 1).queueId as queueId,
                         mediaType,
                         messageType,
