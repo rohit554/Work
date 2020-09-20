@@ -54,7 +54,7 @@
                             "referenceName": "AzureKeyVault",
                             "type": "LinkedServiceReference"
                         },
-                        "secretName": "dabaricksaccesstoken"
+                        "secretName": "databricksaccesstoken"
                     },
                     "existingClusterId": {
                         "type": "AzureKeyVaultSecret",
@@ -667,9 +667,6 @@
                     "tenant": {
                         "type": "string",
                         "defaultValue": "[parameters('tenant')]"
-                    },
-                    "extract_date": {
-                        "type": "string"
                     }
                 },
                 "folder": {

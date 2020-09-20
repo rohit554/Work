@@ -1,6 +1,15 @@
 {
-    "testhf": {
-        "adf": ["dganalytics/connectors/gpc/batch/adf/gpc_day1_template.json"],
-        "realtime":  "dganalytics/connectors/gpc/realtime/functions"
+    "hellofresh": {
+        "adf": {
+            "1": {
+                "pipeline": "dganalytics/connectors/gpc/batch/adf/gpc_daily_template.json",
+                "parameters": {}
+            },
+            "2": "dganalytics/connectors/gpc/batch/adf/gpc_data_migration.json",
+            "3": "dganalytics/connectors/gpc/batch/adf/gpc_powerbi_export.json"
+        },
+        "realtime": {
+            "1": "dganalytics/connectors/gpc/realtime/functions"
+        }
     }
 }

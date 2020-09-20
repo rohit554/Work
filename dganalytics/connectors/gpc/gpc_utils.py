@@ -253,6 +253,20 @@ def extract_parser():
 
     return tenant, run_id, extract_date, api_name
 
+def dg_metadata_export_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--tenant', required=True)
+    parser.add_argument('--run_id', required=True)
+    parser.add_argument('--extract_date', required=True,
+                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
+    parser.add_argument('--org_id', required=True)
+    args, unknown_args = parser.parse_known_args()
+    tenant = args.tenant
+    run_id = args.run_id
+    extract_date = args.extract_date.strftime('%Y-%m-%d')
+    org_id= args.org_id
+    return tenant, run_id, extract_date, org_id
+
 
 def transform_parser():
     parser = argparse.ArgumentParser()

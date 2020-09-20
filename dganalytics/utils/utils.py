@@ -7,6 +7,10 @@ import json
 from datetime import datetime
 import logging
 import tempfile
+import pymongo
+import requests
+import pandas as pd
+
 
 def get_env():
     try:
@@ -93,6 +97,7 @@ def get_logger(tenant: str, app_name: str):
 
     return logger
 
+
 def flush_utils(spark: SparkSession, logger: logging.Logger) -> None:
     # spark.stop()
     '''
@@ -103,6 +108,7 @@ def flush_utils(spark: SparkSession, logger: logging.Logger) -> None:
     file_handler.close()
     '''
     pass
+
 
 def get_dbutils():
     global dbutils
@@ -127,7 +133,68 @@ def get_secret(secret_key: str):
         return dbutils.secrets.get(scope='dgsecretscope', key='{}'.format(secret_key))
 
 
-def get_spark_session(app_name: str, tenant: str, default_db: str):
+def get_mongo_connection(database: str = None):
+    mongo_client = pymongo.MongoClient(get_secret("mongodbconnurl"))
+    env = get_env()
+    if database is None:
+        if env == "local":
+            db_name = "dggamificationdev"
+        else:
+            db_name = "dggamification" + env
+        mongo_client.get_database(db_name)
+    else:
+        mongo_client.get_database(database)
+    return mongo_client
+
+
+def get_gamification_token():
+    body = {
+        "email": get_secret("gamificationuser"),
+        "password": get_secret("gamificationpassword")
+    }
+    gamification_url = get_secret("gamificationurl")
+
+    auth_resp = requests.post(
+        f"{gamification_url}/api/auth/getAccessToken/", data=body)
+    if auth_resp.status_code != 200 or 'access_token' not in auth_resp.json().keys():
+        raise Exception("unable to get gamification access token")
+
+    return auth_resp.json()['access_token'], auth_resp.json()['userId']
+
+def push_gamification_data(df: pd.DataFrame, org_id: str, connection_name: str):
+    # df = df.sample(n=100)
+    token, user_Id = get_gamification_token()
+    headers = {
+        "email": get_secret("gamificationuser"),
+        "id_token": token,
+        "orgid": org_id
+    }
+    prefix = "# Mandatory fields are Date & UserID (Format must be YYYY-MM-DD)"    
+    a = tempfile.NamedTemporaryFile()
+    print(str(df.shape))
+    a.file.write(bytes(prefix + "\n", 'utf-8'))
+    a.file.write(bytes(df.to_csv(index=False, header=True, mode='a'), 'utf-8'))
+    body = {
+        "connectionName": f"{connection_name}",
+        "user_id": f"{user_Id}"
+    }
+    files = [
+        ('profile', open(a.name, 'rb'))
+    ]
+    print(f"{get_secret('gamificationurl')}/api/connection/uploaDataFile")
+
+    # print(str(body))
+
+    resp = requests.post(
+        f"{get_secret('gamificationurl')}/api/connection/uploaDataFile", headers=headers, files=files, data=body)
+    if resp.status_code != 200:
+        raise Exception("publishing failed")
+    else:
+        print("File data submitted to API")
+    a.close()
+
+
+def get_spark_session(app_name: str, tenant: str, default_db: str = None):
     global env
     time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
     app_name = f"{tenant}-{app_name}-{time}"
@@ -161,8 +228,8 @@ def get_spark_session(app_name: str, tenant: str, default_db: str):
 
     spark = SparkSession.builder.appName(app_name).config(
         conf=conf).getOrCreate().newSession()
-
-    spark.sql(f"use {default_db}")
+    if default_db is not None:
+        spark.sql(f"use {default_db}")
     return spark
 
 

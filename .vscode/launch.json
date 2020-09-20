@@ -20,9 +20,10 @@
             "console": "integratedTerminal",
             "args": [
                 "--tenant=test",
-                "--run_id=t1",
+                "--run_id=t2",
                 "--extract_date=2020-09-02",
-                "--api_name=conversation_details"
+                "--api_name=wrapup_codes",
+                "--org_id=SALMATDEV"
             ]
         },
         {

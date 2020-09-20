@@ -20,7 +20,8 @@ if __name__ == "__main__":
     try:
         logger.info(f"Extracting GPC API {api_name}")
 
-        if check_prev_gpc_extract(spark, api_name, extract_date, run_id):
+        # if check_prev_gpc_extract(spark, api_name, extract_date, run_id):
+        if 1 == 2:
             logger.info(f"API {api_name} for {tenant} - {extract_date} already extracted")
             resp_list = get_prev_extract_data(tenant, extract_date, run_id, api_name)
             process_raw_data(spark, tenant, api_name, run_id, resp_list, extract_date, 0, re_process=True)
