@@ -10,7 +10,17 @@ import tempfile
 import pymongo
 import requests
 import pandas as pd
+from contextlib import contextmanager
 
+@contextmanager
+def get_mongo_conxn(mongodb_conxnx_uri):
+    try:
+        with pymongo.MongoClient( mongodb_conxnx_uri ) as mongodb_cluster_client:
+            yield mongodb_cluster_client
+    except Exception as e:
+        raise Exception(
+            f"Excepton {e} occured. Please mongodb_conxnx_uri for env"
+        )
 
 def get_env():
     try:
@@ -131,21 +141,6 @@ def get_secret(secret_key: str):
     else:
         dbutils = get_dbutils()
         return dbutils.secrets.get(scope='dgsecretscope', key='{}'.format(secret_key))
-
-
-def get_mongo_connection(database: str = None):
-    mongo_client = pymongo.MongoClient(get_secret("mongodbconnurl"))
-    env = get_env()
-    if database is None:
-        if env == "local":
-            db_name = "dggamificationdev"
-        else:
-            db_name = "dggamification" + env
-        mongo_client.get_database(db_name)
-    else:
-        mongo_client.get_database(database)
-    return mongo_client
-
 
 def get_gamification_token():
     body = {
