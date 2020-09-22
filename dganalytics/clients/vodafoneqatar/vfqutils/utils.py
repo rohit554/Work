@@ -80,7 +80,7 @@ def exit_deltatable_changes(this_deltatable, numericreplace, stringreplace, outp
         this_dataframe = this_deltatable.toDF()
         cdataframe = nullify_data(
             this_dataframe, numericreplace, stringreplace)
-        overwrite_sparkDF_to_Delta(cdataframe, output_filepath)
+        overwrite_sparkDF_to_Delta(cdataframe, output_filepath,options={ "overwriteSchema": "true"})
     except Exception as e:
         logging.error(f"Exit changes on failure also failed with error {e}")
     return
@@ -128,7 +128,7 @@ def extract_mongo_colxn(
             if not os.path.exists(output_filepath):
                 try:
                     overwrite_sparkDF_to_Delta(
-                        daywise_collection_data, output_filepath)
+                        daywise_collection_data, output_filepath,options={ "overwriteSchema": "true"})
                 except Exception as e:
                     if not daywise_collection_data.toPandas().empty:
                         logging.error(
@@ -149,7 +149,8 @@ def extract_mongo_colxn(
 
                 overwrite_sparkDF_to_Delta(
                     transformed_existing_table_data,
-                    output_filepath
+                    output_filepath,
+                    options={ "overwriteSchema": "true"}
                 )
                 existing_deltatable = DeltaTable.forPath(
                     spark, output_filepath)
@@ -186,7 +187,7 @@ def extract_mongo_colxn(
             try:
 
                 overwrite_sparkDF_to_Delta(
-                    daywise_collection_data, output_filepath)
+                    daywise_collection_data, output_filepath,options={ "overwriteSchema": "true"})
 
             except Exception as e:
                 if not daywise_collection_data.toPandas().empty:
