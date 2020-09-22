@@ -126,6 +126,7 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate):
             )
         # if step_name == "FinalUpdate":
             extract_mongo_colxn(
+                env,
                 mongodb_conxnx_uri,
                 tenant,
                 database_name,
