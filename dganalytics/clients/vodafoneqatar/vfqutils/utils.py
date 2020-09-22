@@ -36,11 +36,14 @@ def denullify_data(this_dataframe, numcons_paceholder):
     return transformed_dataframe
 
 
-def overwrite_sparkDF_to_Delta(this_dataframe, filepath, **options):
-    framewriter = this_dataframe.write.format("delta").mode("overwrite")
-    for opt, val in options.items():
-        framewriter = framewriter.option(opt, val)
-    framewriter.save(
+def overwrite_sparkDF_to_Delta(this_dataframe, filepath,):
+    framewriter = this_dataframe.write.format(
+        "delta"
+        ).mode(
+            "overwrite"
+            ).option(
+                "overwriteSchema", "true"
+                ).save(
         filepath
     )
     return
@@ -80,7 +83,7 @@ def exit_deltatable_changes(this_deltatable, numericreplace, stringreplace, outp
         this_dataframe = this_deltatable.toDF()
         cdataframe = nullify_data(
             this_dataframe, numericreplace, stringreplace)
-        overwrite_sparkDF_to_Delta(cdataframe, output_filepath,options={ "overwriteSchema": "true"})
+        overwrite_sparkDF_to_Delta(cdataframe, output_filepath)
     except Exception as e:
         logging.error(f"Exit changes on failure also failed with error {e}")
     return
@@ -128,7 +131,7 @@ def extract_mongo_colxn(
             if not os.path.exists(output_filepath):
                 try:
                     overwrite_sparkDF_to_Delta(
-                        daywise_collection_data, output_filepath,options={ "overwriteSchema": "true"})
+                        daywise_collection_data, output_filepath)
                 except Exception as e:
                     if not daywise_collection_data.toPandas().empty:
                         logging.error(
@@ -150,7 +153,6 @@ def extract_mongo_colxn(
                 overwrite_sparkDF_to_Delta(
                     transformed_existing_table_data,
                     output_filepath,
-                    options={ "overwriteSchema": "true"}
                 )
                 existing_deltatable = DeltaTable.forPath(
                     spark, output_filepath)
@@ -187,7 +189,7 @@ def extract_mongo_colxn(
             try:
 
                 overwrite_sparkDF_to_Delta(
-                    daywise_collection_data, output_filepath,options={ "overwriteSchema": "true"})
+                    daywise_collection_data, output_filepath)
 
             except Exception as e:
                 if not daywise_collection_data.toPandas().empty:
