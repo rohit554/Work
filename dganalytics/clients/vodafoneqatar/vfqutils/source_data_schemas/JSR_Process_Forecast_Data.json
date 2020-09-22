@@ -1,0 +1,47 @@
+{
+    "fields": [
+      {
+        "metadata": {},
+        "name": "actual",
+        "nullable": true,
+        "type": "int"
+      },
+      {
+        "metadata": {},
+        "name": "forecast",
+        "nullable": true,
+        "type": "int"
+      },
+      {
+        "metadata": {},
+        "name": "language",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "lob",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "location",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "report_date",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "segment_type",
+        "nullable": true,
+        "type": "string"
+      }
+    ],
+    "type": "struct"
+}

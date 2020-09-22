@@ -28,7 +28,7 @@
             "args": [
                 "--env=local",
                 "--database_name=vodafone-qatar-prod",
-                "--stage_name=Raw_FCR",
+                "--stage_name=User_FCR_KPI_Data",
                 "--step_name=FetchDelta"
             ]
 

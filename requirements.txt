@@ -12,6 +12,6 @@ azure-mgmt-resource
 azure-keyvault
 azure-keyvault-secrets
 azure-identity
-azure-storage-blob
+azure-storage-blob~=12.4.0
 azure-storage-file-datalake
 websocket_client
