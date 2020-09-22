@@ -1,1 +1,2 @@
 include dganalytics/connectors/gpc/source_api_schemas/*.json
+include dganalytics/clients/vodafoneqatar/vfqutils/source_data_schemas/*.json

@@ -136,6 +136,7 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate):
                 config_out_rnmdcolms,
                 output_db_path,
                 temp_delta_location,
+                stage_name
             )
             drop_mongo_colxn(
 

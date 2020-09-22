@@ -6,9 +6,10 @@ import logging
 import os
 from pyspark.sql import functions as F
 from copy import deepcopy
-
+from pathlib import Path
 from dganalytics.utils.utils import get_spark_session
-
+from pyspark.sql.types import StructType
+import json
 
 def denullify_data(this_dataframe, numcons_paceholder):
     # from math import pi,pow
@@ -37,6 +38,7 @@ def denullify_data(this_dataframe, numcons_paceholder):
 
 
 def overwrite_sparkDF_to_Delta(this_dataframe, filepath,):
+    print(str(this_dataframe.dtypes))
     framewriter = this_dataframe.write.format(
         "delta"
         ).mode(
@@ -64,7 +66,12 @@ def read_delta_to_sparkDF(spark, filepath):
     return this_dataframe
 
 
-def get_sparkDf_from_mongocollection(spark, tenant, mongodb_conxnx_uri, database_name, output_table_name):
+def get_sparkDf_from_mongocollection(spark, tenant, mongodb_conxnx_uri, database_name, output_table_name, stage_name):
+    schema_path = os.path.join(
+        Path(__file__).parent, 'source_data_schemas', '{}.json'.format(stage_name))
+    with open(schema_path, 'r') as f:
+        schema = f.read()
+    schema = StructType.fromJson(json.loads(schema))
 
     this_dataframe = spark.read.format(
         "mongo"
@@ -74,7 +81,8 @@ def get_sparkDf_from_mongocollection(spark, tenant, mongodb_conxnx_uri, database
         "database", database_name
     ).option(
         "collection", output_table_name
-    ).load()
+    ).schema(schema).load()
+    print(str(this_dataframe.dtypes))
     return this_dataframe
 
 
@@ -100,6 +108,7 @@ def extract_mongo_colxn(
     renamed_columns,
     output_db_path,
     temp_delta_location,
+    stage_name
 ):
 
     output_filepath = f'{output_db_path}/{output_table_name}'
@@ -117,7 +126,7 @@ def extract_mongo_colxn(
     from delta.tables import DeltaTable
     try:
         daywise_collection_data = get_sparkDf_from_mongocollection(
-            spark, tenant, mongodb_conxnx_uri, database_name, output_table_name
+            spark, tenant, mongodb_conxnx_uri, database_name, output_table_name, stage_name
         )
         if '_id' in daywise_collection_data.columns:
             daywise_collection_data = daywise_collection_data.drop('_id')
