@@ -1,11 +1,149 @@
 {
     "fields": [
         {
-            "metadata": {},
-            "name": "conversationEnd",
-            "nullable": true,
-            "type": "string"
+          "metadata": {},
+          "name": "account_num",
+          "nullable": true,
+          "type": "long"
+        },
+        {
+          "metadata": {},
+          "name": "account_type",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "activity_num",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "agent",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "category",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "check",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "comments",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "counts",
+          "nullable": true,
+          "type": "long"
+        },
+        {
+          "metadata": {},
+          "name": "created_month",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "created_year",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "crm_segment",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "date",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "date_1",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "description",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "journey",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "location",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "owner",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "resolution_code",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "service_type",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "state",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "status",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "times",
+          "nullable": true,
+          "type": "long"
+        },
+        {
+          "metadata": {},
+          "name": "type",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
+          "name": "user_id",
+          "nullable": true,
+          "type": "string"
         }
-    ],
+      ],
     "type": "struct"
 }

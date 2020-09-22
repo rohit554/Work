@@ -97,7 +97,7 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate):
 
         else:
             min_rundate = datetime.strptime('2020-09-02', '%Y-%m-%d')
-            act_rundate = datetime.strptime('2020-09-03', '%Y-%m-%d')
+            act_rundate = datetime.strptime('2020-09-21', '%Y-%m-%d')
 
         for curr_rundate in rundate_range_generator(min_rundate, act_rundate + timedelta(days=1)):
             logging.info(f"current rundate: {curr_rundate}")

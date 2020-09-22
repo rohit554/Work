@@ -18,13 +18,20 @@
                 "AZURE_PASSWORD": "${env:AZURE_PASSWORD}"
             },
             "console": "integratedTerminal",
+            // "args": [
+            //     "--tenant=test",
+            //     "--run_id=t2",
+            //     "--extract_date=2020-09-02",
+            //     "--api_name=wrapup_codes",
+            //     "--org_id=SALMATDEV"
+            // ]
             "args": [
-                "--tenant=test",
-                "--run_id=t2",
-                "--extract_date=2020-09-02",
-                "--api_name=wrapup_codes",
-                "--org_id=SALMATDEV"
+                "--env=local",
+                "--database_name=vodafone-qatar-prod",
+                "--stage_name=Raw_FCR",
+                "--step_name=FetchDelta"
             ]
+
         },
         {
             "name": "Attach to Python Functions",

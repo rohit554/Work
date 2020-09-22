@@ -81,7 +81,9 @@ def get_sparkDf_from_mongocollection(spark, tenant, mongodb_conxnx_uri, database
         "database", database_name
     ).option(
         "collection", output_table_name
-    ).schema(schema).load()
+    ).schema(
+        schema
+        ).load()
     print(str(this_dataframe.dtypes))
     return this_dataframe
 
@@ -206,6 +208,8 @@ def extract_mongo_colxn(
                         f"Spark Dataframe write failed with error {e}")
                     raise
                 logging.warn(f"Delta Table Write failed with error {e}")
+    except ValueError as e:
+        logging.warn(f"Spark Dataframe load Exception : {e}")
     except Exception as e:
         if not daywise_collection_data.toPandas().empty:
             logging.error(f"Spark Dataframe read failed with error {e}")
