@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from pyspark.sql.functions import col
+from pyspark.sql.functions import *
 from datetime import date, datetime, timedelta
 import logging
 import os
@@ -24,9 +24,7 @@ def denullify_data(this_dataframe, numcons_paceholder):
                 float('nan'), numcons_paceholder)
             for colmn, typx in transformed_dataframe.dtypes:
                 if typx == 'null':
-                    transformed_dataframe = transformed_dataframe.withColumn(colmn, F.when(
-                        (F.col(colmn) is True) | (
-                            F.col(colmn) is not True), "NonePlaceHolder"
+                    transformed_dataframe = transformed_dataframe.withColumn(colmn, lit("NullPlaceHolder")
                     )
                     )
         except Exception as e:
@@ -140,70 +138,70 @@ def extract_mongo_colxn(
             except Exception as e:
                 logging.warn(
                     f"Skipping Vaccum Temp Table due to Exceotion: {e}")
-            # if env !='local':
-            #     split_output_file = output_filepath.split(":")
-            #     if len(split_output_file)>1:
-            #         act_output_file = f'/{split_output_file[0]}{split_output_file[1]}'
-            #     else:
-            #         act_output_file = output_filepath
-            # else:
-            #     act_output_file = output_filepath
-            # if not os.path.exists(act_output_file):
-            #     try:
-            #         overwrite_sparkDF_to_Delta(
-            #             daywise_collection_data, output_filepath)
-            #     except Exception as e:
-            #         if not daywise_collection_data.toPandas().empty:
-            #             logging.error(
-            #                 f"Spark Dataframe write failed with error {e}")
-            #             raise
-            #         logging.warn(f"Dataframe is empty exception is {e}")
-            # else:
-            from math import pi, pow
-            numcons_paceholder = pow(pow(pow(pi, pi), pow(pi, pi)), pi)
-            transformed_daywise_collection_data = denullify_data(
-                daywise_collection_data, numcons_paceholder)
+            if env !='local':
+                split_output_file = output_filepath.split(":")
+                if len(split_output_file)>1:
+                    act_output_file = f'/{split_output_file[0]}{split_output_file[1]}'
+                else:
+                    act_output_file = output_filepath
+            else:
+                act_output_file = output_filepath
+            if not os.path.exists(act_output_file):
+                try:
+                    overwrite_sparkDF_to_Delta(
+                        daywise_collection_data, output_filepath)
+                except Exception as e:
+                    if not daywise_collection_data.toPandas().empty:
+                        logging.error(
+                            f"Spark Dataframe write failed with error {e}")
+                        raise
+                    logging.warn(f"Dataframe is empty exception is {e}")
+            else:
+                from math import pi, pow
+                numcons_paceholder = pow(pow(pow(pi, pi), pow(pi, pi)), pi)
+                transformed_daywise_collection_data = denullify_data(
+                    daywise_collection_data, numcons_paceholder)
 
-            existing_table_data = read_delta_to_sparkDF(
-                spark, output_filepath)
+                existing_table_data = read_delta_to_sparkDF(
+                    spark, output_filepath)
 
-            transformed_existing_table_data = denullify_data(
-                existing_table_data, numcons_paceholder)
+                transformed_existing_table_data = denullify_data(
+                    existing_table_data, numcons_paceholder)
 
-            overwrite_sparkDF_to_Delta(
-                transformed_existing_table_data,
-                output_filepath,
-            )
-            existing_deltatable = DeltaTable.forPath(
-                spark, output_filepath)
+                overwrite_sparkDF_to_Delta(
+                    transformed_existing_table_data,
+                    output_filepath,
+                )
+                existing_deltatable = DeltaTable.forPath(
+                    spark, output_filepath)
 
-            on_condition = " and ".join(
-                [f'curr_dataset.{_} = update_dataset.{_}'for _ in primary_key])
+                on_condition = " and ".join(
+                    [f'curr_dataset.{_} = update_dataset.{_}'for _ in primary_key])
 
-            upserts = {_: f"update_dataset.{_}" for _ in output_columns}
-            try:
-                existing_deltatable.alias("curr_dataset").merge(
-                    transformed_daywise_collection_data.coalesce(
-                        2).alias("update_dataset"),
-                    on_condition
-                ).whenMatchedUpdateAll(
-                    # ).whenMatchedUpdate(
-                    # set = upserts
-                ).whenNotMatchedInsertAll(
-                    # ).whenNotMatchedInsert(
-                    # values = upserts
-                ).execute()
-                exit_deltatable_changes(
-                    existing_deltatable, numcons_paceholder, 'NonePlaceHolder', output_filepath)
-            except Exception as e:
-                exit_deltatable_changes(
-                    existing_deltatable, numcons_paceholder, 'NonePlaceHolder', output_filepath)
-                if not transformed_daywise_collection_data.toPandas().empty:
-                    logging.error(
-                        f"Delta Table Merge failed in Merge with error {e}")
-                    raise
-                logging.warn(
-                    f"Delta Table Merge failed in Merge with error {e} /n Empty Data for this rundate")
+                upserts = {_: f"update_dataset.{_}" for _ in output_columns}
+                try:
+                    existing_deltatable.alias("curr_dataset").merge(
+                        transformed_daywise_collection_data.coalesce(
+                            2).alias("update_dataset"),
+                        on_condition
+                    ).whenMatchedUpdateAll(
+                        # ).whenMatchedUpdate(
+                        # set = upserts
+                    ).whenNotMatchedInsertAll(
+                        # ).whenNotMatchedInsert(
+                        # values = upserts
+                    ).execute()
+                    exit_deltatable_changes(
+                        existing_deltatable, numcons_paceholder, 'NonePlaceHolder', output_filepath)
+                except Exception as e:
+                    exit_deltatable_changes(
+                        existing_deltatable, numcons_paceholder, 'NonePlaceHolder', output_filepath)
+                    if not transformed_daywise_collection_data.toPandas().empty:
+                        logging.error(
+                            f"Delta Table Merge failed in Merge with error {e}")
+                        raise
+                    logging.warn(
+                        f"Delta Table Merge failed in Merge with error {e} /n Empty Data for this rundate")
 
         if 'OVERWRITE' in output_type:
             try:
