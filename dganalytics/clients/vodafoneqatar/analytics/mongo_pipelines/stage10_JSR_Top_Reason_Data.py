@@ -105,7 +105,7 @@ aggr_pipeline = [
       "created_by": 1,
       "location": 1,
       "lob": "$service_type",
-      "FCR": {
+      "fcr": {
         "$cond": [
           {
             "$eq": [
@@ -117,7 +117,7 @@ aggr_pipeline = [
           0
         ]
       },
-      "NFCR": {
+      "nfcr": {
         "$cond": [
           {
             "$or": [

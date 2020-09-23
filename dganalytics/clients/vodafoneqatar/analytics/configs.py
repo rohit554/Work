@@ -130,8 +130,8 @@ config = {
         'primary_key': ['sub_reason', 'call_reason', 'type', 'call_type', 'created_by', 'segment_type', 'report_date', 'location', 'lob', ],
         'output_type': ['MERGED','RENAME_COLUMNS'],
         'renamed_columns': { # Columns in collection renamed after aggregation before inserting
-            'NFCR':'nfcr',   # format : "Existing output field Name from Mongo": "Expected field Name"
-            'FCR':'fcr', 
+            # 'NFCR':'nfcr',   # format : "Existing output field Name from Mongo": "Expected field Name"
+            # 'FCR':'fcr', 
         },
     },
     "Process_AHT_KPI_Data_to_All_Process" : {
