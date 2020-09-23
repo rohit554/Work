@@ -4,13 +4,13 @@
         "metadata": {},
         "name": "actual",
         "nullable": true,
-        "type": "int"
+        "type": "long"
       },
       {
         "metadata": {},
         "name": "forecast",
         "nullable": true,
-        "type": "int"
+        "type": "long"
       },
       {
         "metadata": {},

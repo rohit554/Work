@@ -64,7 +64,7 @@
         "metadata": {},
         "name": "value2",
         "nullable": true,
-        "type": "int"
+        "type": "long"
       }
     ],
     "type": "struct"
