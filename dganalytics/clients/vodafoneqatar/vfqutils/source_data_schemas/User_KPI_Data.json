@@ -35,60 +35,6 @@
         "name": "value2",
         "nullable": true,
         "type": "double"
-      },
-      {
-        "metadata": {},
-        "name": "last_name",
-        "nullable": true,
-        "type": "string"
-      },
-      {
-        "metadata": {},
-        "name": "line_manager",
-        "nullable": true,
-        "type": "string"
-      },
-      {
-        "metadata": {},
-        "name": "lm_user_id",
-        "nullable": true,
-        "type": "string"
-      },
-      {
-        "metadata": {},
-        "name": "lob",
-        "nullable": true,
-        "type": "string"
-      },
-      {
-        "metadata": {},
-        "name": "location",
-        "nullable": true,
-        "type": "string"
-      },
-      {
-        "metadata": {},
-        "name": "role",
-        "nullable": true,
-        "type": "string"
-      },
-      {
-        "metadata": {},
-        "name": "sub_lob",
-        "nullable": true,
-        "type": "string"
-      },
-      {
-        "metadata": {},
-        "name": "team_leader",
-        "nullable": true,
-        "type": "string"
-      },
-      {
-        "metadata": {},
-        "name": "user_id",
-        "nullable": true,
-        "type": "string"
       }
     ],
     "type": "struct"
