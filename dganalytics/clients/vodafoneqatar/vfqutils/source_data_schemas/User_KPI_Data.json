@@ -2,39 +2,39 @@
     "fields": [
       {
         "metadata": {},
-        "name": "cms_name",
+        "name": "date",
         "nullable": true,
         "type": "string"
       },
       {
         "metadata": {},
-        "name": "email_id",
+        "name": "kpi",
         "nullable": true,
         "type": "string"
       },
       {
         "metadata": {},
-        "name": "first_name",
+        "name": "siebel_id",
         "nullable": true,
         "type": "string"
       },
       {
         "metadata": {},
-        "name": "gender",
+        "name": "user_id",
         "nullable": true,
         "type": "string"
       },
       {
         "metadata": {},
-        "name": "image",
+        "name": "value1",
         "nullable": true,
-        "type": "string"
+        "type": "double"
       },
       {
         "metadata": {},
-        "name": "language",
+        "name": "value2",
         "nullable": true,
-        "type": "string"
+        "type": "double"
       },
       {
         "metadata": {},

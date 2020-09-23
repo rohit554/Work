@@ -58,7 +58,7 @@
         "metadata": {},
         "name": "fcr_tag",
         "nullable": true,
-        "type": "double"
+        "type": "string"
       },
       {
         "metadata": {},
@@ -70,13 +70,13 @@
         "metadata": {},
         "name": "fcr",
         "nullable": true,
-        "type": "string"
+        "type": "double"
       },
       {
         "metadata": {},
         "name": "nfcr",
         "nullable": true,
-        "type": "string"
+        "type": "double"
       }
     ],
     "type": "struct"
