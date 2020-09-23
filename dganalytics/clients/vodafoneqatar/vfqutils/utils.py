@@ -26,7 +26,7 @@ def denullify_data(this_dataframe, numcons_paceholder):
                 if typx == 'null':
                     transformed_dataframe = transformed_dataframe.withColumn(colmn, lit("NullPlaceHolder")
                     )
-                    )
+                    
         except Exception as e:
             if not this_dataframe.toPandas().empty:
                 logging.error(f"Spark Null conversion failed with error {e}")
