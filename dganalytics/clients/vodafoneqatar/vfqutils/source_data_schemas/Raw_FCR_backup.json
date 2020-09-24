@@ -38,6 +38,12 @@
         },
         {
           "metadata": {},
+          "name": "comments",
+          "nullable": true,
+          "type": "string"
+        },
+        {
+          "metadata": {},
           "name": "counts",
           "nullable": true,
           "type": "long"

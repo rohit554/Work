@@ -5,7 +5,7 @@ aggr_pipeline = [
       "owner": 1,
       "account_type": 1,
       "agent": 1,
-      "comments": 1,
+      # "comments": 1,
       "journey": 1,
       "counts": 1,
       "created_month": 1,
