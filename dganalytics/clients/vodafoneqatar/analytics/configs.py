@@ -22,7 +22,7 @@ config = {
         'load_timestamp_field': "insertion_timestamp",
     },
     "Raw_FCR": { #uniqu key is not available
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': "t_raw_fcr_data",
         'pipeline': pipelines.stage1_Raw_FCR.aggr_pipeline,
         'collection': "FCR",
@@ -36,10 +36,10 @@ config = {
              'user_id', 'location', 'state', 'category', 'date', 'status'],
         'primary_key': ['activity_num'],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     "User_FCR_KPI_Data": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': "t_fcr_kpi_data",
         'pipeline': pipelines.stage2_User_FCR_KPI_Data.aggr_pipeline,
         'collection': "FCR",
@@ -47,10 +47,10 @@ config = {
         'output_columns': ['user_id', 'date',  'value1', 'value2', 'kpi','siebel_id' ],
         'primary_key': ['user_id', 'siebel_id' ,'date',  ],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     "User_AHT_KPI_Data": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_aht_kpi_data',
         'collection': 'CALL',
         'load_timestamp_field': "insertion_timestamp",
@@ -58,10 +58,10 @@ config = {
         'output_columns': ['date', 'kpi', 'user_id', 'value1', 'value2','siebel_id'],
         'primary_key': ['user_id','siebel_id', 'date','kpi', ],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     "Call_Volume": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_call_volume_data',
         'collection': 'CALLSERVICE',
         'load_timestamp_field': "insertion_timestamp",
@@ -69,10 +69,10 @@ config = {
         'output_columns': ['answd', 'answd_in_threshold', 'aban_in_5_secs', 'aban_calls', 'offered', 'report_date', 'location', 'lob', 'segment_type', 'language'],
         'primary_key': ['report_date', 'location', 'lob', 'segment_type', 'language'],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     "User_Details": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_user_details',
         'collection': 'user_details',
         'load_timestamp_field': "insertion_timestamp",
@@ -80,10 +80,10 @@ config = {
         'output_columns': ['location', 'first_name', 'last_name', 'line_manager', 'role', 'sub_lob', 'user_id', 'lob', 'image', 'lm_user_id', 'cms_name', 'email_id', 'gender', 'team_leader', 'language'],
         'primary_key': [ 'user_id', 'cms_name', ],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     # "JSR_KPI_User_Team_Target": {  #No OutPUt
-    #     'output_db': "vodafone-qatar-dev-aggregation",
+    #     
     #     'output_collxn': 't_kpi_user_team_target',
     #     'load_timestamp_field': "insertion_timestamp",
     #     'collection': 'TARGET',
@@ -91,10 +91,10 @@ config = {
     #     'output_columns': ['kpi', 'team_id', 'target', 'weightage', 'user_id', 'date'],
     #     'primary_key': ['kpi', 'user_id', 'date'],
     #     'output_type': ['MERGED'],
-    #     'renamed_columns': {},
+    #     'partition_by': [],
     # },
     "JSR_Process_Forecast_Data": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_forecast_data',
         'load_timestamp_field': "insertion_timestamp",
         'collection': 'CALLSERVICE',
@@ -102,10 +102,10 @@ config = {
         'output_columns': ['forecast', 'report_date', 'lob', 'segment_type', 'location', 'language', 'actual'],
         'primary_key': [ 'report_date', 'lob', 'segment_type', 'location', 'language', ],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     "JSR_KPI_Team_Target": { 
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_kpi_team_target',
         'collection': 'TARGET',
         'load_timestamp_field': "insertion_timestamp",
@@ -113,10 +113,10 @@ config = {
         'output_columns': ['kpi', 'team_id', 'target', 'weightage', 'date'],
         'primary_key': ['kpi', 'team_id', 'date'],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     "User_KPI_Data": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_kpi_data',
         'collection': 'TNPS_Data',
         'load_timestamp_field': "insertion_timestamp",
@@ -124,10 +124,10 @@ config = {
         'output_columns': ['user_id', 'date', 'value1', 'value2', 'kpi','siebel_id'],
         'primary_key': ['user_id', 'date','siebel_id', 'kpi', ],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     "JSR_Top_Reason_Data": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_top_reason_data',
         'collection': 'SIEBELACTIVITY',
         'pipeline': pipelines.stage10_JSR_Top_Reason_Data.aggr_pipeline,
@@ -135,13 +135,10 @@ config = {
         'output_columns': ['sub_reason', 'call_reason', 'type', 'call_type', 'created_by', 'segment_type', 'report_date', 'location', 'lob', 'fcr_tag', 'overall_tnps', 'fcr', 'nfcr'],
         'primary_key': ['sub_reason', 'call_reason', 'type', 'call_type', 'created_by', 'segment_type', 'report_date', 'location', 'lob', ],
         'output_type': ['MERGED','RENAME_COLUMNS'],
-        'renamed_columns': { # Columns in collection renamed after aggregation before inserting
-            # 'NFCR':'nfcr',   # format : "Existing output field Name from Mongo": "Expected field Name"
-            # 'FCR':'fcr', 
-        },
+        'partition_by': [],
     },
     "Process_AHT_KPI_Data_to_All_Process" : {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn':'t_process_all_kpi_data',
         'collection': "CALLSERVICE",
         'load_timestamp_field': "insertion_timestamp",
@@ -149,11 +146,11 @@ config = {
         'output_columns': ['location', 'lobs', 'language', 'arpu_segment', 'segment_type', 'services', 'site', 'date', 'value1', 'value2', 'kpi'],
         'primary_key': ['location', 'lobs', 'language', 'arpu_segment', 'segment_type', 'services', 'site', 'date', 'kpi'],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
 
     "JSR_Process_TNPS_KPI_Data_to_All_Process": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_process_all_kpi_data',
         'collection': 'TNPS_Data',
         'load_timestamp_field': "insertion_timestamp",
@@ -162,11 +159,11 @@ config = {
         'primary_key': ['location', 'lobs', 'language', 'arpu_segment', 'segment_type', 'services', 'site', 'date', 'kpi'],
         # 'primary_key': ['location', 'language', 'segment_type', 'services', 'date', 'kpi'],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
 
     "JSR_Process_KPI_Data_to_All_Process": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_process_all_kpi_data',
         'collection': 'Skill_List',
         'pipeline': pipelines.stage13_JSR_Process_KPI_Data_to_All_Process.aggr_pipeline,
@@ -175,10 +172,10 @@ config = {
         'primary_key': ['location', 'lobs', 'language', 'arpu_segment', 'segment_type', 'services', 'site', 'date', 'kpi'],
         # 'primary_key': ['location', 'lobs', 'language', 'arpu_segment', 'segment_type', 'services', 'site', 'date', 'kpi'],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     "JSR_Process_FCR_KPI_to_All_Process": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_process_all_kpi_data',
         'collection': 'FCR',
         'load_timestamp_field': "insertion_timestamp",
@@ -187,10 +184,10 @@ config = {
         'primary_key': ['location', 'lobs', 'language', 'arpu_segment', 'segment_type', 'services', 'site', 'date', 'kpi'],
         # 'primary_key': ['location', 'segment_type', 'services', 'date', 'kpi'],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     "Admin_Login": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_admin_login',
         'load_timestamp_field': "insertion_timestamp",
         'collection': 'admin_login',
@@ -198,10 +195,10 @@ config = {
         'output_columns': ['email_id', 'avaya_name', 'first_name', 'last_name', 'siebel_id'],
         'primary_key': ['email_id', ],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     "JSR_AHT_KPI_Data": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_process_aht_kpi_data',
         'collection': 'CALLSERVICE',
         'load_timestamp_field': "insertion_timestamp",
@@ -209,10 +206,10 @@ config = {
         'output_columns': ['location', 'lobs', 'language', 'arpu_segment', 'segment_type', 'services', 'site', 'date', 'value1', 'value2', 'kpi'],
         'primary_key': ['location', 'lobs', 'language', 'arpu_segment', 'segment_type', 'services', 'site', 'date', 'kpi'],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     "JSR_Trouble_Ticket_Data": { 
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_view_trouble_ticket_data',
         'collection': 'TTICKET',
         'pipeline': pipelines.stage17_JSR_Trouble_Ticket_Data.aggr_pipeline,
@@ -220,10 +217,10 @@ config = {
         'output_columns': ['call_type', 'created_by', 'call_reason', 'segment_type', 'report_date', 'location', 'lob'],
         'primary_key': ['call_type', 'created_by', 'call_reason', 'segment_type', 'report_date', 'location', 'lob'],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
     "JSR_Process_KPI_Data": {
-        'output_db': "vodafone-qatar-dev-aggregation",
+        
         'output_collxn': 't_process_kpi_data',
         'collection': 'Skill_List',
         'load_timestamp_field': "insertion_timestamp",
@@ -231,6 +228,6 @@ config = {
         'output_columns': ['location', 'lobs', 'language', 'arpu_segment', 'segment_type', 'services', 'site', 'date', 'value1', 'value2', 'kpi'],
         'primary_key': ['location', 'lobs', 'language', 'arpu_segment', 'segment_type', 'services', 'site', 'date','kpi'],
         'output_type': ['MERGED'],
-        'renamed_columns': {},
+        'partition_by': [],
     },
 }

@@ -76,7 +76,8 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate):
         config_out_colmns = config[f'{stage_name}']['output_columns']
         config_out_primarykey = config[f'{stage_name}']['primary_key']
         config_out_type = config[f'{stage_name}']['output_type']
-        config_out_rnmdcolms = config[f'{stage_name}']['renamed_columns']
+        config_out_rnmdcolms = {} # config[f'{stage_name}']['renamed_columns']
+        
 
         config_out_pipl = config[f'{stage_name}']['pipeline']
         config_out_loadtsfld = config[f'{stage_name}']['load_timestamp_field']
