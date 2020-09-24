@@ -15,3 +15,4 @@ azure-identity
 azure-storage-blob~=12.4.0
 azure-storage-file-datalake
 websocket_client
+dnspython

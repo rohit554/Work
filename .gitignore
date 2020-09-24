@@ -7,3 +7,7 @@ dist/
 build/
 *egg-info*
 *.venv*
+*launch.json*
+*.ropeproject*
+.vscode/
+!*devcontainer.json*
