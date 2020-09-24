@@ -1,5 +1,5 @@
 from dganalytics.clients.vodafoneqatar.vfqutils.utils import (
-    extract_mongo_colxn, get_minimum_processing_date, rundate_range_generator)
+    extract_mongo_colxn, get_minimum_processing_date, rundate_range_generator, export_dataframe_to_csv )
 from dganalytics.clients.vodafoneqatar.vfqutils.vfq_mongo_utils import (
     aggregate_mongo_colxn, drop_mongo_colxn, get_config_mongo, upsertone_mongo_colxn)
 from dganalytics.clients.vodafoneqatar.analytics.configs import config
@@ -146,6 +146,9 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate):
                 config_out_collxn,
 
             )
+        
+        export_dataframe_to_csv(output_db_path,config_out_collxn,tenant)
+
     if step_name == "default":
         mindate = get_minimum_processing_date(
 

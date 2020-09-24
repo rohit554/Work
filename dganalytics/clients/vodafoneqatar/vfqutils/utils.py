@@ -11,6 +11,27 @@ from dganalytics.utils.utils import get_spark_session
 from pyspark.sql.types import StructType
 import json
 
+
+def export_dataframe_to_csv(output_db_path,output_table_name,tenant):
+
+    output_filepath = f'{output_db_path}/{output_table_name}'
+    logging.warn(f"outfilepath: {output_table_name}")
+    parent_db_path = output_db_path.split(tenant)[0]
+    pbdata_path = f'{parent_db_path}{tenant}/data/pbdatasets/{output_table_name}'
+
+    spark = get_spark_session(
+        "ETLExportSparktoCSV",
+        tenant,
+        default_db="default",
+        # cust_conf=cust_conf
+    )
+    df = spark.sql(f"select * from delta.`{output_filepath}`")
+
+    df.write.mode("overwrite").csv(pbdata_path, header = 'true')
+
+    return
+
+
 def denullify_data(this_dataframe, numcons_paceholder):
     # from math import pi,pow
     # numcons_paceholder = pow(pow(pow(pi,pi),pow(pi,pi)),pi)
