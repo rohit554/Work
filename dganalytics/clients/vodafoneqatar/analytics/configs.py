@@ -133,7 +133,7 @@ config = {
         'pipeline': pipelines.stage10_JSR_Top_Reason_Data.aggr_pipeline,
         'load_timestamp_field': "insertion_timestamp",
         'output_columns': ['sub_reason', 'call_reason', 'type', 'call_type', 'created_by', 'segment_type', 'report_date', 'location', 'lob', 'fcr_tag', 'overall_tnps', 'fcr', 'nfcr'],
-        'primary_key': ['sub_reason', 'call_reason', 'type', 'call_type', 'created_by', 'segment_type', 'report_date', 'location', 'lob', ],
+        'primary_key': ['sub_reason', 'call_reason', 'type', 'call_type', 'created_by', 'segment_type', 'report_date', 'location', 'lob', 'fcr_tag', 'overall_tnps', 'fcr', 'nfcr'],
         'output_type': ['MERGED','RENAME_COLUMNS'],
         'partition_by': [],
     },

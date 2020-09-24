@@ -4,9 +4,9 @@ FCR
 
 Raw_FCR
 
-stage2_User_FCR_KPI_Data
+User_FCR_KPI_Data
 
-stage10_JSR_Top_Reason_Data
+JSR_Top_Reason_Data
 
 =================================================================
 CALL
@@ -23,18 +23,18 @@ JSR_Process_Forecast_Data
 Process_AHT_KPI_Data_to_All_Process
 JSR_AHT_KPI_Data
 
-stage13_JSR_Process_KPI_Data_to_All_Process
-stage18_JSR_Process_KPI_Data
+JSR_Process_KPI_Data_to_All_Process
+JSR_Process_KPI_Data
 
 ================================================================
 user_details
 
 User_Details
-stage2_User_FCR_KPI_Data
-stage3_User_AHT_KPI_Data
-stage6_JSR_KPI_User_Team_Target
-stage9_User_KPI_Data
-stage17_JSR_Trouble_Ticket_Data
+User_FCR_KPI_Data
+User_AHT_KPI_Data
+JSR_KPI_User_Team_Target
+User_KPI_Data
+JSR_Trouble_Ticket_Data
 
 
 ============================================================================
@@ -46,22 +46,22 @@ TNPS_Data
 
 User_KPI_Data
 JSR_Process_TNPS_KPI_Data_to_All_Process
-stage10_JSR_Top_Reason_Data
+JSR_Top_Reason_Data
 ====================================================================
 SIEBELACTIVITY
 
 JSR_Top_Reason_Data
-stage14_JSR_Process_FCR_KPI_to_All_Process
+JSR_Process_FCR_KPI_to_All_Process
 =============================================================================
 Skill_List
 
 JSR_Process_KPI_Data_to_All_Process
 JSR_Process_KPI_Data
 
-stage4_Call_Volume
-stage7_JSR_Process_Forecast_Data
-stage12_Process_AHT_KPI_Data_to_All_Process
-stage16_JSR_AHT_KPI_Data
+Call_Volume
+JSR_Process_Forecast_Data
+Process_AHT_KPI_Data_to_All_Process
+JSR_AHT_KPI_Data
 =====================================================================
 admin_login
 
