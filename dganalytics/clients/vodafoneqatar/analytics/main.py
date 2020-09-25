@@ -83,7 +83,7 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate,):
         config_out_loadtsfld = config[f'{stage_name}']['load_timestamp_field']
 
     if step_name == "FetchDelta":
-        act_rundate = datetime.strptime(rundate, '%Y-%m-%d') + timedelta(1)
+        act_rundate =( datetime.strptime(rundate, '%Y-%m-%d') + timedelta(1)).date()
         min_rundate_curs = get_config_mongo(
 
             mongodb_conxnx_uri,
