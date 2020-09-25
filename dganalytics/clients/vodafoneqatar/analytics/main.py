@@ -153,8 +153,8 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate,):
             mongodb_conxnx_uri,
             database_name,
             env,
-            
-            str((datetime.utcnow() -timedelta(2) ).date()),
+            str((datetime.strptime(rundate,"%Y-%m-%d") - timedelta(2)).date()),
+            # str((datetime.utcnow() -timedelta(2) ).date()),
             config,
             aggregate_mongo_colxn
         )
@@ -190,13 +190,13 @@ if __name__ == "__main__":
                         default="find_min_rundate",
                         help="Stage Name.",
                         )
-    # parser.add_argument('--rundate',
-    #                     type=str,
-    #                     # required=True,
-    #                     default=str(date.today() - timedelta(days=1)),
-    #                     help="Run Date",
+    parser.add_argument('--rundate',
+                        type=str,
+                        # required=True,
+                        default=str(datetime.utcnow().date()+ timedelta(1)),
+                        help="Run Date",
 
-    #                     )
+                        )
     parser.add_argument('--step_name',
                         type=str,
                         # required=True,
@@ -209,7 +209,7 @@ if __name__ == "__main__":
     env = args.env
     database_name = args.database_name
     stage_name = args.stage_name
-    rundate = str(datetime.utcnow().date())
+    # rundate = str(datetime.utcnow().date())
     step_name = args.step_name
 
     logging.info(
