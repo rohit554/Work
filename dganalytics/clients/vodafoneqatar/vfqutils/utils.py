@@ -193,15 +193,16 @@ def extract_mongo_colxn(
                 existing_deltatable = DeltaTable.forPath(
                     spark, output_filepath)
 
+                # on_condition = " and ".join(
+                #     [f'curr_dataset.{_} = update_dataset.{_}'for _ in primary_key])
                 on_condition = " and ".join(
-                    [f'curr_dataset.{_} = update_dataset.{_}'for _ in primary_key])
+                    [f'coalesce(curr_dataset.{_},"NullPlaceHolder") = coalesce(update_dataset.{_},"NullPlaceHolder")' for _ in primary_key])
 
                 upserts = {_: f"update_dataset.{_}" for _ in output_columns}
                 try:
                     existing_deltatable.alias("curr_dataset").merge(
                         # transformed_daywise_collection_data.coalesce(
-                        daywise_collection_data.coalesce(
-                            2).alias("update_dataset"),
+                        daywise_collection_data.alias("update_dataset"),
                         on_condition
                     ).whenMatchedUpdateAll(
                         # ).whenMatchedUpdate(
