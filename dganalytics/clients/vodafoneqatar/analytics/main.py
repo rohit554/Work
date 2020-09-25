@@ -56,7 +56,7 @@ def updatePipeline(
     return(pipe)
 
 
-def extract_from_mongo(env, database_name, stage_name, step_name, rundate):
+def extract_from_mongo(env, database_name, stage_name, step_name, rundate,):
 
     tenant = "".join(database_name.split("-")[:-1])
     tenant_path, db_path, log_path = get_path_vars(tenant)
@@ -83,24 +83,21 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate):
         config_out_loadtsfld = config[f'{stage_name}']['load_timestamp_field']
 
     if step_name == "FetchDelta":
-        act_rundate = datetime.strptime(rundate, '%Y-%m-%d')
-        if env not in {'local', 'dev'}:
-            min_rundate_curs = get_config_mongo(
+        act_rundate = datetime.strptime(rundate, '%Y-%m-%d') + timedelta(1)
+        min_rundate_curs = get_config_mongo(
 
-                mongodb_conxnx_uri,
-                database_name,
-                "dgmis_config",
-                "min_rundate",
-            )
-            minterm = deepcopy(list(min_rundate_curs))
-            # min_rundate = minterm[0]['config_value'].strftime("%Y-%m-%d")
-            min_rundate = minterm[0]['config_value']
+            mongodb_conxnx_uri,
+            database_name,
+            "dgmis_config",
+            "min_rundate",
+        )
+        minterm = deepcopy(list(min_rundate_curs))
+        # min_rundate = minterm[0]['config_value'].strftime("%Y-%m-%d")
+        min_rundate = minterm[0]['config_value']
+        min_rundate = min_rundate.date()
 
-        else:
-            min_rundate = datetime.strptime('2020-09-02', '%Y-%m-%d')
-            act_rundate = datetime.strptime('2020-09-21', '%Y-%m-%d')
 
-        for curr_rundate in rundate_range_generator(min_rundate, act_rundate + timedelta(days=1)):
+        for curr_rundate in rundate_range_generator(min_rundate, act_rundate ):
             logging.warn(f"current rundate: {curr_rundate}")
 
             pipeline = updatePipeline(
@@ -156,7 +153,8 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate):
             mongodb_conxnx_uri,
             database_name,
             env,
-            rundate,
+            
+            str((datetime.utcnow() -timedelta(2) ).date()),
             config,
             aggregate_mongo_colxn
         )
@@ -192,13 +190,13 @@ if __name__ == "__main__":
                         default="find_min_rundate",
                         help="Stage Name.",
                         )
-    parser.add_argument('--rundate',
-                        type=str,
-                        # required=True,
-                        default=str(date.today() - timedelta(days=1)),
-                        help="Run Date",
+    # parser.add_argument('--rundate',
+    #                     type=str,
+    #                     # required=True,
+    #                     default=str(date.today() - timedelta(days=1)),
+    #                     help="Run Date",
 
-                        )
+    #                     )
     parser.add_argument('--step_name',
                         type=str,
                         # required=True,
@@ -211,7 +209,7 @@ if __name__ == "__main__":
     env = args.env
     database_name = args.database_name
     stage_name = args.stage_name
-    rundate = args.rundate
+    rundate = str(datetime.utcnow().date())
     step_name = args.step_name
 
     logging.info(

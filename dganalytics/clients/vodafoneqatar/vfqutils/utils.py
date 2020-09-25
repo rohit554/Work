@@ -108,58 +108,19 @@ def get_sparkDf_from_mongocollection(spark, tenant, mongodb_conxnx_uri, database
     return this_dataframe
 
 
-def exit_deltatable_changes(this_deltatable, numericreplace, stringreplace, output_filepath):
+def exit_deltatable_changes(
+    this_deltatable, 
+    # numericreplace, 
+    # stringreplace, 
+    output_filepath):
     try:
         this_dataframe = this_deltatable.toDF()
-        cdataframe = nullify_data(
-            this_dataframe, numericreplace, stringreplace)
-        overwrite_sparkDF_to_Delta(cdataframe, output_filepath)
+        # cdataframe = nullify_data(
+        #     this_dataframe, numericreplace, stringreplace)
+        overwrite_sparkDF_to_Delta(this_dataframe, output_filepath)
     except Exception as e:
         logging.error(f"Exit changes on failure also failed with error {e}")
     return
-
-def read_existing_delta_data(spark,env,output_filepath,stage_name,numcons_paceholder):
-    path_exists = False
-    # if env !='local':
-    split_output_file = output_filepath.split(":")
-    if len(split_output_file)>1:
-        act_output_file = f'/{split_output_file[0]}{split_output_file[1]}'
-    else:
-        act_output_file = output_filepath
-    # else:
-    #     act_output_file = output_filepath
-    print(act_output_file)
-    print(os.path.exists(act_output_file))
-    if not os.path.exists(act_output_file):
-        path_exists = False
-        schema_path = os.path.join(
-            Path(__file__).parent, 'source_data_schemas', '{}.json'.format(stage_name))
-        with open(schema_path, 'r') as f:
-            schema = f.read()
-        schema = StructType.fromJson(json.loads(schema))
-        empty_df = spark.createDataFrame([], schema)
-        try:
-            overwrite_sparkDF_to_Delta(
-                empty_df, output_filepath)
-        except Exception as e:
-            logging.error(
-                f"Spark Dataframe write failed with error {e}")
-            raise
-    else:
-        path_exists = True
-        existing_table_data = read_delta_to_sparkDF(
-            spark, output_filepath,stage_name)
-        print(existing_table_data.count())
-
-        transformed_existing_table_data = denullify_data(
-            existing_table_data, numcons_paceholder)
-
-        overwrite_sparkDF_to_Delta(
-            transformed_existing_table_data,
-            output_filepath,
-        )
-    return path_exists
-
 
 
 def extract_mongo_colxn(
@@ -212,22 +173,22 @@ def extract_mongo_colxn(
                 overwrite_sparkDF_to_Delta(
                     daywise_collection_data, output_filepath)
             else:
-                from math import pi, pow
-                numcons_paceholder = pow(pow(pow(pi, pi), pow(pi, pi)), pi)
+                # from math import pi, pow
+                # numcons_paceholder = pow(pow(pow(pi, pi), pow(pi, pi)), pi)
                 # try:
-                existing_table_data = read_delta_to_sparkDF(
-                    spark, output_filepath,stage_name)
-                print(existing_table_data.count())
+                # existing_table_data = read_delta_to_sparkDF(
+                #     spark, output_filepath,stage_name)
+                # print(existing_table_data.count())
 
-                transformed_existing_table_data = denullify_data(
-                    existing_table_data, numcons_paceholder)
+                # transformed_existing_table_data = denullify_data(
+                #     existing_table_data, numcons_paceholder)
 
-                overwrite_sparkDF_to_Delta(
-                    transformed_existing_table_data,
-                    output_filepath,
-                )
-                transformed_daywise_collection_data = denullify_data(
-                    daywise_collection_data, numcons_paceholder)
+                # overwrite_sparkDF_to_Delta(
+                #     transformed_existing_table_data,
+                #     output_filepath,
+                # )
+                # transformed_daywise_collection_data = denullify_data(
+                #     daywise_collection_data, numcons_paceholder)
 
                 existing_deltatable = DeltaTable.forPath(
                     spark, output_filepath)
@@ -238,7 +199,8 @@ def extract_mongo_colxn(
                 upserts = {_: f"update_dataset.{_}" for _ in output_columns}
                 try:
                     existing_deltatable.alias("curr_dataset").merge(
-                        transformed_daywise_collection_data.coalesce(
+                        # transformed_daywise_collection_data.coalesce(
+                        daywise_collection_data.coalesce(
                             2).alias("update_dataset"),
                         on_condition
                     ).whenMatchedUpdateAll(
@@ -249,11 +211,15 @@ def extract_mongo_colxn(
                         # values = upserts
                     ).execute()
                     exit_deltatable_changes(
-                        existing_deltatable, numcons_paceholder, 'NonePlaceHolder', output_filepath)
+                        existing_deltatable, 
+                        # numcons_paceholder, 
+                        # 'NonePlaceHolder',
+                         output_filepath)
                 except Exception as e:
                     # exit_deltatable_changes(
                     #     existing_deltatable, numcons_paceholder, 'NonePlaceHolder', output_filepath)
-                    if not transformed_daywise_collection_data.toPandas().empty:
+                    # if not transformed_daywise_collection_data.toPandas().empty:
+                    if not daywise_collection_data.toPandas().empty:
                         logging.error(
                             f"Delta Table Merge failed in Merge with error {e}")
                         raise
@@ -338,7 +304,8 @@ def get_minimum_processing_date(
 
 def rundate_range_generator(min, run):
     new = min
-    while new < run:
+    while new <= run:
         # yield new.strftime("%Y-%m-%d")
-        yield new
+        newx = datetime(new.year,new.month,new.day)
+        yield newx
         new = new + timedelta(days=1)
