@@ -25,9 +25,17 @@ def export_dataframe_to_csv(output_db_path,output_table_name,tenant):
         default_db="default",
         # cust_conf=cust_conf
     )
-    df = spark.sql(f"select * from delta.`{output_filepath}`")
+    split_output_file = output_filepath.split(":")
+    if len(split_output_file)>1:
+        act_output_file = f'/{split_output_file[0]}{split_output_file[1]}'
+    else:
+        act_output_file = output_filepath
+    if not os.path.exists(act_output_file):
+        pass
+    else:
+        df = spark.sql(f"select * from delta.`{output_filepath}`")
 
-    df.write.mode("overwrite").csv(pbdata_path, header = 'true')
+        df.write.mode("overwrite").csv(pbdata_path, header = 'true')
 
     return
 
