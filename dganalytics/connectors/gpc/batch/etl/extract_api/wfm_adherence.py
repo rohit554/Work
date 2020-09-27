@@ -1,9 +1,9 @@
 import requests as rq
 import json
 from pyspark.sql import SparkSession
-from dganalytics.utils.utils import get_secret, get_path_vars
+from dganalytics.utils.utils import get_secret
 from dganalytics.connectors.gpc.gpc_utils import authorize, get_api_url, process_raw_data
-from dganalytics.connectors.gpc.gpc_utils import update_raw_table, write_api_resp, get_interval, gpc_utils_logger
+from dganalytics.connectors.gpc.gpc_utils import get_interval, gpc_utils_logger
 import ast
 from websocket import create_connection
 
@@ -14,7 +14,8 @@ def get_users_list(spark: SparkSession):
     return users_list
 
 
-def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
+def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_name: str,
+                           extract_date: str, extract_interval_start: str, extract_interval_end: str):
     logger = gpc_utils_logger(tenant, "wfm_adherence")
 
     api_headers = authorize(tenant)
@@ -46,8 +47,10 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
     wfm_resps_urls = []
 
     batchsize = 1000
-    start_time = get_interval(extract_date).split("/")[0]
-    end_time = get_interval(extract_date).split("/")[1]
+    start_time = get_interval(
+        extract_date, extract_interval_start, extract_interval_end).split("/")[0]
+    end_time = get_interval(
+        extract_date, extract_interval_start, extract_interval_end).split("/")[1]
     for i in range(0, len(user_ids), batchsize):
         body = {
             "startDate": start_time,
@@ -70,7 +73,9 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
 
     wfm_resps = []
     for w in wfm_resps_urls:
-        for url in w['eventBody']['downloadUrls']:
-            wfm_resps.append(rq.get(url).json())
+        if 'downloadUrls' in w['eventBody'].keys():
+            for url in w['eventBody']['downloadUrls']:
+                wfm_resps.append(rq.get(url).json())
     wfm_resps = [json.dumps(resp) for resp in wfm_resps]
-    process_raw_data(spark, tenant, 'wfm_adherence', run_id, wfm_resps, extract_date, len(user_ids))
+    process_raw_data(spark, tenant, 'wfm_adherence', run_id,
+                     wfm_resps, extract_date, len(user_ids), extract_interval_start, extract_interval_end)

@@ -1,12 +1,13 @@
 import requests as rq
 import json
 from pyspark.sql import SparkSession
-from dganalytics.connectors.gpc.gpc_utils import get_api_url, get_schema
-from dganalytics.connectors.gpc.gpc_utils import authorize, get_path_vars, process_raw_data
-from dganalytics.connectors.gpc.gpc_utils import update_raw_table, write_api_resp, gpc_utils_logger
+from dganalytics.connectors.gpc.gpc_utils import get_api_url
+from dganalytics.connectors.gpc.gpc_utils import authorize, process_raw_data
+from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger
 
 
-def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
+def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str,
+                              extract_interval_start: str, extract_interval_end: str):
     logger = gpc_utils_logger(tenant, "gpc_evaluation_forms_api")
     logger.info("Extracting Evaluation Forms")
     api_headers = authorize(tenant)
@@ -35,7 +36,8 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_
         versions_resp = rq.get(
             f"{get_api_url(tenant)}/api/v2/quality/forms/evaluations/{e}/versions", headers=api_headers)
         if versions_resp.status_code != 200:
-            logger.error("Evaluation Form Versions API Failed" + versions_resp.text)
+            logger.error("Evaluation Form Versions API Failed" +
+                         versions_resp.text)
 
         versions_list.append(versions_resp.json()['entities'])
 
@@ -51,6 +53,9 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str, db_
 
         evaluation_forms_list.append(resp.json())
 
-    evaluation_forms_list = [json.dumps(form) for form in evaluation_forms_list]
+    evaluation_forms_list = [json.dumps(form)
+                             for form in evaluation_forms_list]
 
-    process_raw_data(spark, tenant, 'evaluation_forms', run_id, evaluation_forms_list, extract_date, len(versions_list))
+    process_raw_data(spark, tenant, 'evaluation_forms', run_id,
+                     evaluation_forms_list, extract_date, len(versions_list), extract_interval_start,
+                     extract_interval_end)
