@@ -209,7 +209,7 @@ if __name__ == "__main__":
     env = args.env
     database_name = args.database_name
     stage_name = args.stage_name
-    # rundate = str(datetime.utcnow().date())
+    rundate = args.rundate
     step_name = args.step_name
 
     logging.info(
