@@ -6,9 +6,9 @@ def fact_wfm_actuals(spark: SparkSession, extract_date: str):
         select distinct userId,startDate,actualsEndDate, endDate, actuals.actualActivityCategory,actuals.endOffsetSeconds, actuals.startOffsetSeconds,
                                     cast(startDate as date) startDatePart
     from (
-    select data.userId, data.startDate, data.actualsEndDate, data.endDate,data.impact,
-    explode(data.actuals) as actuals from (
-    select explode(data) as data from raw_wfm_adherence where extractDate = '{extract_date}')
+    select userId, startDate, actualsEndDate, endDate, impact,
+    explode(actuals) as actuals from (
+    select * as data from raw_wfm_adherence where extractDate = '{extract_date}')
     ) 
                             """)
     orig_wfm_actuals.registerTempTable("orig_wfm_actuals")

@@ -34,36 +34,18 @@ def create_ingestion_stats_table(spark: SparkSession, db_name: str, db_path: str
 
 def create_dim_tables(spark: SparkSession, db_name: str):
     logger.info("Setting genesys dim/fact tables")
-    spark.sql(
-        f"""create table if not exists {db_name}.dim_conversations
-            (
-                conversationId string,
-                conversationStart timestamp,
-                conversationEnd timestamp,
-                originatingDirection string,
-                sessionId string,
-                sessionStart timestamp comment 'first segment start date',
-                sessionEnd timestamp comment 'last segment end date',
-                sessionDirection string,
-                purpose string,
-                queueId string,
-                mediaType string,
-                messageType string,
-                agentId string,
-                wrapUpCode string,
-                wrapUpNote string,
-                conversationStartDate date
-            )
-            using delta
-            PARTITIONED BY (conversationStartDate)
-            LOCATION '{db_path}/{db_name}/dim_conversations'
-            """
-    )
 
     spark.sql(
         f"""create table if not exists {db_name}.fact_conversation_metrics
             (
-                sessionId string,
+                conversationId string,
+                agentId string,
+                mediaType string,
+                messageType string,
+                originatingDirection string, 
+                queueId string,
+                wrapUpCode string,
+                wrapUpNote string,
                 emitDateTime timestamp comment 'aggregated values into 15 min interval buckets',
                 nAbandon int,
                 nAcd int,

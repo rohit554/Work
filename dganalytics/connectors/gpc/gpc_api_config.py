@@ -122,7 +122,8 @@ gpc_end_points = {
         "extract_type": "custom",
         "spark_partitions": {"max_records_per_partition": 30000},
         "table_name": "wfm_adherence",
-        "tbl_overwrite": False
+        "tbl_overwrite": False,
+        "raw_primary_key": ["userId", "startDate", "endDate"]
     },
     "evaluations": {
         "endpoint": "/api/v2/quality/evaluations/query",

@@ -10,9 +10,9 @@ def fact_wfm_day_metrics(spark: SparkSession, extract_date: str):
     dayMetrics.exceptionCount, dayMetrics.exceptionDurationSecs, dayMetrics.impactSeconds,
     dayMetrics.scheduleLengthSecs, 
     cast(startDate as date) startDatePart from (
-    select data.userId, data.startDate, data.actualsEndDate, data.endDate,data.impact,
-    explode(data.dayMetrics) as dayMetrics from (
-    select explode(data) as data from raw_wfm_adherence where extractDate = '{extract_date}')
+    select userId, startDate, actualsEndDate, endDate, impact,
+    explode(dayMetrics) as dayMetrics from (
+    select * from raw_wfm_adherence where extractDate = '{extract_date}')
     ) 
                                     """)
     wfm_day_metrics.registerTempTable("wfm_day_metrics")

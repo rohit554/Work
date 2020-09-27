@@ -3,8 +3,11 @@ from pyspark.sql import SparkSession
 
 def fact_conversation_metrics(spark: SparkSession, extract_date: str):
     conversation_metrics = spark.sql(f"""
-                                            select distinct 
-                    sessionId,  
+                                            select  
+                                        conversationId, agentId, mediaType, messageType, originatingDirection, 
+                            element_at(segments, 1).queueId as queueId,
+                            element_at(segments, size(segments)).wrapUpCode as wrapUpCode,
+                        max(element_at(segments, size(segments)).wrapUpNote) as wrapUpNote,
                     cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as emitDateTime,
                     cast(cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as date) as emitDate,
                     sum(case when coalesce(tAbandon,0) > 0 then 1 else 0 end) as nAbandon,
@@ -48,18 +51,25 @@ def fact_conversation_metrics(spark: SparkSession, extract_date: str):
                     *
                     from (
                     select
-                        sessionId, metrics.emitDate, metrics.name, metrics.value
+                        conversationId, agentId, originatingDirection, purpose, 
+                        element_at(segments, 1).queueId, mediaType, messageType, 
+                        metrics.emitDate, metrics.name, metrics.value
                     from
                         (
                         select
-                            sessions.sessionId, explode(sessions.metrics) as metrics 
+                            conversationId, conversationStart, conversationEnd, originatingDirection,
+                            sessions.mediaType, sessions.messageType, purpose, agentId, sessions.sessionId,
+                            sessions.direction as sessionDirection, sessions.segments, explode(sessions.metrics) as metrics 
                         from
                             (
                             select
+                                conversationId, conversationStart, conversationEnd, originatingDirection,
+                                participants.purpose, participants.userId as agentId,
                                 explode(participants.sessions) as sessions
                             from
                                 (
                                 select
+                                    conversationId, conversationStart, conversationEnd, originatingDirection,
                                     explode(participants) as participants
                                 from
                                     raw_conversation_details where extractDate = '{extract_date}')
@@ -77,16 +87,22 @@ def fact_conversation_metrics(spark: SparkSession, extract_date: str):
                                     'tWait'
                                 )
                             )
-                        
                     )
-                    group by sessionId, cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp)
+                    group by conversationId, agentId, mediaType, messageType, originatingDirection, 
+                    	element_at(segments, 1).queueId,
+                            element_at(segments, size(segments)).wrapUpCode,
+                    cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'),
+                        format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp)
                                             """)
 
     conversation_metrics.registerTempTable("conversation_metrics")
+    spark.sql("delete from fact_conversation_metrics where conversationId in (select distinct conversationId from conversation_metrics)")
+    spark.sql("insert into fact_conversation_metrics select * from conversation_metrics")
+    '''
     spark.sql(f"""
                     merge into fact_conversation_metrics as target
                         using conversation_metrics as source
-                    on source.sessionId = target.sessionId
+                    on source.conversationDimKey = target.conversationDimKey
                             and source.emitDateTime = target.emitDateTime
                             and source.emitDate = target.emitDate
                     WHEN MATCHED THEN
@@ -94,3 +110,4 @@ def fact_conversation_metrics(spark: SparkSession, extract_date: str):
                     WHEN NOT MATCHED THEN
                         INSERT *
                 """)
+    '''

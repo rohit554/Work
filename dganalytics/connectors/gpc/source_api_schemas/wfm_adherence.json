@@ -2,7 +2,7 @@
     "fields": [
         {
             "metadata": {},
-            "name": "data",
+            "name": "actuals",
             "nullable": true,
             "type": {
                 "containsNull": true,
@@ -10,167 +10,21 @@
                     "fields": [
                         {
                             "metadata": {},
-                            "name": "actuals",
-                            "nullable": true,
-                            "type": {
-                                "containsNull": true,
-                                "elementType": {
-                                    "fields": [
-                                        {
-                                            "metadata": {},
-                                            "name": "actualActivityCategory",
-                                            "nullable": true,
-                                            "type": "string"
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "endOffsetSeconds",
-                                            "nullable": true,
-                                            "type": "long"
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "startOffsetSeconds",
-                                            "nullable": true,
-                                            "type": "long"
-                                        }
-                                    ],
-                                    "type": "struct"
-                                },
-                                "type": "array"
-                            }
-                        },
-                        {
-                            "metadata": {},
-                            "name": "actualsEndDate",
-                            "nullable": true,
-                            "type": "timestamp"
-                        },
-                        {
-                            "metadata": {},
-                            "name": "adherencePercentage",
-                            "nullable": true,
-                            "type": "double"
-                        },
-                        {
-                            "metadata": {},
-                            "name": "conformancePercentage",
-                            "nullable": true,
-                            "type": "double"
-                        },
-                        {
-                            "metadata": {},
-                            "name": "dayMetrics",
-                            "nullable": true,
-                            "type": {
-                                "containsNull": true,
-                                "elementType": {
-                                    "fields": [
-                                        {
-                                            "metadata": {},
-                                            "name": "actualLengthSecs",
-                                            "nullable": true,
-                                            "type": "long"
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "adherencePercentage",
-                                            "nullable": true,
-                                            "type": "double"
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "adherenceScheduleSecs",
-                                            "nullable": true,
-                                            "type": "long"
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "conformanceActualSecs",
-                                            "nullable": true,
-                                            "type": "long"
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "conformancePercentage",
-                                            "nullable": true,
-                                            "type": "double"
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "conformanceScheduleSecs",
-                                            "nullable": true,
-                                            "type": "long"
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "dayStartOffsetSecs",
-                                            "nullable": true,
-                                            "type": "long"
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "exceptionCount",
-                                            "nullable": true,
-                                            "type": "long"
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "exceptionDurationSecs",
-                                            "nullable": true,
-                                            "type": "long"
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "impactSeconds",
-                                            "nullable": true,
-                                            "type": "long"
-                                        },
-                                        {
-                                            "metadata": {},
-                                            "name": "scheduleLengthSecs",
-                                            "nullable": true,
-                                            "type": "long"
-                                        }
-                                    ],
-                                    "type": "struct"
-                                },
-                                "type": "array"
-                            }
-                        },
-                        {
-                            "metadata": {},
-                            "name": "endDate",
-                            "nullable": true,
-                            "type": "timestamp"
-                        },
-                        {
-                            "metadata": {},
-                            "name": "exceptionInfo",
-                            "nullable": true,
-                            "type": {
-                                "containsNull": true,
-                                "elementType": "string",
-                                "type": "array"
-                            }
-                        },
-                        {
-                            "metadata": {},
-                            "name": "impact",
+                            "name": "actualActivityCategory",
                             "nullable": true,
                             "type": "string"
                         },
                         {
                             "metadata": {},
-                            "name": "startDate",
+                            "name": "endOffsetSeconds",
                             "nullable": true,
-                            "type": "timestamp"
+                            "type": "long"
                         },
                         {
                             "metadata": {},
-                            "name": "userId",
+                            "name": "startOffsetSeconds",
                             "nullable": true,
-                            "type": "string"
+                            "type": "long"
                         }
                     ],
                     "type": "struct"
@@ -180,15 +34,135 @@
         },
         {
             "metadata": {},
-            "name": "entityId",
+            "name": "actualsEndDate",
+            "nullable": true,
+            "type": "timestamp"
+        },
+        {
+            "metadata": {},
+            "name": "adherencePercentage",
+            "nullable": true,
+            "type": "double"
+        },
+        {
+            "metadata": {},
+            "name": "conformancePercentage",
+            "nullable": true,
+            "type": "double"
+        },
+        {
+            "metadata": {},
+            "name": "dayMetrics",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": {
+                    "fields": [
+                        {
+                            "metadata": {},
+                            "name": "actualLengthSecs",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "adherencePercentage",
+                            "nullable": true,
+                            "type": "double"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "adherenceScheduleSecs",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "conformanceActualSecs",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "conformancePercentage",
+                            "nullable": true,
+                            "type": "double"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "conformanceScheduleSecs",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "dayStartOffsetSecs",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "exceptionCount",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "exceptionDurationSecs",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "impactSeconds",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "scheduleLengthSecs",
+                            "nullable": true,
+                            "type": "long"
+                        }
+                    ],
+                    "type": "struct"
+                },
+                "type": "array"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "endDate",
+            "nullable": true,
+            "type": "timestamp"
+        },
+        {
+            "metadata": {},
+            "name": "exceptionInfo",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": "string",
+                "type": "array"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "impact",
             "nullable": true,
             "type": "string"
         },
         {
             "metadata": {},
-            "name": "version",
+            "name": "startDate",
             "nullable": true,
-            "type": "long"
+            "type": "timestamp"
+        },
+        {
+            "metadata": {},
+            "name": "userId",
+            "nullable": true,
+            "type": "string"
         }
     ],
     "type": "struct"

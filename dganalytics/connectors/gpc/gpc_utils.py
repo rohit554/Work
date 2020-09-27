@@ -138,7 +138,7 @@ def write_api_resp(resp: list, api_name: str, run_id: str, tenant: str, extract_
                         'gpc', extract_date, run_id)
     logger.info("tenant path" + str(path))
     Path(path).mkdir(parents=True, exist_ok=True)
-    file_name = f'{api_name}_{extract_interval_start}_{extract_interval_end}.json.gz'
+    file_name = f"{api_name}_{extract_interval_start.replace(':', '-')}_{extract_interval_end.replace(':', '-')}.json.gz"
     temp_resp_file = tempfile.NamedTemporaryFile('w+', delete=True)
     temp_resp_file.close()
     with gzip.open(temp_resp_file.name, 'wt', encoding="utf-16") as zipfile:
@@ -191,11 +191,16 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
         df.registerTempTable("source_tbl")
         target = spark.read.format("delta").load(f"{db_path}/{db_name}/{table_name}")
         target.registerTempTable("target_tbl")
-        primary_key_condition = [f'source_tbl.{c} = target_tbl.{c}'for c in gpc_end_points['api_name']['raw_primary_key']]
+        primary_key_condition = [f'source_tbl.{c} = target_tbl.{c}'for c in gpc_end_points[api_name]['raw_primary_key']]
         primary_key_condition = " and ".join(primary_key_condition)
         spark.sql(f"""merge into target_tbl
                             using source_tbl
-                        on {primary_key_condition} and source_tbl.extractDate = target_tbl.extractDate""")
+                        on {primary_key_condition} and source_tbl.extractDate = target_tbl.extractDate
+                        WHEN MATCHED THEN
+                            UPDATE SET *
+                        WHEN NOT MATCHED THEN
+                            INSERT *
+                        """)
 
     else:
         df.coalesce(1).write.format("delta").mode(
@@ -261,8 +266,10 @@ def extract_parser():
     run_id = args.run_id
     api_name = args.api_name
     extract_date = args.extract_date.strftime('%Y-%m-%d')
+    extract_interval_start = args.extract_interval_start.strftime('%Y-%m-%dT%H:%M:%S')
+    extract_interval_end = args.extract_interval_end.strftime('%Y-%m-%dT%H:%M:%S')
 
-    return tenant, run_id, extract_date, api_name
+    return tenant, run_id, extract_date, api_name, extract_interval_start, extract_interval_end
 
 
 def dg_metadata_export_parser():

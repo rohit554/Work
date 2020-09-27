@@ -4,15 +4,15 @@ def dim_conversations(spark: SparkSession, extract_date: str):
     conversations = spark.sql(f"""
                                     select
                         distinct
+                        hash(conversationId, coalesce(agentId, ''), coalesce(originatingDirection, ''), 
+                            coalesce(element_at(segments, 1).queueId, ''),
+                            coalesce(mediaType, ''), coalesce(messageType, '')) as conversationDimKey,
                         conversationId,
                         conversationStart,
                         conversationEnd,
                         originatingDirection,
-                        sessionId,
                         element_at(segments, 1).segmentStart as sessionStart,
                         element_at(segments, size(segments)).segmentEnd as sessionEnd,
-                        sessionDirection,
-                        purpose,
                         element_at(segments, 1).queueId as queueId,
                         mediaType,
                         messageType,
@@ -39,6 +39,7 @@ def dim_conversations(spark: SparkSession, extract_date: str):
                                     explode(participants) as participants
                                 from
                                     raw_conversation_details where extractDate = '{extract_date}')
+                                    where participants.purpose = 'agent'
                                 ) )
                                     """
                               )
