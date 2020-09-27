@@ -13,7 +13,8 @@ gpc_end_points = {
         },
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True
+        "tbl_overwrite": True,
+        "raw_primary_key": ["id"]
     },
     "routing_queues": {
         "endpoint": "/api/v2/routing/queues",
@@ -26,7 +27,8 @@ gpc_end_points = {
         },
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 50000},
-        "tbl_overwrite": True
+        "tbl_overwrite": True,
+        "raw_primary_key": ["id"]
     },
     "groups": {
         "endpoint": "/api/v2/groups",
@@ -39,7 +41,8 @@ gpc_end_points = {
         },
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True
+        "tbl_overwrite": True,
+        "raw_primary_key": ["id"]
     },
     "users_details": {
         "endpoint": "/api/v2/analytics/users/details/query",
@@ -52,7 +55,8 @@ gpc_end_points = {
         },
         "entity_name": "userDetails",
         "spark_partitions": {"max_records_per_partition": 30000},
-        "tbl_overwrite": False
+        "tbl_overwrite": False,
+        "raw_primary_key": ["userId"]
     },
     "users_details_job": {
         "endpoint": "/api/v2/analytics/users/details/jobs",
@@ -66,7 +70,8 @@ gpc_end_points = {
         "entity_name": "userDetails",
         "spark_partitions": {"max_records_per_partition": 30000},
         "table_name": "users_details",
-        "tbl_overwrite": False
+        "tbl_overwrite": False,
+        "raw_primary_key": ["userId"]
     },
     "wrapup_codes": {
         "endpoint": "/api/v2/routing/wrapupcodes",
@@ -79,7 +84,8 @@ gpc_end_points = {
         },
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 50000},
-        "tbl_overwrite": True
+        "tbl_overwrite": True,
+        "raw_primary_key": ["id"]
     },
     "conversation_details": {
         "endpoint": "/api/v2/analytics/conversations/details/query",
@@ -92,7 +98,8 @@ gpc_end_points = {
         },
         "entity_name": "conversations",
         "spark_partitions": {"max_records_per_partition": 5000},
-        "tbl_overwrite": False
+        "tbl_overwrite": False,
+        "raw_primary_key": ["conversationId"]
     },
     "conversation_details_job": {
         "endpoint": "/api/v2/analytics/conversations/details/jobs",
@@ -107,7 +114,8 @@ gpc_end_points = {
         "entity_name": "conversations",
         "spark_partitions": {"max_records_per_partition": 5000},
         "table_name": "conversation_details",
-        "tbl_overwrite": False
+        "tbl_overwrite": False,
+        "raw_primary_key": ["conversationId"]
     },
     "wfm_adherence": {
         "endpoint": "/api/v2/workforcemanagement/adherence/historical",
@@ -121,13 +129,15 @@ gpc_end_points = {
         "extract_type": "custom",
         "spark_partitions": {"max_records_per_partition": 10000},
         "table_name": "evaluations",
-        "tbl_overwrite": False
+        "tbl_overwrite": False,
+        "raw_primary_key": ["id"]
     },
     "evaluation_forms": {
         "endpoint": "/api/v2/quality/forms/evaluations/{}",
         "extract_type": "custom",
         "spark_partitions": {"max_records_per_partition": 100000},
         "table_name": "evaluation_forms",
-        "tbl_overwrite": True
+        "tbl_overwrite": True,
+        "raw_primary_key": ["id"]
     }
 }
