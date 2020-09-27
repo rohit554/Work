@@ -212,7 +212,7 @@ if __name__ == "__main__":
     rundate = args.rundate
     step_name = args.step_name
 
-    logging.info(
+    logging.warn(
         f"environment: {env},database: {database_name},stage: {stage_name},step: {step_name},rundate: {rundate}")
 
     extract_from_mongo(env, database_name, stage_name, step_name, rundate)
