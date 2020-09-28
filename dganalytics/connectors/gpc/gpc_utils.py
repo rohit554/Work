@@ -256,9 +256,9 @@ def extract_parser():
     parser.add_argument('--extract_date', required=True,
                         type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
     parser.add_argument('--extract_interval_start', required=True,
-                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%S'))
+                        type=lambda s: datetime.datetime.strptime(s.replace("Z", "").replace("z", ""), '%Y-%m-%dT%H:%M:%S'))
     parser.add_argument('--extract_interval_end', required=True,
-                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%S'))
+                        type=lambda s: datetime.datetime.strptime(s.replace("Z", "").replace("z", ""), '%Y-%m-%dT%H:%M:%S'))
     parser.add_argument('--api_name', required=True)
 
     args, unknown_args = parser.parse_known_args()

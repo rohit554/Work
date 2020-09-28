@@ -52,7 +52,7 @@ sum(case when mediaType = 'message' then coalesce(tAcw,0) else 0 end) as AvgDail
 sum(case when mediaType = 'email' then coalesce(tAcw,0) else 0 end) as AvgDailyAcwTimeEmail,
 sum(coalesce(tAcw,0)) as AvgDailyAcwTime
 FROM fact_conversation_metrics
-WHERE cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) >= (cast('{extract_date}' as date) )
+WHERE cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) = (cast('{extract_date}' as date) )
 group by agentId , cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date)
 ) conv
 FULL OUTER JOIN
@@ -60,7 +60,7 @@ FULL OUTER JOIN
 select userId as UserID,cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) as Date,
 sum(unix_timestamp(endTime) - unix_timestamp(startTime)) as SumDailyNotRespondingTime
 from fact_routing_status where routingStatus = 'NOT_RESPONDING'
-and cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date)  >= (cast('{extract_date}' as date) )
+and cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date)  = (cast('{extract_date}' as date) )
 group by userId, cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) 
 ) nr
 on nr.UserID = conv.UserID
@@ -75,7 +75,7 @@ AVG(case when upper(b.mediaType) = 'EMAIL' then a.totalScore else NULL end) as A
 AVG(a.totalScore) as AvgDailyQAScore
 from fact_evaluation_total_scores a, dim_evaluations b
 where a.evaluationId = b.evaluationId 
-and cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) >= (cast('{extract_date}' as date))
+and cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) = (cast('{extract_date}' as date))
 group by b.agentId, cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date)
 ) quality
 on quality.UserID = cnr.UserID

@@ -1179,7 +1179,25 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "evaluation_forms",
+                                "activity": "dim_evaluations",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "fact_evaluation_total_scores",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "fact_conversation_metrics",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "fact_routing_status",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -1202,12 +1220,8 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
-                                "--transformation",
-                                "dim_evaluation_forms"
+                                "--org_id",
+                                "@pipeline().parameters.tenant"
                             ]
                         },
                         "linkedServiceName": {
