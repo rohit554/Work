@@ -4,9 +4,6 @@ def dim_conversations(spark: SparkSession, extract_date: str):
     conversations = spark.sql(f"""
                                     select
                         distinct
-                        hash(conversationId, coalesce(agentId, ''), coalesce(originatingDirection, ''), 
-                            coalesce(element_at(segments, 1).queueId, ''),
-                            coalesce(mediaType, ''), coalesce(messageType, '')) as conversationDimKey,
                         conversationId,
                         conversationStart,
                         conversationEnd,

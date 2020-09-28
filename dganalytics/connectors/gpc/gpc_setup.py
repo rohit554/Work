@@ -92,6 +92,29 @@ def create_dim_tables(spark: SparkSession, db_name: str):
     )
 
     spark.sql(
+        f"""create table if not exists {db_name}.dim_conversations
+            (
+                conversationId string,
+                conversationStart timestamp,
+                conversationEnd timestamp,
+                originatingDirection string,
+                sessionStart timestamp comment 'first segment start date',
+                sessionEnd timestamp comment 'last segment end date',
+                queueId string,
+                mediaType string,
+                messageType string,
+                agentId string,
+                wrapUpCode string,
+                wrapUpNote string,
+                conversationStartDate date
+            )
+            using delta
+            PARTITIONED BY (conversationStartDate)
+            LOCATION '{db_path}/{db_name}/dim_conversations'
+            """
+    )
+
+    spark.sql(
         f"""
                 create table if not exists {db_name}.dim_users
                 (

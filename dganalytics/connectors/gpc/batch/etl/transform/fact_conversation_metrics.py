@@ -9,7 +9,6 @@ def fact_conversation_metrics(spark: SparkSession, extract_date: str):
                             element_at(segments, size(segments)).wrapUpCode as wrapUpCode,
                         max(element_at(segments, size(segments)).wrapUpNote) as wrapUpNote,
                     cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as emitDateTime,
-                    cast(cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as date) as emitDate,
                     sum(case when coalesce(tAbandon,0) > 0 then 1 else 0 end) as nAbandon,
                     sum(case when coalesce(tAcd,0) > 0 then 1 else 0 end) as nAcd,
                     sum(case when coalesce(tAcw,0) > 0 then 1 else 0 end) as nAcw,
@@ -44,7 +43,8 @@ def fact_conversation_metrics(spark: SparkSession, extract_date: str):
                     sum(coalesce(tShortAbandon,0))/1000.0 as tShortAbandon,
                     sum(coalesce(tTalkComplete,0))/1000.0 as tTalkComplete,
                     sum(coalesce(tVoicemail,0))/1000.0 as tVoicemail,
-                    sum(coalesce(tWait,0))/1000.0 as tWait
+                    sum(coalesce(tWait,0))/1000.0 as tWait,
+                    cast(cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as date) as emitDate
                     from 
                     (
                     select 
@@ -53,7 +53,7 @@ def fact_conversation_metrics(spark: SparkSession, extract_date: str):
                     select
                         conversationId, agentId, originatingDirection, purpose, 
                         element_at(segments, 1).queueId, mediaType, messageType, 
-                        metrics.emitDate, metrics.name, metrics.value
+                        metrics.emitDate, metrics.name, metrics.value, segments
                     from
                         (
                         select

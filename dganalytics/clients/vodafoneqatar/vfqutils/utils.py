@@ -65,7 +65,6 @@ def denullify_data(this_dataframe, numcons_paceholder):
 
 
 def overwrite_sparkDF_to_Delta(this_dataframe, filepath,):
-    print(str(this_dataframe.dtypes))
     framewriter = this_dataframe.write.format(
         "delta"
         ).mode(
@@ -111,7 +110,6 @@ def get_sparkDf_from_mongocollection(spark, tenant, mongodb_conxnx_uri, database
     ).schema(
         schema
         ).load()
-    print(str(this_dataframe.dtypes))
     print("outcount: {}".format(this_dataframe.count()))
     return this_dataframe
 
