@@ -5,7 +5,7 @@
         "tenant": {
             "type": "string",
             "metadata": "Environment name",
-            "defaultValue": "vodafoneqatae"
+            "defaultValue": "vodafoneqatar"
         },
         "env": {
             "type": "string",
