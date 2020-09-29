@@ -132,9 +132,9 @@ config = {
         'collection': 'SIEBELACTIVITY',
         'pipeline': pipelines.stage10_JSR_Top_Reason_Data.aggr_pipeline,
         'load_timestamp_field': "insertion_timestamp",
-        'output_columns': ['sub_reason', 'call_reason', 'type', 'call_type', 'created_by', 'segment_type', 'report_date', 'location', 'lob', 'fcr_tag', 'overall_tnps', 'fcr', 'nfcr'],
-        'primary_key': ['sub_reason', 'call_reason', 'type', 'call_type', 'created_by', 'segment_type', 'report_date', 'location', 'lob', 'fcr_tag', 'overall_tnps', 'fcr', 'nfcr'],
-        'output_type': ['MERGED','RENAME_COLUMNS'],
+        'output_columns': ['activity_num','sub_reason', 'call_reason', 'type', 'call_type', 'created_by', 'segment_type', 'report_date', 'location', 'lob', 'fcr_tag', 'overall_tnps', 'fcr', 'nfcr'],
+        'primary_key': ['activity_num'],
+        'output_type': ['MERGED'],
         'partition_by': [],
     },
     "Process_AHT_KPI_Data_to_All_Process" : {
