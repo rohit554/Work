@@ -2,6 +2,12 @@
     "fields": [
       {
         "metadata": {},
+        "name": "activity_num",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
         "name": "sub_reason",
         "nullable": true,
         "type": "string"
