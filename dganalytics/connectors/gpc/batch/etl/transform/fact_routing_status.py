@@ -9,6 +9,16 @@ def fact_routing_status(spark: SparkSession, extract_date: str):
                                 """)
     routing_status.registerTempTable("routing_status")
     spark.sql("""
+                delete from fact_routing_status a where exists (
+                        select 1 from routing_status b where a.userId = b.userId
+                        and a.startDate = b.startDate and a.startTime = b.startTime
+                        and a.endTime = b.endTime
+                ) 
+                """)
+    spark.sql("insert into fact_routing_status select * from routing_status")
+
+    '''
+    spark.sql("""
                 merge into fact_routing_status as target
                     using routing_status as source
                     on source.userId = target.userId
@@ -18,3 +28,5 @@ def fact_routing_status(spark: SparkSession, extract_date: str):
                     WHEN NOT MATCHED THEN
                         INSERT *
             """)
+
+    '''

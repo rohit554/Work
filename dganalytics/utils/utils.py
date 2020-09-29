@@ -75,7 +75,7 @@ def get_logger(tenant: str, app_name: str):
     elif len(logger.handlers) == 0:
         pass
     else:
-        logger.error("unable to get logging. multiple loggers exist")
+        logger.exception("unable to get logging. multiple loggers exist")
     logger.setLevel(logging.DEBUG)
     '''
     existing_handlers = [
@@ -85,7 +85,7 @@ def get_logger(tenant: str, app_name: str):
     elif len(logger.handlers) == 0:
         pass
     else:
-        logger.error("unable to get logging. multiple loggers exist")
+        logger.exception("unable to get logging. multiple loggers exist")
     '''
     '''
     fh = logging.FileHandler(temp_log_file_name)

@@ -42,6 +42,15 @@ def dim_conversations(spark: SparkSession, extract_date: str):
                               )
     conversations.registerTempTable("conversations")
 
+    spark.sql("""delete from dim_conversations a where exists (
+                        select 1 from conversations b 
+                                where a.conversationId = b.conversationId
+                                and a.conversationStartDate = b.conversationStartDate
+    )""")
+
+    spark.sql("""insert into dim_conversations select * from conversations""")
+
+    '''
     upsert = spark.sql("""
                             merge into dim_conversations as target
                                 using conversations as source
@@ -53,3 +62,4 @@ def dim_conversations(spark: SparkSession, extract_date: str):
                                 WHEN NOT MATCHED THEN
                                     INSERT *
                             """)
+    '''

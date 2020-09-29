@@ -24,7 +24,7 @@
         "factoryId": "[concat('Microsoft.DataFactory/factories/dg', parameters('env'), 'adf')]",
         "factoryname": "[concat('dg', parameters('env'), 'adf')]",
         "AzureKeyVault_baseUrl": "[concat('https://dg', parameters('env') ,'secrets.vault.azure.net/')]",
-        "gpcMigrationTriggerStart": "[dateTimeAdd(parameters('baseTime'), '-P190D', 'yyyy-MM-ddT00:30:00Z')]"
+        "gpcMigrationTriggerStart": "[dateTimeAdd(parameters('baseTime'), '-P190D', 'yyyy-MM-ddT00:00:00Z')]"
     },
     "resources": [
         {
@@ -105,10 +105,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--api_name",
                                 "conversation_details_job"
                             ]
@@ -139,10 +135,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--api_name",
                                 "users_details_job"
                             ]
@@ -173,10 +165,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--api_name",
                                 "wfm_adherence"
                             ]
@@ -207,10 +195,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--api_name",
                                 "evaluations"
                             ]
@@ -248,10 +232,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--transformation",
                                 "dim_conversations"
                             ]
@@ -289,10 +269,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--transformation",
                                 "dim_evaluations"
                             ]
@@ -330,10 +306,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--transformation",
                                 "fact_conversation_metrics"
                             ]
@@ -371,10 +343,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--transformation",
                                 "fact_evaluation_question_group_scores"
                             ]
@@ -412,10 +380,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--transformation",
                                 "fact_evaluation_question_scores"
                             ]
@@ -453,10 +417,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--transformation",
                                 "fact_evaluation_total_scores"
                             ]
@@ -494,10 +454,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--transformation",
                                 "fact_primary_presence"
                             ]
@@ -535,10 +491,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--transformation",
                                 "fact_routing_status"
                             ]
@@ -576,10 +528,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--transformation",
                                 "fact_wfm_actuals"
                             ]
@@ -617,10 +565,6 @@
                                 "@pipeline().RunId",
                                 "--extract_date",
                                 "@pipeline().parameters.extract_date",
-                                "--extract_interval_start",
-                                "@pipeline().parameters.extract_interval_start",
-                                "--extract_interval_end",
-                                "@pipeline().parameters.extract_interval_end",
                                 "--transformation",
                                 "fact_wfm_day_metrics"
                             ]
@@ -665,9 +609,7 @@
                         },
                         "parameters": {
                             "tenant": "[parameters('tenant')]",
-                            "extract_date": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ss')}",
-                            "extract_interval_start": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ss')}",
-                            "extract_interval_end": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddTHH:mm:ss')}"
+                            "extract_date": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ss')}"
                         }
                     }
                 ],

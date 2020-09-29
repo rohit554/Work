@@ -14,8 +14,7 @@ def get_users_list(spark: SparkSession):
     return users_list
 
 
-def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_name: str,
-                           extract_date: str, extract_interval_start: str, extract_interval_end: str):
+def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
     logger = gpc_utils_logger(tenant, "wfm_adherence")
 
     api_headers = authorize(tenant)
@@ -23,7 +22,7 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
     steaming_channel = rq.post(
         f"{get_api_url(tenant)}/api/v2/notifications/channels", headers=api_headers)
     if steaming_channel.status_code != 200:
-        logger.error("steaming_channel API Failed %s", steaming_channel.text)
+        logger.exception("steaming_channel API Failed %s", steaming_channel.text)
 
     steaming_channel = steaming_channel.json()
     steaming_channel_id = steaming_channel['id']
@@ -35,7 +34,7 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
                             "id": "v2.users.{}.workforcemanagement.historicaladherencequery".format(ouath_client_id)
                         }]))
     if subscribe.status_code != 200:
-        logger.error("subscribe API Failed" + subscribe.text)
+        logger.exception("subscribe API Failed" + subscribe.text)
 
     wss_url = f"{get_api_url(tenant)}".replace(
         "https://api.", "wss://streaming.")
@@ -47,10 +46,8 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
     wfm_resps_urls = []
 
     batchsize = 1000
-    start_time = get_interval(
-        extract_date, extract_interval_start, extract_interval_end).split("/")[0]
-    end_time = get_interval(
-        extract_date, extract_interval_start, extract_interval_end).split("/")[1]
+    start_time = get_interval(extract_date).split("/")[0]
+    end_time = get_interval(extract_date).split("/")[1]
     for i in range(0, len(user_ids), batchsize):
         body = {
             "startDate": start_time,
@@ -61,7 +58,7 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
         resp = rq.post(f"{get_api_url(tenant)}/api/v2/workforcemanagement/adherence/historical",
                        headers=api_headers, data=json.dumps(body))
         if resp.status_code != 202:
-            logger.error("WFM Historical Adherence API Failed" + resp.text)
+            logger.exception("WFM Historical Adherence API Failed" + resp.text)
 
         while True:
             msg = ws.recv()
@@ -78,4 +75,4 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
                 wfm_resps.append(rq.get(url).json())
     wfm_resps = [json.dumps(resp) for resp in wfm_resps]
     process_raw_data(spark, tenant, 'wfm_adherence', run_id,
-                     wfm_resps, extract_date, len(user_ids), extract_interval_start, extract_interval_end)
+                     wfm_resps, extract_date, len(user_ids))

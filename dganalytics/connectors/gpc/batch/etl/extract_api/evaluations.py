@@ -13,16 +13,15 @@ def get_evaluators(spark: SparkSession) -> list:
     return evaluators
 
 
-def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str,
-                         extract_interval_start: str, extract_interval_end: str):
+def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
 
     logger = gpc_utils_logger(tenant, "gpc_evaluations")
 
     evaluators = get_evaluators(spark)
     api_headers = authorize(tenant)
     evaluation_details_list = []
-    start_time = get_interval(extract_date, extract_interval_start, extract_interval_end).split("/")[0]
-    end_time = get_interval(extract_date, extract_interval_start, extract_interval_end).split("/")[1]
+    start_time = get_interval(extract_date).split("/")[0]
+    end_time = get_interval(extract_date).split("/")[1]
     for e in evaluators:
         body = {
             "startTime": start_time,
@@ -33,7 +32,7 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, db_name:
         resp = rq.get(f"{get_api_url(tenant)}/api/v2/quality/evaluations/query",
                       headers=api_headers, params=body)
         if resp.status_code != 200:
-            logger.error("Detailed Evaluations API Failed" + resp.text)
+            logger.exception("Detailed Evaluations API Failed" + resp.text)
 
         evaluation_details_list.append(resp.json()['entities'])
 
@@ -42,4 +41,4 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, db_name:
     evaluation_details_list = [json.dumps(ed)
                                for ed in evaluation_details_list]
     process_raw_data(spark, tenant, 'evaluations', run_id,
-                     evaluation_details_list, extract_date, len(evaluators), extract_interval_start, extract_interval_end)
+                     evaluation_details_list, extract_date, len(evaluators))

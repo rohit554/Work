@@ -56,7 +56,7 @@ gpc_end_points = {
         "entity_name": "userDetails",
         "spark_partitions": {"max_records_per_partition": 30000},
         "tbl_overwrite": False,
-        "raw_primary_key": ["userId"]
+        "raw_primary_key": ["userId", "extractDate"]
     },
     "users_details_job": {
         "endpoint": "/api/v2/analytics/users/details/jobs",
@@ -71,7 +71,7 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 30000},
         "table_name": "users_details",
         "tbl_overwrite": False,
-        "raw_primary_key": ["userId"]
+        "raw_primary_key": ["userId", "extractDate"]
     },
     "wrapup_codes": {
         "endpoint": "/api/v2/routing/wrapupcodes",
