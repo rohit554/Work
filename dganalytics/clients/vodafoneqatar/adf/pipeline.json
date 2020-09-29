@@ -2,6 +2,11 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "tenant": {
+            "type": "string",
+            "metadata": "Environment name",
+            "defaultValue": "vodafoneqatae"
+        },
         "env": {
             "type": "string",
             "metadata": "Environment name",
@@ -734,16 +739,17 @@
                 ],
                 "concurrency": 1,
                 "parameters": {
-                    "tenant": {
+                     "database_name": {
                         "type": "string",
-                        "defaultValue": "vodafoneqatar"
+                        "defaultValue": "[parameters('database_name')]"
                     },
-                    "extract_date": {
-                        "type": "string"
+                     "env": {
+                        "type": "string",
+                        "defaultValue": "[parameters('env')]"
                     }
                 },
                 "folder": {
-                    "name": "vodafoneqatar"
+                    "name": "[parameters('tenant')]"
                 },
                 "annotations": []
             },
