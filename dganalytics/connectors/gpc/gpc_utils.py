@@ -60,8 +60,8 @@ def get_api_url(tenant: str) -> str:
     return url
 
 
-def get_interval(extract_date: str, extract_interval_start, extract_interval_end):
-    interval = f"{extract_interval_start}Z/{extract_interval_end}Z"
+def get_interval(extract_date: str):
+    interval = f"{extract_date}T00:00:00Z/{extract_date}T23:59:59Z"
     return interval
 
 
@@ -90,7 +90,7 @@ def authorize(tenant: str):
     if auth_request.status_code == 200:
         access_token = auth_request.json()['access_token']
     else:
-        logger.error(
+        logger.exception(
             "Autohrization failed while requesting Access Token for tenant - {}".format(tenant))
     api_headers = {
         "Authorization": "Bearer {}".format(access_token),
@@ -118,7 +118,7 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
         time.sleep(180)
         if retry > 5:
             message = f"GPC API Extraction failed - {tenant} - {api_name} - {run_id}"
-            logger.error(message + str(resp.text))
+            logger.exception(message + str(resp.text))
         return "SLEEP"
     else:
         if "message" in resp.json().keys() and \
@@ -128,17 +128,16 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
             return "OK"
 
         message = f"GPC API Extraction failed - {tenant} - {api_name} - {run_id}"
-        logger.error(message + str(resp.text))
+        logger.exception(message + str(resp.text))
 
 
-def write_api_resp(resp: list, api_name: str, run_id: str, tenant: str, extract_date: str,
-                   extract_interval_start: str, extract_interval_end: str):
+def write_api_resp(resp: list, api_name: str, run_id: str, tenant: str, extract_date: str):
     tenant_path, db_path, log_path = get_path_vars(tenant)
     path = os.path.join(tenant_path, 'data', 'raw',
                         'gpc', extract_date, run_id)
     logger.info("tenant path" + str(path))
     Path(path).mkdir(parents=True, exist_ok=True)
-    file_name = f"{api_name}_{extract_interval_start.replace(':', '-')}_{extract_interval_end.replace(':', '-')}.json.gz"
+    file_name = f"{api_name}_{extract_date}.json.gz"
     temp_resp_file = tempfile.NamedTemporaryFile('w+', delete=True)
     temp_resp_file.close()
     with gzip.open(temp_resp_file.name, 'wt', encoding="utf-16") as zipfile:
@@ -183,7 +182,7 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
 
     partition_spec = ""
     if not get_tbl_overwrite(api_name):
-        '''
+
         df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
             'extractDate').option("replaceWhere",
                                   f" extractDate = '{extract_date}' ").save(f"{db_path}/{db_name}/{table_name}")
@@ -201,7 +200,7 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
                         WHEN NOT MATCHED THEN
                             INSERT *
                         """)
-
+        '''
     else:
         df.coalesce(1).write.format("delta").mode(
             "overwrite").save(f"{db_path}/{db_name}/{table_name}")
@@ -224,11 +223,11 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
 
 
 def process_raw_data(spark: SparkSession, tenant: str, api_name: str, run_id: str, resp_list: list, extract_date: str,
-                     page_count: int, extract_interval_start, extract_interval_end, re_process: bool = False):
+                     page_count: int, re_process: bool = False):
     logger.info(f"processing raw data extracted for {tenant} and {api_name}")
     if not re_process:
         raw_file = write_api_resp(
-            resp_list, api_name, run_id, tenant, extract_date, extract_interval_start, extract_interval_end)
+            resp_list, api_name, run_id, tenant, extract_date)
     n_partitions = get_spark_partitions_num(api_name, len(resp_list))
     update_raw_table(spark, tenant, resp_list, api_name,
                      extract_date, n_partitions)
@@ -255,10 +254,6 @@ def extract_parser():
     parser.add_argument('--run_id', required=True)
     parser.add_argument('--extract_date', required=True,
                         type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
-    parser.add_argument('--extract_interval_start', required=True,
-                        type=lambda s: datetime.datetime.strptime(s.replace("Z", "").replace("z", ""), '%Y-%m-%dT%H:%M:%S'))
-    parser.add_argument('--extract_interval_end', required=True,
-                        type=lambda s: datetime.datetime.strptime(s.replace("Z", "").replace("z", ""), '%Y-%m-%dT%H:%M:%S'))
     parser.add_argument('--api_name', required=True)
 
     args, unknown_args = parser.parse_known_args()
@@ -266,10 +261,8 @@ def extract_parser():
     run_id = args.run_id
     api_name = args.api_name
     extract_date = args.extract_date.strftime('%Y-%m-%d')
-    extract_interval_start = args.extract_interval_start.strftime('%Y-%m-%dT%H:%M:%S')
-    extract_interval_end = args.extract_interval_end.strftime('%Y-%m-%dT%H:%M:%S')
-
-    return tenant, run_id, extract_date, api_name, extract_interval_start, extract_interval_end
+    
+    return tenant, run_id, extract_date, api_name
 
 
 def dg_metadata_export_parser():
@@ -346,8 +339,7 @@ def get_prev_extract_data(tenant: str, extract_date: str, run_id: str, api_name:
 
 
 def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
-                extract_date: str, extract_interval_start: str, extract_interval_end: str,
-                overwrite_gpc_config: dict = None):
+                extract_date: str, overwrite_gpc_config: dict = None):
     logger.info(
         f"GPC Request Start for {api_name} with extract_date {extract_date}")
     auth_headers = authorize(tenant)
@@ -369,8 +361,7 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
     cursor_param = ""
 
     if interval:
-        params['interval'] = get_interval(
-            extract_date, extract_interval_start, extract_interval_end)
+        params['interval'] = get_interval(extract_date)
 
     while True:
         if paging:
@@ -416,7 +407,6 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 cursor_param = resp_json['cursor']
             else:
                 break
-    process_raw_data(spark, tenant, api_name, run_id,
-                     resp_list, extract_date, page_count, extract_interval_start, extract_interval_end)
+    process_raw_data(spark, tenant, api_name, run_id, resp_list, extract_date, page_count)
 
     return True

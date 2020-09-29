@@ -11,5 +11,15 @@
         "realtime": {
             "1": "dganalytics/connectors/gpc/realtime/functions"
         }
+    },
+    "salmatcolesonline": {
+        "adf": {
+            "1": {
+                "pipeline": "dganalytics/connectors/gpc/batch/adf/gpc_daily_template.json"
+            },
+            "2": {
+                "pipeline": "dganalytics/clients/salmatcolesonline/adf/probe_colesonline.json"
+            }
+        }
     }
 }

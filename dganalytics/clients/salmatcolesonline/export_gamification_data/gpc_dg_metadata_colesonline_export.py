@@ -43,14 +43,14 @@ SumDailyNotRespondingTime
 from (
 SELECT 
 agentId as UserID, cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) as Date,
-sum(case when mediaType = 'voice' then coalesce(tHeldComplete,0) else 0 end) as AvgDailyHoldTimeVoice,
-sum(case when mediaType = 'message' then coalesce(tHeldComplete,0) else 0 end) as AvgDailyHoldTimeMessage,
-sum(case when mediaType = 'email' then coalesce(tHeldComplete,0) else 0 end) as AvgDailyHoldTimeEmail,
-sum(coalesce(tHeldComplete,0)) as AvgDailyHoldTime,
-sum(case when mediaType = 'voice' then coalesce(tAcw,0) else 0 end) as AvgDailyAcwTimeVoice,
-sum(case when mediaType = 'message' then coalesce(tAcw,0) else 0 end) as AvgDailyAcwTimeMessage,
-sum(case when mediaType = 'email' then coalesce(tAcw,0) else 0 end) as AvgDailyAcwTimeEmail,
-sum(coalesce(tAcw,0)) as AvgDailyAcwTime
+sum(case when lower(mediaType) = 'voice' then coalesce(tHeldComplete,0) else 0 end)/sum(case when mediaType = 'voice' then coalesce(nHeldComplete,0) else 0 end) as AvgDailyHoldTimeVoice,
+sum(case when lower(mediaType) = 'message' then coalesce(tHeldComplete,0) else 0 end)/sum(case when mediaType = 'message' then coalesce(nHeldComplete,0) else 0 end) as AvgDailyHoldTimeMessage,
+sum(case when lower(mediaType) = 'email' then coalesce(tHeldComplete,0) else 0 end)/sum(case when mediaType = 'email' then coalesce(nHeldComplete ,0) else 0 end) as AvgDailyHoldTimeEmail,
+sum(coalesce(tHeldComplete,0))/sum(coalesce(nHeldComplete,0)) as AvgDailyHoldTime,
+sum(case when lower(mediaType) = 'voice' then coalesce(tAcw,0) else 0 end)/sum(case when mediaType = 'voice' then coalesce(nAcw ,0) else 0 end) as AvgDailyAcwTimeVoice,
+sum(case when lower(mediaType) = 'message' then coalesce(tAcw,0) else 0 end)/sum(case when mediaType = 'message' then coalesce(nAcw ,0) else 0 end) as AvgDailyAcwTimeMessage,
+sum(case when lower(mediaType) = 'email' then coalesce(tAcw,0) else 0 end)/sum(case when mediaType = 'email' then coalesce(nAcw ,0) else 0 end) as AvgDailyAcwTimeEmail,
+sum(coalesce(tAcw,0))/sum(coalesce(nAcw ,0)) as AvgDailyAcwTime
 FROM fact_conversation_metrics
 WHERE cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) = (cast('{extract_date}' as date) )
 group by agentId , cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date)

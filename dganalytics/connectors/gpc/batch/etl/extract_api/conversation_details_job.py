@@ -5,18 +5,17 @@ from dganalytics.connectors.gpc.gpc_utils import gpc_request, authorize
 from dganalytics.connectors.gpc.gpc_utils import get_interval, get_api_url, gpc_utils_logger
 
 
-def exec_conversation_details_job(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str,
-                                  extract_interval_start: str, extract_interval_end: str):
+def exec_conversation_details_job(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
     logger = gpc_utils_logger(tenant, 'conversation_details_job')
     logger.info("Conversation job inside")
     api_headers = authorize(tenant)
     body = {
-        "interval": get_interval(extract_date, extract_interval_start, extract_interval_end)
+        "interval": get_interval(extract_date)
     }
     job_resp = rq.post(f"{get_api_url(tenant)}/api/v2/analytics/conversations/details/jobs",
                        headers=api_headers, data=json.dumps(body))
     if job_resp.status_code != 202:
-        logger.error(
+        logger.exception(
             "Conversation Details Job Submit API Failed" + str(job_resp.text))
 
     job_id = job_resp.json()['jobId']
@@ -24,13 +23,13 @@ def exec_conversation_details_job(spark: SparkSession, tenant: str, run_id: str,
         job_status_resp = rq.get(f"{get_api_url(tenant)}/api/v2/analytics/conversations/details/jobs/{job_id}",
                                  headers=api_headers)
         if job_status_resp.status_code not in [200, 202]:
-            logger.error(
+            logger.exception(
                 "Conversation Details Job Submit API Failed" + str(job_resp.text))
 
         if job_status_resp.json()['state'] == 'FULFILLED':
             break
         if job_status_resp.json()['state'] in ["FAILED", "CANCELLED", "EXPIRED"]:
-            logger.error("""Conversation Details Job Status API - Job was either Killed,
+            logger.exception("""Conversation Details Job Status API - Job was either Killed,
                             cancelled or expired""" + str(job_resp.text))
 
     api_config = {
@@ -41,5 +40,4 @@ def exec_conversation_details_job(spark: SparkSession, tenant: str, run_id: str,
     }
 
     df = gpc_request(spark, tenant, 'conversation_details_job',
-                     run_id, extract_date, extract_interval_start, extract_interval_end,
-                     overwrite_gpc_config=api_config)
+                     run_id, extract_date, overwrite_gpc_config=api_config)
