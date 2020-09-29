@@ -56,6 +56,7 @@ aggr_pipeline = [
   {
     "$project": {
       "_id": 0,
+      "activity_num" : 1,
       "segment_type": {
         "$cond": {
           "if": {
