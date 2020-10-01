@@ -28,24 +28,24 @@ def updatePipeline(
         timestamp_field = 'insertion_timestamp'
 
     pipe = deepcopy(aggr_pipe)
-    # pipe.insert(0, {
-    #     "$match": {
-    #         "$expr": {
-    #             # "$eq": [
-    #             #     {
-    #             #     "$dateToString": {
-    #             #         "format": "%Y-%m-%d",
-    #             #         "date": f"${timestamp_field}"
-    #             #     }
-    #             #     },
-    #             #     yesterday
-    #             # ]
-    #             "$eq": [
-    #                 f"${timestamp_field}", rundatex
-    #             ]
-    #         }
-    #     }
-    # })
+    pipe.insert(0, {
+        "$match": {
+            "$expr": {
+                # "$eq": [
+                #     {
+                #     "$dateToString": {
+                #         "format": "%Y-%m-%d",
+                #         "date": f"${timestamp_field}"
+                #     }
+                #     },
+                #     yesterday
+                # ]
+                "$eq": [
+                    f"${timestamp_field}", rundatex
+                ]
+            }
+        }
+    })
 
     pipe.append(
         {
