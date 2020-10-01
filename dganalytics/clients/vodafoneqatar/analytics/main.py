@@ -56,7 +56,7 @@ def updatePipeline(
     return(pipe)
 
 
-def extract_from_mongo(env, database_name, stage_name, step_name, rundate,):
+def extract_from_mongo(database_name, stage_name, step_name, rundate,):
 
     tenant = "".join(database_name.split("-")[:-1])
     tenant_path, db_path, log_path = get_path_vars(tenant)
@@ -67,7 +67,6 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate,):
     output_db_path = db_path + f'/dg_{tenant}'
     print(output_db_path)
 
-    temp_delta_location = tenant_path + '/data/adhoc/'
 
     if step_name != "default":
 
@@ -89,7 +88,7 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate,):
             mongodb_conxnx_uri,
             database_name,
             "dgmis_config",
-            "min_rundate",
+            tenant+"_min_rundate",
         )
         minterm = deepcopy(list(min_rundate_curs))
         # min_rundate = minterm[0]['config_value'].strftime("%Y-%m-%d")
@@ -124,7 +123,6 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate,):
             )
         # if step_name == "FinalUpdate":
             extract_mongo_colxn(
-                env,
                 mongodb_conxnx_uri,
                 tenant,
                 database_name,
@@ -134,7 +132,6 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate,):
                 config_out_type,
                 config_out_rnmdcolms,
                 output_db_path,
-                temp_delta_location,
                 stage_name
             )
             drop_mongo_colxn(
@@ -152,7 +149,6 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate,):
 
             mongodb_conxnx_uri,
             database_name,
-            env,
             str((datetime.strptime(rundate,"%Y-%m-%d") - timedelta(2)).date()),
             # str((datetime.utcnow() -timedelta(2) ).date()),
             config,
@@ -163,20 +159,13 @@ def extract_from_mongo(env, database_name, stage_name, step_name, rundate,):
             mongodb_conxnx_uri,
             database_name,
             collection_name='dgmis_config',
-            upsert_filter={'config_name': 'min_rundate'},
+            upsert_filter={'config_name': tenant+"_min_rundate"},
             update={"$set": {"config_value": mindate}},
         )
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--env',
-                        type=str,
-                        # required=True,
-                        default='local',
-                        help="Environment Name.",
-
-                        )
     parser.add_argument('--database_name',
                         type=str,
                         required=True,
@@ -206,14 +195,13 @@ if __name__ == "__main__":
 
     args, unknown_args = parser.parse_known_args()
 
-    env = args.env
     database_name = args.database_name
     stage_name = args.stage_name
     rundate = args.rundate
     step_name = args.step_name
 
     logging.warn(
-        f"environment: {env},database: {database_name},stage: {stage_name},step: {step_name},rundate: {rundate}")
+        f"database: {database_name},stage: {stage_name},step: {step_name},rundate: {rundate}")
 
-    extract_from_mongo(env, database_name, stage_name, step_name, rundate)
+    extract_from_mongo(database_name, stage_name, step_name, rundate)
     # get_minimum_processing_date('2020-09-03')

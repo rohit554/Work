@@ -147,7 +147,6 @@ def exit_deltatable_changes(
 
 
 def extract_mongo_colxn(
-    env,
     mongodb_conxnx_uri,
     tenant,
     database_name,
@@ -157,7 +156,6 @@ def extract_mongo_colxn(
     output_type,
     renamed_columns,
     output_db_path,
-    temp_delta_location,
     stage_name,
     partioned_by=None
 ):
@@ -171,7 +169,6 @@ def extract_mongo_colxn(
         # cust_conf=cust_conf
     )
 
-    # temp_delta_file = f"{temp_delta_location}/tempFrameDBETLmongocsv"
 
     from delta.tables import DeltaTable
     try:
@@ -279,7 +276,6 @@ def extract_mongo_colxn(
 def get_minimum_processing_date(
     mongodb_conxnx_uri,
     database_name,
-    env,
     rundate,
     config,
     aggregate_mongo_colxn

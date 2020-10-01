@@ -97,9 +97,7 @@
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/vodafoneqatar/analytics/main.py",
                             "parameters": [
                                 "--database_name",
-                                "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]"
+                                "[parameters('database_name')]"
                             ]
                         },
                         "linkedServiceName": {
@@ -131,8 +129,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "Call_Volume",
                                 "--step_name",
@@ -168,8 +164,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "JSR_KPI_Team_Target",
                                 "--step_name",
@@ -205,8 +199,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "JSR_Process_Forecast_Data",
                                 "--step_name",
@@ -242,8 +234,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "Raw_FCR",
                                 "--step_name",
@@ -279,8 +269,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "User_Details",
                                 "--step_name",
@@ -316,8 +304,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "User_FCR_KPI_Data",
                                 "--step_name",
@@ -353,8 +339,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "JSR_Top_Reason_Data",
                                 "--step_name",
@@ -390,8 +374,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "User_KPI_Data",
                                 "--step_name",
@@ -427,8 +409,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "JSR_Process_KPI_Data_to_All_Process",
                                 "--step_name",
@@ -464,8 +444,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "Process_AHT_KPI_Data_to_All_Process",
                                 "--step_name",
@@ -501,8 +479,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "JSR_Process_TNPS_KPI_Data_to_All_Process",
                                 "--step_name",
@@ -538,8 +514,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "JSR_Process_FCR_KPI_to_All_Process",
                                 "--step_name",
@@ -575,8 +549,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "Admin_Login",
                                 "--step_name",
@@ -612,8 +584,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "JSR_AHT_KPI_Data",
                                 "--step_name",
@@ -649,8 +619,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "JSR_Trouble_Ticket_Data",
                                 "--step_name",
@@ -686,8 +654,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "User_AHT_KPI_Data",
                                 "--step_name",
@@ -723,8 +689,6 @@
                             "parameters": [
                                 "--database_name",
                                 "[parameters('database_name')]",
-                                "--env",
-                                "[parameters('env')]",
                                 "--stage_name",
                                 "JSR_Process_KPI_Data",
                                 "--step_name",
@@ -742,10 +706,6 @@
                      "database_name": {
                         "type": "string",
                         "defaultValue": "[parameters('database_name')]"
-                    },
-                     "env": {
-                        "type": "string",
-                        "defaultValue": "[parameters('env')]"
                     }
                 },
                 "folder": {
