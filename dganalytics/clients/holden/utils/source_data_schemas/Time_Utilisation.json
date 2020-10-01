@@ -1,0 +1,77 @@
+{
+    "fields": [
+      {
+        "metadata": {},
+        "name": "_id",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Exception",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Agent_Name",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "UPA",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Non_UPA",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "IEX_ID",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Time",
+        "nullable": true,
+        "type": "timestamp"
+      },
+      {
+        "metadata": {},
+        "name": "Total_Time_mins",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Shot_Date",
+        "nullable": true,
+        "type": "timestamp"
+      },
+      {
+        "metadata": {},
+        "name": "User_ID",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Break",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Lunch",
+        "nullable": true,
+        "type": "string"
+      }
+    ],
+    "type": "struct"
+}

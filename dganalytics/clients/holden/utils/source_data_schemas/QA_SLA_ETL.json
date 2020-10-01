@@ -1,0 +1,89 @@
+{
+    "fields": [
+      {
+        "metadata": {},
+        "name": "Evaluated_Name",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Evaluation_Creation_Date",
+        "nullable": true,
+        "type": "timestamp"
+      },
+      {
+        "metadata": {},
+        "name": "Reviewd_by_evaluator",
+        "nullable": true,
+        "type": "boolean"
+      },
+      {
+        "metadata": {},
+        "name": "Type",
+        "nullable": true,
+        "type": "integer"
+      },
+      {
+        "metadata": {},
+        "name": "Evaluator_Review_Date",
+        "nullable": true,
+        "type": "timestamp"
+      },
+      {
+        "metadata": {},
+        "name": "Reviewed_By_Agent",
+        "nullable": true,
+        "type": "boolean"
+      },
+      {
+        "metadata": {},
+        "name": "Evaluation_Modification_Date",
+        "nullable": true,
+        "type": "timestamp"
+      },
+      {
+        "metadata": {},
+        "name": "Score",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Evaluation_comment",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Evaluator_Name",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Segment_ID_Attached_to_Evaluation",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Agent_Review_Date",
+        "nullable": true,
+        "type": "timestamp"
+      },
+      {
+        "metadata": {},
+        "name": "Form_Name",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Max_Score",
+        "nullable": true,
+        "type": "string"
+      }
+    ],
+    "type": "struct"
+}
