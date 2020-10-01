@@ -1,0 +1,77 @@
+{
+    "fields": [
+      {
+        "metadata": {},
+        "name": "Full_Name",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Role",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Buisness_Unit",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Litmus_ID",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Avaya_ID",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Last_Name",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "IEX_ID",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Team_Leader",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "First_Name",
+        "nullable": true,
+        "type": "double"
+      },
+      {
+        "metadata": {},
+        "name": "Email",
+        "nullable": true,
+        "type": "double"
+      },
+      {
+        "metadata": {},
+        "name": "QA_ID",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "Status",
+        "nullable": true,
+        "type": "string"
+      }
+    ],
+    "type": "struct"
+}
