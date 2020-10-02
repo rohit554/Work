@@ -6,7 +6,7 @@ from dganalytics.connectors.gpc.gpc_utils import authorize, get_api_url, process
 from dganalytics.connectors.gpc.gpc_utils import get_interval, gpc_utils_logger
 import ast
 from websocket import create_connection
-
+import time
 
 def get_users_list(spark: SparkSession):
     users_list = spark.sql("select distinct id as userId from raw_users").toPandas()[
@@ -48,6 +48,9 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
     batchsize = 1000
     start_time = get_interval(extract_date).split("/")[0]
     end_time = get_interval(extract_date).split("/")[1]
+    from datetime import datetime
+    if datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%SZ') > datetime.utcnow():
+        end_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
     for i in range(0, len(user_ids), batchsize):
         body = {
             "startDate": start_time,
@@ -60,10 +63,12 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
         if resp.status_code != 202:
             logger.exception("WFM Historical Adherence API Failed" + resp.text)
 
+        time.sleep(10)
         while True:
             msg = ws.recv()
             msg = ast.literal_eval(msg)
-            if 'id' in msg['eventBody'].keys():
+            print(msg)
+            if 'id' in msg['eventBody'].keys() or msg['eventBody']['message'] == 'WebSocket Heartbeat':
                 wfm_resps_urls.append(msg)
                 break
     ws.close()
