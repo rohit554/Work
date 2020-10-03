@@ -248,7 +248,7 @@ def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_
 
 def exec_mongo_pipeline(spark, pipeline, collection):
     df = spark.read.format("mongo").option("uri", get_secret('mongodbconnurl')).option(
-        "collection", collection).option("database", f"dggamification{env if env != 'local' else 'prd'}").option(
+        "collection", collection).option("database", f"dggamification{env if env != 'local' else 'dev'}").option(
             "pipeline", json.dumps(pipeline)).load()
     return df
 
