@@ -1,4 +1,5 @@
 from dganalytics.utils.utils import exec_mongo_pipeline
+from pyspark.sql.types import StructType, StructField, StringType, BooleanType
 
 pipeline = [
     {
@@ -25,9 +26,16 @@ pipeline = [
     }
 ]
 
+schema = StructType([StructField('campaign_id', StructType([StructField('oid', StringType(), True)]), True),
+                     StructField('end_date', StringType(), True), StructField(
+                         'is_active', BooleanType(), True),
+                     StructField('is_deleted', BooleanType(), True), StructField(
+                         'name', StringType(), True),
+                     StructField('org_id', StringType(), True), StructField('start_date', StringType(), True)])
+
 
 def get_campaign(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'Campaign')
+    df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
     df.registerTempTable("campaign")
     df = spark.sql("""
                     select  campaign_id.oid campaignId,

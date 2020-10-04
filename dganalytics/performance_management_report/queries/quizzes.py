@@ -1,4 +1,5 @@
 from dganalytics.utils.utils import exec_mongo_pipeline
+from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 
 pipeline = [
     {
@@ -181,8 +182,26 @@ pipeline = [
     }
 ]
 
+schema = StructType([StructField('answered_date', StringType(), True),
+                     StructField('campaign_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('no_of_correct_questions',
+                                 DoubleType(), True),
+                     StructField('org_id', StringType(), True),
+                     StructField('quiz_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('quiz_name', StringType(), True),
+                     StructField('quiz_percentage_score', DoubleType(), True),
+                     StructField('quiz_status', StringType(), True),
+                     StructField('team_lead_mongo_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('total_questions', DoubleType(), True),
+                     StructField('user_id', StringType(), True),
+                     StructField('user_mongo_id', StructType([StructField('oid', StringType(), True)]), True)])
+
+
 def get_quizzes(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'Campaign')
+    df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
     df.registerTempTable("quizzes")
     df = spark.sql("""
                     select  cast(answered_date as date) answeredDate,

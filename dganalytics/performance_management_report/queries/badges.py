@@ -1,4 +1,5 @@
 from dganalytics.utils.utils import exec_mongo_pipeline
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 pipeline = [
     {
@@ -24,8 +25,18 @@ pipeline = [
     }
 ]
 
+schema = StructType([StructField('badge_name', StringType(), True),
+                     StructField('campaign_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('date', StringType(), True),
+                     StructField('description', StringType(), True),
+                     StructField('lead_mongo_user_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('user_id', StringType(), True)])
+
+
 def get_badges(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'User_Outcome')
+    df = exec_mongo_pipeline(spark, pipeline, 'User_Outcome', schema)
     df.registerTempTable("badges")
     df = spark.sql("""
                     select  badge_name badgeName,

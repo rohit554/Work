@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import get_spark_session, push_gamification_data
+from dganalytics.utils.utils import get_spark_session, push_gamification_data, export_powerbi_csv
 from dganalytics.connectors.gpc.gpc_utils import dg_metadata_export_parser, get_dbname, gpc_utils_logger
 from pyspark.sql import SparkSession
 
@@ -83,9 +83,9 @@ or lower(concat(element_at(split(trim(element_at(split(trim(a.Employee), ","),2)
 	and wfm.Date = cqnr.Date
 )		
 where
-	UserID is not NULL
+	UserID is not NULL and Date is not NULL
                 """)
-    return df.toPandas()
+    return df
 
 
 if __name__ == "__main__":
@@ -98,7 +98,23 @@ if __name__ == "__main__":
         logger.info("gpc_dg_metadata_colesonline_export")
 
         df = get_coles_data(spark, extract_date, org_id)
-        push_gamification_data(df, 'SALMATCOLESONLINE', 'ColesProbe')
+        df.registerTempTable("coles_activity")
+        spark.sql(f"""
+						merge into dg_salmatcolesonline.kpi_raw_data
+						using coles_activity 
+							on kpi_raw_data.userId = coles_activity.UserID
+							and kpi_raw_data.date = coles_activity.Date
+						when matched then 
+							update set *
+						when not matched then
+							insert *
+					""")
+
+        pb_export = spark.sql(
+            "select * from dg_salmatcolesonline.kpi_raw_data")
+        export_powerbi_csv(tenant, pb_export, 'kpi_raw_data')
+        push_gamification_data(
+            df.toPandas(), 'SALMATCOLESONLINE', 'ColesProbe')
 
     except Exception as e:
         logger.exception(e, stack_info=True, exc_info=True)

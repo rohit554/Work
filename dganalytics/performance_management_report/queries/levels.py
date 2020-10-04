@@ -1,4 +1,5 @@
 from dganalytics.utils.utils import exec_mongo_pipeline
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
 
 pipeline = [
     {
@@ -78,9 +79,22 @@ pipeline = [
     }
 ]
 
+schema = StructType([StructField('achieved_date', TimestampType(), True),
+                     StructField('campaign_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('campaign_name', StringType(), True),
+                     StructField('level_end_points', IntegerType(), True),
+                     StructField('level_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('level_number', IntegerType(), True),
+                     StructField('level_start_points', IntegerType(), True),
+                     StructField('mongo_user_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('user_id', StringType(), True)])
+
 
 def get_levels(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'User')
+    df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
     df.registerTempTable("levels")
     df = spark.sql("""
                     select  achieved_date achievedDate,

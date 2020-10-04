@@ -1,0 +1,30 @@
+from dganalytics.utils.utils import get_spark_session, get_path_vars
+tenant = 'salmatcolesonline'
+app_name = "gpc_dg_metadata_colesonline_export"
+tenant_path, db_path, log_path = get_path_vars(tenant)
+spark = get_spark_session(app_name, tenant, default_db='dg_salmatcolesonline')
+
+spark.sql(f"""
+            create table if not exists dg_salmatcolesonline.kpi_raw_data
+                (
+                    userId string,
+                    date date,
+                    DailyAdherencePercentage float,
+                    AvgDailyQAScoreVoice float,
+                    AvgDailyQAScoreMessage float,
+    	            AvgDailyQAScoreEmail float,
+                    AvgDailyQAScore float,
+                    AvgDailyHoldTimeVoice float,
+    	            AvgDailyHoldTimeMessage float,
+                    AvgDailyHoldTimeEmail float,
+                    AvgDailyHoldTime float,
+                    AvgDailyAcwTimeVoice float,
+                    AvgDailyAcwTimeMessage float,
+		            AvgDailyAcwTimeEmail float,
+                    AvgDailyAcwTime float,
+                    SumDailyNotRespondingTime float
+                )
+                using delta
+                partitioned by(date)
+                LOCATION '{db_path}/dg_salmatcolesonline/kpi_raw_data'
+            """)

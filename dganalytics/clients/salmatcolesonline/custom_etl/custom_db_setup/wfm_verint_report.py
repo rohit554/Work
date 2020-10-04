@@ -23,5 +23,5 @@ spark.sql(f"""
                 `Adherence Violations` int
             )
             using delta
-            LOCATION '{db_path}/{tenant}/wfm_verint_export'
+            LOCATION '{db_path}/dg_salmatcolesonline/wfm_verint_export'
         """)

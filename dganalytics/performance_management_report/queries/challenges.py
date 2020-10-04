@@ -1,4 +1,5 @@
 from dganalytics.utils.utils import exec_mongo_pipeline
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 pipeline = [
     {
@@ -254,9 +255,28 @@ pipeline = [
     }
 ]
 
+schema = StructType([StructField('action', StringType(), True),
+                     StructField('campaign_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('challenge_acceptance_date',
+                                 StringType(), True),
+                     StructField('challenge_completion_date',
+                                 StringType(), True),
+                     StructField('challenge_end_date', StringType(), True),
+                     StructField('challenge_frequency', IntegerType(), True),
+                     StructField('challenge_name', StringType(), True),
+                     StructField('challenge_thrown_date', StringType(), True),
+                     StructField('challengee_mongo_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('challenger_mongo_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('no_of_days', IntegerType(), True),
+                     StructField('org_id', StringType(), True),
+                     StructField('status', StringType(), True)])
+
 
 def get_challenges(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'User')
+    df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
     df.registerTempTable("challenges")
     df = spark.sql("""
                     select  action action,

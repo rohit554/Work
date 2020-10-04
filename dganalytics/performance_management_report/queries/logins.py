@@ -1,4 +1,5 @@
 from dganalytics.utils.utils import exec_mongo_pipeline
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
 
 pipeline = [
     {
@@ -16,9 +17,13 @@ pipeline = [
     }
 ]
 
+schema = StructType([StructField('date', StringType(), True),
+                     StructField('login_attempt', IntegerType(), True),
+                     StructField('user_id', StringType(), True)])
+
 
 def get_logins(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'Audit_Log')
+    df = exec_mongo_pipeline(spark, pipeline, 'Audit_Log', schema)
     df.registerTempTable("logins")
     df = spark.sql("""
                     select  cast(date as date) date,

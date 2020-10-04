@@ -26,7 +26,7 @@
                  "--extract_interval_end=2020-09-27T14:30:00",
                  "--api_name=wfm_adherence",
                  "--org_id=SALMATDEV",
-                 "--pipeline=activity_wise_points"
+                 "--pipeline=users"
              ]
             /*
             "args": [

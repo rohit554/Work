@@ -1,4 +1,6 @@
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from dganalytics.utils.utils import exec_mongo_pipeline
+
 
 pipeline = [
     {
@@ -157,8 +159,18 @@ pipeline = [
 ]
 
 
+schema = StructType([StructField('activity_name', StringType(), True),
+                     StructField('campaign_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('date', StringType(), True), StructField(
+    'frequency', StringType(), True), StructField('kpi_name', StringType(), True),
+    StructField('mongo_user_id', StructType(
+        [StructField('oid', StringType(), True)]), True),
+    StructField('points', IntegerType(), True), StructField('user_id', StringType(), True)])
+
+
 def get_activity_wise_points(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'Campaign')
+    df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
     df.registerTempTable("activity_wise_points")
     df = spark.sql("""
                     select  activity_name activityName,
@@ -172,5 +184,5 @@ def get_activity_wise_points(spark):
                             'salmatcolesonline' orgId
                     from activity_wise_points
                 """)
-    df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
+    df.write.format("delta").mode("overwrite").partitionBy(
         'orgId').saveAsTable("dg_performance_management.activity_wise_points")

@@ -1,4 +1,5 @@
 from dganalytics.utils.utils import exec_mongo_pipeline
+from pyspark.sql.types import StructType, StructField, StringType, BooleanType
 
 pipeline = [
     {
@@ -62,9 +63,21 @@ pipeline = [
     }
 ]
 
+schema = StructType([StructField('answer_given', StringType(), True),
+                     StructField('answered_date', StringType(), True),
+                     StructField('campaign_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('correct_answer', StringType(), True),
+                     StructField('is_correct', BooleanType(), True),
+                     StructField('question', StringType(), True),
+                     StructField('quiz_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('subject_area', StringType(), True),
+                     StructField('user_id', StringType(), True)])
+
 
 def get_questions(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'quiz')
+    df = exec_mongo_pipeline(spark, pipeline, 'quiz', schema)
     df.registerTempTable("questions")
     df = spark.sql("""
                     select  answer_given answerGiven,

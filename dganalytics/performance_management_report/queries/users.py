@@ -1,4 +1,5 @@
 from dganalytics.utils.utils import exec_mongo_pipeline
+from pyspark.sql.types import StructType, StructField, StringType
 
 pipeline = [
     {
@@ -117,9 +118,22 @@ pipeline = [
     }
 ]
 
+schema = StructType([StructField('Email', StringType(), True),
+                     StructField('FirstName', StringType(), True),
+                     StructField('LastName', StringType(), True),
+                     StructField('MongoUserId', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('Name', StringType(), True),
+                     StructField('OrgId', StringType(), True),
+                     StructField('Quartile', StringType(), True),
+                     StructField('RoleId', StringType(), True),
+                     StructField('TeamLeadName', StringType(), True),
+                     StructField('TeamName', StringType(), True),
+                     StructField('UserId', StringType(), True)])
+
 
 def get_users(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'User')
+    df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
     df.registerTempTable("users")
     df = spark.sql("""
                     select  UserId userId,
@@ -135,4 +149,5 @@ def get_users(spark):
                             'salmatcolesonline' orgId
                     from users
                 """)
-    df.coalesce(1).write.format("delta").mode("overwrite").partitionBy('orgId').saveAsTable("dg_performance_management.users")
+    df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
+        'orgId').saveAsTable("dg_performance_management.users")
