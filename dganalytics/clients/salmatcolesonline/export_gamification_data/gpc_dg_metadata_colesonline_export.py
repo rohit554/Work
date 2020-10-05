@@ -98,21 +98,7 @@ if __name__ == "__main__":
         logger.info("gpc_dg_metadata_colesonline_export")
 
         df = get_coles_data(spark, extract_date, org_id)
-        df.registerTempTable("coles_activity")
-        spark.sql(f"""
-						merge into dg_salmatcolesonline.kpi_raw_data
-						using coles_activity 
-							on kpi_raw_data.userId = coles_activity.UserID
-							and kpi_raw_data.date = coles_activity.Date
-						when matched then 
-							update set *
-						when not matched then
-							insert *
-					""")
-
-        pb_export = spark.sql(
-            "select * from dg_salmatcolesonline.kpi_raw_data")
-        export_powerbi_csv(tenant, pb_export, 'kpi_raw_data')
+        df = df.drop_duplicates()
         push_gamification_data(
             df.toPandas(), 'SALMATCOLESONLINE', 'ColesProbe')
 
