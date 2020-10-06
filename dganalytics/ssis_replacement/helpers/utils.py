@@ -147,6 +147,7 @@ def extract_mongo_colxn(
         daywise_collection_data = get_sparkDf_from_mongocollection(
             spark, tenant, mongodb_conxnx_uri, database_name, output_table_name, schema
         )
+        daywise_collection_data = daywise_collection_data.dropDuplicates(primary_key)
         if 'MERGED' in output_type:
             try:
                 deltaTable = DeltaTable.forPath(spark, output_filepath)
