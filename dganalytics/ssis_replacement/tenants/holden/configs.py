@@ -213,7 +213,7 @@ config = {
         'pipeline': pipelines.stage5_Time_Utilisation.aggr_pipeline,
         'output_columns': [
             '_id',
-            'exist_id'
+            # 'exist_id'
             'Exception',
             'Agent_Name',
             'UPA',
@@ -230,7 +230,7 @@ config = {
             '_id',
             'Shot_Date',
             'IEX_ID',
-            'exist_id'
+            # 'exist_id'
          ],
         'output_type': ['MERGED'],
         'partition_by': 'Shot_Date',
