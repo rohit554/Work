@@ -12,15 +12,26 @@ import requests
 import pandas as pd
 from contextlib import contextmanager
 
+
 @contextmanager
 def get_mongo_conxn(mongodb_conxnx_uri):
     try:
-        with pymongo.MongoClient( mongodb_conxnx_uri ) as mongodb_cluster_client:
+        with pymongo.MongoClient(mongodb_conxnx_uri) as mongodb_cluster_client:
             yield mongodb_cluster_client
     except Exception as e:
         raise Exception(
             f"Excepton {e} occured. Please mongodb_conxnx_uri for env"
         )
+
+def export_powerbi_csv(tenant, df, file_name):
+    tenant_path, db_path, log_path = get_path_vars(tenant)
+    if "dbfs" in tenant_path:
+        tenant_path = "file://" + tenant_path
+
+    op_file = os.path.join(
+        f"{tenant_path}", 'data', 'pbdatasets', f"{file_name}")
+    df.write.mode("overwrite").option("header", True).option("timestampFormat", "yyyy-MM-dd HH:mm:ss")\
+        .option("escape", "\\").option("dateFormat", "yyyy-MM-dd").csv(op_file)
 
 def get_env():
     try:
@@ -142,6 +153,7 @@ def get_secret(secret_key: str):
         dbutils = get_dbutils()
         return dbutils.secrets.get(scope='dgsecretscope', key='{}'.format(secret_key))
 
+
 def get_gamification_token():
     body = {
         "email": get_secret("gamificationuser"),
@@ -156,6 +168,7 @@ def get_gamification_token():
 
     return auth_resp.json()['access_token'], auth_resp.json()['userId']
 
+
 def push_gamification_data(df: pd.DataFrame, org_id: str, connection_name: str):
     # df = df.sample(n=100)
     token, user_Id = get_gamification_token()
@@ -164,7 +177,7 @@ def push_gamification_data(df: pd.DataFrame, org_id: str, connection_name: str):
         "id_token": token,
         "orgid": org_id
     }
-    prefix = "# Mandatory fields are Date & UserID (Format must be YYYY-MM-DD)"    
+    prefix = "# Mandatory fields are Date & UserID (Format must be YYYY-MM-DD)"
     a = tempfile.NamedTemporaryFile()
     print(str(df.shape))
     a.file.write(bytes(prefix + "\n", 'utf-8'))
@@ -189,7 +202,9 @@ def push_gamification_data(df: pd.DataFrame, org_id: str, connection_name: str):
     a.close()
 
 
-def get_spark_session(app_name: str, tenant: str, default_db: str = None):
+
+
+def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_conf: dict = None):
     global env
     time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
     app_name = f"{tenant}-{app_name}-{time}"
@@ -210,13 +225,17 @@ def get_spark_session(app_name: str, tenant: str, default_db: str = None):
                                ("spark.databricks.delta.snapshotPartitions", 3)
                                ])
 
+    if addtl_conf:
+        for k, v in addtl_conf.items():
+            conf.set(k, v)
+
     import findspark
     findspark.init(os.environ['SPARK_HOME'])
     if env == "local":
         import findspark
         findspark.init(os.environ['SPARK_HOME'])
 
-        conf = conf.setAll([("spark.jars.packages", "io.delta:delta-core_2.12:0.7.0"),
+        conf = conf.setAll([("spark.jars.packages", "io.delta:delta-core_2.12:0.7.0,org.mongodb.spark:mongo-spark-connector_2.12:3.0.0"),
                             ("spark.sql.extensions",
                              "io.delta.sql.DeltaSparkSessionExtension"),
                             ("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")])
@@ -227,6 +246,11 @@ def get_spark_session(app_name: str, tenant: str, default_db: str = None):
         spark.sql(f"use {default_db}")
     return spark
 
+def exec_mongo_pipeline(spark, pipeline, collection, schema=None):
+    df = spark.read.format("mongo").option("uri", get_secret('mongodbconnurl')).option(
+        "collection", collection).option("database", f"dggamification{env if env != 'local' else 'dev'}").option(
+            "pipeline", json.dumps(pipeline)).schema(schema).load()
+    return df
 
 dbutils = None
 secrets = None
