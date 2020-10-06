@@ -42,7 +42,8 @@ def export_dataframe_to_csv(output_db_path,output_table_name,tenant):
     return
 
 
-def overwrite_sparkDF_to_Delta(this_dataframe, filepath,partioned_by=None):
+def overwrite_sparkDF_to_Delta(this_dataframe, filepath,uniqKey,partioned_by=None):
+    this_dataframe = this_dataframe.dropDuplicates(uniqKey)
     if partioned_by == None:
         framewriter = this_dataframe.write.format(
             "delta"
@@ -105,11 +106,12 @@ def get_sparkDf_from_mongocollection(spark, tenant, mongodb_conxnx_uri, database
 def exit_deltatable_changes(
     this_deltatable, 
     output_filepath,
+    uniqKey,
     partioned_by=None,
     ):
     try:
         this_dataframe = this_deltatable.toDF()
-        overwrite_sparkDF_to_Delta(this_dataframe, output_filepath,partioned_by=partioned_by)
+        overwrite_sparkDF_to_Delta(this_dataframe, output_filepath,uniqKey,partioned_by=partioned_by)
     except Exception as e:
         logging.error(f"Exit changes on failure also failed with error {e}")
     return
@@ -158,8 +160,9 @@ def extract_mongo_colxn(
             else:
                 act_output_file = output_filepath
             if not os.path.exists(act_output_file):
+                
                 overwrite_sparkDF_to_Delta(
-                    daywise_collection_data, output_filepath,partioned_by)
+                    daywise_collection_data, output_filepath,primary_key,partioned_by)
             else:
 
                 existing_deltatable = DeltaTable.forPath(
@@ -179,6 +182,7 @@ def extract_mongo_colxn(
                     exit_deltatable_changes(
                         existing_deltatable, 
                          output_filepath,
+                         primary_key,
                          partioned_by
                          )
                 except Exception as e:
@@ -193,7 +197,7 @@ def extract_mongo_colxn(
             try:
 
                 overwrite_sparkDF_to_Delta(
-                    daywise_collection_data, output_filepath,partioned_by)
+                    daywise_collection_data, output_filepath,primary_key,partioned_by)
 
             except Exception as e:
                 if not daywise_collection_data.toPandas().empty:
