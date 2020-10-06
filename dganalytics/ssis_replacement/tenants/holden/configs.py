@@ -11,7 +11,8 @@ from copy import deepcopy
 import logging
 
 config = {
-    "run_window_type": "FIXED",
+    # "run_window_type": "FIXED",
+    "run_window_type": None,
     # "find_min_rundate": {
     #     "collections": [
     #         'CENTERVIEW',

@@ -27,6 +27,7 @@ def updatePipeline(
     load_timestamp_field,
     out_collxn,
     rundatex,
+    run_window_type,
 ):
     if type(load_timestamp_field) != str:
         raise "load_timestamp_field should be empty string for default value or a string"
@@ -38,15 +39,16 @@ def updatePipeline(
         timestamp_field = 'insertion_timestamp'
 
     pipe = deepcopy(aggr_pipe)
-    pipe.insert(0, {
-        "$match": {
-            "$expr": {
-                "$eq": [
-                    f"${timestamp_field}", rundatex
-                ]
+    if run_window_type != None:
+        pipe.insert(0, {
+            "$match": {
+                "$expr": {
+                    "$eq": [
+                        f"${timestamp_field}", rundatex
+                    ]
+                }
             }
-        }
-    })
+        })
 
     pipe.append(
         {
@@ -138,22 +140,25 @@ def extract_from_mongo( database_name, stage_name, step_name, rundate,):
 
 
     if step_name == "FetchDelta":
-        act_rundate =( datetime.strptime(rundate, '%Y-%m-%d') + timedelta(1)).date()
-        min_rundate_curs = get_config_mongo(
+        if run_window_type != None:
+            act_rundate =( datetime.strptime(rundate, '%Y-%m-%d') + timedelta(1)).date()
+            min_rundate_curs = get_config_mongo(
 
-            mongodb_conxnx_uri,
-            database_name,
-            "dgmis_config",
-            {
-                'tenant': f'{tenant}'
-            },
-        )
-        minterm = deepcopy(list(min_rundate_curs))
-        # min_rundate = minterm[0]['config_value'].strftime("%Y-%m-%d")
-        min_rundate = minterm[0]["min_rundate"]
-        min_rundate = min_rundate.date()
-        # min_rundate = ( datetime.strptime(rundate, '%Y-%m-%d') - timedelta(2)).date()
-
+                mongodb_conxnx_uri,
+                database_name,
+                "dgmis_config",
+                {
+                    'tenant': f'{tenant}'
+                },
+            )
+            minterm = deepcopy(list(min_rundate_curs))
+            # min_rundate = minterm[0]['config_value'].strftime("%Y-%m-%d")
+            min_rundate = minterm[0]["min_rundate"]
+            min_rundate = min_rundate.date()
+            # min_rundate = ( datetime.strptime(rundate, '%Y-%m-%d') - timedelta(2)).date()
+        else:
+            min_rundate = ( datetime.strptime(rundate, '%Y-%m-%d') ).date()
+            act_rundate =( datetime.strptime(rundate, '%Y-%m-%d')).date()
         for curr_rundate in rundate_range_generator(min_rundate, act_rundate ):
             logging.warn(f"current rundate: {curr_rundate}")
 
@@ -163,6 +168,7 @@ def extract_from_mongo( database_name, stage_name, step_name, rundate,):
                 config_out_loadtsfld,
                 config_out_collxn,
                 curr_rundate,
+                run_window_type,
             )
 
             drop_mongo_colxn(
