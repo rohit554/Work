@@ -16,7 +16,7 @@ schema = {
         "metadata": {},
         "name": "Reviewd_by_evaluator",
         "nullable": True,
-        "type": "boolean"
+        "type": "string"
       },
       {
         "metadata": {},
@@ -34,7 +34,7 @@ schema = {
         "metadata": {},
         "name": "Reviewed_By_Agent",
         "nullable": True,
-        "type": "boolean"
+        "type": "string"
       },
       {
         "metadata": {},

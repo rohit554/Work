@@ -40,7 +40,7 @@ schema = {
         "metadata": {},
         "name": "Time",
         "nullable": True,
-        "type": "timestamp"
+        "type": "string"
       },
       {
         "metadata": {},

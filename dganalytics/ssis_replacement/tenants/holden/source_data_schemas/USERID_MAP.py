@@ -52,13 +52,13 @@ schema = {
         "metadata": {},
         "name": "First_Name",
         "nullable": True,
-        "type": "double"
+        "type": "string"
       },
       {
         "metadata": {},
         "name": "Email",
         "nullable": True,
-        "type": "double"
+        "type": "string"
       },
       {
         "metadata": {},
