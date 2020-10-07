@@ -86,7 +86,7 @@ schema = {
       },
       {
         "metadata": {},
-        "name": "occp_aux_7_plus_9",
+        "name": "OCCP_AUX_7_9",
         "nullable": True,
         "type": "long"
       },

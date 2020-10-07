@@ -17,7 +17,7 @@ aggr_pipeline = [
         "ABN": "$abn_percentage",
         "Total_ACW_Time_m": "$total_acw_time",
         "OCCP_includes_AUX_7": "$occp_includes_aux_7",
-        "occp_aux_7_plus_9": "$occp_aux_7_plus_9",
+        "OCCP_AUX_7_9": "$occp_aux_7_plus_9",
         "Total_Outbound_Time_min": "$total_outbound_time",
         "Avg_ACW_Time_m": "$avg_acw_time1",
         "AVG_ABN_Time_m": "$avg_abn_time",

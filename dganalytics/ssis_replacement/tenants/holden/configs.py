@@ -47,7 +47,7 @@ config = {
             'ABN',
             'Total_ACW_Time_m',
             'OCCP_includes_AUX_7',
-            'occp_aux_7_plus_9',
+            'OCCP_AUX_7_9',
             'Total_Outbound_Time_min',
             'Avg_ACW_Time_m',
             'AVG_ABN_Time_m',
@@ -112,7 +112,7 @@ config = {
             'Delivered_Time_min',
             'Total_Handle_Time_min',
             'Login_Name',
-         ],
+        ],
         'primary_key': [
             'Date',
             'Login_Name',
