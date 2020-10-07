@@ -100,7 +100,7 @@
         "metadata": {},
         "name": "Evaluation_Date",
         "nullable": true,
-        "type": "string"
+        "type": "timestamp"
       },
       {
         "metadata": {},
