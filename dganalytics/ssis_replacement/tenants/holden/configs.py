@@ -77,7 +77,6 @@ config = {
         'schema': schemas.Center_View.schema
     },
     "Advisor_view": {
-        
         'output_collxn': "t_CCP_Advisor_view",
         'pipeline': pipelines.stage2_Advisor_view.aggr_pipeline,
         'collection': "ADVISORVIEW",
@@ -316,5 +315,68 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'Evaluator_Review_Date',
         'schema': schemas.QA_SLA_ETL.schema
+    },
+    "EMAIL_SOCIAL_SLA": {
+        'output_collxn': "t_EMAIL_SOCIAL_SLA",
+        'pipeline': pipelines.stage8_EMAIL_SOCIAL_SLA.aggr_pipeline,
+        'collection': "EMAIL&SOCIALSLA",
+        'load_timestamp_field': "insertion_timestamp",
+        'output_columns': [
+            'runID',
+            'Report_Date',
+            'Oldest_HCC_Email',
+            'Oldest_Recall_Email',
+            'Oldest_Social_Post',
+            'transport_time',
+        ],
+        'primary_key': [
+            'Report_Date',
+        ],
+        'output_type': ['MERGED'],
+        'partition_by': None,
+        'schema': schemas.EMAIL_SOCIAL_SLA.schema
+    },
+    "CCP_Interval_Report": {
+        'output_collxn': "t_CCP_Interval_Report",
+        'pipeline': pipelines.stage9_CCP_Interval_Report.aggr_pipeline,
+        'collection': "INTERVAL",
+        'load_timestamp_field': "insertion_timestamp",
+        'output_columns': [
+            'Login_ID',
+            'Time',
+            'date',
+            'ACD_Calls',
+            'Direct_Agent_Calls',
+            'DA_Abandon',
+            'DA_Other',
+            'Extout_Calls',
+            'CARS_ACD_min',
+            'CARS_Hold_min',
+            'ACW_min',
+            'THT_min',
+            'Outbound_Time_min',
+            'True_ACW_min',
+            'Total_Stafftime_min',
+            'Total_Auxtime_min',
+            'Avail_Time',
+            'AUX_1_min',
+            'AUX_2_min',
+            'AUX_3_min',
+            'AUX_4_min',
+            'AUX_5_min',
+            'AUX_6_min',
+            'Aux_7_min',
+            'AUX_8_min',
+            'AUX_9_min',
+            'transport_time',
+        ],
+        'primary_key': [
+            'Login_ID',
+            'Time',
+            'date',
+        ],
+        'output_type': ['MERGED'],
+        'partition_by': None,
+        'schema': schemas.CCP_Interval_Report.schema
     },
 }

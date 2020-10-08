@@ -6,4 +6,6 @@ from  . import stage4_USERID_MAP
 from  . import stage5_Time_Utilisation
 from  . import stage6_NPS_CSAT
 from  . import stage7_QA_SLA_ETL
+from  . import stage8_EMAIL_SOCIAL_SLA
+from  . import stage9_CCP_Interval_Report
 

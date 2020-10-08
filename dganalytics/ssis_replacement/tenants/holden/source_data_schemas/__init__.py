@@ -5,3 +5,5 @@ from  . import USERID_MAP
 from  . import Time_Utilisation
 from  . import NPS_CSAT
 from  . import QA_SLA_ETL
+from  . import EMAIL_SOCIAL_SLA
+from  . import CCP_Interval_Report
