@@ -1,7 +1,9 @@
 aggr_pipeline = [
   {
     "$project": {
-      "_id": 0,
+      '_id': {
+          "$toString": '$_id'
+      },
       'Evaluated_Name': '$evaluated_name', 
       'Evaluation_Creation_Date': '$evaluation_cereation_date',  #timestamp
       'Reviewd_by_evaluator': '$rev_by_evaluator', #boolean

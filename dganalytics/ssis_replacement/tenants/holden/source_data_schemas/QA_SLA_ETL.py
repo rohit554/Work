@@ -2,6 +2,12 @@ schema = {
     "fields": [
       {
         "metadata": {},
+        "name": "_id",
+        "nullable": True,
+        "type": "string"
+      },
+      {
+        "metadata": {},
         "name": "Evaluated_Name",
         "nullable": True,
         "type": "string"

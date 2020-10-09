@@ -287,6 +287,7 @@ config = {
         'load_timestamp_field': "insertion_timestamp",
         'pipeline': pipelines.stage7_QA_SLA_ETL.aggr_pipeline,
         'output_columns': [
+            '_id',
             'Evaluated_Name',
             'Evaluation_Creation_Date',
             'Reviewd_by_evaluator',
@@ -303,14 +304,7 @@ config = {
             'Max_Score',
         ],
         'primary_key': [
-            'Evaluated_Name',
-            'Evaluation_Creation_Date',
-            'Type',
-            'Evaluator_Review_Date',
-            'Evaluation_Modification_Date',
-            'Evaluator_Name',
-            'Segment_ID_Attached_to_Evaluation',
-            'Agent_Review_Date',
+            '_id',
         ],
         'output_type': ['MERGED'],
         'partition_by': 'Evaluator_Review_Date',
