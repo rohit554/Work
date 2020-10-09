@@ -74,6 +74,12 @@ schema = {
       },
       {
         "metadata": {},
+        "name": "Outbound_Time_min",
+        "nullable": True,
+        "type": "string"
+      },
+      {
+        "metadata": {},
         "name": "True_ACW_min",
         "nullable": True,
         "type": "string"
