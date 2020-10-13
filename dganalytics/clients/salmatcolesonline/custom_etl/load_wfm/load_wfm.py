@@ -29,7 +29,8 @@ if __name__ == '__main__':
         "Time Not Adhering to Schedule (%)": "TimeNotAdheringToSchedule",
         "Adherence Violations": "AdherenceViolations"
     }, errors="raise")
-    df = df.dropDuplicates()
+    df = df.drop_duplicates()
+
     df['Employee'] = df['Employee'].astype('str').str.strip()
     df = df[['Date', 'Organisation', 'Employee', 'Supervisor', 'TimeAdheringToScheduleHours',
              'TimeNotAdheringToScheduleHours', 'TotalTimeScheduledHours', 'TimeAdheringToSchedule',
