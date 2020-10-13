@@ -1,0 +1,272 @@
+{
+    "name": "holden_ssis_replacement",
+    "properties": {
+        "activities": [
+            {
+                "name": "Center_View",
+                "type": "DatabricksSparkPython",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
+                    "parameters": [
+                        "--database_name",
+                        "@pipeline().parameters.database_name",
+                        "--stage_name",
+                        "Center_View",
+                        "--step_name",
+                        "FetchDelta"
+                    ]
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Advisor_view",
+                "type": "DatabricksSparkPython",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
+                    "parameters": [
+                        "--database_name",
+                        "@pipeline().parameters.database_name",
+                        "--stage_name",
+                        "Advisor_view",
+                        "--step_name",
+                        "FetchDelta"
+                    ]
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "QA_Data_ETL",
+                "type": "DatabricksSparkPython",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
+                    "parameters": [
+                        "--database_name",
+                        "@pipeline().parameters.database_name",
+                        "--stage_name",
+                        "QA_Data_ETL",
+                        "--step_name",
+                        "FetchDelta"
+                    ]
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "USERID_MAP",
+                "type": "DatabricksSparkPython",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
+                    "parameters": [
+                        "--database_name",
+                        "@pipeline().parameters.database_name",
+                        "--stage_name",
+                        "USERID_MAP",
+                        "--step_name",
+                        "FetchDelta"
+                    ]
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "Time_Utilisation",
+                "type": "DatabricksSparkPython",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
+                    "parameters": [
+                        "--database_name",
+                        "@pipeline().parameters.database_name",
+                        "--stage_name",
+                        "Time_Utilisation",
+                        "--step_name",
+                        "FetchDelta"
+                    ]
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "NPS_CSAT",
+                "type": "DatabricksSparkPython",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
+                    "parameters": [
+                        "--database_name",
+                        "@pipeline().parameters.database_name",
+                        "--stage_name",
+                        "NPS_CSAT",
+                        "--step_name",
+                        "FetchDelta"
+                    ]
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "QA_SLA_ETL",
+                "type": "DatabricksSparkPython",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
+                    "parameters": [
+                        "--database_name",
+                        "@pipeline().parameters.database_name",
+                        "--stage_name",
+                        "QA_SLA_ETL",
+                        "--step_name",
+                        "FetchDelta"
+                    ]
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "EMAIL_SOCIAL_SLA",
+                "type": "DatabricksSparkPython",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
+                    "parameters": [
+                        "--database_name",
+                        "@pipeline().parameters.database_name",
+                        "--stage_name",
+                        "EMAIL_SOCIAL_SLA",
+                        "--step_name",
+                        "FetchDelta"
+                    ]
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            },
+            {
+                "name": "CCP_Interval_Report",
+                "type": "DatabricksSparkPython",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "7.00:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "userProperties": [],
+                "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
+                    "parameters": [
+                        "--database_name",
+                        "@pipeline().parameters.database_name",
+                        "--stage_name",
+                        "CCP_Interval_Report",
+                        "--step_name",
+                        "FetchDelta"
+                    ]
+                },
+                "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                }
+            }
+        ],
+        "concurrency": 1,
+        "parameters": {
+            "database_name": {
+                "type": "string",
+                "defaultValue": "holden-prod"
+            }
+        },
+        "folder": {
+            "name": "holden"
+        },
+        "annotations": [],
+        "lastPublishTime": "2020-10-01T08:20:07Z"
+    },
+    "type": "Microsoft.DataFactory/factories/pipelines"
+}
