@@ -49,6 +49,10 @@ jobs:
   - script: |
       sudo apt install tree
   - script: |
+      cd $(Pipeline.Workspace)
+      tree
+      echo "============================"
+      cd $(System.DefaultWorkingDirectory)
       tree
 
   # - task: AzurePowerShell@5
