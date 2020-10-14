@@ -75,9 +75,6 @@ jobs:
       sudo chmod +x /usr/bin/azcopy
     displayName: Install AzCopy V10
   - script: |
-      echo $(storagesastoken)
-    displayName: StorageSAS
-  - script: |
       uploaddirectory=$(System.DefaultWorkingDirectory)
       storageaccountname=${{variables.lakestorageName}}
       blobcontainername='datagamz'
