@@ -83,7 +83,7 @@ jobs:
       http_CONST='https://'
       url_PFX='.blob.core.windows.net/'
       finalblobconnector=$http_CONST$storageaccountname$url_PFX$blobcontainername$blobcontainerpath
-      azcopy copy --source $uploaddirectory --destination $finalblobconnector  --dest-key $storageKey --recursive --include-pattern="*.py;*.json;*txt;*.in" --exclude-path=".venv;build;devops_utils;dganalytics.egg-info;dist;.vscode" --exclude-pattern="*.pyc"
+      azcopy copy $uploaddirectory --destination $finalblobconnector  --dest-key $storageKey --recursive --include-pattern="*.py;*.json;*txt;*.in" --exclude-path=".venv;build;devops_utils;dganalytics.egg-info;dist;.vscode" --exclude-pattern="*.pyc"
     displayName: Upload Code to Blob
 
   - script: |
