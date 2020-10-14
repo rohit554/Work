@@ -80,7 +80,7 @@ jobs:
       uploaddirectory=./dganalytics
       storageaccountname=${{variables.lakestorageName}}
       blobcontainername='datagamz/'
-      blobcontainerpath='code/'
+      blobcontainerpath='code/dganalytics/'
       TOKENX="$(storagesastoken)"
       http_CONST='https://'
       url_PFX='.blob.core.windows.net/'
