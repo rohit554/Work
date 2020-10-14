@@ -62,7 +62,7 @@ jobs:
       azureSubscription: ${{variables.keyvaultsubscription}}
       ScriptType: 'FilePath'
       ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell_utils/azcopyfoldertoblob.ps1'
-      ScriptArguments: '$(System.DefaultWorkingDirectory) ${{variables.lakestorageName}} datagamz  code $(storageaccesskey) '
+      ScriptArguments: '$(System.DefaultWorkingDirectory) ${{variables.lakestorageName}} datagamz  code/temp $(storageaccesskey) '
       azurePowerShellVersion: 'LatestVersion'
     name: uploadblobfiles
     displayName: Upload Files to Blob
