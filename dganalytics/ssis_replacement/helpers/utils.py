@@ -36,6 +36,10 @@ def export_dataframe_to_csv(output_db_path,output_table_name,tenant):
         pass
     else:
         df = spark.sql(f"select * from delta.`{output_filepath}`")
+        remove_newline = F.udf(lambda x: (x.replace("\n"," ")).replace('''"''',"QUOTE<") if type(x) == str else x,StringType())
+        for field, typex in df.dtypes:
+            if typex == 'string':
+                df = df.withColumn(field, remove_newline(field))
 
         df.write.mode("overwrite").csv(pbdata_path, header = 'true')
 
