@@ -46,6 +46,13 @@ jobs:
     storageAccountName: ${{ variables.rgprefix }}realtimestorage
 
   steps:
+  - script: sudo apt install tree
+  - script: |
+      cd $(System.DefaultWorkingDirectory)
+      tree
+      
+    displayName: 'TestWorking Directory'
+
   - task: AzurePowerShell@5
     inputs:
       azureSubscription: ${{variables.keyvaultsubscription}}
