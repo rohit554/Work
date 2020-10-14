@@ -77,21 +77,20 @@ jobs:
   - script: |
       echo $(storagesastoken)
     displayName: StorageSAS
-  # - script: |
-  #     uploaddirectory=$(System.DefaultWorkingDirectory)
-  #     storageaccountname=${{variables.lakestorageName}}
-  #     blobcontainername='datagamz'
-  #     blobcontainerpath='code/temp/'
-  #     TOKENX=$(storagesastoken)
-  #     http_CONST='https://'
-  #     url_PFX='.blob.core.windows.net/'
-  #     finalblobconnector=$http_CONST$storageaccountname$url_PFX$blobcontainername$blobcontainerpath$TOKENX
-  #     echo $TOKENX
-  #     echo $finalblobconnector
-  #     azcopy copy $uploaddirectory $finalblobconnector --recursive --include-pattern="*.py;*.json;*txt;*.in" --exclude-path=".venv;build;devops_utils;dganalytics.egg-info;dist;.vscode" --exclude-pattern="*.pyc"
-  #   displayName: Upload Code to Blob
+  - script: |
+      uploaddirectory=$(System.DefaultWorkingDirectory)
+      storageaccountname=${{variables.lakestorageName}}
+      blobcontainername='datagamz'
+      blobcontainerpath='code/temp/'
+      TOKENX="$(storagesastoken)"
+      http_CONST='https://'
+      url_PFX='.blob.core.windows.net/'
+      finalblobconnector=$http_CONST$storageaccountname$url_PFX$blobcontainername$blobcontainerpath$TOKENX
+      echo $finalblobconnector
+      azcopy copy $uploaddirectory $finalblobconnector --recursive --include-pattern="*.py;*.json;*txt;*.in" --exclude-path=".venv;build;devops_utils;dganalytics.egg-info;dist;.vscode" --exclude-pattern="*.pyc"
+    displayName: Upload Code to Blob
 
-  # - script: |
-  #     cd $(System.DefaultWorkingDirectory)/devops_utils/python
-  #     python3 restart_Databricks_cluster.py $(databricksuri) $(databrickssecret) ${{variables.sparkName}}
-  #   displayName: 'Start Cluster'
+  - script: |
+      cd $(System.DefaultWorkingDirectory)/devops_utils/python
+      python3 restart_Databricks_cluster.py $(databricksuri) $(databrickssecret) ${{variables.sparkName}}
+    displayName: 'Start Cluster'
