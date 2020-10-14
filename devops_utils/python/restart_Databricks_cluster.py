@@ -70,7 +70,7 @@ def getSparkClusterId(assumedClusterName):
     return requisiteClusterID
 
 def StartCluster(cluster_id):
-    post_StartClusterEndPoint["cluster_id"] = "{}".format(cluster_id)
+    post_StartClusterBody["cluster_id"] = "{}".format(cluster_id)
     try:
         resp = sendRequests('post',databricksURI + post_StartClusterEndPoint ,headers=header ,body=post_StartClusterBody)
         return resp
