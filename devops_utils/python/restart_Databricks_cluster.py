@@ -79,7 +79,7 @@ def StartCluster(cluster_id):
 
 
 def RestartCluster(cluster_id):
-    post_RestartClusterBody["existing_cluster_id"] = "{}".format(cluster_id)
+    post_RestartClusterBody["cluster_id"] = "{}".format(cluster_id)
     try:
         resp = sendRequests('post',databricksURI + post_RestartClusterEndPoint ,headers=header ,body=post_RestartClusterBody)
         return resp
