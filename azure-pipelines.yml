@@ -70,5 +70,5 @@ jobs:
 
   - script: |
       cd $(System.DefaultWorkingDirectory)/devops_utils/python
-      python3 restart_Databricks_cluster.py $(databricksuri) $(databrickssecret) ${{variables.sparkName}}"
-    displayName: 'Create Tenant Environment'
+      python3 restart_Databricks_cluster.py $(databricksuri) $(databrickssecret) ${{variables.sparkName}}
+    displayName: 'Start Cluster'
