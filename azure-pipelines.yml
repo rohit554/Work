@@ -75,7 +75,7 @@ jobs:
       sudo chmod +x /usr/bin/azcopy
     displayName: Install AzCopy V10
   - script: |
-      uploaddirectory=$(System.DefaultWorkingDirectory)
+      uploaddirectory=$(System.DefaultWorkingDirectory)/s
       storageaccountname=${{variables.lakestorageName}}
       blobcontainername='datagamz/'
       blobcontainerpath='code/temp/'
