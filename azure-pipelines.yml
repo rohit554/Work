@@ -46,18 +46,12 @@ jobs:
     storageAccountName: ${{ variables.rgprefix }}realtimestorage
 
   steps:
-  - script: sudo apt install tree
-  - script: |
-      cd $(System.DefaultWorkingDirectory)
-      tree
-      
-    displayName: 'TestWorking Directory'
 
   - task: AzurePowerShell@5
     inputs:
       azureSubscription: ${{variables.keyvaultsubscription}}
       ScriptType: 'FilePath'
-      ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell_utils/getstorageAccesskey.ps1'
+      ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell/getstorageAccesskey.ps1'
       ScriptArguments: '${{variables.KeyVaultResourcename}} storageaccesskey storageaccesskey databricksinstanceurl databricksuri databricksaccesstoken databrickssecret'
       azurePowerShellVersion: 'LatestVersion'
     name: gettingKeyVaultVars
@@ -68,13 +62,13 @@ jobs:
     inputs:
       azureSubscription: ${{variables.keyvaultsubscription}}
       ScriptType: 'FilePath'
-      ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell_utils/azcopyfoldertoblob.ps1'
+      ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell/azcopyfoldertoblob.ps1'
       ScriptArguments: '$(System.DefaultWorkingDirectory) ${{variables.lakestorageName}} datagamz  code/temp $(storageaccesskey) '
       azurePowerShellVersion: 'LatestVersion'
     name: uploadblobfiles
     displayName: Upload Files to Blob
 
   - script: |
-      cd $(System.DefaultWorkingDirectory)/devops_utils/python_utils
+      cd $(System.DefaultWorkingDirectory)/devops_utils/python
       python3 restart_Databricks_cluster.py $(databricksuri) $(databrickssecret) ${{variables.sparkName}}"
     displayName: 'Create Tenant Environment'
