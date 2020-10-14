@@ -17,3 +17,11 @@ steps:
     echo Add other tasks to build, test, and deploy your project.
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
+- task: AzurePowerShell@5
+  inputs:
+    azureSubscription: 'Pay-As-You-Go(590f7ac0-b909-4092-adb4-2ad447a5bb19)'
+    ScriptType: 'InlineScript'
+    Inline: |
+      azcopy --version
+      azcopy --help
+    azurePowerShellVersion: 'LatestVersion'
