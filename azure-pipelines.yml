@@ -47,57 +47,51 @@ jobs:
 
   steps:
   - script: |
-      sudo apt install tree
-  - script: |
       cd $(Pipeline.Workspace)
-      tree
-      echo "============================"
-      cd $(System.DefaultWorkingDirectory)
-      tree
+      mkdir -p $(Pipeline.Workspace)/dganalytics
+      cp $(Pipeline.Workspace)/s/* $(Pipeline.Workspace)/dganalytics -r
 
-  # - task: AzurePowerShell@5
-  #   inputs:
-  #     azureSubscription: ${{variables.keyvaultsubscription}}
-  #     ScriptType: 'FilePath'
-  #     ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell/getstorageAccesskey.ps1'
-  #     ScriptArguments: '${{variables.KeyVaultResourcename}} storagesastoken storagesastoken databricksinstanceurl databricksuri databricksaccesstoken databrickssecret'
-  #     azurePowerShellVersion: 'LatestVersion'
-  #   name: gettingKeyVaultVars
-  #   displayName: Get KeyVault
+  - task: AzurePowerShell@5
+    inputs:
+      azureSubscription: ${{variables.keyvaultsubscription}}
+      ScriptType: 'FilePath'
+      ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell/getstorageAccesskey.ps1'
+      ScriptArguments: '${{variables.KeyVaultResourcename}} storagesastoken storagesastoken databricksinstanceurl databricksuri databricksaccesstoken databrickssecret'
+      azurePowerShellVersion: 'LatestVersion'
+    name: gettingKeyVaultVars
+    displayName: Get KeyVault
 
-  # - script: |
-  #     cd ../
-  #     mkdir -p ./tmp
-  #     cd ./tmp
-  #     #Download AzCopy
-  #     wget https://aka.ms/downloadazcopy-v10-linux
+  - script: |
+      cd ../
+      mkdir -p ./tmp
+      cd ./tmp
+      #Download AzCopy
+      wget https://aka.ms/downloadazcopy-v10-linux
 
-  #     #Expand Archive
-  #     tar -xvf downloadazcopy-v10-linux
+      #Expand Archive
+      tar -xvf downloadazcopy-v10-linux
 
-  #     #(Optional) Remove existing AzCopy version
-  #     sudo rm /usr/bin/azcopy
+      #(Optional) Remove existing AzCopy version
+      sudo rm /usr/bin/azcopy
 
-  #     # Move AzCopy to the destination you want to store it
-  #     sudo cp ./azcopy_linux_amd64_*/azcopy /usr/bin/
-  #     sudo chmod +x /usr/bin/azcopy
-  #   displayName: Install AzCopy V10
-  # - script: |
-  #     mkdir -p ../dganalytics
-  #     cp $(System.DefaultWorkingDirectory) ../dganalytics -r
-  #     uploaddirectory=../dganalytics
-  #     storageaccountname=${{variables.lakestorageName}}
-  #     blobcontainername='datagamz/'
-  #     blobcontainerpath='code/dganalytics/'
-  #     TOKENX="$(storagesastoken)"
-  #     http_CONST='https://'
-  #     url_PFX='.blob.core.windows.net/'
-  #     finalblobconnector=$http_CONST$storageaccountname$url_PFX$blobcontainername$blobcontainerpath$TOKENX
-  #     echo $finalblobconnector
-  #     azcopy copy $uploaddirectory $finalblobconnector --recursive --include-pattern="*.py;*.json;*txt;*.in" --exclude-path=".venv;build;devops_utils;dganalytics.egg-info;dist;.vscode" --exclude-pattern="*.pyc"
-  #   displayName: Upload Code to Blob
+      # Move AzCopy to the destination you want to store it
+      sudo cp ./azcopy_linux_amd64_*/azcopy /usr/bin/
+      sudo chmod +x /usr/bin/azcopy
+    displayName: Install AzCopy V10
+  - script: |
+      uploaddirectory=$(Pipeline.Workspace)/dganalytics
+      storageaccountname=${{variables.lakestorageName}}
+      blobcontainername='datagamz/'
+      blobcontainerpath='code/'
+      TOKENX="$(storagesastoken)"
+      http_CONST='https://'
+      url_PFX='.blob.core.windows.net/'
+      finalblobconnector=$http_CONST$storageaccountname$url_PFX$blobcontainername$blobcontainerpath$TOKENX
+      echo $finalblobconnector
+      azcopy copy $uploaddirectory $finalblobconnector --recursive --include-pattern="*.py;*.json;*txt;*.in" --exclude-path=".venv;build;devops_utils;dganalytics.egg-info;dist;.vscode" --exclude-pattern="*.pyc"
+    displayName: Upload Code to Blob
 
-  # - script: |
-  #     cd $(System.DefaultWorkingDirectory)/devops_utils/python
-  #     python3 restart_Databricks_cluster.py $(databricksuri) $(databrickssecret) ${{variables.sparkName}}
-  #   displayName: 'Start Cluster'
+  - script: |
+      cd $(System.DefaultWorkingDirectory)/devops_utils/python
+      python3 restart_Databricks_cluster.py $(databricksuri) $(databrickssecret) ${{variables.sparkName}}
+    displayName: 'Start Cluster'
