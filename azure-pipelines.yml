@@ -6,22 +6,68 @@
 trigger:
 - None
 
-pool:
-  vmImage: 'ubuntu-latest'
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+parameters:
+  - name: environment
+    displayName: Environment Parameter
+    default: 'dev'
+    type: string
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
-- task: AzurePowerShell@5
-  inputs:
-    azureSubscription: 'Pay-As-You-Go(590f7ac0-b909-4092-adb4-2ad447a5bb19)'
-    ScriptType: 'InlineScript'
-    Inline: |
-      azcopy --version
-      azcopy --help
-    azurePowerShellVersion: 'LatestVersion'
+variables:
+  - name: rgprefix
+    value: dg${{ parameters.environment }}
+  - name: vmImageName
+    value: ubuntu-latest
+  - name: azureResourceManagerConnection
+    value: 'Pay-As-You-Go(590f7ac0-b909-4092-adb4-2ad447a5bb19)'
+  - name: subscriptionId
+    value: '590f7ac0-b909-4092-adb4-2ad447a5bb19'
+  - name: keyvaultsubscription
+    value: ${{ variables.rgprefix }}SecretsAccess
+
+  - group: gamificationPipelineVars
+  - group: onboardingPipelineVars
+  - group: datagamzGeneralPipelineVars
+
+jobs:
+- job: AnalyticsPlatformCICD
+  pool:
+    vmImage: ${{variables.vmImageName}}
+  variables:
+    resourceGroupName: ${{ variables.rgprefix }}analytics
+    KeyVaultResourcename: ${{ variables.rgprefix }}secrets
+    keyvaultsubscription: ${{ variables.rgprefix }}SecretsAccess
+    lakestorageName: ${{ variables.rgprefix }}lakestorage
+    sparkName: ${{ variables.rgprefix }}spark
+    tenant_setup_pyfile: "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/tenant_setup.py"
+    systemsetup_pyPfx1: "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/"
+    systemsetup_pyMdl: "/"
+    systemsetup_pySfx: _setup.py
+    storageAccountName: ${{ variables.rgprefix }}realtimestorage
+
+  steps:
+  - task: AzurePowerShell@5
+    inputs:
+      azureSubscription: ${{variables.keyvaultsubscription}}
+      ScriptType: 'FilePath'
+      ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell_utils/getstorageAccesskey.ps1'
+      ScriptArguments: '${{variables.KeyVaultResourcename}} storageaccesskey storageaccesskey databricksinstanceurl databricksuri databricksaccesstoken databrickssecret'
+      azurePowerShellVersion: 'LatestVersion'
+    name: gettingKeyVaultVars
+    displayName: Get KeyVault
+
+
+  - task: AzurePowerShell@5
+    inputs:
+      azureSubscription: ${{variables.keyvaultsubscription}}
+      ScriptType: 'FilePath'
+      ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell_utils/azcopyfoldertoblob.ps1'
+      ScriptArguments: '$(System.DefaultWorkingDirectory) ${{variables.lakestorageName}} datagamz  code $(storageaccesskey) '
+      azurePowerShellVersion: 'LatestVersion'
+    name: uploadblobfiles
+    displayName: Upload Files to Blob
+
+  - script: |
+      cd $(System.DefaultWorkingDirectory)/devops_utils/python_utils
+      python3 restart_Databricks_cluster.py $(databricksuri) $(databrickssecret) ${{variables.sparkName}}"
+    displayName: 'Create Tenant Environment'
