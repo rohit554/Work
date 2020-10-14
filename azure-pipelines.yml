@@ -75,9 +75,9 @@ jobs:
       sudo chmod +x /usr/bin/azcopy
     displayName: Install AzCopy V10
   - script: |
-      mkdir -p ./dganalytics
-      cp $(System.DefaultWorkingDirectory) dganalytics -r
-      uploaddirectory=./dganalytics
+      mkdir -p ../dganalytics
+      cp $(System.DefaultWorkingDirectory) ../dganalytics -r
+      uploaddirectory=../dganalytics
       storageaccountname=${{variables.lakestorageName}}
       blobcontainername='datagamz/'
       blobcontainerpath='code/dganalytics/'
