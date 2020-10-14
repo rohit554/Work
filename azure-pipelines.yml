@@ -57,16 +57,34 @@ jobs:
     name: gettingKeyVaultVars
     displayName: Get KeyVault
 
+  - script: |
+      cd ../
+      mkdir -p ./tmp
+      cd ./tmp
+      #Download AzCopy
+      wget https://aka.ms/downloadazcopy-v10-linux
 
-  - task: AzurePowerShell@5
-    inputs:
-      azureSubscription: ${{variables.keyvaultsubscription}}
-      ScriptType: 'FilePath'
-      ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell/azcopyfoldertoblob.ps1'
-      ScriptArguments: '$(System.DefaultWorkingDirectory) ${{variables.lakestorageName}} datagamz  code/temp $(storageaccesskey) '
-      azurePowerShellVersion: 'LatestVersion'
-    name: uploadblobfiles
-    displayName: Upload Files to Blob
+      #Expand Archive
+      tar -xvf downloadazcopy-v10-linux
+
+      #(Optional) Remove existing AzCopy version
+      sudo rm /usr/bin/azcopy
+
+      # Move AzCopy to the destination you want to store it
+      sudo cp ./azcopy_linux_amd64_*/azcopy /usr/bin/
+      sudo chmod +x /usr/bin/azcopy
+    displayName: Install AzCopy V10
+
+  - script: |
+      uploaddirectory=$(System.DefaultWorkingDirectory)
+      storageaccountname=${{variables.lakestorageName}}
+      blobcontainername='datagamz'
+      blobcontainerpath='code/temp'
+      http_CONST='https://'
+      url_PFX='.blob.core.windows.net/'
+      finalblobconnector=$http_CONST$storageaccountname$url_PFX$blobcontainername$blobcontainerpath
+      azcopy copy --source $uploaddirectory --destination $finalblobconnector  --dest-key $storageKey --recursive --include-pattern="*.py;*.json;*txt;*.in" --exclude-path=".venv;build;devops_utils;dganalytics.egg-info;dist;.vscode" --exclude-pattern="*.pyc"
+    displayName: Upload Code to Blob
 
   - script: |
       cd $(System.DefaultWorkingDirectory)/devops_utils/python
