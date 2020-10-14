@@ -77,7 +77,7 @@ jobs:
   - script: |
       uploaddirectory=$(System.DefaultWorkingDirectory)
       storageaccountname=${{variables.lakestorageName}}
-      blobcontainername='datagamz'
+      blobcontainername='datagamz/'
       blobcontainerpath='code/temp/'
       TOKENX="$(storagesastoken)"
       http_CONST='https://'
