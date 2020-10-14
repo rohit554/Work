@@ -1,0 +1,95 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- None
+
+
+parameters:
+  - name: environment
+    displayName: Environment Parameter
+    default: 'dev'
+    type: string
+
+variables:
+  - name: rgprefix
+    value: dg${{ parameters.environment }}
+  - name: vmImageName
+    value: ubuntu-latest
+  - name: azureResourceManagerConnection
+    value: 'Pay-As-You-Go(590f7ac0-b909-4092-adb4-2ad447a5bb19)'
+  - name: subscriptionId
+    value: '590f7ac0-b909-4092-adb4-2ad447a5bb19'
+  - name: keyvaultsubscription
+    value: ${{ variables.rgprefix }}SecretsAccess
+
+  - group: gamificationPipelineVars
+  - group: onboardingPipelineVars
+  - group: datagamzGeneralPipelineVars
+
+jobs:
+- job: AnalyticsPlatformCICD
+  pool:
+    vmImage: ${{variables.vmImageName}}
+  variables:
+    resourceGroupName: ${{ variables.rgprefix }}analytics
+    KeyVaultResourcename: ${{ variables.rgprefix }}secrets
+    keyvaultsubscription: ${{ variables.rgprefix }}SecretsAccess
+    lakestorageName: ${{ variables.rgprefix }}lakestorage
+    sparkName: ${{ variables.rgprefix }}spark
+    tenant_setup_pyfile: "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/tenant_setup.py"
+    systemsetup_pyPfx1: "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/"
+    systemsetup_pyMdl: "/"
+    systemsetup_pySfx: _setup.py
+    storageAccountName: ${{ variables.rgprefix }}realtimestorage
+
+  steps:
+
+  - task: AzurePowerShell@5
+    inputs:
+      azureSubscription: ${{variables.keyvaultsubscription}}
+      ScriptType: 'FilePath'
+      ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell/getstorageAccesskey.ps1'
+      ScriptArguments: '${{variables.KeyVaultResourcename}} storagesastoken storagesastoken databricksinstanceurl databricksuri databricksaccesstoken databrickssecret'
+      azurePowerShellVersion: 'LatestVersion'
+    name: gettingKeyVaultVars
+    displayName: Get KeyVault
+
+  - script: |
+      cd ../
+      mkdir -p ./tmp
+      cd ./tmp
+      #Download AzCopy
+      wget https://aka.ms/downloadazcopy-v10-linux
+
+      #Expand Archive
+      tar -xvf downloadazcopy-v10-linux
+
+      #(Optional) Remove existing AzCopy version
+      sudo rm /usr/bin/azcopy
+
+      # Move AzCopy to the destination you want to store it
+      sudo cp ./azcopy_linux_amd64_*/azcopy /usr/bin/
+      sudo chmod +x /usr/bin/azcopy
+    displayName: Install AzCopy V10
+  - script: |
+      mkdir -p ./dganalytics
+      cp $(System.DefaultWorkingDirectory) dganalytics -r
+      uploaddirectory=./dganalytics
+      storageaccountname=${{variables.lakestorageName}}
+      blobcontainername='datagamz/'
+      blobcontainerpath='code/'
+      TOKENX="$(storagesastoken)"
+      http_CONST='https://'
+      url_PFX='.blob.core.windows.net/'
+      finalblobconnector=$http_CONST$storageaccountname$url_PFX$blobcontainername$blobcontainerpath$TOKENX
+      echo $finalblobconnector
+      azcopy copy $uploaddirectory $finalblobconnector --recursive --include-pattern="*.py;*.json;*txt;*.in" --exclude-path=".venv;build;devops_utils;dganalytics.egg-info;dist;.vscode" --exclude-pattern="*.pyc"
+    displayName: Upload Code to Blob
+
+  - script: |
+      cd $(System.DefaultWorkingDirectory)/devops_utils/python
+      python3 restart_Databricks_cluster.py $(databricksuri) $(databrickssecret) ${{variables.sparkName}}
+    displayName: 'Start Cluster'
