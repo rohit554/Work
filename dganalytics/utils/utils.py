@@ -28,7 +28,7 @@ def free_text_feild_correction(DataFrame,free_text_fields):
     @F.udf
     def udf_corrected_string(x):
         rx = ""
-        if type(x) not in {np.NaN , pd.NaT, None}:
+        if type(x) == str:
             rx = ''.join(e if  e.isalnum() else " "  for e in x )
         else:
             rx = x
