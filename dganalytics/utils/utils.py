@@ -23,8 +23,10 @@ def free_text_feild_correction(DataFrame,free_text_fields):
     Returns:
         [SparkDataFrame]: [Spark Dataframe]
     """
-    udf_corrected_string = F.udf(lambda x: lambda x: ''.join(e if  e.isalnum() else " "  for e in x ))
+    udf_corrected_string = F.udf(lambda x: ''.join(e if  e.isalnum() else " "  for e in x ))
+    # udf_corrected_string = F.udf(lambda x: print(x) )
     for field in free_text_fields:
+        print(field)
         DataFrame = DataFrame.withColumn(field, udf_corrected_string(field))
     return DataFrame
 
