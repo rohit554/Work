@@ -11,7 +11,22 @@ import pymongo
 import requests
 import pandas as pd
 from contextlib import contextmanager
+from pyspark.sql import functions as F
 
+def free_text_feild_correction(DataFrame,free_text_fields):
+    """[summary]
+
+    Args:
+        DataFrame (sparkDataFrame): [Spark Dataframe],
+        free_text_fields (list of strings): [field names for all free text fields]
+
+    Returns:
+        [SparkDataFrame]: [Spark Dataframe]
+    """
+    udf_corrected_string = F.udf(lambda x: lambda x: ''.join(e if  e.isalnum() else " "  for e in x ))
+    for field in free_text_fields:
+        DataFrame = DataFrame.withColumn(field, udf_corrected_string(field))
+    return DataFrame
 
 @contextmanager
 def get_mongo_conxn(mongodb_conxnx_uri):

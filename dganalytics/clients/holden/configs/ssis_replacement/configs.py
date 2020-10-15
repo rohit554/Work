@@ -27,7 +27,6 @@ config = {
     #     'load_timestamp_field': "insertion_timestamp",
     # },
     "Center_View": { #uniqu key is not available
-        
         'output_collxn': "t_CCP_Center_view",
         'pipeline': pipelines.stage1_Center_View.aggr_pipeline,
         'collection': "CENTERVIEW",
@@ -74,7 +73,8 @@ config = {
         ],
         'output_type': ['MERGED'],
         'partition_by': "Date",
-        'schema': schemas.Center_View.schema
+        'schema': schemas.Center_View.schema,
+        'free_text_fields': None,
     },
     "Advisor_view": {
         'output_collxn': "t_CCP_Advisor_view",
@@ -119,10 +119,10 @@ config = {
         ],
         'output_type': ['MERGED'],
         'partition_by': 'Date',
-        'schema': schemas.Advisor_view.schema
+        'schema': schemas.Advisor_view.schema,
+        'free_text_fields': None,
     },
     "QA_Data_ETL": {
-        
         'output_collxn': 't_QA_DATA',
         'collection': 'QADATA',
         'load_timestamp_field': "insertion_timestamp",
@@ -172,37 +172,38 @@ config = {
         ],
         'output_type': ['MERGED'],
         'partition_by': 'Evaluation_Date',
-        'schema': schemas.QA_Data_ETL.schema
+        'schema': schemas.QA_Data_ETL.schema,
+        'free_text_fields': None,
     },
     "USERID_MAP": {
-        
         'output_collxn': 't_USERIDMAP',
         'collection': 'USERIDMAP',
         'load_timestamp_field': "insertion_timestamp",
         'pipeline': pipelines.stage4_USERID_MAP.aggr_pipeline,
         'output_columns': [
-            'Full_Name', 
-            'Role', 
-            'Buisness_Unit', 
-            'Litmus_ID', 
-            'Avaya_ID', 
-            'Last_Name', 
-            'IEX_ID', 
-            'Team_Leader', 
-            'First_Name', 
-            'Email', 
-            'QA_ID', 
+            'Full_Name',
+            'Role',
+            'Buisness_Unit',
+            'Litmus_ID',
+            'Avaya_ID',
+            'Last_Name',
+            'IEX_ID',
+            'Team_Leader',
+            'First_Name',
+            'Email',
+            'QA_ID',
             'Status'
         ],
         'primary_key': [
-            'First_Name', 
-            'Last_Name', 
-            'Full_Name', 
-            'Email', 
+            'First_Name',
+            'Last_Name',
+            'Full_Name',
+            'Email',
         ],
         'output_type': ['MERGED'],
         'partition_by': None,
-        'schema': schemas.USERID_MAP.schema
+        'schema': schemas.USERID_MAP.schema,
+        'free_text_fields': None,
     },
     "Time_Utilisation": {
         
@@ -233,7 +234,8 @@ config = {
          ],
         'output_type': ['MERGED'],
         'partition_by': 'Shot_Date',
-        'schema': schemas.Time_Utilisation.schema
+        'schema': schemas.Time_Utilisation.schema,
+        'free_text_fields': None,
     },
     "NPS_CSAT": {
         
@@ -278,7 +280,8 @@ config = {
         ],
         'output_type': ['MERGED'],
         'partition_by': 'Responded_on',
-        'schema': schemas.NPS_CSAT.schema
+        'schema': schemas.NPS_CSAT.schema,
+        'free_text_fields': ['Primary_Comment_Comment'],
     },
     "QA_SLA_ETL": { 
         
@@ -308,7 +311,8 @@ config = {
         ],
         'output_type': ['MERGED'],
         'partition_by': 'Evaluator_Review_Date',
-        'schema': schemas.QA_SLA_ETL.schema
+        'schema': schemas.QA_SLA_ETL.schema,
+        'free_text_fields': None,
     },
     "EMAIL_SOCIAL_SLA": {
         'output_collxn': "t_EMAIL_SOCIAL_SLA",
@@ -328,7 +332,8 @@ config = {
         ],
         'output_type': ['MERGED'],
         'partition_by': None,
-        'schema': schemas.EMAIL_SOCIAL_SLA.schema
+        'schema': schemas.EMAIL_SOCIAL_SLA.schema,
+        'free_text_fields': None,
     },
     "CCP_Interval_Report": {
         'output_collxn': "t_CCP_Interval_Report",
@@ -371,6 +376,7 @@ config = {
         ],
         'output_type': ['MERGED'],
         'partition_by': None,
-        'schema': schemas.CCP_Interval_Report.schema
+        'schema': schemas.CCP_Interval_Report.schema,
+        'free_text_fields': None,
     },
 }
