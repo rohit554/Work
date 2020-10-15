@@ -7,12 +7,12 @@ import os
 from pyspark.sql import functions as F
 from copy import deepcopy
 from pathlib import Path
-from dganalytics.utils.utils import get_spark_session
+from dganalytics.utils.utils import get_spark_session, free_text_feild_correction
 from pyspark.sql.types import StringType, StructType
 import json
 
 
-def export_dataframe_to_csv(output_db_path,output_table_name,tenant):
+def export_dataframe_to_csv(output_db_path,output_table_name,tenant,free_text_fields=None):
 
     output_filepath = f'{output_db_path}/{output_table_name}'
     logging.warn("writing to csv File")
@@ -36,10 +36,7 @@ def export_dataframe_to_csv(output_db_path,output_table_name,tenant):
         pass
     else:
         df = spark.sql(f"select * from delta.`{output_filepath}`")
-        udf_Compatible_string = F.udf(lambda x: (x.replace("\n"," ")).replace('''"''',"QUOTE<") if type(x) == str else x,StringType())
-        for field, typex in df.dtypes:
-            if typex == 'string':
-                df = df.withColumn(field, udf_Compatible_string(field))
+        df = free_text_feild_correction(df,free_text_fields)
 
         df.write.mode("overwrite").csv(pbdata_path, header = 'true')
 

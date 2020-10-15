@@ -27,7 +27,6 @@ config = {
         'load_timestamp_field': "insertion_timestamp",
     },
     "Raw_FCR": { #uniqu key is not available
-        
         'output_collxn': "t_raw_fcr_data",
         'pipeline': pipelines.stage1_Raw_FCR.aggr_pipeline,
         'collection': "FCR",
@@ -38,14 +37,16 @@ config = {
             'journey', 'counts', 'created_month', 'description', 
             'check', 'activity_num', 'type', 'crm_segment', 'date_1', 
             'account_num', 'service_type', 'times', 'created_year', 'resolution_code',
-             'user_id', 'location', 'state', 'category', 'date', 'status'],
+            'user_id', 'location', 'state', 'category', 'date', 'status'
+            ],
         'primary_key': ['activity_num'],
         'output_type': ['MERGED'],
         'partition_by': None,
         'schema': schemas.Raw_FCR.schema,
+        'free_text_fields': [], #['comments']
     },
     "User_FCR_KPI_Data": {
-        
+
         'output_collxn': "t_fcr_kpi_data",
         'pipeline': pipelines.stage2_User_FCR_KPI_Data.aggr_pipeline,
         'collection': "FCR",
@@ -55,9 +56,10 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'date',
         'schema': schemas.User_FCR_KPI_Data.schema,
+        'free_text_fields': [],
     },
     "User_AHT_KPI_Data": {
-        
+
         'output_collxn': 't_aht_kpi_data',
         'collection': 'CALL',
         'load_timestamp_field': "insertion_timestamp",
@@ -67,9 +69,10 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'date',
         'schema': schemas.User_AHT_KPI_Data.schema,
+        'free_text_fields': [],
     },
     "Call_Volume": {
-        
+
         'output_collxn': 't_call_volume_data',
         'collection': 'CALLSERVICE',
         'load_timestamp_field': "insertion_timestamp",
@@ -79,9 +82,10 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'report_date',
         'schema': schemas.Call_Volume.schema,
+        'free_text_fields': [],
     },
     "User_Details": {
-        
+
         'output_collxn': 't_user_details',
         'collection': 'user_details',
         'load_timestamp_field': "insertion_timestamp",
@@ -91,9 +95,10 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': None,
         'schema': schemas.User_Details.schema,
+        'free_text_fields': [],
     },
     # "JSR_KPI_User_Team_Target": {  #No OutPUt
-    #     
+    #
     #     'output_collxn': 't_kpi_user_team_target',
     #     'load_timestamp_field': "insertion_timestamp",
     #     'collection': 'TARGET',
@@ -114,6 +119,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'report_date',
         'schema': schemas.JSR_Process_Forecast_Data.schema,
+        'free_text_fields': [],
     },
     "JSR_KPI_Team_Target": { 
         
@@ -126,6 +132,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'date',
         'schema': schemas.JSR_KPI_Team_Target.schema,
+        'free_text_fields': [],
     },
     "User_KPI_Data": {
         
@@ -138,6 +145,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'date',
         'schema': schemas.User_KPI_Data.schema,
+        'free_text_fields': [],
     },
     "JSR_Top_Reason_Data": {
         
@@ -150,6 +158,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': None,
         'schema': schemas.JSR_Top_Reason_Data.schema,
+        'free_text_fields': [],
     },
     "Process_AHT_KPI_Data_to_All_Process" : {
         
@@ -162,6 +171,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'date',
         'schema': schemas.Process_AHT_KPI_Data_to_All_Process.schema,
+        'free_text_fields': [],
     },
 
     "JSR_Process_TNPS_KPI_Data_to_All_Process": {
@@ -176,6 +186,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'date',
         'schema': schemas.JSR_Process_TNPS_KPI_Data_to_All_Process.schema,
+        'free_text_fields': [],
     },
 
     "JSR_Process_KPI_Data_to_All_Process": {
@@ -190,6 +201,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'date',
         'schema': schemas.JSR_Process_KPI_Data_to_All_Process.schema,
+        'free_text_fields': [],
     },
     "JSR_Process_FCR_KPI_to_All_Process": {
         
@@ -203,6 +215,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'date',
         'schema': schemas.JSR_Process_FCR_KPI_to_All_Process.schema,
+        'free_text_fields': [],
     },
     "Admin_Login": {
         
@@ -215,6 +228,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': None,
         'schema': schemas.Admin_Login.schema,
+        'free_text_fields': [],
     },
     "JSR_AHT_KPI_Data": {
         
@@ -227,6 +241,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'date',
         'schema': schemas.JSR_AHT_KPI_Data.schema,
+        'free_text_fields': [],
     },
     "JSR_Trouble_Ticket_Data": { 
         
@@ -239,6 +254,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'report_date',
         'schema': schemas.JSR_Trouble_Ticket_Data.schema,
+        'free_text_fields': [],
     },
     "JSR_Process_KPI_Data": {
         
@@ -251,5 +267,6 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'date',
         'schema': schemas.JSR_Process_KPI_Data.schema,
+        'free_text_fields': [],
     },
 }

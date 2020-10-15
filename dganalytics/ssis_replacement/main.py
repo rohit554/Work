@@ -135,7 +135,7 @@ def extract_from_mongo( database_name, stage_name, step_name, rundate,):
         config_out_partitioned = config[f'{tenant}'][f'{stage_name}']['partition_by']
         config_out_pipl = config[f'{tenant}'][f'{stage_name}']['pipeline']
         config_out_loadtsfld = config[f'{tenant}'][f'{stage_name}']['load_timestamp_field']
-
+        config_out_free_text_fields = config[f'{tenant}'][f'{stage_name}']['free_text_fields']
 
 
 
@@ -208,7 +208,7 @@ def extract_from_mongo( database_name, stage_name, step_name, rundate,):
 
             )
         
-        export_dataframe_to_csv(output_db_path,config_out_collxn,tenant)
+        export_dataframe_to_csv(output_db_path,config_out_collxn,tenant,free_text_fields=config_out_free_text_fields)
 
     if step_name == "default":
         if run_window_type == "DYNAMIC":
