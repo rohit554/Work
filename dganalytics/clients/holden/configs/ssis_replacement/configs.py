@@ -74,7 +74,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': "Date",
         'schema': schemas.Center_View.schema,
-        'free_text_fields': None,
+        'free_text_fields': [],
     },
     "Advisor_view": {
         'output_collxn': "t_CCP_Advisor_view",
@@ -120,7 +120,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'Date',
         'schema': schemas.Advisor_view.schema,
-        'free_text_fields': None,
+        'free_text_fields': [],
     },
     "QA_Data_ETL": {
         'output_collxn': 't_QA_DATA',
@@ -173,7 +173,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'Evaluation_Date',
         'schema': schemas.QA_Data_ETL.schema,
-        'free_text_fields': None,
+        'free_text_fields': [],
     },
     "USERID_MAP": {
         'output_collxn': 't_USERIDMAP',
@@ -203,7 +203,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': None,
         'schema': schemas.USERID_MAP.schema,
-        'free_text_fields': None,
+        'free_text_fields': [],
     },
     "Time_Utilisation": {
         
@@ -235,7 +235,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'Shot_Date',
         'schema': schemas.Time_Utilisation.schema,
-        'free_text_fields': None,
+        'free_text_fields': [],
     },
     "NPS_CSAT": {
         
@@ -312,7 +312,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': 'Evaluator_Review_Date',
         'schema': schemas.QA_SLA_ETL.schema,
-        'free_text_fields': None,
+        'free_text_fields': [],
     },
     "EMAIL_SOCIAL_SLA": {
         'output_collxn': "t_EMAIL_SOCIAL_SLA",
@@ -333,7 +333,7 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': None,
         'schema': schemas.EMAIL_SOCIAL_SLA.schema,
-        'free_text_fields': None,
+        'free_text_fields': [],
     },
     "CCP_Interval_Report": {
         'output_collxn': "t_CCP_Interval_Report",
@@ -377,6 +377,6 @@ config = {
         'output_type': ['MERGED'],
         'partition_by': None,
         'schema': schemas.CCP_Interval_Report.schema,
-        'free_text_fields': None,
+        'free_text_fields': [],
     },
 }
