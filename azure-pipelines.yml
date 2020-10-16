@@ -133,7 +133,7 @@ jobs:
       azureSubscription:  ${{ variables.azureResourceManagerConnection }}
       ScriptType: 'FilePath'
       ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell/multiAdfDeployment.ps1'
-      ScriptArguments: '${{ variables.resourceGroupName }} $(System.DefaultWorkingDirectory)/deployment.json ${{lower(parameters.tenant)}} $(System.DefaultWorkingDirectory)'
+      ScriptArguments: '${{ variables.resourceGroupName }} $(System.DefaultWorkingDirectory)/deployment.json ${{lower(parameters.tenant)}} ${{parameters.environment}} $(System.DefaultWorkingDirectory)'
       azurePowerShellVersion: 'LatestVersion'
     name: DeployMultiADF${{ parameters.environment }}${{lower(parameters.tenant)}}
     displayName: Deploy Multiple ADF pipelines
