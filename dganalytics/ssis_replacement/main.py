@@ -18,7 +18,7 @@ import argparse
 import os
 from copy import deepcopy
 import logging
-from dganalytics.utils.utils import get_path_vars, get_secret
+from dganalytics.utils.utils import get_path_vars, get_secret, get_env
 
 
 def updatePipeline(
@@ -110,9 +110,9 @@ def get_minimum_processing_date(
 
 
 
-def extract_from_mongo( database_name, stage_name, step_name, rundate,):
-
-    tenant = "".join(database_name.split("-")[:-1])
+def extract_from_mongo( tenant, stage_name, step_name, rundate,):
+    env = get_env()
+    # tenant = "".join(database_name.split("-")[:-1])
     tenant_path, db_path, log_path = get_path_vars(tenant)
 
     #mongodb_conxnx_uri = get_secret("mongodb_conxnx_uri")
@@ -137,6 +137,7 @@ def extract_from_mongo( database_name, stage_name, step_name, rundate,):
         config_out_loadtsfld = config[f'{tenant}'][f'{stage_name}']['load_timestamp_field']
         config_out_free_text_fields = config[f'{tenant}'][f'{stage_name}']['free_text_fields']
 
+    config_database_name = config[f'{tenant}']['database_name'][env]
 
 
     if step_name == "FetchDelta":
@@ -145,7 +146,7 @@ def extract_from_mongo( database_name, stage_name, step_name, rundate,):
             min_rundate_curs = get_config_mongo(
 
                 mongodb_conxnx_uri,
-                database_name,
+                config_database_name,
                 "dgmis_config",
                 {
                     'tenant': f'{tenant}'
@@ -174,14 +175,14 @@ def extract_from_mongo( database_name, stage_name, step_name, rundate,):
             drop_mongo_colxn(
 
                 mongodb_conxnx_uri,
-                database_name,
+                config_database_name,
                 config_out_collxn,
 
             )
 
             aggregate_mongo_colxn(
                 mongodb_conxnx_uri,
-                database_name,
+                config_database_name,
                 config_collxn,
                 pipeline,
             )
@@ -189,7 +190,7 @@ def extract_from_mongo( database_name, stage_name, step_name, rundate,):
             extract_mongo_colxn(
                 mongodb_conxnx_uri,
                 tenant,
-                database_name,
+                config_database_name,
                 config_out_collxn,
                 config_out_colmns,
                 config_out_primarykey,
@@ -203,7 +204,7 @@ def extract_from_mongo( database_name, stage_name, step_name, rundate,):
             drop_mongo_colxn(
 
                 mongodb_conxnx_uri,
-                database_name,
+                config_database_name,
                 config_out_collxn,
 
             )
@@ -215,7 +216,7 @@ def extract_from_mongo( database_name, stage_name, step_name, rundate,):
             mindate = get_minimum_processing_date(
 
                 mongodb_conxnx_uri,
-                database_name,
+                config_database_name,
                 str((datetime.strptime(rundate,"%Y-%m-%d") - timedelta(2)).date()),
                 aggrpipeline=config[f'{tenant}'][f'{stage_name}']['pipeline'],
                 timestampfield=config[f'{tenant}'][f'{stage_name}']['load_timestamp_field'],
@@ -227,7 +228,7 @@ def extract_from_mongo( database_name, stage_name, step_name, rundate,):
         insertdate = upsertone_mongo_colxn(
 
             mongodb_conxnx_uri,
-            database_name,
+            config_database_name,
             collection_name='dgmis_config',
             upsert_filter={
                 'tenant': f'{tenant}'
@@ -238,11 +239,11 @@ def extract_from_mongo( database_name, stage_name, step_name, rundate,):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--database_name',
+    parser.add_argument('--tenant',
                         type=str,
                         required=True,
-                        default="vodafone-qatar-dev",
-                        help="Database Name.",
+                        default="vodafoneqatar",
+                        help="Tenant Name.",
 
                         )
     parser.add_argument('--stage_name',
@@ -267,13 +268,13 @@ if __name__ == "__main__":
 
     args, unknown_args = parser.parse_known_args()
 
-    database_name = args.database_name
+    tenant = args.tenant
     stage_name = args.stage_name
     rundate = args.rundate
     step_name = args.step_name
 
     logging.warn(
-        f"database: {database_name},stage: {stage_name},step: {step_name},rundate: {rundate}")
+        f"tenant: {tenant},stage: {stage_name},step: {step_name},rundate: {rundate}")
 
-    extract_from_mongo( database_name, stage_name, step_name, rundate)
+    extract_from_mongo( tenant, stage_name, step_name, rundate)
     # get_minimum_processing_date('2020-09-03')

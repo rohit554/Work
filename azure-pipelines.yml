@@ -12,6 +12,28 @@ parameters:
     displayName: Environment Parameter
     default: 'dev'
     type: string
+  - name: tenantSpecific
+    displayName: Enable Tenant Specific deployment
+    type: boolean
+    default: false
+  - name: ADFdeployment
+    displayName: Enable ADF deployment for Tenant
+    type: boolean
+    default: false
+  - name: AppFunctionDeployment
+    displayName: Enable App Function deployment for Tenant
+    type: boolean
+    default: false
+  - name: tenant
+    displayName: Tenant Name
+    default: 'default'
+    type: string
+    values:
+      - hellofresh
+      - salmatcolesonline
+      - vodafoneqatar
+      - holden
+      - default
 
 variables:
   - name: rgprefix
@@ -31,6 +53,7 @@ variables:
 
 jobs:
 - job: AnalyticsPlatformCICD
+  dependsOn: ADFDeployment
   pool:
     vmImage: ${{variables.vmImageName}}
   variables:
@@ -39,10 +62,6 @@ jobs:
     keyvaultsubscription: ${{ variables.rgprefix }}SecretsAccess
     lakestorageName: ${{ variables.rgprefix }}lakestorage
     sparkName: ${{ variables.rgprefix }}spark
-    tenant_setup_pyfile: "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/tenant_setup.py"
-    systemsetup_pyPfx1: "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/"
-    systemsetup_pyMdl: "/"
-    systemsetup_pySfx: _setup.py
     storageAccountName: ${{ variables.rgprefix }}realtimestorage
 
   steps:
@@ -95,3 +114,27 @@ jobs:
       cd $(System.DefaultWorkingDirectory)/devops_utils/python
       python3 restart_Databricks_cluster.py $(databricksuri) $(databrickssecret) ${{variables.sparkName}}
     displayName: 'Start Cluster'
+
+- job: ADFDeployment
+  condition: eq('${{parameters.tenantSpecific}}', true )
+  pool:
+    vmImage: ${{variables.vmImageName}}
+  variables:
+    resourceGroupName: ${{ variables.rgprefix }}analytics
+    KeyVaultResourcename: ${{ variables.rgprefix }}secrets
+    keyvaultsubscription: ${{ variables.rgprefix }}SecretsAccess
+    lakestorageName: ${{ variables.rgprefix }}lakestorage
+    sparkName: ${{ variables.rgprefix }}spark
+    storageAccountName: ${{ variables.rgprefix }}realtimestorage
+
+  steps:
+  - task: AzurePowerShell@5
+    inputs:
+      azureSubscription:  ${{ variables.azureResourceManagerConnection }}
+      ScriptType: 'FilePath'
+      ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell/multiAdfDeployment.ps1'
+      ScriptArguments: '${{ variables.resourceGroupName }} $(System.DefaultWorkingDirectory)/deployment.json ${{lower(parameters.tenant)}} $(System.DefaultWorkingDirectory)'
+      azurePowerShellVersion: 'LatestVersion'
+    name: DeployMultiADF${{ parameters.environment }}${{lower(parameters.tenant)}}
+    displayName: Deploy Multiple ADF pipelines
+    condition: and(succeeded(), eq('${{parameters.ADFdeployment}}', true ))

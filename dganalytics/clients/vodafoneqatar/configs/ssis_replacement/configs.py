@@ -7,6 +7,11 @@ from . import (
 from copy import deepcopy
 import logging
 
+database_name = {
+    'dev': 'vodafone-qatar-prod',
+    'uat': 'vodafone-qatar-prod',
+    'prd': 'vodafone-qatar-prod',
+}
 config = {
     "run_window_type": "DYNAMIC",
     "find_min_rundate": {
@@ -270,3 +275,4 @@ config = {
         'free_text_fields': [],
     },
 }
+config['database_name']=database_name
