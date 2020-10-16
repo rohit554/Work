@@ -17,8 +17,8 @@
                 "typeProperties": {
                     "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                     "parameters": [
-                        "--database_name",
-                        "@pipeline().parameters.database_name",
+                        "--tenant",
+                        "@pipeline().parameters.tenant",
                         "--stage_name",
                         "Center_View",
                         "--step_name",
@@ -45,8 +45,8 @@
                 "typeProperties": {
                     "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                     "parameters": [
-                        "--database_name",
-                        "@pipeline().parameters.database_name",
+                        "--tenant",
+                        "@pipeline().parameters.tenant",
                         "--stage_name",
                         "Advisor_view",
                         "--step_name",
@@ -73,8 +73,8 @@
                 "typeProperties": {
                     "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                     "parameters": [
-                        "--database_name",
-                        "@pipeline().parameters.database_name",
+                        "--tenant",
+                        "@pipeline().parameters.tenant",
                         "--stage_name",
                         "QA_Data_ETL",
                         "--step_name",
@@ -101,8 +101,8 @@
                 "typeProperties": {
                     "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                     "parameters": [
-                        "--database_name",
-                        "@pipeline().parameters.database_name",
+                        "--tenant",
+                        "@pipeline().parameters.tenant",
                         "--stage_name",
                         "USERID_MAP",
                         "--step_name",
@@ -129,8 +129,8 @@
                 "typeProperties": {
                     "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                     "parameters": [
-                        "--database_name",
-                        "@pipeline().parameters.database_name",
+                        "--tenant",
+                        "@pipeline().parameters.tenant",
                         "--stage_name",
                         "Time_Utilisation",
                         "--step_name",
@@ -157,8 +157,8 @@
                 "typeProperties": {
                     "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                     "parameters": [
-                        "--database_name",
-                        "@pipeline().parameters.database_name",
+                        "--tenant",
+                        "@pipeline().parameters.tenant",
                         "--stage_name",
                         "NPS_CSAT",
                         "--step_name",
@@ -185,8 +185,8 @@
                 "typeProperties": {
                     "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                     "parameters": [
-                        "--database_name",
-                        "@pipeline().parameters.database_name",
+                        "--tenant",
+                        "@pipeline().parameters.tenant",
                         "--stage_name",
                         "QA_SLA_ETL",
                         "--step_name",
@@ -213,8 +213,8 @@
                 "typeProperties": {
                     "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                     "parameters": [
-                        "--database_name",
-                        "@pipeline().parameters.database_name",
+                        "--tenant",
+                        "@pipeline().parameters.tenant",
                         "--stage_name",
                         "EMAIL_SOCIAL_SLA",
                         "--step_name",
@@ -241,8 +241,8 @@
                 "typeProperties": {
                     "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                     "parameters": [
-                        "--database_name",
-                        "@pipeline().parameters.database_name",
+                        "--tenant",
+                        "@pipeline().parameters.tenant",
                         "--stage_name",
                         "CCP_Interval_Report",
                         "--step_name",
@@ -257,9 +257,9 @@
         ],
         "concurrency": 1,
         "parameters": {
-            "database_name": {
+            "tenant": {
                 "type": "string",
-                "defaultValue": "holden-prod"
+                "defaultValue": "holden"
             }
         },
         "folder": {
