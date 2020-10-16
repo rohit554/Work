@@ -4,18 +4,13 @@
     "parameters": {
         "tenant": {
             "type": "string",
-            "metadata": "Environment name",
+            "metadata": "Tenant name",
             "defaultValue": "vodafoneqatar"
         },
         "env": {
             "type": "string",
             "metadata": "Environment name",
             "defaultValue": "dev"
-        },
-        "database_name": {
-            "type": "string",
-            "metadata": "Environment name",
-            "defaultValue": "vodafone-qatar-prod"
         }
     },
     "variables": {
@@ -96,8 +91,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]"
+                                "--tenant",
+                                "[parameters('tenant')]"
                             ]
                         },
                         "linkedServiceName": {
@@ -127,8 +122,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "Call_Volume",
                                 "--step_name",
@@ -162,8 +157,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "JSR_KPI_Team_Target",
                                 "--step_name",
@@ -197,8 +192,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "JSR_Process_Forecast_Data",
                                 "--step_name",
@@ -232,8 +227,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "Raw_FCR",
                                 "--step_name",
@@ -267,8 +262,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "User_Details",
                                 "--step_name",
@@ -302,8 +297,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "User_FCR_KPI_Data",
                                 "--step_name",
@@ -337,8 +332,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "JSR_Top_Reason_Data",
                                 "--step_name",
@@ -372,8 +367,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "User_KPI_Data",
                                 "--step_name",
@@ -407,8 +402,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "JSR_Process_KPI_Data_to_All_Process",
                                 "--step_name",
@@ -442,8 +437,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "Process_AHT_KPI_Data_to_All_Process",
                                 "--step_name",
@@ -477,8 +472,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "JSR_Process_TNPS_KPI_Data_to_All_Process",
                                 "--step_name",
@@ -512,8 +507,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "JSR_Process_FCR_KPI_to_All_Process",
                                 "--step_name",
@@ -547,8 +542,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "Admin_Login",
                                 "--step_name",
@@ -582,8 +577,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "JSR_AHT_KPI_Data",
                                 "--step_name",
@@ -617,8 +612,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "JSR_Trouble_Ticket_Data",
                                 "--step_name",
@@ -652,8 +647,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "User_AHT_KPI_Data",
                                 "--step_name",
@@ -687,8 +682,8 @@
                         "typeProperties": {
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
                             "parameters": [
-                                "--database_name",
-                                "[parameters('database_name')]",
+                                "--tenant",
+                                "[parameters('tenant')]",
                                 "--stage_name",
                                 "JSR_Process_KPI_Data",
                                 "--step_name",
@@ -703,9 +698,9 @@
                 ],
                 "concurrency": 1,
                 "parameters": {
-                     "database_name": {
+                     "tenant": {
                         "type": "string",
-                        "defaultValue": "[parameters('database_name')]"
+                        "defaultValue": "[parameters('tenant')]"
                     }
                 },
                 "folder": {
