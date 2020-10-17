@@ -64,20 +64,11 @@ from
 		and cnr.Date = quality.Date ) cqnr
 	FULL OUTER JOIN
 	(
-		 select b.userId as UserID, a.Date, a.TimeAdheringToSchedule as DailyAdherencePercentage
-from dg_salmatcolesonline.wfm_verint_export a, dim_users b
+		 select a.genesysUserId as UserID, a.Date, a.TimeAdheringToSchedule as DailyAdherencePercentage
+from dg_salmatcolesonline.wfm_verint_export a
  where 
  a.`Date` <= (cast('{extract_date}' as date))
  and a.`Date` >= (cast('{extract_date}' as date) - 7)
- and
-( concat(trim(element_at(split(trim(a.Employee), ","),2)) , ' ' , trim(element_at(split(trim(a.Employee), ","),1))) = b.userFullName 
-or (concat(element_at(split(trim(element_at(split(trim(a.Employee), ","),2)), ' '),1) , ' ' , trim(element_at(split(trim(a.Employee), ","),1)))) = b.userFullName
-or lower(concat(trim(element_at(split(trim(a.Employee), ","),2)) , ' ' , trim(element_at(split(trim(a.Employee), ","),1)))) = lower(b.userFullName)
-or lower(concat(element_at(split(trim(element_at(split(trim(a.Employee), ","),2)), ' '),1) , ' ' , trim(element_at(split(trim(a.Employee), ","),1)))) = lower(b.userFullName)
-or lower(concat(trim(element_at(split(trim(a.Employee), ","),2)) , '.', trim(element_at(split(trim(a.Employee), ","),1)))) = lower(ELEMENT_at(split(b.userName, "@"),1))
-or lower(concat(element_at(split(trim(element_at(split(trim(a.Employee), ","),2)), ' '),1) , '.' , trim(element_at(split(trim(a.Employee), ","),1)))) = lower(ELEMENT_at(split(b.userName, "@"),1))
-or lower(concat(element_at(split(trim(element_at(split(trim(a.Employee), ","),2)), ' '),2) , '.' , trim(element_at(split(trim(a.Employee), ","),1)))) = lower(ELEMENT_at(split(b.userName, "@"),1))
-)
 	) wfm		
 	on wfm.UserID = cqnr.UserID
 	and wfm.Date = cqnr.Date

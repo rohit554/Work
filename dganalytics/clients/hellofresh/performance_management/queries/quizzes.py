@@ -3,6 +3,11 @@ from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 
 pipeline = [
     {
+        "$match": {
+
+        }
+    },
+    {
         "$project": {
             "name": 1.0,
             "game_design": 1.0,
@@ -30,10 +35,10 @@ pipeline = [
                     "input": "$game_design.gd_users",
                     "as": "q",
                     "cond": {
-                        "$eq": [
-                            "$$q.team_id",
-                            "$questionnaire.team_id"
-                        ]
+                            "$eq": [
+                                "$$q.team_id",
+                                "$questionnaire.team_id"
+                            ]
                     }
                 }
             }
@@ -49,7 +54,7 @@ pipeline = [
         "$lookup": {
             "from": "User",
             "let": {
-                "uid": "$users.user_id"
+                    "uid": "$users.user_id"
             },
             "pipeline": [
                 {
@@ -92,9 +97,9 @@ pipeline = [
         "$lookup": {
             "from": "quiz",
             "let": {
-                "campaign_id": "$campaign_id",
-                "uid": "$agent_data.user_id",
-                "qid": "$quiz_id"
+                    "campaign_id": "$campaign_id",
+                    "uid": "$agent_data.user_id",
+                    "qid": "$quiz_id"
             },
             "pipeline": [
                 {
@@ -154,7 +159,12 @@ pipeline = [
                     0.0
                 ]
             },
-            "answered_date": "$quiz_data.answered_date",
+            "answered_date": {
+                "$dateToString": {
+                    "format": "%Y-%m-%d",
+                    "date": "$quiz_data.answered_date"
+                }
+            },
             "total_questions": {
                 "$ifNull": [
                     "$quiz_data.total_questions",
@@ -168,81 +178,6 @@ pipeline = [
                 ]
             },
             "org_id": "$org_id"
-        }
-    },
-    {
-        "$lookup": {
-            "from": "Organization",
-            "let": {
-                "oid": "$org_id"
-            },
-            "pipeline": [
-                {
-                    "$match": {
-                        "$expr": {
-                            "$and": [
-                                {
-                                    "$eq": [
-                                        "$org_id",
-                                        "$$oid"
-                                    ]
-                                },
-                                {
-                                    "$eq": [
-                                        "$type",
-                                        "Organisation"
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "$project": {
-                        "timezone": {
-                            "$ifNull": [
-                                "$timezone",
-                                "Australia/Melbourne"
-                            ]
-                        }
-                    }
-                }
-            ],
-            "as": "org"
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$org",
-            "preserveNullAndEmptyArrays": True
-        }
-    },
-    {
-        "$project": {
-            "campaign_id": 1.0,
-            "quiz_id": 1.0,
-            "quiz_name": 1.0,
-            "user_id": 1.0,
-            "team_lead_mongo_id": 1.0,
-            "user_mongo_id": 1.0,
-            "quiz_status": 1.0,
-            "no_of_correct_questions": 1.0,
-            "answered_date": {
-                "$dateToString": {
-                    "format": "%Y-%m-%d",
-                    "date": {
-                        "$toDate": {
-                            "$dateToString": {
-                                "date": "$answered_date",
-                                "timezone": "$org.timezone"
-                            }
-                        }
-                    }
-                }
-            },
-            "total_questions": 1.0,
-            "quiz_percentage_score": 1.0,
-            "org_id": 1.0
         }
     }
 ]
@@ -266,7 +201,7 @@ schema = StructType([StructField('answered_date', StringType(), True),
 
 
 def get_quizzes(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
+    df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb='hellofresh-prod')
     df.registerTempTable("quizzes")
     df = spark.sql("""
                     select  cast(answered_date as date) answeredDate,
@@ -280,7 +215,7 @@ def get_quizzes(spark):
                             cast(total_questions as int) totalQuestions,
                             user_id userId,
                             user_mongo_id.oid userMongoId,
-                            org_id orgId
+                            'hellofresh' orgId
                     from quizzes
                 """)
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(

@@ -3,6 +3,10 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 pipeline = [
     {
+        "$match": {
+        }
+    },
+    {
         "$project": {
             "org_id": 1.0,
             "name": 1.0,
@@ -117,8 +121,8 @@ pipeline = [
         "$lookup": {
             "from": "Campaign",
             "let": {
-                "id": "$campaign_challenges.challenge_id",
-                "org_id": "$org_id"
+                    "id": "$campaign_challenges.challenge_id",
+                    "org_id": "$org_id"
             },
             "pipeline": [
                 {
@@ -147,13 +151,13 @@ pipeline = [
                                 },
                                 {
                                     "$eq": [
-                                        "$is_active", 
+                                        "$is_active",
                                         True
                                     ]
                                 },
                                 {
                                     "$eq": [
-                                        "$is_deleted", 
+                                        "$is_deleted",
                                         False
                                     ]
                                 },
@@ -223,165 +227,28 @@ pipeline = [
             "challengee_mongo_id": "$campaign_challenges.user_id",
             "status": "$campaign_challenges.status",
             "action": "$campaign_challenges.action",
-            "challenge_thrown_date": "$creation_date",
-            "challenge_acceptance_date": "$acceptance_date",
-            "challenge_end_date": "$end_date",
-            "challenge_completion_date": "$completion_date"
-        }
-    },
-    {
-        "$lookup": {
-            "from": "Organization",
-            "let": {
-                "oid": "$org_id"
-            },
-            "pipeline": [
-                {
-                    "$match": {
-                        "$expr": {
-                            "$and": [
-                                {
-                                    "$eq": [
-                                        "$org_id",
-                                        "$$oid"
-                                    ]
-                                },
-                                {
-                                    "$eq": [
-                                        "$type",
-                                        "Organisation"
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "$project": {
-                        "timezone": {
-                            "$ifNull": [
-                                "$timezone",
-                                "Australia/Melbourne"
-                            ]
-                        }
-                    }
-                }
-            ],
-            "as": "org"
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$org",
-            "preserveNullAndEmptyArrays": True
-        }
-    },
-    {
-        "$project": {
-            "org_id": "$org_id",
-            "challenger_mongo_id": 1.0,
-            "campaign_id": 1.0,
-            "challenge_name": 1.0,
-            "challenge_frequency": 1.0,
-            "no_of_days": 1.0,
-            "challengee_mongo_id": 1.0,
-            "status": 1.0,
-            "action": 1.0,
-            "challenge_end_date": {
-                "$cond": {
-                    "if": {
-                        "$and": [
-                            {
-                                "$eq": [
-                                    "$challenge_end_date",
-                                    None
-                                ]
-                            }
-                        ]
-                    },
-                    "then": None,
-                    "else": {
-                        "$dateToString": {
-                            "format": "%Y-%m-%d",
-                            "date": {
-                                "$toDate": {
-                                    "$dateToString": {
-                                        "date": "$challenge_end_date",
-                                        "timezone": "$org.timezone"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
             "challenge_thrown_date": {
                 "$dateToString": {
                     "format": "%Y-%m-%d",
-                    "date": {
-                        "$toDate": {
-                            "$dateToString": {
-                                "date": "$challenge_thrown_date",
-                                "timezone": "$org.timezone"
-                            }
-                        }
-                    }
+                    "date": "$creation_date"
                 }
             },
             "challenge_acceptance_date": {
-                "$cond": {
-                    "if": {
-                        "$and": [
-                            {
-                                "$eq": [
-                                    "$challenge_acceptance_date",
-                                    None
-                                ]
-                            }
-                        ]
-                    },
-                    "then": None,
-                    "else": {
-                        "$dateToString": {
-                            "format": "%Y-%m-%d",
-                            "date": {
-                                "$toDate": {
-                                    "$dateToString": {
-                                        "date": "$challenge_acceptance_date",
-                                        "timezone": "$org.timezone"
-                                    }
-                                }
-                            }
-                        }
-                    }
+                "$dateToString": {
+                    "format": "%Y-%m-%d",
+                    "date": "$acceptance_date"
+                }
+            },
+            "challenge_end_date": {
+                "$dateToString": {
+                    "format": "%Y-%m-%d",
+                    "date": "$end_date"
                 }
             },
             "challenge_completion_date": {
-                "$cond": {
-                    "if": {
-                        "$and": [
-                            {
-                                "$eq": [
-                                    "$challenge_completion_date",
-                                    None
-                                ]
-                            }
-                        ]
-                    },
-                    "then": None,
-                    "else": {
-                        "$dateToString": {
-                            "format": "%Y-%m-%d",
-                            "date": {
-                                "$toDate": {
-                                    "$dateToString": {
-                                        "date": "$challenge_completion_date",
-                                        "timezone": "$org.timezone"
-                                    }
-                                }
-                            }
-                        }
-                    }
+                "$dateToString": {
+                    "format": "%Y-%m-%d",
+                    "date": "$completion_date"
                 }
             }
         }
@@ -409,7 +276,7 @@ schema = StructType([StructField('action', StringType(), True),
 
 
 def get_challenges(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
+    df = exec_mongo_pipeline(spark, pipeline, 'User', schema, mongodb='hellofresh-prod')
     df.registerTempTable("challenges")
     df = spark.sql("""
                     select  action action,
@@ -424,7 +291,7 @@ def get_challenges(spark):
                             challenger_mongo_id.oid challengerMongoId,
                             no_of_days noOfDays,
                             status status,
-                            org_id orgId
+                            'hellofresh' orgId
                     from challenges
                 """)
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(

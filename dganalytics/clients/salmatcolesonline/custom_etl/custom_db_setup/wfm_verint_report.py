@@ -15,13 +15,17 @@ spark.sql(f"""
                 Organisation string,
                 Employee string,
                 Supervisor string,
-                `Time Adhering toSchedule (Hours)` double,
-                `Time Not Adhering to Schedule (Hours)` double,
-                `Total Time Scheduled (Hours)` double,
-                `Time Adhering to Schedule (%)` double,
-                `Time Not Adhering to Schedule (%)` double,
-                `Adherence Violations` int
+                `TimeAdheringToScheduleHours` double,
+                `TimeNotAdheringToScheduleHours` double,
+                `TotalTimeScheduledHours` double,
+                `TimeAdheringToSchedule` double,
+                `TimeNotAdheringToSchedule` double,
+                `AdherenceViolations` int,
+                Employee_ID string,
+                Username string,
+                genesysUserId string
             )
             using delta
+            partitioned by(Date)
             LOCATION '{db_path}/dg_salmatcolesonline/wfm_verint_export'
         """)
