@@ -10,6 +10,11 @@ from . import (
 from copy import deepcopy
 import logging
 
+database_name = {
+    'dev': 'holden-prod',
+    'uat': 'holden-prod',
+    'prd': 'holden-prod',
+}
 config = {
     # "run_window_type": "FIXED",
     "run_window_type": None,
@@ -380,3 +385,4 @@ config = {
         'free_text_fields': [],
     },
 }
+config['database_name']=database_name

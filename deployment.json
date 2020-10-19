@@ -3,10 +3,15 @@
         "adf": {
             "1": {
                 "pipeline": "dganalytics/connectors/gpc/batch/adf/gpc_daily_template.json",
-                "parameters": {}
+                "parameters": {"tenant":"hellofresh"}
             },
-            "2": "dganalytics/connectors/gpc/batch/adf/gpc_data_migration.json",
-            "3": "dganalytics/connectors/gpc/batch/adf/gpc_powerbi_export.json"
+            "2": {
+                "pipeline": "dganalytics/connectors/gpc/batch/adf/gpc_data_migration.json",
+                "parameters": {"tenant":"hellofresh"}
+            },
+            "3":{ "pipeline": "dganalytics/connectors/gpc/batch/adf/gpc_powerbi_export.json",
+                "parameters": {"tenant":"hellofresh"}
+            }
         },
         "realtime": {
             "1": "dganalytics/connectors/gpc/realtime/functions"
@@ -15,10 +20,28 @@
     "salmatcolesonline": {
         "adf": {
             "1": {
-                "pipeline": "dganalytics/connectors/gpc/batch/adf/gpc_daily_template.json"
+                "pipeline": "dganalytics/connectors/gpc/batch/adf/gpc_daily_template.json",
+                "parameters": {"tenant":"salmatcolesonline"}
             },
             "2": {
-                "pipeline": "dganalytics/clients/salmatcolesonline/adf/probe_colesonline.json"
+                "pipeline": "dganalytics/clients/salmatcolesonline/adf/probe_colesonline.json",
+                "parameters": {"tenant":"salmatcolesonline"}
+            }
+        }
+    },
+    "holden": {
+        "adf": {
+            "1": {
+                "pipeline": "dganalytics/clients/holden/adf/pipeline.json",
+                "parameters": {"tenant":"holden"}
+            }
+        }
+    },
+    "vodafoneqatar": {
+        "adf": {
+            "1": {
+                "pipeline": "dganalytics/clients/vodafoneqatar/adf/pipeline.json",
+                "parameters": {"tenant":"vodafoneqatar"}
             }
         }
     }
