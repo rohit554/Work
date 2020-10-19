@@ -13,8 +13,11 @@
                 "parameters": {"tenant":"hellofresh"}
             }
         },
-        "realtime": {
-            "1": "dganalytics/connectors/gpc/realtime/functions"
+        "appfunctions": {
+            "1": {
+                "src_code": "dganalytics/connectors/gpc/realtime/functions",
+                "parameters": {"name_sfx": "hellofreshaxgpc"}
+            }
         }
     },
     "salmatcolesonline": {
