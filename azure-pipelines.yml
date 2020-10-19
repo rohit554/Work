@@ -138,3 +138,27 @@ jobs:
     name: DeployMultiADF${{ parameters.environment }}${{lower(parameters.tenant)}}
     displayName: Deploy Multiple ADF pipelines
     condition: and(succeeded(), eq('${{parameters.ADFdeployment}}', true ))
+
+- job: AppFunctionDeployment
+  condition: eq('${{parameters.tenantSpecific}}', true )
+  pool:
+    vmImage: ${{variables.vmImageName}}
+  variables:
+    resourceGroupName: ${{ variables.rgprefix }}analytics
+    KeyVaultResourcename: ${{ variables.rgprefix }}secrets
+    keyvaultsubscription: ${{ variables.rgprefix }}SecretsAccess
+    lakestorageName: ${{ variables.rgprefix }}lakestorage
+    sparkName: ${{ variables.rgprefix }}spark
+    storageAccountName: ${{ variables.rgprefix }}realtimestorage
+
+  steps:
+  - task: AzurePowerShell@5
+    inputs:
+      azureSubscription: ${{variables.azureResourceManagerConnection}}
+      ScriptType: 'FilePath'
+      ScriptPath: '$(System.DefaultWorkingDirectory)/devops_utils/powershell/multiFuncDeployment.ps1'
+      ScriptArguments: '${{ variables.resourceGroupName }} $(System.DefaultWorkingDirectory)/deployment.json ${{lower(parameters.tenant)}} ${{ variables.rgprefix }} ${{parameters.environment}} $(System.DefaultWorkingDirectory)'
+      azurePowerShellVersion: 'LatestVersion'
+    name: Deploy_App_funcs_${{ parameters.environment }}
+    displayName: Deploy App Func Code
+    condition: and(succeeded(), eq('${{parameters.enableSourceSystem}}', true ))
