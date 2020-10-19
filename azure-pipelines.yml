@@ -53,7 +53,7 @@ variables:
 
 jobs:
 - job: AnalyticsPlatformCICD
-  dependsOn: ADFDeployment
+  dependsOn: ADF_AppFunction_Deployment
   pool:
     vmImage: ${{variables.vmImageName}}
   variables:
@@ -115,7 +115,7 @@ jobs:
       python3 restart_Databricks_cluster.py $(databricksuri) $(databrickssecret) ${{variables.sparkName}}
     displayName: 'Start Cluster'
 
-- job: ADFDeployment
+- job: ADF_AppFunction_Deployment
   condition: eq('${{parameters.tenantSpecific}}', true )
   pool:
     vmImage: ${{variables.vmImageName}}
