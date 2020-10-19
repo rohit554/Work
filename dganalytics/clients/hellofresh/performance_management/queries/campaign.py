@@ -35,7 +35,7 @@ schema = StructType([StructField('campaign_id', StructType([StructField('oid', S
 
 
 def get_campaign(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
+    df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb='hellofresh-prod')
     df.registerTempTable("campaign")
     df = spark.sql("""
                     select  campaign_id.oid campaignId,
@@ -44,7 +44,7 @@ def get_campaign(spark):
                             is_active isActive,
                             is_deleted isDeleted,
                             name name,
-                            org_id orgId
+                            'hellofresh' orgId
                     from campaign
                 """)
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(

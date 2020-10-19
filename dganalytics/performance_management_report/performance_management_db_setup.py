@@ -198,7 +198,6 @@ spark.sql(f"""
                 loginAttempt int,
                 userId string,
                 orgId string
-
             )
             using delta
             PARTITIONED BY (orgId)
