@@ -1,0 +1,161 @@
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
+from pyspark.sql.types import StructType, StructField, StringType
+
+pipeline = [
+    {
+        "$match": {
+            "is_active": True,
+            "is_deleted": False
+        }
+    },
+    {
+        "$project": {
+            "user_id": 1.0,
+            "email": 1.0,
+            "first_name": 1.0,
+            "last_name": 1.0,
+            "name": 1.0,
+            "quartile": 1.0,
+            "works_for": 1.0,
+            "role_id": 1.0,
+            "org_id": 1.0
+        }
+    },
+    {
+        "$unwind": {
+            "path": "$works_for",
+            "preserveNullAndEmptyArrays": True
+        }
+    },
+    {
+        "$lookup": {
+            "from": "Organization",
+            "localField": "works_for.team_id",
+            "foreignField": "_id",
+            "as": "Team"
+        }
+    },
+    {
+        "$unwind": {
+            "path": "$Team",
+            "preserveNullAndEmptyArrays": True
+        }
+    },
+    {
+        "$lookup": {
+            "from": "User",
+            "let": {
+                    "team_id": "$works_for.team_id"
+            },
+            "pipeline": [
+                {
+                    "$project": {
+                        "name": 1.0,
+                        "user_id": 1.0,
+                        "works_for": 1.0
+                    }
+                },
+                {
+                    "$unwind": {
+                        "path": "$works_for"
+                    }
+                },
+                {
+                    "$match": {
+                        "$expr": {
+                            "$and": [
+                                {
+                                    "$eq": [
+                                        "$works_for.role_id",
+                                        "Team Lead"
+                                    ]
+                                },
+                                {
+                                    "$eq": [
+                                        "$works_for.team_id",
+                                        "$$team_id"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "$project": {
+                        "name": "$name"
+                    }
+                }
+            ],
+            "as": "tl_data"
+        }
+    },
+    {
+        "$unwind": {
+            "path": "$tl_data",
+            "preserveNullAndEmptyArrays": True
+        }
+    },
+    {
+        "$project": {
+            "_id": 0.0,
+            "MongoUserId": "$_id",
+            "UserId": "$user_id",
+            "Email": "$email",
+            "FirstName": "$first_name",
+            "LastName": "$last_name",
+            "Name": "$name",
+            "Quartile": "$quartile",
+            "RoleId": {
+                    "$ifNull": [
+                        "$works_for.role_id",
+                        "$role_id"
+                    ]
+            },
+            "TeamName": "$Team.name",
+            "TeamLeadName": "$tl_data.name",
+            "OrgId": "$org_id"
+        }
+    }
+]
+
+schema = StructType([StructField('Email', StringType(), True),
+                     StructField('FirstName', StringType(), True),
+                     StructField('LastName', StringType(), True),
+                     StructField('MongoUserId', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('Name', StringType(), True),
+                     StructField('OrgId', StringType(), True),
+                     StructField('Quartile', StringType(), True),
+                     StructField('RoleId', StringType(), True),
+                     StructField('TeamLeadName', StringType(), True),
+                     StructField('TeamName', StringType(), True),
+                     StructField('UserId', StringType(), True)])
+
+databases = ['holden-prod', 'tp-prod']
+
+
+def get_users(spark):
+    for db in databases:
+        print("getting data from " + db)
+        df = exec_mongo_pipeline(spark, pipeline, 'User', schema, mongodb=db)
+        df.registerTempTable("users")
+        df = spark.sql("""
+                        select  UserId userId,
+                                Email email,
+                                FirstName firstName,
+                                LastName lastName,
+                                MongoUserId.oid mongoUserId,
+                                Name name,
+                                Quartile quartile,
+                                RoleId roleId,
+                                TeamLeadName teamLeadName,
+                                TeamName teamName,
+                                lower(OrgId) orgId
+                        from users
+                    """)
+        '''
+        df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
+            'orgId').saveAsTable("dg_performance_management.users")
+        '''
+        delta_table_partition_ovrewrite(
+            df, "dg_performance_management.users", ['orgId'])
