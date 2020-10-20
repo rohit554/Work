@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import exec_mongo_pipeline
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 
 pipeline = [
@@ -280,8 +280,11 @@ def get_quizzes(spark):
                             cast(total_questions as int) totalQuestions,
                             user_id userId,
                             user_mongo_id.oid userMongoId,
-                            org_id orgId
+                            lower(org_id) orgId
                     from quizzes
                 """)
+    '''
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
         'orgId').saveAsTable("dg_performance_management.quizzes")
+    '''
+    delta_table_partition_ovrewrite(df, "dg_performance_management.quizzes", ['orgId'])

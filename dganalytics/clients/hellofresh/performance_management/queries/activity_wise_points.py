@@ -1,5 +1,5 @@
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
-from dganalytics.utils.utils import exec_mongo_pipeline
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
 
 
 pipeline = [
@@ -181,7 +181,8 @@ schema = StructType([StructField('activity_name', StringType(), True),
 
 
 def get_activity_wise_points(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb='hellofresh-prod')
+    df = exec_mongo_pipeline(spark, pipeline, 'Campaign',
+                             schema, mongodb='hellofresh-prod')
     df.registerTempTable("activity_wise_points")
     df = spark.sql("""
                     select  activity_name activityName,
@@ -195,5 +196,8 @@ def get_activity_wise_points(spark):
                             'hellofresh' orgId
                     from activity_wise_points
                 """)
+    '''
     df.write.format("delta").mode("overwrite").partitionBy(
         'orgId').saveAsTable("dg_performance_management.activity_wise_points")
+    '''
+    delta_table_partition_ovrewrite(df, "dg_performance_management.activity_wise_points", ['orgId'])

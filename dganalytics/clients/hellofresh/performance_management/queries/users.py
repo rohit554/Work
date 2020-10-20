@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import exec_mongo_pipeline
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
 from pyspark.sql.types import StructType, StructField, StringType
 
 pipeline = [
@@ -149,5 +149,8 @@ def get_users(spark):
                             'hellofresh' orgId
                     from users
                 """)
+    '''
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
         'orgId').saveAsTable("dg_performance_management.users")
+    '''
+    delta_table_partition_ovrewrite(df, "dg_performance_management.users", ['orgId'])

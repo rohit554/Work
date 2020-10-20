@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import get_spark_session, get_path_vars
+from dganalytics.utils.utils import get_spark_session
 from dganalytics.clients.hellofresh.performance_management import queries
 import argparse
 
@@ -13,7 +13,7 @@ pipelines = {
     "levels": queries.get_levels,
     "user_campaign": queries.get_user_campaign,
     "logins": queries.get_logins,
-    "kpi_raw_data": queries.get_kpi_raw_data
+    "hellofresh_kpi_raw_data": queries.get_hellofresh_kpi_raw_data
 }
 
 if __name__ == "__main__":

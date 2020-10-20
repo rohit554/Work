@@ -12,8 +12,10 @@ import requests
 import pandas as pd
 from contextlib import contextmanager
 from pyspark.sql import functions as F
+from typing import List
 
-def free_text_feild_correction(DataFrame,free_text_fields):
+
+def free_text_feild_correction(DataFrame, free_text_fields):
     """[summary]
 
     Args:
@@ -29,7 +31,7 @@ def free_text_feild_correction(DataFrame,free_text_fields):
     def udf_corrected_string(x):
         rx = ""
         if type(x) == str:
-            rx = ''.join(e if  e.isalnum() else " "  for e in x )
+            rx = ''.join(e if e.isalnum() else " " for e in x)
         else:
             rx = x
         return rx
@@ -37,6 +39,7 @@ def free_text_feild_correction(DataFrame,free_text_fields):
         print(field)
         DataFrame = DataFrame.withColumn(field, udf_corrected_string(field))
     return DataFrame
+
 
 @contextmanager
 def get_mongo_conxn(mongodb_conxnx_uri):
@@ -48,6 +51,7 @@ def get_mongo_conxn(mongodb_conxnx_uri):
             f"Excepton {e} occured. Please mongodb_conxnx_uri for env"
         )
 
+
 def export_powerbi_csv(tenant, df, file_name):
     tenant_path, db_path, log_path = get_path_vars(tenant)
     if "dbfs" in tenant_path:
@@ -57,6 +61,7 @@ def export_powerbi_csv(tenant, df, file_name):
         f"{tenant_path}", 'data', 'pbdatasets', f"{file_name}")
     df.write.mode("overwrite").option("header", True).option("timestampFormat", "yyyy-MM-dd HH:mm:ss")\
         .option("escape", "\\").option("dateFormat", "yyyy-MM-dd").csv(op_file)
+
 
 def get_env():
     try:
@@ -227,8 +232,6 @@ def push_gamification_data(df: pd.DataFrame, org_id: str, connection_name: str):
     a.close()
 
 
-
-
 def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_conf: dict = None):
     global env
     time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
@@ -271,6 +274,7 @@ def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_
         spark.sql(f"use {default_db}")
     return spark
 
+
 def exec_mongo_pipeline(spark, pipeline, collection, schema, mongodb=None):
     if mongodb is None:
         mongodb = f"dggamification{env if env != 'local' else 'dev'}"
@@ -279,6 +283,54 @@ def exec_mongo_pipeline(spark, pipeline, collection, schema, mongodb=None):
             "pipeline", json.dumps(pipeline)).schema(schema).load()
     return df
 
+
+def get_powerbi_access_token():
+    global pb_access_token
+    if pb_access_token is None:
+        print("getting power BI access token")
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded"
+        }
+        payload = {
+            "grant_type": "password",
+            "scope": "openid",
+            "resource": "https://analysis.windows.net/powerbi/api",
+            "client_id": get_secret("powerbiclientid"),
+            "username": get_secret("powerbiusername"),
+            "password": get_secret("powerbipassword")
+        }
+        pb_token = requests.post(
+            "https://login.microsoftonline.com/common/oauth2/token", headers=headers, data=payload)
+        if pb_token.status_code != 200:
+            raise Exception("Power BI Authentication failed")
+        pb_access_token = pb_token.json()['access_token']
+    return pb_access_token
+
+
+def exec_powerbi_refresh(workspace_id, dataset_id):
+    print("power bi refresh started for ROI")
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {get_powerbi_access_token()}"
+    }
+    refresh = requests.post(
+        f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/datasets/{dataset_id}/refreshes", headers=headers)
+    print(headers)
+    print(f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/datasets/{dataset_id}/refreshes")
+    print(refresh.status_code)
+    print(refresh.text)
+
+
+def delta_table_partition_ovrewrite(df, table, partition_cols: List[str]):
+    for val in df.select(partition_cols).distinct().collect():
+        filter_condition = " and ".join(
+            [k + "='" + str(v) + "'" for k, v in val.asDict().items()])
+        df.filter(filter_condition).coalesce(1).write.format("delta").mode("overwrite"
+                                                                           ).partitionBy(partition_cols
+                                                                                         ).option("replaceWhere",
+                                                                                                  filter_condition).saveAsTable(f"{table}")
+
+pb_access_token = None
 dbutils = None
 secrets = None
 env = get_env()

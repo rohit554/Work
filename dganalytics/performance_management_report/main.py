@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import get_spark_session, get_path_vars
+from dganalytics.utils.utils import get_spark_session, env
 from dganalytics.performance_management_report import queries
 import argparse
 

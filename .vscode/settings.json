@@ -16,7 +16,7 @@
     "azureFunctions.projectLanguage": "Python",
     "azureFunctions.projectRuntime": "~3",
     "debug.internalConsoleOptions": "neverOpen",
-    "python.pythonPath": "/home/incdev/anaconda3/envs/dganalytics/bin/python",
+    "python.pythonPath": ".venv\\Scripts\\python.exe",
     "cSpell.words": [
         "SIEBELACTIVITY",
         "TNPS",

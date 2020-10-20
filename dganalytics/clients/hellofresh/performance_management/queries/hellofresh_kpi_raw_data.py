@@ -1,5 +1,5 @@
-from dganalytics.utils.utils import exec_mongo_pipeline
-from pyspark.sql.types import StructType, StructField, StringType, DoubleType, TimestampType
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
+from pyspark.sql.types import StructType, StructField, StringType, DoubleType, TimestampType, FloatType
 
 pipeline = [
     {
@@ -16,16 +16,16 @@ pipeline = [
     }
 ]
 
-schema = StructType([StructField('csat', DoubleType, True),
-                     StructField('key_word', DoubleType, True),
-                     StructField('not_responding_time', DoubleType, True),
-                     StructField('org_id', StringType, True),
-                     StructField('report_date', TimestampType, True),
-                     StructField('user_id', StringType, True),
-                     StructField('user_name', StringType, True)])
+schema = StructType([StructField('csat', DoubleType(), True),
+                     StructField('key_word', DoubleType(), True),
+                     StructField('not_responding_time', DoubleType(), True),
+                     StructField('org_id', StringType(), True),
+                     StructField('report_date', TimestampType(), True),
+                     StructField('user_id', StringType(), True),
+                     StructField('user_name', StringType(), True)])
 
 
-def get_kpi_raw_data(spark):
+def get_hellofresh_kpi_raw_data(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'All_Data',
                              schema, mongodb='hellofresh-prod')
     df.registerTempTable("all_data")
@@ -39,5 +39,8 @@ def get_kpi_raw_data(spark):
                             'hellofresh' orgId
                     from all_data
                 """)
+    '''
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
         'orgId').saveAsTable("dg_performance_management.hellofresh_kpi_raw_data")
+    '''
+    delta_table_partition_ovrewrite(df, "dg_performance_management.hellofresh_kpi_raw_data", ['orgId'])

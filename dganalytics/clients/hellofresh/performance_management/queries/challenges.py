@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import exec_mongo_pipeline
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 pipeline = [
@@ -294,5 +294,8 @@ def get_challenges(spark):
                             'hellofresh' orgId
                     from challenges
                 """)
+    '''
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
         'orgId').saveAsTable("dg_performance_management.challenges")
+    '''
+    delta_table_partition_ovrewrite(df, "dg_performance_management.challenges", ['orgId'])

@@ -8,4 +8,4 @@ from dganalytics.clients.hellofresh.performance_management.queries.questions imp
 from dganalytics.clients.hellofresh.performance_management.queries.levels import get_levels
 from dganalytics.clients.hellofresh.performance_management.queries.user_campaign import get_user_campaign
 from dganalytics.clients.hellofresh.performance_management.queries.logins import get_logins
-from dganalytics.clients.hellofresh.performance_management.queries.kpi_raw_data import get_kpi_raw_data
+from dganalytics.clients.hellofresh.performance_management.queries.hellofresh_kpi_raw_data import get_hellofresh_kpi_raw_data

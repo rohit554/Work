@@ -1,0 +1,555 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "env": {
+            "type": "string",
+            "metadata": "Environment name",
+            "defaultValue": "dev"
+        },
+        "baseTime": {
+            "type": "string",
+            "defaultValue": "[utcNow('u')]",
+            "metadata": {
+                "description": "Schedule will start one hour from this time."
+            }
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/dg', parameters('env'), 'adf')]",
+        "factoryname": "[concat('dg', parameters('env'), 'adf')]",
+        "AzureKeyVault_baseUrl": "[concat('https://dg', parameters('env') ,'secrets.vault.azure.net/')]",
+        "dailyTriggerStart": "[dateTimeAdd(parameters('baseTime'), 'P1D', 'yyyy-MM-ddT02:00:00Z')]"
+    },
+    "resources": [
+        {
+            "name": "[concat(variables('factoryname'), '/AzureKeyVault')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureKeyVault",
+                "typeProperties": {
+                    "baseUrl": "[variables('AzureKeyVault_baseUrl')]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(variables('factoryname'), '/AzureDatabricks')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureDatabricks",
+                "typeProperties": {
+                    "domain": {
+                        "type": "AzureKeyVaultSecret",
+                        "store": {
+                            "referenceName": "AzureKeyVault",
+                            "type": "LinkedServiceReference"
+                        },
+                        "secretName": "databricksinstanceurl"
+                    },
+                    "accessToken": {
+                        "type": "AzureKeyVaultSecret",
+                        "store": {
+                            "referenceName": "AzureKeyVault",
+                            "type": "LinkedServiceReference"
+                        },
+                        "secretName": "databricksaccesstoken"
+                    },
+                    "existingClusterId": {
+                        "type": "AzureKeyVaultSecret",
+                        "store": {
+                            "referenceName": "AzureKeyVault",
+                            "type": "LinkedServiceReference"
+                        },
+                        "secretName": "databricksclusterid"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureKeyVault')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryname'), '/HelloFresh_Performance_Management_Prev_Platform')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "activity_wise_points",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "wait-1",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/performance_management/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "activity_wise_points"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "badges",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "wait-1",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/performance_management/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "badges"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "campaign",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/performance_management/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "campaign"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "challenges",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "wait-2",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/performance_management/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "challenges"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "levels",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/performance_management/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "levels"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "logins",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/performance_management/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "logins"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "questions",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "wait-2",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/performance_management/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "questions"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "quizzes",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "wait-2",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/performance_management/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "quizzes"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "user_campaign",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/performance_management/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "user_campaign"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "users",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/performance_management/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "users"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "hellofresh_kpi_raw_data",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "wait-2",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/performance_management/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "hellofresh_kpi_raw_data"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "wait-1",
+                        "type": "Wait",
+                        "dependsOn": [
+                            {
+                                "activity": "users",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "user_campaign",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "logins",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "levels",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "campaign",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "waitTimeInSeconds": 5
+                        }
+                    },
+                    {
+                        "name": "wait-2",
+                        "type": "Wait",
+                        "dependsOn": [
+                            {
+                                "activity": "activity_wise_points",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "badges",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "waitTimeInSeconds": 5
+                        }
+                    },
+                    {
+                        "name": "wait-3",
+                        "type": "Wait",
+                        "dependsOn": [
+                            {
+                                "activity": "challenges",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "questions",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "quizzes",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "hellofresh_kpi_raw_data",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "userProperties": [],
+                        "typeProperties": {
+                            "waitTimeInSeconds": 5
+                        }
+                    },
+                    {
+                        "name": "Power BI Export and Refresh",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "wait-3",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/performance_management/performance_management_pb_export.py",
+                            "parameters": [
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    }
+                ],
+                "parameters": {
+                },
+                "folder": {
+                    "name": "performance_management"
+                },
+                "annotations": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureDatabricks')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryname'), '/HelloFresh_Performance_Management_Prev_Platform_Trigger')]",
+            "type": "Microsoft.DataFactory/factories/triggers",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "runtimeState": "Stopped",
+                "pipelines": [
+                    {
+                        "pipelineReference": {
+                            "referenceName": "HelloFresh_Performance_Management_Prev_Platform",
+                            "type": "PipelineReference"
+                        }
+                    }
+                ],
+                "type": "ScheduleTrigger",
+                "typeProperties": {
+                    "recurrence": {
+                        "frequency": "Hour",
+                        "interval": 8,
+                        "startTime": "[variables('dailyTriggerStart')]",
+                        "timeZone": "UTC"
+                    }
+                }
+            },
+            "dependsOn": [
+                "HelloFresh_Performance_Management_Prev_Platform"
+            ]
+        }
+    ]
+}

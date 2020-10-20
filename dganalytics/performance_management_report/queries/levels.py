@@ -1,83 +1,150 @@
-from dganalytics.utils.utils import exec_mongo_pipeline
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
 
 pipeline = [
-    {
-        "$match": {
-
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$campaign_levels"
-        }
-    },
-    {
-        "$project": {
-            "user_id": 1.0,
-            "campaign_id": "$campaign_levels.campaign_id",
-            "level_id": "$campaign_levels.level",
-            "achieved_date": "$campaign_levels.achieved_date"
-        }
-    },
-    {
-        "$lookup": {
-            "from": "Campaign",
-            "localField": "campaign_id",
-            "foreignField": "_id",
-            "as": "campaigns"
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$campaigns",
-            "includeArrayIndex": "arrayIndex",
-            "preserveNullAndEmptyArrays": False
-        }
-    },
-    {
-        "$project": {
-            "user_id": 1.0,
-            "campaign_id": 1.0,
-            "level_id": 1.0,
-            "achieved_date": 1.0,
-            "campaign_name": "$campaigns.name",
-            "campaign_level": "$campaigns.levels"
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$campaign_level",
-            "includeArrayIndex": "arrayIndex",
-            "preserveNullAndEmptyArrays": False
-        }
-    },
-    {
-        "$match": {
-            "$expr": {
-                "$eq": [
-                    "$level_id",
-                    "$campaign_level._id"
-                ]
+        { 
+            "$unwind" : { 
+                "path" : "$campaign_levels"
+            }
+        }, 
+        { 
+            "$project" : { 
+                "user_id" : 1.0, 
+                "campaign_id" : "$campaign_levels.campaign_id", 
+                "level_id" : "$campaign_levels.level", 
+                "achieved_date" : "$campaign_levels.achieved_date", 
+                "org_id" : 1.0
+            }
+        }, 
+        { 
+            "$lookup" : { 
+                "from" : "Campaign", 
+                "localField" : "campaign_id", 
+                "foreignField" : "_id", 
+                "as" : "campaigns"
+            }
+        }, 
+        { 
+            "$unwind" : { 
+                "path" : "$campaigns", 
+                "includeArrayIndex" : "arrayIndex", 
+                "preserveNullAndEmptyArrays" : False
+            }
+        }, 
+        { 
+            "$project" : { 
+                "user_id" : 1.0, 
+                "campaign_id" : 1.0, 
+                "level_id" : 1.0, 
+                "achieved_date" : 1.0, 
+                "campaign_name" : "$campaigns.name", 
+                "campaign_level" : "$campaigns.levels", 
+                "org_id" : 1.0
+            }
+        }, 
+        { 
+            "$unwind" : { 
+                "path" : "$campaign_level", 
+                "includeArrayIndex" : "arrayIndex", 
+                "preserveNullAndEmptyArrays" : False
+            }
+        }, 
+        { 
+            "$match" : { 
+                "$expr" : { 
+                    "$eq" : [
+                        "$level_id", 
+                        "$campaign_level._id"
+                    ]
+                }
+            }
+        }, 
+        { 
+            "$project" : { 
+                "_id" : 0.0, 
+                "mongo_user_id" : "$_id", 
+                "user_id" : 1.0, 
+                "campaign_id" : 1.0, 
+                "level_id" : 1.0, 
+                "achieved_date" : 1.0, 
+                "campaign_name" : 1.0, 
+                "level_name" : "$campaign_levels.name", 
+                "level_start_points" : "$campaign_level.start_points", 
+                "level_end_points" : "$campaign_level.end_points", 
+                "level_number" : "$campaign_level.id", 
+                "org_id" : 1.0
+            }
+        }, 
+        { 
+            "$lookup" : { 
+                "from" : "Organization", 
+                "let" : { 
+                    "oid" : "$org_id"
+                }, 
+                "pipeline" : [
+                    { 
+                        "$match" : { 
+                            "$expr" : { 
+                                "$and" : [
+                                    { 
+                                        "$eq" : [
+                                            "$org_id", 
+                                            "$$oid"
+                                        ]
+                                    }, 
+                                    { 
+                                        "$eq" : [
+                                            "$type", 
+                                            "Organisation"
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    }, 
+                    { 
+                        "$project" : { 
+                            "timezone" : { 
+                                "$ifNull" : [
+                                    "$timezone", 
+                                    "Australia/Melbourne"
+                                ]
+                            }
+                        }
+                    }
+                ], 
+                "as" : "org"
+            }
+        }, 
+        { 
+            "$unwind" : { 
+                "path" : "$org", 
+                "preserveNullAndEmptyArrays" : True
+            }
+        }, 
+        { 
+            "$project" : { 
+                "mongo_user_id" : 1.0, 
+                "user_id" : 1.0, 
+                "campaign_id" : 1.0, 
+                "level_id" : 1.0, 
+                "achieved_date" : { 
+                    "$toDate" : { 
+                        "$dateToString" : { 
+                            "date" : "$achieved_date", 
+                            "timezone" : "$org.timezone"
+                        }
+                    }
+                }, 
+                "campaign_name" : 1.0, 
+                "level_name" : 1.0, 
+                "level_start_points" : 1.0, 
+                "level_end_points" : 1.0, 
+                "level_number" : 1.0, 
+                "org_id" : 1.0
             }
         }
-    },
-    {
-        "$project": {
-            "_id": 0,
-            "mongo_user_id": "$_id",
-            "user_id": 1.0,
-            "campaign_id": 1.0,
-            "level_id": 1.0,
-            "achieved_date": 1.0,
-            "campaign_name": 1.0,
-            "level_name": "$campaign_levels.name",
-            "level_start_points": "$campaign_level.start_points",
-            "level_end_points": "$campaign_level.end_points",
-            "level_number": "$campaign_level.id"
-        }
-    }
-]
+    ]
 
 schema = StructType([StructField('achieved_date', TimestampType(), True),
                      StructField('campaign_id', StructType(
@@ -88,6 +155,7 @@ schema = StructType([StructField('achieved_date', TimestampType(), True),
                          [StructField('oid', StringType(), True)]), True),
                      StructField('level_number', IntegerType(), True),
                      StructField('level_start_points', IntegerType(), True),
+                     StructField('org_id', StringType(), True),
                      StructField('mongo_user_id', StructType(
                          [StructField('oid', StringType(), True)]), True),
                      StructField('user_id', StringType(), True)])
@@ -106,8 +174,11 @@ def get_levels(spark):
                             level_start_points levelStartPoints,
                             mongo_user_id.oid mongoUserId,
                             user_id userId,
-                            'salmatcolesonline' orgId
+                            lower(org_id) orgId
                     from levels
                 """)
+    '''
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
         'orgId').saveAsTable("dg_performance_management.levels")
+    '''
+    delta_table_partition_ovrewrite(df, "dg_performance_management.levels", ['orgId'])

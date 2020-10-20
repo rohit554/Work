@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import exec_mongo_pipeline
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 pipeline = [
@@ -293,7 +293,7 @@ pipeline = [
                         "$and": [
                             {
                                 "$eq": [
-                                    "$challenge_end_date",
+                                    "$challenge_end_date", 
                                     None
                                 ]
                             }
@@ -334,7 +334,7 @@ pipeline = [
                         "$and": [
                             {
                                 "$eq": [
-                                    "$challenge_acceptance_date",
+                                    "$challenge_acceptance_date", 
                                     None
                                 ]
                             }
@@ -362,7 +362,7 @@ pipeline = [
                         "$and": [
                             {
                                 "$eq": [
-                                    "$challenge_completion_date",
+                                    "$challenge_completion_date", 
                                     None
                                 ]
                             }
@@ -424,8 +424,11 @@ def get_challenges(spark):
                             challenger_mongo_id.oid challengerMongoId,
                             no_of_days noOfDays,
                             status status,
-                            org_id orgId
+                            lower(org_id) orgId
                     from challenges
                 """)
+    '''
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
         'orgId').saveAsTable("dg_performance_management.challenges")
+    '''
+    delta_table_partition_ovrewrite(df, "dg_performance_management.challenges", ['orgId'])
