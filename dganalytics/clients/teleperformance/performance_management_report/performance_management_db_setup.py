@@ -27,7 +27,7 @@ spark.sql(f"""
 
 spark.sql(f"""
         create table if not exists 
-            dg_performance_management.campaign_activities
+            dg_performance_management.tp_campaign_activities
             (
                 campaignId string,
                 activityId string,
@@ -38,5 +38,5 @@ spark.sql(f"""
             )
             using delta
             PARTITIONED BY (orgId)
-            LOCATION '{db_path}/dg_performance_management/campaign_activities'
+            LOCATION '{db_path}/dg_performance_management/tp_campaign_activities'
         """)

@@ -134,7 +134,7 @@ schema = StructType([StructField('Email', StringType(), True),
 
 def get_users(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'User', schema, mongodb='hellofresh-prod')
-    df.registerTempTable("users")
+    df.registerTempTable("hellofresh_users")
     df = spark.sql("""
                     select  UserId userId,
                             Email email,
@@ -146,11 +146,12 @@ def get_users(spark):
                             RoleId roleId,
                             TeamLeadName teamLeadName,
                             TeamName teamName,
+                            OrgId as hellofreshOrgId,
                             'hellofresh' orgId
-                    from users
+                    from hellofresh_users
                 """)
     '''
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
-        'orgId').saveAsTable("dg_performance_management.users")
+        'orgId').saveAsTable("dg_performance_management.hellofresh_users")
     '''
-    delta_table_partition_ovrewrite(df, "dg_performance_management.users", ['orgId'])
+    delta_table_partition_ovrewrite(df, "dg_performance_management.hellofresh_users", ['orgId'])

@@ -24,3 +24,25 @@ spark.sql(f"""
             PARTITIONED BY (orgId)
             LOCATION '{db_path}/dg_performance_management/hellofresh_kpi_raw_data'
         """)
+
+spark.sql(f"""
+        create table if not exists 
+            dg_performance_management.hellofresh_users
+            (
+                userId string,
+                email string,
+                firstName string,
+                lastName string,
+                mongoUserId string,
+                name string,
+                quartile string,
+                roleId string,
+                teamLeadName string,
+                teamName string,
+                hellofreshOrgId string,
+                orgId string
+            )
+            using delta
+            PARTITIONED BY (orgId)
+            LOCATION '{db_path}/dg_performance_management/hellofresh_users'
+        """)

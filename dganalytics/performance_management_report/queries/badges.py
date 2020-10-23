@@ -144,7 +144,7 @@ def get_badges(spark):
                     select  badge_name badgeName,
                             campaign_id.oid campaignId,
                             cast(date as date) date,
-                            description description,
+                            replace(replace(replace(replace(replace(description, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' '),',','') description,
                             lead_mongo_user_id.oid leadMongoUserId,
                             user_id userId,
                             lower(org_id) orgId
@@ -154,4 +154,5 @@ def get_badges(spark):
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
         'orgId').saveAsTable("dg_performance_management.badges")
     '''
-    delta_table_partition_ovrewrite(df, "dg_performance_management.badges", ['orgId'])
+    delta_table_partition_ovrewrite(
+        df, "dg_performance_management.badges", ['orgId'])

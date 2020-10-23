@@ -355,7 +355,7 @@
                         }
                     },
                     {
-                        "name": "campaign_activities",
+                        "name": "tp_campaign_activities",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
@@ -377,7 +377,7 @@
                             "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/teleperformance/performance_management_report/main.py",
                             "parameters": [
                                 "--pipeline",
-                                "campaign_activities"
+                                "tp_campaign_activities"
                             ]
                         },
                         "linkedServiceName": {
@@ -517,7 +517,7 @@
                                 ]
                             },
                             {
-                                "activity": "campaign_activities",
+                                "activity": "tp_campaign_activities",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]

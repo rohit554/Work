@@ -83,11 +83,11 @@ def get_questions(spark):
                     select  answer_given answerGiven,
                             cast(answered_date as date) answeredDate,
                             campaign_id.oid campaignId,
-                            correct_answer correctAnswer,
+                            replace(replace(replace(replace(correct_answer, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' ') correctAnswer,
                             is_correct isCorrect,
-                            question question,
+                            replace(replace(replace(replace(question, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' ') question,
                             quiz_id.oid quiz_id,
-                            subject_area subject_area,
+                            replace(replace(replace(replace(subject_area, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' ') subject_area,
                             user_id userId,
                             'hellofresh' orgId
                     from questions

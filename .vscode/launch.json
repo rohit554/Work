@@ -18,7 +18,6 @@
                 "AZURE_PASSWORD": "${env:AZURE_PASSWORD}"
             },
             "console": "integratedTerminal",
-            /*
              "args": [
                  "--tenant=test",
                 "--run_id=t2",
@@ -29,13 +28,14 @@
                  "--org_id=SALMATDEV",
                  "--pipeline=users"
              ]
-            */
+            /*
             "args": [
                 "--env=local",
                 "--database_name=holden-prod",
                 "--stage_name=QA_SLA_ETL",
                 "--step_name=FetchDelta"
             ]
+            */
         },
         {
             "name": "Attach to Python Functions",

@@ -16,6 +16,16 @@ if __name__ == "__main__":
             "name": "bcp",
             "pb_workspace": "",
             "pb_roi_dataset": ""
+        },
+        {
+            "name": "bob",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
+        },
+        {
+            "name": "holden",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
         }
     ]
     app_name = "performance_management_powerbi_export"
@@ -23,12 +33,11 @@ if __name__ == "__main__":
     spark = get_spark_session(
         app_name=app_name, tenant='datagamz', default_db='dg_performance_management')
     tables = ["activity_wise_points", "badges", "campaign", "challenges", "levels", "logins", "questions",
-              "quizzes", "user_campaign", "users", "tp_kpi_raw_data", "campaign_activities"]
+              "quizzes", "user_campaign", "users", "tp_kpi_raw_data", "tp_campaign_activities"]
     for tenant in tenants:
-        tenant_path, db_path, log_path = get_path_vars(tenant['name'])
         for table in tables:
             df = spark.sql(
                 f"select * from dg_performance_management.{table} where orgId = '{tenant['name']}'")
             df = df.drop("orgId")
-            export_powerbi_csv('tp' + tenant['name'], df, f"pm_{table}")
+            export_powerbi_csv('tp' + tenant['name'] if tenant['name'] != 'holden' else 'holden', df, f"pm_{table}")
         exec_powerbi_refresh(tenant['pb_workspace'], tenant['pb_roi_dataset'])

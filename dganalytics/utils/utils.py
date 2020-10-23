@@ -13,6 +13,8 @@ import pandas as pd
 from contextlib import contextmanager
 from pyspark.sql import functions as F
 from typing import List
+import string
+import random
 
 
 def free_text_feild_correction(DataFrame, free_text_fields):
@@ -60,7 +62,8 @@ def export_powerbi_csv(tenant, df, file_name):
     op_file = os.path.join(
         f"{tenant_path}", 'data', 'pbdatasets', f"{file_name}")
     df.write.mode("overwrite").option("header", True).option("timestampFormat", "yyyy-MM-dd HH:mm:ss")\
-        .option("escape", "\\").option("dateFormat", "yyyy-MM-dd").csv(op_file)
+        .option("escape", '"').option("quote", '"').option("quoteMode",
+                                                           "MINIMAL").option("dateFormat", "yyyy-MM-dd").csv(op_file)
 
 
 def get_env():
@@ -315,20 +318,47 @@ def exec_powerbi_refresh(workspace_id, dataset_id):
     }
     refresh = requests.post(
         f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/datasets/{dataset_id}/refreshes", headers=headers)
-    print(headers)
-    print(f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/datasets/{dataset_id}/refreshes")
+    print(
+        f"https://api.powerbi.com/v1.0/myorg/groups/{workspace_id}/datasets/{dataset_id}/refreshes")
     print(refresh.status_code)
     print(refresh.text)
 
 
+def random_string(n=10):
+    return ''.join(random.choices(string.ascii_lowercase, k=n))
+
+
 def delta_table_partition_ovrewrite(df, table, partition_cols: List[str]):
-    for val in df.select(partition_cols).distinct().collect():
+    unique_values = df.select(partition_cols).distinct().collect()
+    lst = []
+    for val in unique_values:
+        lst.append(
+            "(" + ",".join(["'" + str(v) + "'" for v in list(val.asDict().values())]) + ")")
+    lst = ",".join(lst)
+    '''
+    unique_values = df.select(partition_cols).distinct().collect()
+    print(len(unique_values))
+    print(unique_values)
+    for val in unique_values:
+        print(val)
         filter_condition = " and ".join(
             [k + "='" + str(v) + "'" for k, v in val.asDict().items()])
         df.filter(filter_condition).coalesce(1).write.format("delta").mode("overwrite"
                                                                            ).partitionBy(partition_cols
                                                                                          ).option("replaceWhere",
                                                                                                   filter_condition).saveAsTable(f"{table}")
+    '''
+    filter_condition = '(' + ", ".join(
+        ["cast(" + c + " as string)" for c in partition_cols]) + ") in (" + lst + ")"
+    print(filter_condition)
+    temp_tbl_name = random_string()
+    df.registerTempTable(temp_tbl_name)
+    df.filter(filter_condition).coalesce(1).write.format(
+        "delta").mode("overwrite"
+                      ).partitionBy(partition_cols
+                                    ).option("replaceWhere",
+                                             filter_condition).saveAsTable(f"{table}")
+
 
 pb_access_token = None
 dbutils = None

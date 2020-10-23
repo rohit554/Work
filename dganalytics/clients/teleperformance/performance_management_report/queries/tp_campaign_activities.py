@@ -1,5 +1,5 @@
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
+from pyspark.sql.types import StructType, StructField, StringType, BooleanType
 
 pipeline = [
     {
@@ -40,24 +40,24 @@ schema = StructType([StructField('CampaignId', StringType(), True),
                      StructField('ActivityId', StringType(), True),
                      StructField('ActivityName', StringType(), True),
                      StructField('KpiName', StringType(), True),
-                     StructField('IsChallengeActivity', StringType(), True),
+                     StructField('IsChallengeActivity', BooleanType(), True),
                      StructField('OrgId', StringType(), True)
                      ])
 
 databases = ['holden-prod', 'tp-prod']
 
-def get_campaign_activities(spark):
+def get_tp_campaign_activities(spark):
     for db in databases:
         df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb=db)
-        df.registerTempTable("campaign_activities")
+        df.registerTempTable("tp_campaign_activities")
         df = spark.sql("""
-                        select  campaignId string,
-                                activityId string,
+                        select  CampaignId as campaignId,
+                                ActivityId as activityId,
                                 ActivityName as activityName,
                                 KpiName as kpiName,
                                 IsChallengeActivity as isChallengeActivity,
                                 lower(OrgId) as orgId
-                        from campaign_activities
+                        from tp_campaign_activities
                     """)
         delta_table_partition_ovrewrite(
-            df, "dg_performance_management.campaign_activities", ['orgId'])
+            df, "dg_performance_management.tp_campaign_activities", ['orgId'])

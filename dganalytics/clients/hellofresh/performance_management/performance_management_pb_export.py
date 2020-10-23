@@ -18,7 +18,7 @@ if __name__ == "__main__":
     spark = get_spark_session(
         app_name=app_name, tenant=tenant_org_id, default_db='dg_performance_management')
     tables = ["activity_wise_points", "badges", "campaign", "challenges", "levels", "logins", "questions",
-              "quizzes", "user_campaign", "users", "hellofresh_kpi_raw_data"]
+              "quizzes", "user_campaign", "hellofresh_users", "hellofresh_kpi_raw_data"]
 
     tenant_path, db_path, log_path = get_path_vars(tenant_org_id)
     for table in tables:

@@ -42,7 +42,7 @@ def get_badges(spark):
                     select  badge_name badgeName,
                             campaign_id.oid campaignId,
                             cast(date as date) date,
-                            description description,
+                            replace(replace(replace(replace(description, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' ') description,
                             lead_mongo_user_id.oid leadMongoUserId,
                             user_id userId,
                             'hellofresh' orgId
