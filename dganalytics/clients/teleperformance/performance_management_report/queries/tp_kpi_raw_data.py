@@ -2,7 +2,7 @@ from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_o
 from pyspark.sql.types import StructType, StructField, StringType, FloatType
 import requests as rq
 from pyspark.sql.functions import lit
-from datetime import datetime
+from datetime import datetime, timedelta
 
 schema = StructType([StructField('campaign_id', StringType(), True),
                      StructField('kpi', StringType(), True),
@@ -14,7 +14,7 @@ schema = StructType([StructField('campaign_id', StringType(), True),
 
 
 def get_tp_kpi_raw_data(spark):
-    start_date = (datetime.utcnow() - datetime.timedelta(days=15)).strftime("%Y-%m-%d")
+    start_date = (datetime.utcnow() - timedelta(days=15)).strftime("%Y-%m-%d")
     holden_data = rq.get(
         f"https://holden.datagamz.com/api/auth/getKpiData?start_date={start_date}&orgid=HOLDEN")
 
