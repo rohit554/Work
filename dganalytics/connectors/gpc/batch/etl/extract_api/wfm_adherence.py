@@ -67,8 +67,7 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
         while True:
             msg = ws.recv()
             msg = ast.literal_eval(msg)
-            print(msg)
-            if 'id' in msg['eventBody'].keys() or msg['eventBody']['message'] == 'WebSocket Heartbeat':
+            if 'queryState' in msg['eventBody'].keys() and msg['eventBody']['queryState'] == 'Complete':
                 wfm_resps_urls.append(msg)
                 break
     ws.close()
@@ -78,6 +77,6 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
         if 'downloadUrls' in w['eventBody'].keys():
             for url in w['eventBody']['downloadUrls']:
                 wfm_resps.append(rq.get(url).json())
-    wfm_resps = [json.dumps(resp) for resp in wfm_resps]
+    wfm_resps = [json.dumps(resp['data']) for resp in wfm_resps if 'data' in resp.keys()]
     process_raw_data(spark, tenant, 'wfm_adherence', run_id,
                      wfm_resps, extract_date, len(user_ids))
