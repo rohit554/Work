@@ -1,14 +1,15 @@
 from pyspark.sql import SparkSession
 
 
-def fact_conversation_metrics(spark: SparkSession, extract_date: str):
+def fact_conversation_metrics(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     conversation_metrics = spark.sql(f"""
-                                            select  
-                                        conversationId, agentId, mediaType, messageType, originatingDirection, 
+                                            select
+                                        conversationId, agentId, mediaType, messageType, originatingDirection,
                             element_at(segments, 1).queueId as queueId,
                             element_at(segments, size(segments)).wrapUpCode as wrapUpCode,
                         max(element_at(segments, size(segments)).wrapUpNote) as wrapUpNote,
-                    cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as emitDateTime,
+                    cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'),
+                        format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as emitDateTime,
                     sum(case when coalesce(tAbandon,0) > 0 then 1 else 0 end) as nAbandon,
                     sum(case when coalesce(tAcd,0) > 0 then 1 else 0 end) as nAcd,
                     sum(case when coalesce(tAcw,0) > 0 then 1 else 0 end) as nAcw,
@@ -44,10 +45,11 @@ def fact_conversation_metrics(spark: SparkSession, extract_date: str):
                     sum(coalesce(tTalkComplete,0))/1000.0 as tTalkComplete,
                     sum(coalesce(tVoicemail,0))/1000.0 as tVoicemail,
                     sum(coalesce(tWait,0))/1000.0 as tWait,
-                    cast(cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'), format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as date) as emitDate
-                    from 
-                    (
-                    select 
+                    cast(cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'),
+                    format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as date) as emitDate
+                    from
+                        (
+                        select
                     *
                     from (
                     select
@@ -59,7 +61,8 @@ def fact_conversation_metrics(spark: SparkSession, extract_date: str):
                         select
                             conversationId, conversationStart, conversationEnd, originatingDirection,
                             sessions.mediaType, sessions.messageType, purpose, agentId, sessions.sessionId,
-                            sessions.direction as sessionDirection, sessions.segments, explode(sessions.metrics) as metrics 
+                            sessions.direction as sessionDirection, sessions.segments,
+                            explode(sessions.metrics) as metrics
                         from
                             (
                             select
@@ -72,42 +75,37 @@ def fact_conversation_metrics(spark: SparkSession, extract_date: str):
                                     conversationId, conversationStart, conversationEnd, originatingDirection,
                                     explode(participants) as participants
                                 from
-                                    raw_conversation_details where extractDate = '{extract_date}')
+                                    raw_conversation_details where extractDate = '{extract_date}'
+                                    and  startTime = '{extract_start_time}' and endTime = '{extract_end_time}')
                            ) )
                     )
                     pivot (
                             sum(coalesce(value,0))
                         for name in ('nBlindTransferred',
-                                    'nConnected', 'nConsult', 'nConsultTransferred', 'nError', 'nOffered', 'nOutbound', 'nOutboundAbandoned',
-                                    'nOutboundAttempted', 'nOutboundConnected', 'nOverSla', 'nStateTransitionError', 'nTransferred',
-                                    'oExternalMediaCount', 'oInteracting', 'oMediaCount', 'oServiceLevel', 'oServiceTarget', 'oWaiting',
-                                    'tAbandon', 'tAcd', 'tAcw', 'tAgentResponseTime', 'tAlert', 'tAnswered', 'tContacting', 'tDialing',
-                                    'tFlowOut', 'tHandle', 'tHeld', 'tHeldComplete', 'tIvr', 'tMonitoring', 'tNotResponding',
+                                    'nConnected', 'nConsult', 'nConsultTransferred', 'nError',
+                                    'nOffered', 'nOutbound', 'nOutboundAbandoned',
+                                    'nOutboundAttempted', 'nOutboundConnected', 'nOverSla',
+                                    'nStateTransitionError', 'nTransferred',
+                                    'oExternalMediaCount', 'oInteracting', 'oMediaCount', 'oServiceLevel',
+                                    'oServiceTarget', 'oWaiting',
+                                    'tAbandon', 'tAcd', 'tAcw', 'tAgentResponseTime', 'tAlert', 'tAnswered',
+                                    'tContacting', 'tDialing',
+                                    'tFlowOut', 'tHandle', 'tHeld', 'tHeldComplete', 'tIvr',
+                                    'tMonitoring', 'tNotResponding',
                                     'tShortAbandon', 'tTalk', 'tTalkComplete', 'tUserResponseTime','tVoicemail',
                                     'tWait'
                                 )
                             )
                     )
                     group by conversationId, agentId, mediaType, messageType, originatingDirection, 
-                    	element_at(segments, 1).queueId,
+                    element_at(segments, 1).queueId,
                             element_at(segments, size(segments)).wrapUpCode,
                     cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'),
                         format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp)
                                             """)
 
     conversation_metrics.registerTempTable("conversation_metrics")
-    spark.sql("delete from fact_conversation_metrics where conversationId in (select distinct conversationId from conversation_metrics)")
-    spark.sql("insert into fact_conversation_metrics select * from conversation_metrics")
-    '''
-    spark.sql(f"""
-                    merge into fact_conversation_metrics as target
-                        using conversation_metrics as source
-                    on source.conversationDimKey = target.conversationDimKey
-                            and source.emitDateTime = target.emitDateTime
-                            and source.emitDate = target.emitDate
-                    WHEN MATCHED THEN
-                        UPDATE SET *
-                    WHEN NOT MATCHED THEN
-                        INSERT *
-                """)
-    '''
+    spark.sql("""delete from fact_conversation_metrics where conversationId in (
+                            select distinct conversationId from conversation_metrics)""")
+    spark.sql(
+        "insert into fact_conversation_metrics select * from conversation_metrics")

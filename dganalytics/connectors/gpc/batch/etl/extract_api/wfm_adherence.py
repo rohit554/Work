@@ -8,13 +8,15 @@ import ast
 from websocket import create_connection
 import time
 
+
 def get_users_list(spark: SparkSession):
     users_list = spark.sql("select distinct id as userId from raw_users").toPandas()[
         'userId'].tolist()
     return users_list
 
 
-def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
+def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str,
+                           extract_start_time: str, extract_end_time: str):
     logger = gpc_utils_logger(tenant, "wfm_adherence")
 
     api_headers = authorize(tenant)
@@ -22,7 +24,8 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
     steaming_channel = rq.post(
         f"{get_api_url(tenant)}/api/v2/notifications/channels", headers=api_headers)
     if steaming_channel.status_code != 200:
-        logger.exception("steaming_channel API Failed %s", steaming_channel.text)
+        logger.exception("steaming_channel API Failed %s",
+                         steaming_channel.text)
 
     steaming_channel = steaming_channel.json()
     steaming_channel_id = steaming_channel['id']
@@ -46,11 +49,12 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
     wfm_resps_urls = []
 
     batchsize = 1000
-    start_time = get_interval(extract_date).split("/")[0]
-    end_time = get_interval(extract_date).split("/")[1]
+    start_time = get_interval(
+        extract_start_time, extract_end_time).split("/")[0].replace("Z", "")
+    end_time = get_interval(extract_start_time, extract_end_time).split("/")[1].replace("Z", "")
     from datetime import datetime
-    if datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%SZ') > datetime.utcnow():
-        end_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+    if datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%S') > datetime.utcnow():
+        end_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
     for i in range(0, len(user_ids), batchsize):
         body = {
             "startDate": start_time,
@@ -77,6 +81,7 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str, db_nam
         if 'downloadUrls' in w['eventBody'].keys():
             for url in w['eventBody']['downloadUrls']:
                 wfm_resps.append(rq.get(url).json())
-    wfm_resps = [json.dumps(resp['data']) for resp in wfm_resps if 'data' in resp.keys()]
+    wfm_resps = [json.dumps(resp['data'])
+                 for resp in wfm_resps if 'data' in resp.keys()]
     process_raw_data(spark, tenant, 'wfm_adherence', run_id,
-                     wfm_resps, extract_date, len(user_ids))
+                     wfm_resps, extract_start_time, extract_end_time, len(user_ids))

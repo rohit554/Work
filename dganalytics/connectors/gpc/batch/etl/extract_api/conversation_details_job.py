@@ -5,12 +5,13 @@ from dganalytics.connectors.gpc.gpc_utils import gpc_request, authorize
 from dganalytics.connectors.gpc.gpc_utils import get_interval, get_api_url, gpc_utils_logger
 
 
-def exec_conversation_details_job(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
+def exec_conversation_details_job(spark: SparkSession, tenant: str, run_id: str,
+                                  extract_start_time: str, extract_end_time: str):
     logger = gpc_utils_logger(tenant, 'conversation_details_job')
     logger.info("Conversation job inside")
     api_headers = authorize(tenant)
     body = {
-        "interval": get_interval(extract_date)
+        "interval": get_interval(extract_start_time, extract_end_time)
     }
     job_resp = rq.post(f"{get_api_url(tenant)}/api/v2/analytics/conversations/details/jobs",
                        headers=api_headers, data=json.dumps(body))
@@ -39,5 +40,5 @@ def exec_conversation_details_job(spark: SparkSession, tenant: str, run_id: str,
         }
     }
 
-    df = gpc_request(spark, tenant, 'conversation_details_job',
-                     run_id, extract_date, overwrite_gpc_config=api_config)
+    gpc_request(spark, tenant, 'conversation_details_job',
+                run_id, extract_start_time, extract_end_time, overwrite_gpc_config=api_config)

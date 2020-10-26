@@ -1,21 +1,21 @@
 from pyspark.sql import SparkSession
 
 
-def dim_user_groups(spark: SparkSession, extract_date: str):
+def dim_user_groups(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     user_groups = spark.sql(f"""
-                    insert overwrite dim_user_groups 
-                        select distinct 
+                    insert overwrite dim_user_groups
+                        select distinct
                             userId,
-                            raw_groups.id as groupId, 
-                            raw_groups.name as groupName, 
+                            raw_groups.id as groupId,
+                            raw_groups.name as groupName,
                             raw_groups.description as groupDescription,
                             raw_groups.state as groupState
-                            from 
+                            from
                             (
-                                select 
+                                select
                                     id as userId,
                                     explode(groups) as user_groups
-                                from raw_users 
-                            ) users, raw_groups 
+                                from raw_users
+                            ) users, raw_groups
                             where users.user_groups.id = raw_groups.id
                     """)

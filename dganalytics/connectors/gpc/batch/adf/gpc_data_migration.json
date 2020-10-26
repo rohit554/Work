@@ -103,8 +103,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--api_name",
                                 "conversation_details_job"
                             ]
@@ -133,8 +135,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--api_name",
                                 "users_details_job"
                             ]
@@ -163,8 +167,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--api_name",
                                 "wfm_adherence"
                             ]
@@ -193,8 +199,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--api_name",
                                 "evaluations"
                             ]
@@ -230,8 +238,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--transformation",
                                 "dim_conversations"
                             ]
@@ -267,8 +277,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--transformation",
                                 "dim_evaluations"
                             ]
@@ -304,8 +316,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--transformation",
                                 "fact_conversation_metrics"
                             ]
@@ -341,8 +355,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--transformation",
                                 "fact_evaluation_question_group_scores"
                             ]
@@ -378,8 +394,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--transformation",
                                 "fact_evaluation_question_scores"
                             ]
@@ -415,8 +433,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--transformation",
                                 "fact_evaluation_total_scores"
                             ]
@@ -452,8 +472,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--transformation",
                                 "fact_primary_presence"
                             ]
@@ -489,8 +511,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--transformation",
                                 "fact_routing_status"
                             ]
@@ -526,8 +550,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--transformation",
                                 "fact_wfm_actuals"
                             ]
@@ -563,8 +589,10 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--extract_date",
-                                "@pipeline().parameters.extract_date",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
                                 "--transformation",
                                 "fact_wfm_day_metrics"
                             ]
@@ -581,8 +609,13 @@
                         "type": "string",
                         "defaultValue": "[parameters('tenant')]"
                     },
-                    "extract_date": {
-                        "type": "string"
+                    "extract_start_time": {
+                        "type": "string",
+                        "defaultValue": "YYYY-MM-DDTHH24:MI:SSZ"
+                    },
+                    "extract_end_time": {
+                        "type": "string",
+                        "defaultValue": "YYYY-MM-DDTHH24:MI:SSZ"
                     }
                 },
                 "folder": {
@@ -609,7 +642,8 @@
                         },
                         "parameters": {
                             "tenant": "[parameters('tenant')]",
-                            "extract_date": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ss')}"
+                            "extract_start_time": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ssZ')}",
+                            "extract_end_time": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddTHH:mm:ssZ')}"
                         }
                     }
                 ],

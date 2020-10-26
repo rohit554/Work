@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 
-def dim_conversations(spark: SparkSession, extract_date: str):
+def dim_conversations(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     conversations = spark.sql(f"""
                                     select
                         distinct
@@ -35,7 +35,8 @@ def dim_conversations(spark: SparkSession, extract_date: str):
                                     conversationId, conversationStart, conversationEnd, originatingDirection,
                                     explode(participants) as participants
                                 from
-                                    raw_conversation_details where extractDate = '{extract_date}')
+                                    raw_conversation_details where extractDate = '{extract_date}'
+                                        and  startTime = '{extract_start_time}' and endTime = '{extract_end_time}')
                                     where participants.purpose = 'agent'
                                 ) )
                                     """
@@ -49,17 +50,3 @@ def dim_conversations(spark: SparkSession, extract_date: str):
     )""")
 
     spark.sql("""insert into dim_conversations select * from conversations""")
-
-    '''
-    upsert = spark.sql("""
-                            merge into dim_conversations as target
-                                using conversations as source
-                                on source.conversationStartDate = target.conversationStartDate
-                                    and source.conversationId = target.conversationId
-                                    and source.sessionId = target.sessionId
-                                WHEN MATCHED THEN
-                                    UPDATE SET *
-                                WHEN NOT MATCHED THEN
-                                    INSERT *
-                            """)
-    '''

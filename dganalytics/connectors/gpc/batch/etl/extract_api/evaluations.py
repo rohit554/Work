@@ -13,15 +13,15 @@ def get_evaluators(spark: SparkSession) -> list:
     return evaluators
 
 
-def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, db_name: str, extract_date: str):
+def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_start_time: str, extract_end_time: str):
 
     logger = gpc_utils_logger(tenant, "gpc_evaluations")
 
     evaluators = get_evaluators(spark)
     api_headers = authorize(tenant)
     evaluation_details_list = []
-    start_time = get_interval(extract_date).split("/")[0]
-    end_time = get_interval(extract_date).split("/")[1]
+    start_time = get_interval(extract_start_time, extract_end_time).split("/")[0]
+    end_time = get_interval(extract_start_time, extract_end_time).split("/")[1]
     for e in evaluators:
         body = {
             "startTime": start_time,
@@ -41,4 +41,4 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, db_name:
     evaluation_details_list = [json.dumps(ed)
                                for ed in evaluation_details_list]
     process_raw_data(spark, tenant, 'evaluations', run_id,
-                     evaluation_details_list, extract_date, len(evaluators))
+                     evaluation_details_list, extract_start_time, extract_end_time, len(evaluators))

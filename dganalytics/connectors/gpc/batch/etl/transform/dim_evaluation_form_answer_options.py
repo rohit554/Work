@@ -1,10 +1,12 @@
 from pyspark.sql import SparkSession
 
-def dim_evaluation_form_answer_options(spark: SparkSession, extract_date: str):
+
+def dim_evaluation_form_answer_options(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
 
     evaluation_form_answer_options = spark.sql("""
         insert overwrite dim_evaluation_form_answer_options
-                        select distinct evaluationFormId, questionGroupId, questionId, answerOptions.id as answerOptionId,
+                        select distinct evaluationFormId, questionGroupId, questionId,
+                        answerOptions.id as answerOptionId,
     answerOptions.text as answerOptionText, answerOptions.value as answerOptionValue  from (
     select evaluationFormId, questionGroupId, questions.id as questionId,
     explode(questions.answerOptions) as answerOptions

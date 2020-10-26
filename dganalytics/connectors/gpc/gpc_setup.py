@@ -6,7 +6,8 @@ from dganalytics.connectors.gpc.gpc_utils import get_schema, get_dbname, gpc_uti
 
 def create_database(spark: SparkSession, path: str, db_name: str):
     logger.info("Creating database for genesys")
-    spark.sql(f"create database if not exists {db_name}  LOCATION '{path}/{db_name}'")
+    spark.sql(
+        f"create database if not exists {db_name}  LOCATION '{path}/{db_name}'")
 
     return True
 
@@ -83,7 +84,6 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 tVoicemail float,
                 tWait float,
                 emitDate date
-                
             )
             using delta
             PARTITIONED BY (emitDate)
@@ -404,10 +404,17 @@ def create_raw_table(api_name: str, spark: SparkSession, db_name: str):
     schema = get_schema(api_name)
     table_name = "raw_" + f"{api_name}"
     logger.info(f"creating genesys raw table - {table_name}")
-    spark.createDataFrame(spark.sparkContext.emptyRDD(), schema=schema).registerTempTable(table_name)
+    spark.createDataFrame(spark.sparkContext.emptyRDD(),
+                          schema=schema).registerTempTable(table_name)
     create_qry = f"""create table if not exists {db_name}.{table_name}
-                        using delta partitioned by(extractDate) LOCATION '{db_path}/{db_name}/{table_name}' as
-                    select *, cast('1900-01-01' as date) extractDate from {table_name} limit 0"""
+                        using delta partitioned by(extractDate, startTime, endTime) LOCATION
+                                '{db_path}/{db_name}/{table_name}'
+                        as
+                    select *, cast('1900-01-01' as date) extractDate,
+                    cast('1900-01-01 00:00:00' as timestamp) startTime,
+                    cast('1900-01-01 00:00:00' as timestamp) endTime,
+                    cast('1900-01-01 00:00:00' as timestamp) insertTime
+                     from {table_name} limit 0"""
     spark.sql(create_qry)
 
     return True
@@ -438,7 +445,8 @@ if __name__ == "__main__":
 
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
-    spark = get_spark_session(app_name="GPC_Setup", tenant=tenant, default_db='default')
+    spark = get_spark_session(app_name="GPC_Setup",
+                              tenant=tenant, default_db='default')
     create_database(spark, db_path, db_name)
     create_ingestion_stats_table(spark, db_name, db_path)
     raw_tables(spark, db_name, db_path, tenant_path)

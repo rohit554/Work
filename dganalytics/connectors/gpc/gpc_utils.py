@@ -11,11 +11,9 @@ from pathlib import Path
 from pyspark.sql.types import StructType
 import argparse
 import math
-
-from requests import api
 from dganalytics.connectors.gpc.gpc_api_config import gpc_end_points
-from dganalytics.utils.utils import env, get_path_vars, get_logger
-from pyspark.sql.functions import lit, to_date
+from dganalytics.utils.utils import env, get_path_vars, get_logger, delta_table_partition_ovrewrite, delta_table_ovrewrite
+from pyspark.sql.functions import lit, to_date, to_timestamp
 import gzip
 from dganalytics.utils.utils import get_secret
 import tempfile
@@ -60,8 +58,15 @@ def get_api_url(tenant: str) -> str:
     return url
 
 
-def get_interval(extract_date: str):
-    interval = f"{extract_date}T00:00:00Z/{extract_date}T23:59:59Z"
+def get_interval(extract_start_time: str, extract_end_time: str):
+    # start_time = (datetime.datetime.strptime(extract_date,
+    #                                         "%Y-%m-%dT%H:%M:%S") - datetime.timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%S")
+    # end_time = (datetime.datetime.strptime(extract_date,
+    #                                         "%Y-%m-%dT%H:%M:%S") - datetime.timedelta(seconds=1)).strftime("%Y-%m-%dT%H:%M:%S")
+    interval = f"{extract_start_time}Z/{extract_end_time}Z"
+
+    # interval = f"2020-10-01T00:00:00Z/2020-10-01T23:59:59Z"
+    # interval = f"{extract_date}T00:00:00Z/{extract_date}T23:59:59Z"
     return interval
 
 
@@ -134,10 +139,10 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
 def write_api_resp(resp: list, api_name: str, run_id: str, tenant: str, extract_date: str):
     tenant_path, db_path, log_path = get_path_vars(tenant)
     path = os.path.join(tenant_path, 'data', 'raw',
-                        'gpc', extract_date, run_id)
+                        'gpc', extract_date.replace(':', '-'), run_id)
     logger.info("tenant path" + str(path))
     Path(path).mkdir(parents=True, exist_ok=True)
-    file_name = f"{api_name}_{extract_date}.json.gz"
+    file_name = f"{api_name}_{extract_date.replace(':', '-')}.json.gz"
     temp_resp_file = tempfile.NamedTemporaryFile('w+', delete=True)
     temp_resp_file.close()
     with gzip.open(temp_resp_file.name, 'wt', encoding="utf-16") as zipfile:
@@ -159,19 +164,24 @@ def ingest_stats(spark: SparkSession, tenant: str, api_name: str, url: str, page
 
 
 def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name: str,
-                     extract_date: str, n_partitions: dict):
-    logger.info(f"updating raw table for {api_name} {extract_date}")
+                     extract_start_time: str, extract_end_time: str):
+    n_partitions = get_spark_partitions_num(api_name, len(resp_list))
+    logger.info(f"updating raw table for {api_name} {extract_start_time}_{extract_end_time}")
     record_count = len(resp_list)
     tenant_path, db_path, log_path = get_path_vars(tenant)
 
     n_partitions = get_spark_partitions_num(api_name, record_count)
     schema = get_schema(api_name)
     db_name = get_dbname(tenant)
-    sc = spark.sparkContext
     df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
         spark._sc.parallelize(resp_list, n_partitions), schema=schema).drop_duplicates()
 
-    df = df.withColumn("extractDate", to_date(lit(extract_date)))
+    df = df.withColumn("extractDate", to_date(lit(extract_start_time[0:10])))
+    df = df.withColumn("startTime", to_timestamp(lit(extract_start_time)))
+    df = df.withColumn("endTime", to_timestamp(lit(extract_end_time)))
+    print("lit start " + lit(extract_start_time))
+    print("lit end " + lit(extract_end_time))
+    df = df.withColumn("insertTime", to_timestamp(lit(datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))))
     table_name = get_raw_tbl_name(api_name)
     logger.info(f"updating raw table for {api_name} {db_name}.{table_name}")
 
@@ -180,61 +190,39 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
     cols = spark.table(f"{db_name}.{table_name}").columns
     cols = ",".join(cols)
 
-    partition_spec = ""
     if not get_tbl_overwrite(api_name):
-
+        delta_table_partition_ovrewrite(df, f"{db_name}.{table_name}", ['extractDate', 'startTime', 'endTime'])
+        '''
         df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
             'extractDate').option("replaceWhere",
-                                  f" extractDate = '{extract_date}' ").save(f"{db_path}/{db_name}/{table_name}")
-        '''
-        df.registerTempTable("source_tbl")
-        target = spark.read.format("delta").load(f"{db_path}/{db_name}/{table_name}")
-        target.registerTempTable("target_tbl")
-        primary_key_condition = [f'source_tbl.{c} = target_tbl.{c}'for c in gpc_end_points[api_name]['raw_primary_key']]
-        primary_key_condition = " and ".join(primary_key_condition)
-        spark.sql(f"""merge into target_tbl
-                            using source_tbl
-                        on {primary_key_condition} and source_tbl.extractDate = target_tbl.extractDate
-                        WHEN MATCHED THEN
-                            UPDATE SET *
-                        WHEN NOT MATCHED THEN
-                            INSERT *
-                        """)
+                               f" extractDate = '{extract_date}' ").save(f"{db_path}/{db_name}/{table_name}")
         '''
     else:
+        '''
         df.coalesce(1).write.format("delta").mode(
             "overwrite").save(f"{db_path}/{db_name}/{table_name}")
-
-    '''
-    spark.sql(f"""insert overwrite TABLE {db_name}.{table_name} {partition_spec}
-                    select {cols} from {api_name}
-                    """)
-    '''
-    '''
-        df.write.saveAsTable(f"{db_name}.{table_name}",
-                             mode="overwrite", format="delta")
-        spark.sql(f"""insert overwrite TABLE {db_name}.{table_name}
-                    """)
-    else:
-        df.write.saveAsTable(f"{db_name}.{table_name}", mode="overwrite",
-                             partitionBy="extractDate", format="delta", replace_where)
-    '''
+        '''
+        delta_table_ovrewrite(df, f"{db_name}.{table_name}")
     return True
 
 
-def process_raw_data(spark: SparkSession, tenant: str, api_name: str, run_id: str, resp_list: list, extract_date: str,
+def process_raw_data(spark: SparkSession, tenant: str, api_name: str, run_id: str, resp_list: list,
+                     extract_start_time: str, extract_end_time: str,
                      page_count: int, re_process: bool = False):
     logger.info(f"processing raw data extracted for {tenant} and {api_name}")
+    '''
     if not re_process:
         raw_file = write_api_resp(
             resp_list, api_name, run_id, tenant, extract_date)
-    n_partitions = get_spark_partitions_num(api_name, len(resp_list))
+    '''
+    # n_partitions = get_spark_partitions_num(api_name, len(resp_list))
     update_raw_table(spark, tenant, resp_list, api_name,
-                     extract_date, n_partitions)
+                     extract_start_time, extract_end_time)
+    '''
     if not re_process:
         ingest_stats(spark, tenant, api_name, api_name, page_count,
                      len(resp_list), raw_file, run_id, extract_date)
-
+    '''
     return True
 
 
@@ -252,17 +240,20 @@ def extract_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--tenant', required=True)
     parser.add_argument('--run_id', required=True)
-    parser.add_argument('--extract_date', required=True,
-                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
+    parser.add_argument('--extract_start_time', required=True,
+                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ'))
+    parser.add_argument('--extract_end_time', required=True,
+                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ'))
     parser.add_argument('--api_name', required=True)
 
     args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
     run_id = args.run_id
     api_name = args.api_name
-    extract_date = args.extract_date.strftime('%Y-%m-%d')
-    
-    return tenant, run_id, extract_date, api_name
+    extract_start_time = args.extract_start_time.strftime('%Y-%m-%dT%H:%M:%S')
+    extract_end_time = args.extract_end_time.strftime('%Y-%m-%dT%H:%M:%S')
+
+    return tenant, run_id, extract_start_time, extract_end_time, api_name
 
 
 def dg_metadata_export_parser():
@@ -284,17 +275,21 @@ def transform_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--tenant', required=True)
     parser.add_argument('--run_id', required=True)
-    parser.add_argument('--extract_date', required=True,
-                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%d'))
+    parser.add_argument('--extract_start_time', required=True,
+                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ'))
+    parser.add_argument('--extract_end_time', required=True,
+                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ'))
     parser.add_argument('--transformation', required=True)
 
     args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
     run_id = args.run_id
-    extract_date = args.extract_date.strftime('%Y-%m-%d')
     transformation = args.transformation
+    extract_start_time = args.extract_start_time.strftime('%Y-%m-%dT%H:%M:%S')
+    extract_end_time = args.extract_end_time.strftime('%Y-%m-%dT%H:%M:%S')
+    extract_date = args.extract_start_time.strftime('%Y-%m-%d')
 
-    return tenant, run_id, extract_date, transformation
+    return tenant, run_id, extract_date, extract_start_time, extract_end_time, transformation
 
 
 def pb_export_parser():
@@ -339,9 +334,9 @@ def get_prev_extract_data(tenant: str, extract_date: str, run_id: str, api_name:
 
 
 def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
-                extract_date: str, overwrite_gpc_config: dict = None):
+                extract_start_time: str, extract_end_time: str, overwrite_gpc_config: dict = None):
     logger.info(
-        f"GPC Request Start for {api_name} with extract_date {extract_date}")
+        f"GPC Request Start for {api_name} with extract_date {extract_start_time}_{extract_end_time}")
     auth_headers = authorize(tenant)
     gepc = gpc_end_points
     if overwrite_gpc_config is not None:
@@ -361,7 +356,7 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
     cursor_param = ""
 
     if interval:
-        params['interval'] = get_interval(extract_date)
+        params['interval'] = get_interval(extract_start_time, extract_end_time)
 
     while True:
         if paging:
@@ -397,9 +392,10 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
 
         if 'pageCount' in resp_json.keys():
             logger.info(
-                f"{tenant}-{api_name}-{extract_date}-{page_count} out of {resp_json['pageCount']}")
+                f"{tenant}-{api_name}-{extract_start_time}-{extract_end_time}-{page_count} out of {resp_json['pageCount']}")
         else:
-            logger.info(f"{tenant}-{api_name}-{extract_date}-{page_count}")
+            logger.info(
+                f"{tenant}-{api_name}-{extract_start_time}-{extract_end_time}-{page_count}")
 
         page_count = page_count + 1
         if cursor:
@@ -407,6 +403,7 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 cursor_param = resp_json['cursor']
             else:
                 break
-    process_raw_data(spark, tenant, api_name, run_id, resp_list, extract_date, page_count)
+    process_raw_data(spark, tenant, api_name, run_id,
+                     resp_list, extract_start_time, extract_end_time, page_count)
 
     return True

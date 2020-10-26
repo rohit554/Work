@@ -1,20 +1,24 @@
 from pyspark.sql import SparkSession
 
 
-def fact_wfm_actuals(spark: SparkSession, extract_date: str):
+def fact_wfm_actuals(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     orig_wfm_actuals = spark.sql(f"""
-        select distinct userId,startDate,actualsEndDate, endDate, actuals.actualActivityCategory,actuals.endOffsetSeconds, actuals.startOffsetSeconds,
+        select distinct userId,startDate,actualsEndDate, endDate, actuals.actualActivityCategory,
+        actuals.endOffsetSeconds, actuals.startOffsetSeconds,
                                     cast(startDate as date) startDatePart
     from (
     select userId, startDate, actualsEndDate, endDate, impact,
     explode(actuals) as actuals from (
-    select * from raw_wfm_adherence where extractDate = '{extract_date}')
+    select * from raw_wfm_adherence where extractDate = '{extract_date}'
+    and  startTime = '{extract_start_time}' and endTime = '{extract_end_time}')
     ) 
                             """)
     orig_wfm_actuals.registerTempTable("orig_wfm_actuals")
     wfm_actuals = spark.sql("""
-    select userId, startDate, actualsEndDate, endDate, actualActivityCategory, endOffsetSeconds, startOffsetSeconds, startDatePart from (
-            select *, row_number() over(partition by userId, startDate, actualsEndDate, startOffsetSeconds 
+    select userId, startDate, actualsEndDate, endDate, actualActivityCategory,
+    endOffsetSeconds, startOffsetSeconds, startDatePart from (
+            select *, row_number() over(partition by userId, startDate,
+            actualsEndDate, startOffsetSeconds
         order by startOffsetSeconds, endOffsetSeconds desc) as rnk from orig_wfm_actuals ) a
         where a.rnk = 1
                 """)

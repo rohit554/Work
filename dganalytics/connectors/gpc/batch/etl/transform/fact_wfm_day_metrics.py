@@ -1,19 +1,21 @@
 from pyspark.sql import SparkSession
 
 
-def fact_wfm_day_metrics(spark: SparkSession, extract_date: str):
+def fact_wfm_day_metrics(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     wfm_day_metrics = spark.sql(f"""
-                                    select distinct userId, startDate, actualsEndDate, endDate, impact, 
+                                    select distinct userId, startDate,
+                                    actualsEndDate, endDate, impact,
     dayMetrics.actualLengthSecs,dayMetrics.adherencePercentage, dayMetrics.adherenceScheduleSecs,
-    dayMetrics.conformanceActualSecs, dayMetrics.conformancePercentage, 
+    dayMetrics.conformanceActualSecs, dayMetrics.conformancePercentage,
     dayMetrics.conformanceScheduleSecs, dayMetrics.dayStartOffsetSecs,
     dayMetrics.exceptionCount, dayMetrics.exceptionDurationSecs, dayMetrics.impactSeconds,
-    dayMetrics.scheduleLengthSecs, 
+    dayMetrics.scheduleLengthSecs,
     cast(startDate as date) startDatePart from (
     select userId, startDate, actualsEndDate, endDate, impact,
     explode(dayMetrics) as dayMetrics from (
-    select * from raw_wfm_adherence where extractDate = '{extract_date}')
-    ) 
+    select * from raw_wfm_adherence where extractDate = '{extract_date}'
+    and  startTime = '{extract_start_time}' and endTime = '{extract_end_time}')
+    )
                                     """)
     wfm_day_metrics.registerTempTable("wfm_day_metrics")
     spark.sql("""

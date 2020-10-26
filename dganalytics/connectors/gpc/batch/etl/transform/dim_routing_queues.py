@@ -1,10 +1,10 @@
 from pyspark.sql import SparkSession
 
 
-def dim_routing_queues(spark: SparkSession, extract_date: str):
+def dim_routing_queues(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     routing_queues = spark.sql("""
                         insert overwrite dim_routing_queues
-                        select distinct 
+                        select distinct
                             id as queueId,
                             name as queueName,
                             acwSettings.wrapupPrompt as wrapupPrompt,
@@ -18,5 +18,5 @@ def dim_routing_queues(spark: SparkSession, extract_date: str):
                             cast(mediaSettings.email.serviceLevel.percentage * 100 as float) as emailSLPercentage,
                             cast(mediaSettings.message.serviceLevel.durationMs/1000 as float) as messageSLDuration,
                             cast(mediaSettings.message.serviceLevel.percentage * 100 as float) as messageSLPercentage
-                            from raw_routing_queues 
+                            from raw_routing_queues
                     """)

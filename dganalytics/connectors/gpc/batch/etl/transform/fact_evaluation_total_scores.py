@@ -1,11 +1,12 @@
 from pyspark.sql import SparkSession
 
 
-def fact_evaluation_total_scores(spark: SparkSession, extract_date: str):
+def fact_evaluation_total_scores(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     evaluation_total_scores = spark.sql(f"""
-                                    select distinct id as evaluationId, answers.totalCriticalScore, 		
+                                    select distinct id as evaluationId, answers.totalCriticalScore,
                                 answers.totalNonCriticalScore, answers.totalScore
                     from raw_evaluations  where extractDate = '{extract_date}'
+                    and  startTime = '{extract_start_time}' and endTime = '{extract_end_time}'
                                     """)
     evaluation_total_scores.registerTempTable("evaluation_total_scores")
     spark.sql("""

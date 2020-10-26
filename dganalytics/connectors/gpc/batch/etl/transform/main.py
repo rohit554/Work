@@ -26,14 +26,14 @@ transform_to_method = {
 
 
 if __name__ == "__main__":
-    tenant, run_id, extract_date, transformation = transform_parser()
+    tenant, run_id, extract_date, extract_start_time, extract_end_time, transformation = transform_parser()
     spark = get_spark_session(
         app_name=transformation, tenant=tenant, default_db=get_dbname(tenant))
 
     logger = gpc_utils_logger(tenant, transformation)
     try:
         logger.info(f"Applying transformation {transformation}")
-        transform_to_method[transformation](spark, extract_date)
+        transform_to_method[transformation](spark, extract_date, extract_start_time, extract_end_time)
     except Exception as e:
         logger.exception(e, stack_info=True, exc_info=True)
         raise

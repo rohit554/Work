@@ -329,6 +329,8 @@ def random_string(n=10):
 
 
 def delta_table_partition_ovrewrite(df, table, partition_cols: List[str]):
+    if df.count() == 0:
+        return
     unique_values = df.select(partition_cols).distinct().collect()
     lst = []
     for val in unique_values:
@@ -358,6 +360,11 @@ def delta_table_partition_ovrewrite(df, table, partition_cols: List[str]):
                       ).partitionBy(partition_cols
                                     ).option("replaceWhere",
                                              filter_condition).saveAsTable(f"{table}")
+
+
+def delta_table_ovrewrite(df, table):
+    if df.count() != 0:
+        df.coalesce(1).write.format("delta").mode("overwrite").saveAsTable(f"{table}")
 
 
 pb_access_token = None
