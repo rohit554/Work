@@ -21,11 +21,11 @@
              "args": [
                  "--tenant=hellofresh",
                 "--run_id=t2",
-                 "--extract_start_time=2020-09-26T00:00:00Z",
-                 "--extract_end_time=2020-09-26T00:30:00Z",
-                 "--api_name=conversation_details",
+                 "--extract_start_time=2020-10-19T00:00:00Z",
+                 "--extract_end_time=2020-10-20T00:00:00Z",
+                 "--api_name=users",
                  "--org_id=hellofresh",
-                 "--pipeline=users"
+                 "--pipeline=quizzes"
              ]
             /*
             "args": [

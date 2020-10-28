@@ -26,7 +26,7 @@ pipeline = [
             "campaign_id": "$_id",
             "quiz_id": "$questionnaire._id",
             "quiz_name": "$questionnaire.name",
-            "quiz_start_date": "$questionnaire_start_date",
+            "quiz_start_date": "$questionnaire.start_date",
             "quiz_created_by": "$questionnaire.created_by",
             "quiz_team_id": "$questionnaire.team_id",
             "org_id": "$org_id",
@@ -177,7 +177,13 @@ pipeline = [
                     0.0
                 ]
             },
-            "org_id": "$org_id"
+            "org_id": "$org_id",
+            "quiz_start_date": {
+                "$dateToString": {
+                    "format": "%Y-%m-%d",
+                    "date": "$quiz_start_date"
+                }
+            }
         }
     }
 ]
@@ -197,7 +203,8 @@ schema = StructType([StructField('answered_date', StringType(), True),
                          [StructField('oid', StringType(), True)]), True),
                      StructField('total_questions', DoubleType(), True),
                      StructField('user_id', StringType(), True),
-                     StructField('user_mongo_id', StructType([StructField('oid', StringType(), True)]), True)])
+                     StructField('user_mongo_id', StructType([StructField('oid', StringType(), True)]), True),
+                     StructField('quiz_start_date', StringType(), True)])
 
 
 def get_quizzes(spark):
@@ -215,7 +222,8 @@ def get_quizzes(spark):
                             cast(total_questions as int) totalQuestions,
                             user_id userId,
                             user_mongo_id.oid userMongoId,
-                            'hellofresh' orgId
+                            'hellofresh' orgId,
+                            cast(quiz_start_date as date) quizStartDate
                     from quizzes
                 """)
     '''

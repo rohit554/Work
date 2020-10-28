@@ -298,16 +298,14 @@ def pb_export_parser():
     parser.add_argument('--run_id', required=True)
     parser.add_argument('--table_name', required=True)
     parser.add_argument('--output_file_name', required=True)
-    parser.add_argument('--skip_cols', required=False, type=List)
 
     args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
     run_id = args.run_id
     table_name = args.table_name
     output_file_name = args.output_file_name
-    skip_cols = args.skip_cols
 
-    return tenant, run_id, table_name, output_file_name, skip_cols
+    return tenant, run_id, table_name, output_file_name
 
 
 def check_prev_gpc_extract(spark: SparkSession, api_name: str, extract_date: str, run_id: str):

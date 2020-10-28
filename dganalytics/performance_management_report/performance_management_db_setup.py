@@ -125,7 +125,8 @@ spark.sql(f"""
                 totalQuestions int,
                 userId string,
                 userMongoId string,
-                orgId string
+                orgId string,
+                quizStartDate date
 
             )
             using delta
