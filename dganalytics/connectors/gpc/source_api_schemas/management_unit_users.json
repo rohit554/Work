@@ -1,0 +1,23 @@
+{
+    "fields": [
+        {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "managementId",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "selfUri",
+            "nullable": true,
+            "type": "string"
+        }
+    ],
+    "type": "struct"
+}

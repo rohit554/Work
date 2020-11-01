@@ -107,6 +107,36 @@
                         }
                     },
                     {
+                        "name": "dimWrapupCodes",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/reporting/gpc_pb_standard_export.py",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--table_name",
+                                "dim_wrapup_codes",
+                                "--output_file_name",
+                                "gdimWrapupCodes"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
                         "name": "dimEvaluationFormAnswerOptions",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],

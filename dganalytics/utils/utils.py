@@ -63,7 +63,7 @@ def export_powerbi_csv(tenant, df, file_name):
         f"{tenant_path}", 'data', 'pbdatasets', f"{file_name}")
     df.write.mode("overwrite").option("header", True).option("timestampFormat", "yyyy-MM-dd HH:mm:ss")\
         .option("escape", '"').option("quote", '"').option("quoteMode",
-                                                           "MINIMAL").option("dateFormat", "yyyy-MM-dd").csv(op_file)
+                                                           "NON_NUMERIC").option("dateFormat", "yyyy-MM-dd").csv(op_file)
 
 
 def get_env():

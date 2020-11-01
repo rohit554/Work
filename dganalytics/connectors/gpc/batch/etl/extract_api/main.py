@@ -5,7 +5,9 @@ from dganalytics.connectors.gpc.batch.etl.extract_api.evaluation_forms import ex
 from dganalytics.connectors.gpc.batch.etl.extract_api.evaluations import exec_evaluations_api
 from dganalytics.connectors.gpc.batch.etl.extract_api.users_details_job import exec_users_details_job_api
 from dganalytics.connectors.gpc.batch.etl.extract_api.wfm_adherence import exec_wfm_adherence_api
-
+from dganalytics.connectors.gpc.batch.etl.extract_api.business_units import exec_business_units
+from dganalytics.connectors.gpc.batch.etl.extract_api.management_units import exec_management_units
+from dganalytics.connectors.gpc.batch.etl.extract_api.management_unit_users import exec_management_unit_users
 
 if __name__ == "__main__":
     tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()
@@ -31,8 +33,9 @@ if __name__ == "__main__":
         else:
         '''
         if api_name in ["users", "routing_queues", "groups", "users_details", "wrapup_codes",
-                        "conversation_details"]:
-            df = gpc_request(spark, tenant, api_name, run_id, extract_start_time, extract_end_time)
+                        "conversation_details", "divisions"]:
+            df = gpc_request(spark, tenant, api_name, run_id,
+                             extract_start_time, extract_end_time)
         elif api_name == "conversation_details_job":
             logger.info("Conversation details job kick off")
             exec_conversation_details_job(
@@ -42,15 +45,26 @@ if __name__ == "__main__":
             exec_evaluation_forms_api(
                 spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "evaluations":
-            exec_evaluations_api(spark, tenant, run_id, extract_start_time, extract_end_time)
+            exec_evaluations_api(spark, tenant, run_id,
+                                 extract_start_time, extract_end_time)
         elif api_name == "users_details_job":
             exec_users_details_job_api(
                 spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "wfm_adherence":
             exec_wfm_adherence_api(
                 spark, tenant, run_id, extract_start_time, extract_end_time)
+        elif api_name == "business_units":
+            exec_business_units(
+                spark, tenant, run_id, extract_start_time, extract_end_time)
+        elif api_name == "management_units":
+            exec_management_units(
+                spark, tenant, run_id, extract_start_time, extract_end_time)
+        elif api_name == "management_unit_users":
+            exec_management_unit_users(
+                spark, tenant, run_id, extract_start_time, extract_end_time)
         else:
             logger.exception("invalid api name")
+            raise Exception
 
     except Exception as e:
         logger.exception(

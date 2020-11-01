@@ -75,28 +75,35 @@ def get_dbname(tenant: str):
     return db_name
 
 
+access_token = None
+
+
 def authorize(tenant: str):
     global secrets
-    logger.info("Authorizing GPC")
+    global access_token
 
-    client_id = get_secret(f'{tenant}gpcOAuthClientId')
-    client_secret = get_secret(f'{tenant}gpcOAuthClientSecret')
-    auth_key = base64.b64encode(
-        bytes(client_id + ":" + client_secret, "ISO-8859-1")).decode("ascii")
+    if access_token is None:
+        logger.info("Authorizing GPC")
+        client_id = get_secret(f'{tenant}gpcOAuthClientId')
+        client_secret = get_secret(f'{tenant}gpcOAuthClientSecret')
+        auth_key = base64.b64encode(
+            bytes(client_id + ":" + client_secret, "ISO-8859-1")).decode("ascii")
 
-    headers = {"Content-Type": "application/x-www-form-urlencoded",
-               "Authorization": f"Basic {auth_key}"}
+        headers = {"Content-Type": "application/x-www-form-urlencoded",
+                   "Authorization": f"Basic {auth_key}"}
 
-    auth_url = get_api_url(tenant).replace("https://api.", "https://login.")
-    auth_request = requests.post(
-        f"{auth_url}/oauth/token?grant_type=client_credentials", headers=headers)
+        auth_url = get_api_url(tenant).replace(
+            "https://api.", "https://login.")
+        auth_request = requests.post(
+            f"{auth_url}/oauth/token?grant_type=client_credentials", headers=headers)
 
-    access_token = ""
-    if auth_request.status_code == 200:
-        access_token = auth_request.json()['access_token']
-    else:
-        logger.exception(
-            "Autohrization failed while requesting Access Token for tenant - {}".format(tenant))
+        access_token = ""
+        if auth_request.status_code == 200:
+            access_token = auth_request.json()['access_token']
+        else:
+            logger.exception(
+                "Autohrization failed while requesting Access Token for tenant - {}".format(tenant))
+            raise Exception
     api_headers = {
         "Authorization": "Bearer {}".format(access_token),
         "Content-Type": "application/json"
@@ -124,6 +131,7 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
         if retry > 5:
             message = f"GPC API Extraction failed - {tenant} - {api_name} - {run_id}"
             logger.exception(message + str(resp.text))
+            raise Exception
         return "SLEEP"
     else:
         if "message" in resp.json().keys() and \
@@ -134,6 +142,7 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
 
         message = f"GPC API Extraction failed - {tenant} - {api_name} - {run_id}"
         logger.exception(message + str(resp.text))
+        raise Exception
 
 
 def write_api_resp(resp: list, api_name: str, run_id: str, tenant: str, extract_date: str):
@@ -166,7 +175,8 @@ def ingest_stats(spark: SparkSession, tenant: str, api_name: str, url: str, page
 def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name: str,
                      extract_start_time: str, extract_end_time: str):
     n_partitions = get_spark_partitions_num(api_name, len(resp_list))
-    logger.info(f"updating raw table for {api_name} {extract_start_time}_{extract_end_time}")
+    logger.info(
+        f"updating raw table for {api_name} {extract_start_time}_{extract_end_time}")
     record_count = len(resp_list)
     tenant_path, db_path, log_path = get_path_vars(tenant)
 
@@ -181,7 +191,8 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
     df = df.withColumn("endTime", to_timestamp(lit(extract_end_time)))
     print("lit start " + lit(extract_start_time))
     print("lit end " + lit(extract_end_time))
-    df = df.withColumn("insertTime", to_timestamp(lit(datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))))
+    df = df.withColumn("insertTime", to_timestamp(
+        lit(datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))))
     table_name = get_raw_tbl_name(api_name)
     logger.info(f"updating raw table for {api_name} {db_name}.{table_name}")
 
@@ -191,7 +202,8 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
     cols = ",".join(cols)
 
     if not get_tbl_overwrite(api_name):
-        delta_table_partition_ovrewrite(df, f"{db_name}.{table_name}", ['extractDate', 'startTime', 'endTime'])
+        delta_table_partition_ovrewrite(df, f"{db_name}.{table_name}", [
+                                        'extractDate', 'startTime', 'endTime'])
         '''
         df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
             'extractDate').option("replaceWhere",
@@ -332,7 +344,8 @@ def get_prev_extract_data(tenant: str, extract_date: str, run_id: str, api_name:
 
 
 def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
-                extract_start_time: str, extract_end_time: str, overwrite_gpc_config: dict = None):
+                extract_start_time: str, extract_end_time: str, overwrite_gpc_config: dict = None,
+                skip_raw_load: bool = False):
     logger.info(
         f"GPC Request Start for {api_name} with extract_date {extract_start_time}_{extract_end_time}")
     auth_headers = authorize(tenant)
@@ -387,6 +400,8 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
         resp_list = resp_list + [json.dumps(entity)
                                  for entity in resp_json[entity]]
         # resp_list = resp_list + resp_json[entity]
+        if not paging and not cursor:
+            break
 
         if 'pageCount' in resp_json.keys():
             logger.info(
@@ -401,7 +416,11 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 cursor_param = resp_json['cursor']
             else:
                 break
-    process_raw_data(spark, tenant, api_name, run_id,
-                     resp_list, extract_start_time, extract_end_time, page_count)
+        if 'pageCount' in resp_json.keys() and resp_json['pageCount'] <= page_count:
+            break
 
-    return True
+    if not skip_raw_load:
+        process_raw_data(spark, tenant, api_name, run_id,
+                         resp_list, extract_start_time, extract_end_time, page_count)
+
+    return resp_list

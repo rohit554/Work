@@ -23,7 +23,7 @@
                 "--run_id=t2",
                  "--extract_start_time=2020-10-19T00:00:00Z",
                  "--extract_end_time=2020-10-20T00:00:00Z",
-                 "--api_name=users",
+                 "--api_name=management_unit_users",
                  "--org_id=hellofresh",
                  "--pipeline=quizzes"
              ]

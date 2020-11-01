@@ -1,0 +1,23 @@
+{
+    "fields": [
+        {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "name",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "homeDivision",
+            "nullable": true,
+            "type": "boolean"
+        }
+    ],
+    "type": "struct"
+}

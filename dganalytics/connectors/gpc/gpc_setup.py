@@ -431,6 +431,10 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     create_raw_table("wrapup_codes", spark, db_name)
     create_raw_table("evaluations", spark, db_name)
     create_raw_table("evaluation_forms", spark, db_name)
+    create_raw_table("divisions", spark, db_name)
+    create_raw_table("business_units", spark, db_name)
+    create_raw_table("management_units", spark, db_name)
+    create_raw_table("management_unit_users", spark, db_name)
 
     return True
 

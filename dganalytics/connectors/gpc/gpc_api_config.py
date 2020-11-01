@@ -128,8 +128,16 @@ gpc_end_points = {
     "evaluations": {
         "endpoint": "/api/v2/quality/evaluations/query",
         "extract_type": "custom",
+        "request_type": "GET",
+        "paging": True,
+        "cursor": False,
+        "interval": False,
+        "params": {
+            "pageSize": 100
+        },
         "spark_partitions": {"max_records_per_partition": 10000},
         "table_name": "evaluations",
+        "entity_name": "entities",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -138,6 +146,54 @@ gpc_end_points = {
         "extract_type": "custom",
         "spark_partitions": {"max_records_per_partition": 100000},
         "table_name": "evaluation_forms",
+        "tbl_overwrite": True,
+        "raw_primary_key": ["id"]
+    },
+    "divisions": {
+        "endpoint": "/api/v2/authorization/divisions",
+        "request_type": "GET",
+        "paging": True,
+        "cursor": False,
+        "interval": False,
+        "params": {
+            "pageSize": 1000
+        },
+        "entity_name": "entities",
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "tbl_overwrite": True,
+        "raw_primary_key": ["id"]
+    },
+    "business_units": {
+        "endpoint": "/api/v2/workforcemanagement/businessunits/{}",
+        "extract_type": "custom",
+        "spark_partitions": {"max_records_per_partition": 100000},
+        "tbl_overwrite": True,
+        "raw_primary_key": ["id"]
+    },
+    "management_units": {
+        "endpoint": "/api/v2/workforcemanagement/businessunits/{b}/managementunits",
+        "request_type": "GET",
+        "paging": True,
+        "cursor": False,
+        "interval": False,
+        "params": {
+            "pageSize": 100
+        },
+        "entity_name": "entities",
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "tbl_overwrite": True,
+        "raw_primary_key": ["id"]
+    },
+    "management_unit_users": {
+        "endpoint": "/api/v2/workforcemanagement/managementunits/{b}/users",
+        "request_type": "GET",
+        "paging": False,
+        "cursor": False,
+        "interval": False,
+        "params": {
+        },
+        "entity_name": "entities",
+        "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": True,
         "raw_primary_key": ["id"]
     }

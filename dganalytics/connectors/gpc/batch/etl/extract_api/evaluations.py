@@ -3,7 +3,7 @@ import json
 from pyspark.sql import SparkSession
 from dganalytics.connectors.gpc.gpc_utils import authorize, get_api_url, process_raw_data
 from dganalytics.connectors.gpc.gpc_utils import get_interval
-from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger
+from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger, gpc_request
 
 
 def get_evaluators(spark: SparkSession) -> list:
@@ -16,29 +16,43 @@ def get_evaluators(spark: SparkSession) -> list:
 def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_start_time: str, extract_end_time: str):
 
     logger = gpc_utils_logger(tenant, "gpc_evaluations")
-
+    extract_end_time = "2020-10-01T08:00:00"
+    extract_start_time = "2020-10-01T00:00:00"
     evaluators = get_evaluators(spark)
     api_headers = authorize(tenant)
     evaluation_details_list = []
-    start_time = get_interval(extract_start_time, extract_end_time).split("/")[0]
+    start_time = get_interval(
+        extract_start_time, extract_end_time).split("/")[0]
     end_time = get_interval(extract_start_time, extract_end_time).split("/")[1]
+    e = evaluators[0]
     for e in evaluators:
         body = {
             "startTime": start_time,
             "endTime": end_time,
             "evaluatorUserId": e,
-            "expandAnswerTotalScores": True
+            "expandAnswerTotalScores": True,
+            "pageSize": 100
         }
+        api_config = {
+            "evaluations": {
+                "params": body
+            }
+        }
+        '''
         resp = rq.get(f"{get_api_url(tenant)}/api/v2/quality/evaluations/query",
                       headers=api_headers, params=body)
         if resp.status_code != 200:
             logger.exception("Detailed Evaluations API Failed" + resp.text)
 
         evaluation_details_list.append(resp.json()['entities'])
+        '''
+        evaluation_details_list.append(gpc_request(spark, tenant, 'evaluations', run_id,
+                                                   extract_start_time, extract_end_time,
+                                                   api_config, skip_raw_load=True))
 
     evaluation_details_list = [
         item for sublist in evaluation_details_list for item in sublist]
-    evaluation_details_list = [json.dumps(ed)
-                               for ed in evaluation_details_list]
+    #evaluation_details_list = [json.dumps(ed)
+    #                           for ed in evaluation_details_list]
     process_raw_data(spark, tenant, 'evaluations', run_id,
                      evaluation_details_list, extract_start_time, extract_end_time, len(evaluators))
