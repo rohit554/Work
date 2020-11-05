@@ -15,8 +15,8 @@ import json
 def export_dataframe_to_csv(output_db_path,output_table_name,tenant,free_text_fields=None):
 
     output_filepath = f'{output_db_path}/{output_table_name}'
-    logging.warn("writing to csv File")
-    logging.warn(f"outfilepath: {output_filepath}")
+    logging.warning("writing to csv File")
+    logging.warning(f"outfilepath: {output_filepath}")
     parent_db_path = output_db_path.split(tenant)[0]
     pbdata_path = f'{parent_db_path}{tenant}/data/pbdatasets/{output_table_name}'
 
@@ -31,7 +31,7 @@ def export_dataframe_to_csv(output_db_path,output_table_name,tenant,free_text_fi
         act_output_file = f'/{split_output_file[0]}{split_output_file[1]}'
     else:
         act_output_file = output_filepath
-    logging.warn(f"pbdatasets: {pbdata_path}")
+    logging.warning(f"pbdatasets: {pbdata_path}")
     if not os.path.exists(act_output_file):
         pass
     else:
@@ -134,7 +134,7 @@ def extract_mongo_colxn(
 ):
 
     output_filepath = f'{output_db_path}/{output_table_name}'
-    logging.warn(f"outfilepath: {output_table_name}")
+    logging.warning(f"outfilepath: {output_table_name}")
     spark = get_spark_session(
         "MongoETLApp",
         tenant,
@@ -154,7 +154,7 @@ def extract_mongo_colxn(
                 deltaTable = DeltaTable.forPath(spark, output_filepath)
                 deltaTable.vacuum()
             except Exception as e:
-                logging.warn(
+                logging.warning(
                     f"Skipping Vaccum Temp Table due to Exception: {e}")
             split_output_file = output_filepath.split(":")
             if len(split_output_file)>1:
@@ -192,7 +192,7 @@ def extract_mongo_colxn(
                         logging.error(
                             f"Delta Table Merge failed in Merge with error {e}")
                         raise
-                    logging.warn(
+                    logging.warning(
                         f"Delta Table Merge failed in Merge with error {e} /n Empty Data for this rundate")
                 
         if 'OVERWRITE' in output_type:
@@ -206,12 +206,12 @@ def extract_mongo_colxn(
                     logging.error(
                         f"Spark Dataframe write failed with error {e}")
                     raise
-                logging.warn(f"Delta Table Write failed with error {e}")
+                logging.warning(f"Delta Table Write failed with error {e}")
     except Exception as e:
         if not daywise_collection_data.toPandas().empty:
             logging.error(f"Spark Dataframe read failed with error {e}")
             raise
-        logging.warn(f"Spark Dataframe load Exception : {e}")
+        logging.warning(f"Spark Dataframe load Exception : {e}")
 
 def rundate_range_generator(min, run):
     new = min
