@@ -694,6 +694,51 @@
                             "referenceName": "AzureDatabricks",
                             "type": "LinkedServiceReference"
                         }
+                    },
+                    {
+                        "name": "RefreshPowerBiReports",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "JSR_Process_KPI_Data",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "JSR_Trouble_Ticket_Data",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "JSR_Top_Reason_Data",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "7.00:00:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/ssis_replacement/main.py",
+                            "parameters": [
+                                "--tenant",
+                                "[parameters('tenant')]",
+                                "--step_name",
+                                "refreshreport"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
                     }
                 ],
                 "concurrency": 1,
