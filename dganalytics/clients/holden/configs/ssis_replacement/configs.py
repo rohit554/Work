@@ -11,10 +11,31 @@ from copy import deepcopy
 import logging
 
 database_name = {
+    'local': 'holden-prod',
     'dev': 'holden-prod',
     'uat': 'holden-prod',
     'prd': 'holden-prod',
 }
+
+report_details = {
+    'local': {
+        "workspace_id": "",
+        "dataset_id": ""
+    },
+    'dev': {
+        "workspace_id": "",
+        "dataset_id": ""
+    },
+    'uat': {
+        "workspace_id": "",
+        "dataset_id": ""
+    },
+    'prd': {
+        "workspace_id": "95372cb6-9d86-4c94-8f5f-1842530f130f",
+        "dataset_id": "284802ac-713e-4f0e-8923-4b0224a917d3"
+    },
+}
+
 config = {
     # "run_window_type": "FIXED",
     "run_window_type": None,
@@ -386,3 +407,4 @@ config = {
     },
 }
 config['database_name']=database_name
+config['report_details'] = report_details

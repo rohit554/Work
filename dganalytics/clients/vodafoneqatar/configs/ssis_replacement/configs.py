@@ -8,10 +8,31 @@ from copy import deepcopy
 import logging
 
 database_name = {
+    'local': 'vodafone-qatar-prod',
     'dev': 'vodafone-qatar-prod',
     'uat': 'vodafone-qatar-prod',
     'prd': 'vodafone-qatar-prod',
 }
+
+report_details = {
+    'local': {
+        "workspace_id": "",
+        "dataset_id": ""
+    },
+    'dev': {
+        "workspace_id": "",
+        "dataset_id": ""
+    },
+    'uat': {
+        "workspace_id": "",
+        "dataset_id": ""
+    },
+    'prd': {
+        "workspace_id": "315bc144-6e09-4b18-92db-7481a93fce81",
+        "dataset_id": "aa43a5f0-ff3c-4a09-b37d-e69103c83abc"
+    },
+}
+
 config = {
     "run_window_type": "DYNAMIC",
     "find_min_rundate": {
@@ -276,3 +297,4 @@ config = {
     },
 }
 config['database_name']=database_name
+config['report_details'] = report_details

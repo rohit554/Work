@@ -18,7 +18,7 @@ import argparse
 import os
 from copy import deepcopy
 import logging
-from dganalytics.utils.utils import get_path_vars, get_secret, get_env
+from dganalytics.utils.utils import get_path_vars, get_secret, get_env, exec_powerbi_refresh
 
 
 def updatePipeline(
@@ -34,7 +34,7 @@ def updatePipeline(
     if load_timestamp_field != '':
         timestamp_field = load_timestamp_field
     else:
-        logging.warn(
+        logging.warning(
             f"Assigning default field name for load_timestamp_field in config : {configname}")
         timestamp_field = 'insertion_timestamp'
 
@@ -123,7 +123,7 @@ def extract_from_mongo( tenant, stage_name, step_name, rundate,):
 
     run_window_type = config[f'{tenant}']["run_window_type"]
 
-    if step_name != "default":
+    if step_name not in {"default","refreshreport"}:
 
         config_collxn = config[f'{tenant}'][f'{stage_name}']['collection']
         config_out_collxn = config[f'{tenant}'][f'{stage_name}']['output_collxn']
@@ -138,6 +138,8 @@ def extract_from_mongo( tenant, stage_name, step_name, rundate,):
         config_out_free_text_fields = config[f'{tenant}'][f'{stage_name}']['free_text_fields']
 
     config_database_name = config[f'{tenant}']['database_name'][env]
+    config_report_workspace = config[f'{tenant}']['report_details'][env]['workspace_id']
+    config_report_dataset = config[f'{tenant}']['report_details'][env]['dataset_id']
 
 
     if step_name == "FetchDelta":
@@ -161,7 +163,7 @@ def extract_from_mongo( tenant, stage_name, step_name, rundate,):
             min_rundate = ( datetime.strptime(rundate, '%Y-%m-%d') ).date()
             act_rundate =( datetime.strptime(rundate, '%Y-%m-%d')).date()
         for curr_rundate in rundate_range_generator(min_rundate, act_rundate ):
-            logging.warn(f"current rundate: {curr_rundate}")
+            logging.warning(f"current rundate: {curr_rundate}")
 
             pipeline = updatePipeline(
                 f'{stage_name}',
@@ -235,6 +237,11 @@ def extract_from_mongo( tenant, stage_name, step_name, rundate,):
             },
             update={"$set": {"min_rundate": mindate}},
         )
+    if step_name == "refreshreport":
+        if env == "prd":
+            exec_powerbi_refresh(config_report_workspace, config_report_dataset)
+        else:
+            print("Executing refresh report here")
 
 
 if __name__ == "__main__":
@@ -273,7 +280,7 @@ if __name__ == "__main__":
     rundate = args.rundate
     step_name = args.step_name
 
-    logging.warn(
+    logging.warning(
         f"tenant: {tenant},stage: {stage_name},step: {step_name},rundate: {rundate}")
 
     extract_from_mongo( tenant, stage_name, step_name, rundate)
