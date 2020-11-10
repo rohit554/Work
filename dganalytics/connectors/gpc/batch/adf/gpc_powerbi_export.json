@@ -687,6 +687,43 @@
                         }
                     },
                     {
+                        "name": "factWfmExceptions",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "factWfmDayMetrics",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/reporting/gpc_pb_standard_export.py",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_name",
+                                "fact_wfm_exceptions",
+                                "--output_file_name",
+                                "gFactWfmActuals"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
                         "name": "factWfmDayMetrics",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],

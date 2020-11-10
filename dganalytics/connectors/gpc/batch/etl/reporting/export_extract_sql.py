@@ -171,8 +171,22 @@ fact_wfm_day_metrics = """
             from fact_wfm_day_metrics
             """
 
+fact_wfm_exceptions = """
+            select
+                userId,
+                managementUnitId,
+                date_format(startDate, 'yyyyMMdd') startDate,
+                int(date_format(startDate, 'HHmmss')) startTime,
+                date_format(endDate, 'yyyyMMdd') endDate,
+                int(date_format(endDate, 'HHmmss')) endTime,
+                actualActivityCategory, impact, routingStatus, scheduledActivityCategory,
+                scheduledActivityCodeId, systemPresence, secondaryPresenceId
+            from fact_wfm_exceptions
+            """
+
 dim_presence_definitions = """
-                select id, name, deactivated, primary, get_json_object(languageLabels, '$.en') as label  from raw_presence_definitions
+                select id, name, deactivated, primary, coalesce(get_json_object(languageLabels, '$.en'), 
+                    get_json_object(languageLabels, '$.en_US')) as label  from raw_presence_definitions
                 """
 
 dim_bu_mu_mapping = """

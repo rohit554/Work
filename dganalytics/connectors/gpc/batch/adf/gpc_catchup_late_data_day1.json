@@ -24,9 +24,7 @@
         "factoryId": "[concat('Microsoft.DataFactory/factories/dg', parameters('env'), 'adf')]",
         "factoryname": "[concat('dg', parameters('env'), 'adf')]",
         "AzureKeyVault_baseUrl": "[concat('https://dg', parameters('env') ,'secrets.vault.azure.net/')]",
-        "gpcMigrationTriggerStart": "[dateTimeAdd(parameters('baseTime'), '-P190D', 'yyyy-MM-ddT00:00:00Z')]",
-        "gpcLateDataTriggerStartDay1": "[dateTimeAdd(parameters('baseTime'), 'P1D', 'yyyy-MM-ddT12:00:00Z')]",
-        "gpcLateDataTriggerStartDay2": "[dateTimeAdd(parameters('baseTime'), 'P1D', 'yyyy-MM-ddT12:15:00Z')]"
+        "gpcLateDataTriggerStart": "[dateTimeAdd(parameters('baseTime'), 'P1D', 'yyyy-MM-ddT12:00:00Z')]"
     },
     "resources": [
         {
@@ -698,72 +696,8 @@
                 "typeProperties": {
                     "frequency": "Hour",
                     "interval": 24,
-                    "startTime": "[variables('gpcMigrationTriggerStart')]",
+                    "startTime": "[variables('gpcLateDataTriggerStart')]",
                     "endTime": "[parameters('baseTime')]",
-                    "maxConcurrency": 1
-                }
-            },
-            "dependsOn": [
-                "[concat(variables('factoryId'), '/pipelines/', parameters('tenant'), '_gpc_data_migration')]"
-            ]
-        },
-        {
-            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_gpc_latedata_trigger_day1')]",
-            "type": "Microsoft.DataFactory/factories/triggers",
-            "apiVersion": "2018-06-01",
-            "properties": {
-                "annotations": [],
-                "runtimeState": "Stopped",
-                "pipelines": [
-                    {
-                        "pipelineReference": {
-                            "referenceName": "[concat(parameters('tenant'), '_gpc_data_migration')]",
-                            "type": "PipelineReference"
-                        },
-                        "parameters": {
-                            "tenant": "[parameters('tenant')]",
-                            "extract_start_time": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddT00:00:00Z')}",
-                            "extract_end_time": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddT00:00:00Z')}"
-                        }
-                    }
-                ],
-                "type": "TumblingWindowTrigger",
-                "typeProperties": {
-                    "frequency": "Hour",
-                    "interval": 24,
-                    "startTime": "[variables('gpcLateDataTriggerStartDay1')]",
-                    "maxConcurrency": 1
-                }
-            },
-            "dependsOn": [
-                "[concat(variables('factoryId'), '/pipelines/', parameters('tenant'), '_gpc_data_migration')]"
-            ]
-        },
-        {
-            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_gpc_latedata_trigger_day2')]",
-            "type": "Microsoft.DataFactory/factories/triggers",
-            "apiVersion": "2018-06-01",
-            "properties": {
-                "annotations": [],
-                "runtimeState": "Stopped",
-                "pipelines": [
-                    {
-                        "pipelineReference": {
-                            "referenceName": "[concat(parameters('tenant'), '_gpc_data_migration')]",
-                            "type": "PipelineReference"
-                        },
-                        "parameters": {
-                            "tenant": "[parameters('tenant')]",
-                            "extract_start_time": "@{formatDateTime(addDays(trigger().outputs.windowStartTime, -1),'yyyy-MM-ddT00:00:00Z')}",
-                            "extract_end_time": "@{formatDateTime(addDays(trigger().outputs.windowEndTime, -1),'yyyy-MM-ddT00:00:00Z')}"
-                        }
-                    }
-                ],
-                "type": "TumblingWindowTrigger",
-                "typeProperties": {
-                    "frequency": "Hour",
-                    "interval": 24,
-                    "startTime": "[variables('gpcLateDataTriggerStartDay2')]",
                     "maxConcurrency": 1
                 }
             },
