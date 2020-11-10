@@ -83,7 +83,9 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 tTalkComplete float,
                 tVoicemail float,
                 tWait float,
-                emitDate date
+                emitDate date,
+                sourceRecordIdentifier long,
+                soucePartition string
             )
             using delta
             PARTITIONED BY (emitDate)
@@ -106,7 +108,9 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 agentId string,
                 wrapUpCode string,
                 wrapUpNote string,
-                conversationStartDate date
+                conversationStartDate date,
+                sourceRecordIdentifier long,
+                soucePartition string
             )
             using delta
             PARTITIONED BY (conversationStartDate)
@@ -126,7 +130,9 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     department string,
                     managerId string,
                     managerFullName string,
-                    state string
+                    state string,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
             LOCATION '{db_path}/{db_name}/dim_users'"""
@@ -137,7 +143,9 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 create table if not exists {db_name}.dim_wrapup_codes
                 (
                     wrapupId string,
-                    wrapupCode string
+                    wrapupCode string,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
             LOCATION '{db_path}/{db_name}/dim_wrapup_codes'"""
@@ -151,7 +159,9 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     groupId string, 
                     groupName string, 
                     groupDescription string,
-                    groupState string
+                    groupState string,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
             LOCATION '{db_path}/{db_name}/dim_user_groups'"""
@@ -173,7 +183,9 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     emailSLDuration float,
                     emailSLPercentage float,
                     messageSLDuration float,
-                    messageSLPercentage float
+                    messageSLPercentage float,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
             LOCATION '{db_path}/{db_name}/dim_routing_queues'"""
@@ -187,7 +199,9 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     startTime timestamp, 
                     endTime timestamp, 
                     routingStatus string,
-                    startDate date
+                    startDate date,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
                     PARTITIONED BY (startDate)
@@ -202,7 +216,9 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     startTime timestamp, 
                     endTime timestamp, 
                     systemPresence string,
-                    startDate date
+                    startDate date,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
                     PARTITIONED BY (startDate)
@@ -230,9 +246,15 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     evaluationFormName string,
                     evaluationFormPublished boolean,
                     neverRelease boolean,
-                    resourceType string
+                    resourceType string,
+                    queueId string,
+                    wrapUpCode string,
+                    conversationDatePart date,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
+                    PARTITIONED BY (conversationDatePart)
             LOCATION '{db_path}/{db_name}/dim_evaluations'"""
     )
 
@@ -243,9 +265,13 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     evaluationId string,
                     totalCriticalScore float,
                     totalNonCriticalScore float,
-                    totalScore float
+                    totalScore float,
+                    conversationDatePart date,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
+                    PARTITIONED BY (conversationDatePart)
             LOCATION '{db_path}/{db_name}/fact_evaluation_total_scores'"""
     )
 
@@ -267,9 +293,13 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     totalNonCriticalScore float,
                     totalNonCriticalScoreUnweighted float,
                     totalScore float,
-                    totalScoreUnweighted float
+                    totalScoreUnweighted float,
+                    conversationDatePart date,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
+                    PARTITIONED BY (conversationDatePart)
             LOCATION '{db_path}/{db_name}/fact_evaluation_question_group_scores'"""
     )
 
@@ -284,9 +314,13 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     comments string,
                     failedKillQuestion boolean,
                     markedNA boolean,
-                    score float
+                    score float,
+                    conversationDatePart date,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
+                    PARTITIONED BY (conversationDatePart)
             LOCATION '{db_path}/{db_name}/fact_evaluation_question_scores'"""
     )
 
@@ -295,22 +329,21 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 create table if not exists {db_name}.fact_wfm_day_metrics
                 (
                     userId string,
+                    managementUnitId string,
                     startDate timestamp,
-                    actualsEndDate timestamp,
+                    startDatePart date,
                     endDate timestamp,
-                    impact string,
                     actualLengthSecs int,
-                    adherencePercentage float,
                     adherenceScheduleSecs int,
                     conformanceActualSecs int,
-                    conformancePercentage float,
                     conformanceScheduleSecs int,
                     dayStartOffsetSecs int,
                     exceptionCount int,
                     exceptionDurationSecs int,
                     impactSeconds int,
                     scheduleLengthSecs int,
-                    startDatePart date
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
                     PARTITIONED BY (startDatePart)
@@ -321,13 +354,13 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 create table if not exists {db_name}.fact_wfm_actuals
                 (
                     userId string,
+                    managementUnitId string,
                     startDate timestamp,
-                    actualsEndDate timestamp,
+                    startDatePart date,
                     endDate timestamp,
                     actualActivityCategory string,
-                    endOffsetSeconds int,
-                    startOffsetSeconds int,
-                    startDatePart date
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
                     PARTITIONED BY (startDatePart)
@@ -336,11 +369,37 @@ def create_dim_tables(spark: SparkSession, db_name: str):
 
     spark.sql(
         f"""
+                create table if not exists {db_name}.fact_wfm_exceptions
+                (
+                    userId string,
+                    managementUnitId string,
+                    startDate timestamp,
+                    startDatePart date,
+                    endDate timestamp,
+                    actualActivityCategory string,
+                    impact string,
+                    routingStatus string,
+                    scheduledActivityCategory string,
+                    scheduledActivityCodeId string,
+                    systemPresence string,
+                    secondaryPresenceId string,
+                    sourceRecordIdentifier long,
+                    soucePartition string
+                )
+                    using delta
+                    PARTITIONED BY (startDatePart)
+            LOCATION '{db_path}/{db_name}/fact_wfm_exceptions'"""
+    )
+
+    spark.sql(
+        f"""
                 create table if not exists {db_name}.dim_evaluation_forms
                 (
                     evaluationFormId string,
                     evaluationFormName string,
-                    published boolean
+                    published boolean,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
             LOCATION '{db_path}/{db_name}/dim_evaluation_forms'"""
@@ -357,7 +416,9 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     defaultAnswersToNA boolean,
                     manualWeight boolean,
                     naEnabled boolean,
-                    weight float
+                    weight float,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
             LOCATION '{db_path}/{db_name}/dim_evaluation_form_question_groups'"""
@@ -376,7 +437,9 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     isCritical boolean,
                     isKill boolean,
                     naEnabled boolean,
-                    questionType string
+                    questionType string,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
             LOCATION '{db_path}/{db_name}/dim_evaluation_form_questions'"""
@@ -391,7 +454,9 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     questionId string,
                     answerOptionId string,
                     answerOptionText string,
-                    answerOptionValue string
+                    answerOptionValue string,
+                    sourceRecordIdentifier long,
+                    soucePartition string
                 )
                     using delta
             LOCATION '{db_path}/{db_name}/dim_evaluation_form_answer_options'"""
@@ -407,13 +472,14 @@ def create_raw_table(api_name: str, spark: SparkSession, db_name: str):
     spark.createDataFrame(spark.sparkContext.emptyRDD(),
                           schema=schema).registerTempTable(table_name)
     create_qry = f"""create table if not exists {db_name}.{table_name}
-                        using delta partitioned by(extractDate, startTime, endTime) LOCATION
+                        using delta partitioned by(extractDate, extractIntervalStartTime, extractIntervalEndTime) LOCATION
                                 '{db_path}/{db_name}/{table_name}'
                         as
                     select *, cast('1900-01-01' as date) extractDate,
-                    cast('1900-01-01 00:00:00' as timestamp) startTime,
-                    cast('1900-01-01 00:00:00' as timestamp) endTime,
-                    cast('1900-01-01 00:00:00' as timestamp) insertTime
+                    cast('1900-01-01 00:00:00' as timestamp) extractIntervalStartTime,
+                    cast('1900-01-01 00:00:00' as timestamp) extractIntervalEndTime,
+                    cast('1900-01-01 00:00:00' as timestamp) recordInsertTime,
+                    monotonically_increasing_id() as recordIdentifier
                      from {table_name} limit 0"""
     spark.sql(create_qry)
 
@@ -435,6 +501,8 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     create_raw_table("business_units", spark, db_name)
     create_raw_table("management_units", spark, db_name)
     create_raw_table("management_unit_users", spark, db_name)
+    create_raw_table("activity_codes", spark, db_name)
+    create_raw_table("presence_definitions", spark, db_name)
 
     return True
 

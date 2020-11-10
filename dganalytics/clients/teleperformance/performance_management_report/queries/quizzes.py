@@ -208,7 +208,7 @@ def get_quizzes(spark):
         df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb=db)
         df.registerTempTable("quizzes")
         df = spark.sql("""
-                        select  cast(answered_date as date) answeredDate,
+                        select  distinct cast(answered_date as date) answeredDate,
                                 campaign_id.oid campaign_id,
                                 cast(no_of_correct_questions as int) noOfCorrectQuestions,
                                 quiz_id.oid quizId,

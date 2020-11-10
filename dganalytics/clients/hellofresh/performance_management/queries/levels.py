@@ -97,7 +97,7 @@ def get_levels(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'User', schema, mongodb='hellofresh-prod')
     df.registerTempTable("levels")
     df = spark.sql("""
-                    select  achieved_date achievedDate,
+                    select  distinct achieved_date achievedDate,
                             campaign_id.oid campaignId,
                             campaign_name campaignName,
                             level_end_points levelEndPoints,

@@ -280,7 +280,7 @@ def get_challenges(spark):
         df = exec_mongo_pipeline(spark, pipeline, 'User', schema, mongodb=db)
         df.registerTempTable("challenges")
         df = spark.sql("""
-                        select  action action,
+                        select  distinct action action,
                                 campaign_id.oid campaignId,
                                 cast(challenge_thrown_date as date) challengeThrownDate,
                                 cast(challenge_acceptance_date as date) challengeAcceptanceDate,

@@ -20,20 +20,7 @@ def get_tp_kpi_raw_data(spark):
 
     holden_data = spark.read.schema(schema).json(spark._sc.parallelize(
         holden_data.json()['data']))
-    holden_data = holden_data.withColumn("orgId", lit('holden'))
-    df = holden_data
-
-    tp_orgs = ['bcp', 'bob']
-    for org in tp_orgs:
-        tp_data = rq.get(
-            f"https://teleperformance.datagamz.com/api/auth/getKpiData?start_date={start_date}&orgid={org.upper()}")
-        tp_data = spark.read.schema(schema).json(spark._sc.parallelize(
-            tp_data.json()['data']))
-        tp_data = tp_data.withColumn("orgId", lit(org))
-        df = df.union(tp_data)
-
-    # df = holden_data.union(tp_data)
-
+    df = holden_data.withColumn("orgId", lit('holden'))
     df.registerTempTable("tp_kpi_raw_data")
     df = spark.sql("""
                     select  campaign_id as campaignId,
@@ -43,13 +30,41 @@ def get_tp_kpi_raw_data(spark):
                             user_id as userId,
                             cast(date as date) as date,
                             value as value,
-                            orgId as orgId
+                            lower(orgId) as orgId
                     from tp_kpi_raw_data
                     where value is not null
                 """)
-    '''
-    df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
-        'orgId').saveAsTable("dg_performance_management.tp_kpi_raw_data")
-    '''
     delta_table_partition_ovrewrite(
         df, "dg_performance_management.tp_kpi_raw_data", ['orgId', 'date'])
+
+    # tp_orgs = ['bcp', 'bob']
+    tp_orgs = spark.sql("select distinct upper(orgId) as orgId from dg_performance_management.campaign").toPandas()['orgId'].tolist()
+    for org in tp_orgs:
+        tp_data = rq.get(
+            f"https://teleperformance.datagamz.com/api/auth/getKpiData?start_date={start_date}&orgid={org.upper()}")
+        df = spark.read.schema(schema).json(spark._sc.parallelize(
+            tp_data.json()['data']))
+        df = tp_data.withColumn("orgId", lit(org))
+        # df = df.union(tp_data)
+
+    # df = holden_data.union(tp_data)
+
+        df.registerTempTable("tp_kpi_raw_data")
+        df = spark.sql("""
+                        select  distinct campaign_id as campaignId,
+                                kpi as kpi,
+                                outcome_name as outcomeName,
+                                outcome_id as outcomeId,
+                                user_id as userId,
+                                cast(date as date) as date,
+                                value as value,
+                                lower(orgId) as orgId
+                        from tp_kpi_raw_data
+                        where value is not null
+                    """)
+        '''
+        df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
+            'orgId').saveAsTable("dg_performance_management.tp_kpi_raw_data")
+        '''
+        delta_table_partition_ovrewrite(
+            df, "dg_performance_management.tp_kpi_raw_data", ['orgId', 'date'])

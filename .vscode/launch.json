@@ -21,11 +21,11 @@
              "args": [
                  "--tenant=hellofresh",
                 "--run_id=t2",
-                 "--extract_start_time=2020-10-19T00:00:00Z",
-                 "--extract_end_time=2020-10-20T00:00:00Z",
-                 "--api_name=management_unit_users",
-                 "--org_id=hellofresh",
-                 "--pipeline=quizzes"
+                 "--extract_start_time=2020-10-20T12:00:00Z",
+                 "--extract_end_time=2020-10-21T00:00:00Z",
+                 "--api_name=wfm_adherence",
+                 "--org_id=salmatcolesonline",
+                 "--pipeline=tp_kpi_raw_data"
              ]
             /*
             "args": [

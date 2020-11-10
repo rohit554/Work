@@ -46,7 +46,8 @@ def fact_conversation_metrics(spark: SparkSession, extract_date, extract_start_t
                     sum(coalesce(tVoicemail,0))/1000.0 as tVoicemail,
                     sum(coalesce(tWait,0))/1000.0 as tWait,
                     cast(cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'),
-                    format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as date) as emitDate
+                    format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp) as date) as emitDate,
+                    max(sourceRecordIdentifier), max(soucePartition)
                     from
                         (
                         select
@@ -55,28 +56,33 @@ def fact_conversation_metrics(spark: SparkSession, extract_date, extract_start_t
                     select
                         conversationId, agentId, originatingDirection, purpose, 
                         element_at(segments, 1).queueId, mediaType, messageType, 
-                        metrics.emitDate, metrics.name, metrics.value, segments
+                        metrics.emitDate, metrics.name, metrics.value, segments,
+                        sourceRecordIdentifier, soucePartition
                     from
                         (
                         select
                             conversationId, conversationStart, conversationEnd, originatingDirection,
                             sessions.mediaType, sessions.messageType, purpose, agentId, sessions.sessionId,
                             sessions.direction as sessionDirection, sessions.segments,
-                            explode(sessions.metrics) as metrics
+                            explode(sessions.metrics) as metrics,
+                            sourceRecordIdentifier, soucePartition
                         from
                             (
                             select
                                 conversationId, conversationStart, conversationEnd, originatingDirection,
                                 participants.purpose, participants.userId as agentId,
-                                explode(participants.sessions) as sessions
+                                explode(participants.sessions) as sessions,
+                                sourceRecordIdentifier, soucePartition
                             from
                                 (
                                 select
                                     conversationId, conversationStart, conversationEnd, originatingDirection,
-                                    explode(participants) as participants
+                                    explode(participants) as participants,
+                                    recordIdentifier as sourceRecordIdentifier,
+                                    concat(extractDate, '|', extractIntervalStartTime, '|', extractIntervalEndTime) as soucePartition
                                 from
                                     raw_conversation_details where extractDate = '{extract_date}'
-                                    and  startTime = '{extract_start_time}' and endTime = '{extract_end_time}')
+                                    and  extractIntervalStartTime = '{extract_start_time}' and extractIntervalEndTime = '{extract_end_time}')
                            ) )
                     )
                     pivot (

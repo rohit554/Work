@@ -30,7 +30,7 @@ def get_hellofresh_kpi_raw_data(spark):
                              schema, mongodb='hellofresh-prod')
     df.registerTempTable("all_data")
     df = spark.sql("""
-                    select  user_id as userId,
+                    select  distinct user_id as userId,
                             report_date as reportDate,
                             user_name as userName,
                             csat as csat,

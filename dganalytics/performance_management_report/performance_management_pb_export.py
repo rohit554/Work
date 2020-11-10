@@ -28,7 +28,7 @@ if __name__ == "__main__":
     spark = get_spark_session(
         app_name=app_name, tenant='datagamz', default_db='dg_performance_management')
     tables = ["activity_wise_points", "badges", "campaign", "challenges", "levels", "logins", "questions",
-              "quizzes", "user_campaign", "users"]
+              "quizzes", "user_campaign", "users", "activity_mapping"]
     for tenant in tenants:
         tenant_path, db_path, log_path = get_path_vars(tenant['name'])
         for table in tables:

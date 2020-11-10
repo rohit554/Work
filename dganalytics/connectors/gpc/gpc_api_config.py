@@ -196,5 +196,32 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": True,
         "raw_primary_key": ["id"]
-    }
+    },
+    "activity_codes": {
+        "endpoint": "/api/v2/workforcemanagement/businessunits/{buId}/activitycodes",
+        "request_type": "GET",
+        "paging": False,
+        "cursor": False,
+        "interval": False,
+        "params": {
+        },
+        "entity_name": "entities",
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "tbl_overwrite": True,
+        "raw_primary_key": ["id"]
+    },
+    "presence_definitions": {
+        "endpoint": "/api/v2/presencedefinitions",
+        "request_type": "GET",
+        "paging": True,
+        "cursor": False,
+        "interval": False,
+        "params": {
+            "pageSize": 100
+        },
+        "entity_name": "entities",
+        "spark_partitions": {"max_records_per_partition": 50000},
+        "tbl_overwrite": True,
+        "raw_primary_key": ["id"]
+    },
 }

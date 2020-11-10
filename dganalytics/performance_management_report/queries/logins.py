@@ -127,7 +127,7 @@ def get_logins(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'Audit_Log', schema)
     df.registerTempTable("logins")
     df = spark.sql("""
-                    select  cast(date as date) date,
+                    select  distinct cast(date as date) date,
                             login_attempt loginAttempt,
                             user_id userId,
                             lower(org_id) orgId

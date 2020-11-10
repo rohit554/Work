@@ -36,7 +36,7 @@
             "metadata": {},
             "name": "actualsEndDate",
             "nullable": true,
-            "type": "timestamp"
+            "type": "string"
         },
         {
             "metadata": {},
@@ -134,7 +134,7 @@
             "metadata": {},
             "name": "endDate",
             "nullable": true,
-            "type": "timestamp"
+            "type": "string"
         },
         {
             "metadata": {},
@@ -142,7 +142,65 @@
             "nullable": true,
             "type": {
                 "containsNull": true,
-                "elementType": "string",
+                "elementType": {
+                    "fields": [
+                        {
+                            "metadata": {},
+                            "name": "actualActivityCategory",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "endOffsetSeconds",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "impact",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "routingStatus",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "scheduledActivityCategory",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "scheduledActivityCodeId",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "secondaryPresenceLookupId",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "startOffsetSeconds",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "systemPresence",
+                            "nullable": true,
+                            "type": "string"
+                        }
+                    ],
+                    "type": "struct"
+                },
                 "type": "array"
             }
         },
@@ -153,14 +211,26 @@
             "type": "string"
         },
         {
+            "name": "lookupIdToSecondaryPresenceId",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+        },
+        {
             "metadata": {},
             "name": "startDate",
             "nullable": true,
-            "type": "timestamp"
+            "type": "string"
         },
         {
             "metadata": {},
             "name": "userId",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "managementUnitId",
             "nullable": true,
             "type": "string"
         }

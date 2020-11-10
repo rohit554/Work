@@ -15,4 +15,5 @@ from dganalytics.connectors.gpc.batch.etl.transform.fact_primary_presence import
 from dganalytics.connectors.gpc.batch.etl.transform.fact_routing_status import fact_routing_status
 from dganalytics.connectors.gpc.batch.etl.transform.fact_wfm_actuals import fact_wfm_actuals
 from dganalytics.connectors.gpc.batch.etl.transform.fact_wfm_day_metrics import fact_wfm_day_metrics
+from dganalytics.connectors.gpc.batch.etl.transform.fact_wfm_exceptions import fact_wfm_exceptions
 from dganalytics.connectors.gpc.batch.etl.transform.dim_wrapup_codes import dim_wrapup_codes

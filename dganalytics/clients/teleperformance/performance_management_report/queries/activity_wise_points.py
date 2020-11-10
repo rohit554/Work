@@ -1,4 +1,4 @@
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
 
 
@@ -164,15 +164,25 @@ pipeline = [
 ]
 
 
-schema = StructType([StructField('activity_name', StringType(), True),
-                     StructField('campaign_id', StructType(
-                         [StructField('oid', StringType(), True)]), True),
-                     StructField('date', StringType(), True), StructField(
-    'frequency', StringType(), True), StructField('kpi_name', StringType(), True),
-    StructField('mongo_user_id', StructType(
-        [StructField('oid', StringType(), True)]), True),
+schema = StructType([StructField('campaign_id', StructType(
+    [StructField('oid', StringType(), True)]), True),
+    StructField('activityId', StringType(), True),
+    StructField('user_id', StringType(), True),
+    StructField('points', IntegerType(), True),
+    StructField('outcome_type', StringType(), True),
+    StructField('team_id', StringType(), True),
+    StructField('kpi_name', StringType(), True),
     StructField('org_id', StringType(), True),
-    StructField('points', IntegerType(), True), StructField('user_id', StringType(), True)])
+    StructField('field_name', StringType(), True),
+    StructField('field_value', DoubleType(), True),
+    StructField('frequency', StringType(), True),
+    StructField('entity_name', StringType(), True),
+    StructField('no_of_times_performed', IntegerType(), True),
+    StructField('activity_name', StringType(), True),
+    StructField('target', DoubleType(), True),
+    StructField('date', StringType(), True),
+    StructField('mongoUserId', StringType(), True)
+])
 
 databases = ['holden-prod', 'tp-prod']
 
@@ -181,16 +191,24 @@ def get_activity_wise_points(spark):
         df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb=db)
         df.registerTempTable("activity_wise_points")
         df = spark.sql("""
-                        select  activity_name activityName,
-                                campaign_id.oid campaignId,
-                                cast(date as date) date,
-                                frequency frequency,
-                                kpi_name kpi_name,
-                                mongo_user_id.oid mongoUserId,
-                                points points,
-                                user_id userId,
-                                lower(org_id) orgId
-                        from activity_wise_points
+                        select  distinct a.campaign_id.oid as campaignId,
+                            a.activityId as activityId,
+                            a.user_id as userId,
+                            a.points as points,
+                            a.outcome_type as outcomeType,
+                            a.team_id as teamId,
+                            a.kpi_name as kpiName,
+                            a.field_name as fieldName,
+                            a.field_value as fieldValue,
+                            a.frequency as frequency,
+                            a.entity_name as entityName,
+                            a.no_of_times_performed as noOfTimesPerformed,
+                            a.activity_name as activityName,
+                            a.target as target,
+                            cast(a.date as date) as date,
+                            a.mongoUserId as mongoUserId,
+                            lower(a.org_id) as orgId
+                    from activity_wise_points a
                     """)
         '''
         df.write.format("delta").mode("overwrite").partitionBy(

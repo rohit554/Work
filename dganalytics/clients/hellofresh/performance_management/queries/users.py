@@ -136,7 +136,7 @@ def get_users(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'User', schema, mongodb='hellofresh-prod')
     df.registerTempTable("hellofresh_users")
     df = spark.sql("""
-                    select  UserId userId,
+                    select  distinct UserId userId,
                             Email email,
                             FirstName firstName,
                             LastName lastName,

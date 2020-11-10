@@ -15,6 +15,12 @@ def get_users_list(spark: SparkSession):
     return users_list
 
 
+def get_management_units(spark: SparkSession) -> list:
+    mus = spark.sql("""select distinct id as managementId
+            from raw_management_units""").toPandas()['managementId'].tolist()
+    return mus
+
+
 def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str,
                            extract_start_time: str, extract_end_time: str):
     logger = gpc_utils_logger(tenant, "wfm_adherence")
@@ -45,24 +51,34 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str,
                            header=["Authorization:{}".format(api_headers['Authorization']),
                                    "Content-Type:application/json"])
 
-    user_ids = get_users_list(spark)
+    # user_ids = get_users_list(spark)
+    mus = get_management_units(spark)
     wfm_resps_urls = []
 
     batchsize = 1000
     start_time = get_interval(
         extract_start_time, extract_end_time).split("/")[0].replace("Z", "")
-    end_time = get_interval(extract_start_time, extract_end_time).split("/")[1].replace("Z", "")
+    end_time = get_interval(extract_start_time, extract_end_time).split(
+        "/")[1].replace("Z", "")
     from datetime import datetime
     if datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%S') > datetime.utcnow():
         end_time = datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%S')
-    for i in range(0, len(user_ids), batchsize):
+    # print(len(user_ids))
+    #             "timeZone": "UTC",
+    # "timeZone": "UTC",
+    # "userIds": user_ids[i:i + batchsize],
+    # for i in range(0, len(user_ids), batchsize):
+    managementunits_with_resp = []
+    i = 0
+    for muid in mus:
+        i = i + 1
+        print(i)
         body = {
             "startDate": start_time,
             "endDate": end_time,
-            "timeZone": "UTC",
-            "userIds": user_ids[i:i + batchsize]
+            "includeExceptions": True
         }
-        resp = rq.post(f"{get_api_url(tenant)}/api/v2/workforcemanagement/adherence/historical",
+        resp = rq.post(f"{get_api_url(tenant)}/api/v2/workforcemanagement/managementunits/{muid}/historicaladherencequery",
                        headers=api_headers, data=json.dumps(body))
         if resp.status_code != 202:
             logger.exception("WFM Historical Adherence API Failed" + resp.text)
@@ -73,15 +89,29 @@ def exec_wfm_adherence_api(spark: SparkSession, tenant: str, run_id: str,
             msg = ast.literal_eval(msg)
             if 'queryState' in msg['eventBody'].keys() and msg['eventBody']['queryState'] == 'Complete':
                 wfm_resps_urls.append(msg)
+                managementunits_with_resp.append(muid)
                 break
     ws.close()
-
+    print("extraction completed")
     wfm_resps = []
-    for w in wfm_resps_urls:
+    print("numbe of URLs to download" + str(len(wfm_resps_urls)))
+    i = 0
+    for w, muid in zip(wfm_resps_urls, managementunits_with_resp):
         if 'downloadUrls' in w['eventBody'].keys():
             for url in w['eventBody']['downloadUrls']:
-                wfm_resps.append(rq.get(url).json())
+                temp = rq.get(url).json()
+                for ls in temp['data']:
+                    ls.update({"lookupIdToSecondaryPresenceId": temp['lookupIdToSecondaryPresenceId']})
+                    ls.update({"managementUnitId": muid})
+                # temp['data']['lookupIdToSecondaryPresenceId'] = temp['lookupIdToSecondaryPresenceId']
+                # temp['managementUnitId'] = muid
+                wfm_resps.append(temp)
+        i = i + 1
+        print(i)
+
+    # [[y.update({'lookupIdToSecondaryPresenceId': x['lookupIdToSecondaryPresenceId']})
+    #  for y in x['data']] for x in wfm_resps]
     wfm_resps = [json.dumps(resp['data'])
                  for resp in wfm_resps if 'data' in resp.keys()]
     process_raw_data(spark, tenant, 'wfm_adherence', run_id,
-                     wfm_resps, extract_start_time, extract_end_time, len(user_ids))
+                     wfm_resps, extract_start_time, extract_end_time, len(wfm_resps))

@@ -26,6 +26,7 @@ spark.sql(f"""
                 roleId string,
                 teamLeadName string,
                 teamName string,
+                state string,
                 orgId string
             )
             using delta
@@ -37,19 +38,44 @@ spark.sql(f"""
         create table if not exists 
             dg_performance_management.activity_wise_points
             (
-                activityName string,
                 campaignId string,
-                date date,
-                frequency string,
-                kpi_name string,
-                mongoUserId string,
-                points int,
+                activityId string,
                 userId string,
+                points int,
+                outcomeType string,
+                teamId string,
+                kpiName string,
+                fieldName string,
+                fieldValue double,
+                frequency string,
+                entityName string,
+                noOfTimesPerformed int,
+                activityName string,
+                target double,
+                date date,
+                mongoUserId string,
                 orgId string
             )
             using delta
             PARTITIONED BY (orgId)
             LOCATION '{db_path}/dg_performance_management/activity_wise_points'
+        """)
+
+spark.sql(f"""
+        create table if not exists 
+            dg_performance_management.activity_mapping
+            (
+                
+                campaignId string,
+                campaignName string,
+                activityId string,
+                activityName string,
+                isChallengeActivty boolean,
+                orgId string
+            )
+            using delta
+            PARTITIONED BY (orgId)
+            LOCATION '{db_path}/dg_performance_management/activity_mapping'
         """)
 
 spark.sql(f"""

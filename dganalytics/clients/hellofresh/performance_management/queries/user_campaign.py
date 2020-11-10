@@ -106,7 +106,7 @@ def get_user_campaign(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb='hellofresh-prod')
     df.registerTempTable("user_campaign")
     df = spark.sql("""
-                    select  CampaignId.oid campaignId,
+                    select  distinct CampaignId.oid campaignId,
                             TeamId.oid teamId,
                             UserId.oid userId,
                             'hellofresh' orgId

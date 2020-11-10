@@ -5,10 +5,14 @@ def fact_routing_status(spark: SparkSession, extract_date, extract_start_time, e
     routing_status = spark.sql(f"""
                                 select distinct userId, routingStatus.startTime,
                                 routingStatus.endTime, routingStatus.routingStatus,
-                                cast(routingStatus.startTime as date) as startDate from (
-    select userId, explode(routingStatus) as routingStatus from raw_users_details where
+                                cast(routingStatus.startTime as date) as startDate, 
+                                sourceRecordIdentifier, soucePartition from (
+    select userId, explode(routingStatus) as routingStatus,
+        recordIdentifier as sourceRecordIdentifier,
+        concat(extractDate, '|', extractIntervalStartTime, '|', extractIntervalEndTime) as soucePartition
+         from raw_users_details where
                             extractDate = '{extract_date}'
-                            and  startTime = '{extract_start_time}' and endTime = '{extract_end_time}')
+                            and  extractIntervalStartTime = '{extract_start_time}' and extractIntervalEndTime = '{extract_end_time}')
                                 """)
     routing_status.registerTempTable("routing_status")
     spark.sql("""

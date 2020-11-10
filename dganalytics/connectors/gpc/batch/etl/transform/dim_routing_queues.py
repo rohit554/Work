@@ -17,6 +17,8 @@ def dim_routing_queues(spark: SparkSession, extract_date, extract_start_time, ex
                             cast(mediaSettings.email.serviceLevel.durationMs/1000 as float) as emailSLDuration,
                             cast(mediaSettings.email.serviceLevel.percentage * 100 as float) as emailSLPercentage,
                             cast(mediaSettings.message.serviceLevel.durationMs/1000 as float) as messageSLDuration,
-                            cast(mediaSettings.message.serviceLevel.percentage * 100 as float) as messageSLPercentage
+                            cast(mediaSettings.message.serviceLevel.percentage * 100 as float) as messageSLPercentage,
+                            recordIdentifier as sourceRecordIdentifier,
+                            concat(extractDate, '|', extractIntervalStartTime, '|', extractIntervalEndTime) as soucePartition
                             from raw_routing_queues
                     """)

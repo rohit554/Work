@@ -8,3 +8,4 @@ from dganalytics.performance_management_report.queries.questions import get_ques
 from dganalytics.performance_management_report.queries.levels import get_levels
 from dganalytics.performance_management_report.queries.user_campaign import get_user_campaign
 from dganalytics.performance_management_report.queries.logins import get_logins
+from dganalytics.performance_management_report.queries.activity_mapping import get_activity_mapping

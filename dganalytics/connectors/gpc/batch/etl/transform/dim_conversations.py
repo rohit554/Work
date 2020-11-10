@@ -16,27 +16,30 @@ def dim_conversations(spark: SparkSession, extract_date, extract_start_time, ext
                         agentId,
                         element_at(segments, size(segments)).wrapUpCode as wrapUpCode,
                         element_at(segments, size(segments)).wrapUpNote as wrapUpNote,
-                        cast(conversationStart as date) conversationStartDate
+                        cast(conversationStart as date) conversationStartDate,
+                        sourceRecordIdentifier, soucePartition
                     from
                         (
                         select
                             conversationId, conversationStart, conversationEnd, originatingDirection,
                             sessions.mediaType, sessions.messageType, purpose, agentId, sessions.sessionId,
-                            sessions.direction as sessionDirection, sessions.segments
+                            sessions.direction as sessionDirection, sessions.segments, sourceRecordIdentifier, soucePartition
                         from
                             (
                             select
                                 conversationId, conversationStart, conversationEnd, originatingDirection,
                                 participants.purpose, participants.userId as agentId,
-                                explode(participants.sessions) as sessions
+                                explode(participants.sessions) as sessions, sourceRecordIdentifier, soucePartition
                             from
                                 (
                                 select
                                     conversationId, conversationStart, conversationEnd, originatingDirection,
                                     explode(participants) as participants
+                                    ,recordIdentifier as sourceRecordIdentifier,
+                                    concat(extractDate, '|', extractIntervalStartTime, '|', extractIntervalEndTime) as soucePartition
                                 from
                                     raw_conversation_details where extractDate = '{extract_date}'
-                                        and  startTime = '{extract_start_time}' and endTime = '{extract_end_time}')
+                                        and  extractIntervalStartTime = '{extract_start_time}' and extractIntervalEndTime = '{extract_end_time}')
                                     where participants.purpose = 'agent'
                                 ) )
                                     """

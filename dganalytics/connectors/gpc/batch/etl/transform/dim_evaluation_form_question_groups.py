@@ -7,8 +7,10 @@ def dim_evaluation_form_question_groups(spark: SparkSession, extract_date, extra
                         select distinct evaluationFormId, questionGroups.id as questionGroupId,
     questionGroups.name as questionGroupName, questionGroups.defaultAnswersToHighest as defaultAnswersToHighest,
     questionGroups.defaultAnswersToNA as defaultAnswersToNA, questionGroups.manualWeight as manualWeight,
-    questionGroups.naEnabled as naEnabled, questionGroups.weight as weight
+    questionGroups.naEnabled as naEnabled, questionGroups.weight as weight, sourceRecordIdentifier, soucePartition
     from (
-    select id as evaluationFormId, explode(questionGroups) as questionGroups from raw_evaluation_forms
+    select id as evaluationFormId, explode(questionGroups) as questionGroups,recordIdentifier as sourceRecordIdentifier,
+concat(extractDate, '|', extractIntervalStartTime, '|', extractIntervalEndTime) as soucePartition
+ from raw_evaluation_forms
     )
                     """)

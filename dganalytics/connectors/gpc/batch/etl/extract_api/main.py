@@ -8,6 +8,7 @@ from dganalytics.connectors.gpc.batch.etl.extract_api.wfm_adherence import exec_
 from dganalytics.connectors.gpc.batch.etl.extract_api.business_units import exec_business_units
 from dganalytics.connectors.gpc.batch.etl.extract_api.management_units import exec_management_units
 from dganalytics.connectors.gpc.batch.etl.extract_api.management_unit_users import exec_management_unit_users
+from dganalytics.connectors.gpc.batch.etl.extract_api.activity_codes import exec_activity_codes
 
 if __name__ == "__main__":
     tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()
@@ -33,7 +34,7 @@ if __name__ == "__main__":
         else:
         '''
         if api_name in ["users", "routing_queues", "groups", "users_details", "wrapup_codes",
-                        "conversation_details", "divisions"]:
+                        "conversation_details", "divisions", "presence_definitions"]:
             df = gpc_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
         elif api_name == "conversation_details_job":
@@ -61,6 +62,9 @@ if __name__ == "__main__":
                 spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "management_unit_users":
             exec_management_unit_users(
+                spark, tenant, run_id, extract_start_time, extract_end_time)
+        elif api_name == "activity_codes":
+            exec_activity_codes(
                 spark, tenant, run_id, extract_start_time, extract_end_time)
         else:
             logger.exception("invalid api name")

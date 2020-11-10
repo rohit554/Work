@@ -51,7 +51,7 @@ def get_tp_campaign_activities(spark):
         df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb=db)
         df.registerTempTable("tp_campaign_activities")
         df = spark.sql("""
-                        select  CampaignId as campaignId,
+                        select  distinct CampaignId as campaignId,
                                 ActivityId as activityId,
                                 ActivityName as activityName,
                                 KpiName as kpiName,

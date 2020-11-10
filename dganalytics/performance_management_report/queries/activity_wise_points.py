@@ -1,166 +1,67 @@
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
+from datetime import datetime, timedelta
+from bson import json_util
+import json
 
+org_id = ''
 
+#datetime.utcnow() - timedelta(days=16)
+'''
+{
+                        "$gte": [
+                            "$creation_date",
+                            json.dumps(datetime.utcnow() - timedelta(days=16), default=json_util.default)
+                        ]
+                    },
+    
+     {
+                        "$eq": [
+                            "$org_id",
+                            org_id.upper()
+                        ]
+                    },
+'''
 pipeline = [
     {
-        "$project": {
-            "is_active": 1.0,
-            "is_deleted": 1.0,
-            "org_id": 1.0,
-            "gd_users": "$game_design.gd_users",
-            "outcome": 1.0
-        }
-    },
-    {
         "$match": {
-            "is_active": True,
-            "is_deleted": False
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$gd_users",
-            "preserveNullAndEmptyArrays": False
-        }
-    },
-    {
-        "$lookup": {
-            "from": "User",
-            "let": {
-                "id": "$gd_users.user_id"
-            },
-            "pipeline": [
-                {
-                    "$match": {
-                        "$expr": {
-                            "$eq": [
-                                "$_id",
-                                "$$id"
-                            ]
-                        }
-                    }
-                },
-                {
-                    "$project": {
-                        "name": 1.0,
-                        "quartile": 1.0,
-                        "user_id": 1.0
-                    }
-                }
-            ],
-            "as": "userData"
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$userData",
-            "preserveNullAndEmptyArrays": False
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$outcome",
-            "preserveNullAndEmptyArrays": False
-        }
-    },
-    {
-        "$project": {
-            "outcome": 1.0,
-            "quartile": {
-                "$filter": {
-                    "input": "$outcome.quartile",
-                    "as": "q",
-                    "cond": {
+            "$expr": {
+                "$and": [
+                    {
                         "$eq": [
-                            "$$q.quartile",
-                            "$userData.quartile"
+                            "$outcome_type",
+                            "points"
                         ]
                     }
-                }
-            },
-            "kpi_name": "$outcome.kpi_name",
-            "user_mongo_id": "$gd_users.user_id",
-            "user_id": "$userData.user_id",
-            "org_id": 1.0
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$quartile",
-            "preserveNullAndEmptyArrays": False
+                ]
+            }
         }
     },
     {
         "$project": {
-            "user_mongo_id": 1.0,
-            "frequency": "$quartile.frequency",
-            "activity": "$outcome.name",
-            "points_per_activity": "$outcome.quantity",
+            "campaign_id": 1.0,
+            "outcome_id": 1.0,
             "user_id": 1.0,
-            "outcome_id": "$outcome._id",
-            "outcome_image": "$outcome.outcome_image",
-            "org_id": 1.0,
-            "kpi_name": 1.0
-        }
-    },
-    {
-        "$lookup": {
-            "from": "User_Outcome",
-            "let": {
-                "user_id": "$user_id",
-                "outcome_id": "$outcome_id"
-            },
-            "pipeline": [
-                {
-                    "$match": {
-                        "$expr": {
-                            "$and": [
-                                {
-                                    "$eq": [
-                                        "$user_id",
-                                        "$$user_id"
-                                    ]
-                                },
-                                {
-                                    "$eq": [
-                                        "$outcome_id",
-                                        "$$outcome_id"
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                }
-            ],
-            "as": "Outcome"
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$Outcome",
-            "preserveNullAndEmptyArrays": False
-        }
-    },
-    {
-        "$project": {
-            "_id": 0.0,
-            "campaign_id": "$_id",
-            "mongo_user_id": "$user_mongo_id",
-            "user_id": 1.0,
-            "frequency": 1.0,
-            "activity_name": "$activity",
-            "date": "$Outcome.creation_date",
+            "date": "$creation_date",
+            "outcome_quantity": 1.0,
+            "outcome_type": 1.0,
+            "team_id": 1.0,
             "kpi_name": 1.0,
-            "points": "$Outcome.outcome_quantity",
-            "org_id": 1.0
+            "org_id": 1.0,
+            "field_name": 1.0,
+            "field_value": 1.0,
+            "frequency": 1.0,
+            "entity_name": 1.0,
+            "no_of_times_performed": 1.0,
+            "outcome_name": 1.0,
+            "quartile_target": 10.0
         }
     },
     {
         "$lookup": {
             "from": "Organization",
             "let": {
-                "oid": "$org_id"
+                    "oid": "$org_id"
             },
             "pipeline": [
                 {
@@ -185,7 +86,12 @@ pipeline = [
                 },
                 {
                     "$project": {
-                        "timezone": 1.0
+                        "timezone": {
+                            "$ifNull": [
+                                "$timezone",
+                                "Australia/Melbourne"
+                            ]
+                        }
                     }
                 }
             ],
@@ -201,59 +107,110 @@ pipeline = [
     {
         "$project": {
             "campaign_id": 1.0,
-            "mongo_user_id": 1.0,
+            "activityId": "$outcome_id",
             "user_id": 1.0,
+            "points": "$outcome_quantity",
+            "outcome_type": 1.0,
+            "team_id": 1.0,
+            "kpi_name": 1.0,
+            "org_id": 1.0,
+            "field_name": 1.0,
+            "field_value": 1.0,
             "frequency": 1.0,
-            "activity_name": 1.0,
+            "entity_name": 1.0,
+            "no_of_times_performed": 1.0,
+            "activity_name": "$outcome_name",
+            "target": "$quartile_target",
             "date": {
-                "$dateToString": {
-                    "format": "%Y-%m-%d",
-                    "date": {
-                        "$toDate": {
-                            "$dateToString": {
-                                "date": "$date",
-                                "timezone": "$org.timezone"
+                "$cond": {
+                    "if": {
+                        "$and": [
+                            {
+                                "$eq": [
+                                    "$date",
+                                    None
+                                ]
+                            }
+                        ]
+                    },
+                    "then": None,
+                    "else": {
+                        "$dateToString": {
+                            "format": "%Y-%m-%d",
+                            "date": {
+                                "$toDate": {
+                                    "$dateToString": {
+                                        "date": "$date",
+                                        "timezone": "$org.timezone"
+                                    }
+                                }
                             }
                         }
                     }
                 }
-            },
-            "kpi_name": 1.0,
-            "points": 1.0,
-            "org_id": 1.0
+            }
         }
     }
 ]
 
-
-schema = StructType([StructField('activity_name', StringType(), True),
-                     StructField('campaign_id', StructType(
-                         [StructField('oid', StringType(), True)]), True),
-                     StructField('date', StringType(), True), StructField(
-    'frequency', StringType(), True), StructField('kpi_name', StringType(), True),
-    StructField('mongo_user_id', StructType(
-        [StructField('oid', StringType(), True)]), True),
-        StructField('org_id', StringType(), True),
-    StructField('points', IntegerType(), True), StructField('user_id', StringType(), True)])
+schema = StructType([StructField('campaign_id', StructType(
+    [StructField('oid', StringType(), True)]), True),
+    StructField('activityId', StringType(), True),
+    StructField('user_id', StringType(), True),
+    StructField('points', IntegerType(), True),
+    StructField('outcome_type', StringType(), True),
+    StructField('team_id', StringType(), True),
+    StructField('kpi_name', StringType(), True),
+    StructField('org_id', StringType(), True),
+    StructField('field_name', StringType(), True),
+    StructField('field_value', DoubleType(), True),
+    StructField('frequency', StringType(), True),
+    StructField('entity_name', StringType(), True),
+    StructField('no_of_times_performed', IntegerType(), True),
+    StructField('activity_name', StringType(), True),
+    StructField('target', DoubleType(), True),
+    StructField('date', StringType(), True),
+    StructField('mongoUserId', StringType(), True)
+])
 
 
 def get_activity_wise_points(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
+    global org_id
+    # orgs = ['salmatcolesonline']
+    '''
+    orgs = spark.sql("select distinct orgId from dg_performance_management.campaign").toPandas()['orgId'].tolist()
+    for oid in orgs:
+        print(oid)
+        org_id = oid.upper()
+    '''
+    df = exec_mongo_pipeline(spark, pipeline, 'User_Outcome', schema)
     df.registerTempTable("activity_wise_points")
     df = spark.sql("""
-                    select  activity_name activityName,
-                            campaign_id.oid campaignId,
-                            cast(date as date) date,
-                            frequency frequency,
-                            kpi_name kpi_name,
-                            mongo_user_id.oid mongoUserId,
-                            points points,
-                            user_id userId,
-                            lower(org_id) orgId
-                    from activity_wise_points
+                    select  distinct a.campaign_id.oid as campaignId,
+                            a.activityId as activityId,
+                            a.user_id as userId,
+                            a.points as points,
+                            a.outcome_type as outcomeType,
+                            a.team_id as teamId,
+                            a.kpi_name as kpiName,
+                            a.field_name as fieldName,
+                            a.field_value as fieldValue,
+                            a.frequency as frequency,
+                            a.entity_name as entityName,
+                            a.no_of_times_performed as noOfTimesPerformed,
+                            a.activity_name as activityName,
+                            a.target as target,
+                            cast(a.date as date) as date,
+                            b.mongoUserId as mongoUserId,
+                            lower(a.org_id) as orgId
+                    from activity_wise_points a, dg_performance_management.users b
+                        where a.user_id = b.userId
+                        and lower(a.org_id) = lower(b.orgId)
                 """)
+
     '''
     df.write.format("delta").mode("overwrite").partitionBy(
         'orgId').saveAsTable("dg_performance_management.activity_wise_points")
     '''
-    delta_table_partition_ovrewrite(df, "dg_performance_management.activity_wise_points", ['orgId'])
+    delta_table_partition_ovrewrite(
+        df, "dg_performance_management.activity_wise_points", ['orgId'])

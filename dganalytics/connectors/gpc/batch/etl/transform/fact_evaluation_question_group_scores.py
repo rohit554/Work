@@ -12,10 +12,13 @@ def fact_evaluation_question_group_scores(spark: SparkSession, extract_date, ext
                             questionGroupScores.maxTotalScoreUnweighted, questionGroupScores.totalCriticalScore,
                             questionGroupScores.totalCriticalScoreUnweighted, questionGroupScores.totalNonCriticalScore,
                             questionGroupScores.totalNonCriticalScoreUnweighted,
-                            questionGroupScores.totalScore, questionGroupScores.totalScoreUnweighted
+                            questionGroupScores.totalScore, questionGroupScores.totalScoreUnweighted,
+                            date_format(conversationDate, 'yyyy-MM-dd') conversationDatePart,
+                            recordIdentifier as sourceRecordIdentifier,
+                            concat(extractDate, '|', extractIntervalStartTime, '|', extractIntervalEndTime) as soucePartition
                                 from raw_evaluations
         lateral view explode(answers.questionGroupScores) as questionGroupScores  where extractDate = '{extract_date}'
-                                    and  startTime = '{extract_start_time}' and endTime = '{extract_end_time}'""")
+                                    and  extractIntervalStartTime = '{extract_start_time}' and extractIntervalEndTime = '{extract_end_time}'""")
 
     evaluation_question_group_scores.registerTempTable(
         "evaluation_question_group_scores")
@@ -24,6 +27,7 @@ def fact_evaluation_question_group_scores(spark: SparkSession, extract_date, ext
                         using evaluation_question_group_scores as source
                         on source.evaluationId = target.evaluationId
                         and source.questionGroupId = target.questionGroupId
+                        and source.conversationDatePart = target.conversationDatePart
                     WHEN MATCHED THEN
                         UPDATE SET *
                     WHEN NOT MATCHED THEN

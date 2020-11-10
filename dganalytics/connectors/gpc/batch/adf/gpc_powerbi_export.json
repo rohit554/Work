@@ -77,36 +77,6 @@
             "properties": {
                 "activities": [
                     {
-                        "name": "dimConversations",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 0,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/reporting/gpc_pb_standard_export.py",
-                            "parameters": [
-                                "--tenant",
-                                "@pipeline().parameters.tenant",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--table_name",
-                                "dim_conversations",
-                                "--output_file_name",
-                                "gDimConversations"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
                         "name": "dimWrapupCodes",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],
@@ -125,10 +95,70 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "dim_wrapup_codes",
                                 "--output_file_name",
                                 "gdimWrapupCodes"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "dimBuMuMapping",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/reporting/gpc_pb_standard_export.py",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_name",
+                                "dim_bu_mu_mapping",
+                                "--output_file_name",
+                                "gdimBuMuMapping"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
+                        "name": "dimPresenceDefinitions",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/reporting/gpc_pb_standard_export.py",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_name",
+                                "dim_presence_definitions",
+                                "--output_file_name",
+                                "gdimPresenceDefinitions"
                             ]
                         },
                         "linkedServiceName": {
@@ -155,7 +185,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "dim_evaluation_form_answer_options",
                                 "--output_file_name",
                                 "gDimEvaluationFormAnswerOptions"
@@ -185,7 +215,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "dim_evaluation_form_question_groups",
                                 "--output_file_name",
                                 "gDimEvaluationFormQuestionGroups"
@@ -215,7 +245,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "dim_evaluation_form_questions",
                                 "--output_file_name",
                                 "gDimEvaluationFormQuestions"
@@ -252,7 +282,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "dim_evaluation_forms",
                                 "--output_file_name",
                                 "gDimEvaluationForms"
@@ -295,7 +325,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "dim_evaluations",
                                 "--output_file_name",
                                 "gDimEvaluations"
@@ -325,7 +355,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "dim_routing_queues",
                                 "--output_file_name",
                                 "gDimRoutingQueues"
@@ -362,7 +392,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "dim_user_groups",
                                 "--output_file_name",
                                 "gDimUserGroups"
@@ -399,7 +429,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "dim_users",
                                 "--output_file_name",
                                 "gDimUsers"
@@ -414,12 +444,6 @@
                         "name": "factConversationMetrics",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
-                            {
-                                "activity": "dimConversations",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
                         ],
                         "policy": {
                             "timeout": "00:30:00",
@@ -436,7 +460,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "fact_conversation_metrics",
                                 "--output_file_name",
                                 "gFactConversationMetrics"
@@ -473,7 +497,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "fact_evaluation_question_group_scores",
                                 "--output_file_name",
                                 "gFactEvaluationQuestionGroupScores"
@@ -510,7 +534,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "fact_evaluation_question_scores",
                                 "--output_file_name",
                                 "gFactEvaluationQuestionScores"
@@ -547,7 +571,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "fact_evaluation_total_scores",
                                 "--output_file_name",
                                 "gFactEvaluationTotalScores"
@@ -577,7 +601,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "fact_primary_presence",
                                 "--output_file_name",
                                 "gFactPrimaryPresence"
@@ -614,7 +638,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "fact_routing_status",
                                 "--output_file_name",
                                 "gFactRoutingStatus"
@@ -651,7 +675,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "fact_wfm_actuals",
                                 "--output_file_name",
                                 "gFactWfmActuals"
@@ -681,7 +705,7 @@
                                 "@pipeline().parameters.tenant",
                                 "--run_id",
                                 "@pipeline().RunId",
-                                "--table_name",
+                                "--extract_name",
                                 "fact_wfm_day_metrics",
                                 "--output_file_name",
                                 "gFactWfmDayMetrics"

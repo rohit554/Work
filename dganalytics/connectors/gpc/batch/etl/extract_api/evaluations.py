@@ -16,8 +16,6 @@ def get_evaluators(spark: SparkSession) -> list:
 def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_start_time: str, extract_end_time: str):
 
     logger = gpc_utils_logger(tenant, "gpc_evaluations")
-    extract_end_time = "2020-10-01T08:00:00"
-    extract_start_time = "2020-10-01T00:00:00"
     evaluators = get_evaluators(spark)
     api_headers = authorize(tenant)
     evaluation_details_list = []

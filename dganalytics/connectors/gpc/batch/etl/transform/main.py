@@ -21,6 +21,7 @@ transform_to_method = {
     "fact_routing_status": transform.fact_routing_status,
     "fact_wfm_actuals": transform.fact_wfm_actuals,
     "fact_wfm_day_metrics": transform.fact_wfm_day_metrics,
+    "fact_wfm_exceptions": transform.fact_wfm_exceptions,
     "dim_wrapup_codes": transform.dim_wrapup_codes
 }
 

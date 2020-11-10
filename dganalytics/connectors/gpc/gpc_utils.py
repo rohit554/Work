@@ -13,7 +13,7 @@ import argparse
 import math
 from dganalytics.connectors.gpc.gpc_api_config import gpc_end_points
 from dganalytics.utils.utils import env, get_path_vars, get_logger, delta_table_partition_ovrewrite, delta_table_ovrewrite
-from pyspark.sql.functions import lit, to_date, to_timestamp
+from pyspark.sql.functions import lit, monotonically_increasing_id, to_date, to_timestamp
 import gzip
 from dganalytics.utils.utils import get_secret
 import tempfile
@@ -59,14 +59,7 @@ def get_api_url(tenant: str) -> str:
 
 
 def get_interval(extract_start_time: str, extract_end_time: str):
-    # start_time = (datetime.datetime.strptime(extract_date,
-    #                                         "%Y-%m-%dT%H:%M:%S") - datetime.timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%S")
-    # end_time = (datetime.datetime.strptime(extract_date,
-    #                                         "%Y-%m-%dT%H:%M:%S") - datetime.timedelta(seconds=1)).strftime("%Y-%m-%dT%H:%M:%S")
     interval = f"{extract_start_time}Z/{extract_end_time}Z"
-
-    # interval = f"2020-10-01T00:00:00Z/2020-10-01T23:59:59Z"
-    # interval = f"{extract_date}T00:00:00Z/{extract_date}T23:59:59Z"
     return interval
 
 
@@ -187,12 +180,13 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
         spark._sc.parallelize(resp_list, n_partitions), schema=schema).drop_duplicates()
 
     df = df.withColumn("extractDate", to_date(lit(extract_start_time[0:10])))
-    df = df.withColumn("startTime", to_timestamp(lit(extract_start_time)))
-    df = df.withColumn("endTime", to_timestamp(lit(extract_end_time)))
+    df = df.withColumn("extractIntervalStartTime", to_timestamp(lit(extract_start_time)))
+    df = df.withColumn("extractIntervalEndTime", to_timestamp(lit(extract_end_time)))
     print("lit start " + lit(extract_start_time))
     print("lit end " + lit(extract_end_time))
-    df = df.withColumn("insertTime", to_timestamp(
+    df = df.withColumn("recordInsertTime", to_timestamp(
         lit(datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))))
+    df = df.withColumn("recordIdentifier", monotonically_increasing_id())
     table_name = get_raw_tbl_name(api_name)
     logger.info(f"updating raw table for {api_name} {db_name}.{table_name}")
 
@@ -203,7 +197,7 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
 
     if not get_tbl_overwrite(api_name):
         delta_table_partition_ovrewrite(df, f"{db_name}.{table_name}", [
-                                        'extractDate', 'startTime', 'endTime'])
+                                        'extractDate', 'extractIntervalStartTime', 'extractIntervalEndTime'])
         '''
         df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
             'extractDate').option("replaceWhere",
@@ -308,16 +302,16 @@ def pb_export_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--tenant', required=True)
     parser.add_argument('--run_id', required=True)
-    parser.add_argument('--table_name', required=True)
+    parser.add_argument('--extract_name', required=True)
     parser.add_argument('--output_file_name', required=True)
 
     args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
     run_id = args.run_id
-    table_name = args.table_name
+    extract_name = args.extract_name
     output_file_name = args.output_file_name
 
-    return tenant, run_id, table_name, output_file_name
+    return tenant, run_id, extract_name, output_file_name
 
 
 def check_prev_gpc_extract(spark: SparkSession, api_name: str, extract_date: str, run_id: str):

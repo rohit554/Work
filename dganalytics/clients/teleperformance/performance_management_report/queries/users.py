@@ -1,13 +1,7 @@
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
-from pyspark.sql.types import StructType, StructField, StringType
+from pyspark.sql.types import StructType, StructField, StringType, BooleanType
 
 pipeline = [
-    {
-        "$match": {
-            "is_active": True,
-            "is_deleted": False
-        }
-    },
     {
         "$project": {
             "user_id": 1.0,
@@ -18,7 +12,9 @@ pipeline = [
             "quartile": 1.0,
             "works_for": 1.0,
             "role_id": 1.0,
-            "org_id": 1.0
+            "org_id": 1.0,
+            "is_active": 1.0,
+            "is_deleted": 1.0
         }
     },
     {
@@ -113,7 +109,9 @@ pipeline = [
             },
             "TeamName": "$Team.name",
             "TeamLeadName": "$tl_data.name",
-            "OrgId": "$org_id"
+            "OrgId": "$org_id",
+            "isActive": "$is_active",
+            "isDeleted": "$is_deleted"
         }
     }
 ]
@@ -129,7 +127,9 @@ schema = StructType([StructField('Email', StringType(), True),
                      StructField('RoleId', StringType(), True),
                      StructField('TeamLeadName', StringType(), True),
                      StructField('TeamName', StringType(), True),
-                     StructField('UserId', StringType(), True)])
+                     StructField('UserId', StringType(), True),
+                     StructField('isActive', BooleanType(), True),
+                     StructField('isDeleted', BooleanType(), True)])
 
 databases = ['holden-prod', 'tp-prod']
 
@@ -140,7 +140,7 @@ def get_users(spark):
         df = exec_mongo_pipeline(spark, pipeline, 'User', schema, mongodb=db)
         df.registerTempTable("users")
         df = spark.sql("""
-                        select  UserId userId,
+                        select  distinct UserId userId,
                                 Email email,
                                 FirstName firstName,
                                 LastName lastName,
@@ -150,6 +150,9 @@ def get_users(spark):
                                 RoleId roleId,
                                 TeamLeadName teamLeadName,
                                 TeamName teamName,
+                                (case when isDeleted then 'deleted'
+                                when not isDeleted and not isActive then 'inactive'
+                                    else 'active' end) state,
                                 lower(OrgId) orgId
                         from users
                     """)

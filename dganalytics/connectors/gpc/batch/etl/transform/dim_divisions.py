@@ -13,7 +13,9 @@ def dim_users(spark: SparkSession, extract_date, extract_start_time, extract_end
                             u.department,
                             u.manager.id as managerId,
                             m.name as managerFullName,
-                            u.state
+                            u.state,
+                            u.recordIdentifier as sourceRecordIdentifier,
+                            concat(u.extractDate, '|', u.extractIntervalStartTime, '|', u.extractIntervalEndTime) as soucePartition
                             from raw_users u
                             left join
                                 raw_users m

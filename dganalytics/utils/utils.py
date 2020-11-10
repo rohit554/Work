@@ -255,6 +255,10 @@ def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_
                                ("spark.sql.shuffle.partitions", 5),
                                ("spark.databricks.delta.snapshotPartitions", 3)
                                ])
+                               #,
+                               #("spark.executor.extraJavaOptions",
+                               # "-Duser.timezone=UTC"),
+                               #("spark.sql.session.timeZone", "UTC") 
 
     if addtl_conf:
         for k, v in addtl_conf.items():
@@ -281,6 +285,7 @@ def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_
 def exec_mongo_pipeline(spark, pipeline, collection, schema, mongodb=None):
     if mongodb is None:
         mongodb = f"dggamification{env if env != 'local' else 'dev'}"
+    # mongodb = 'dggamificationprd'
     df = spark.read.format("mongo").option("uri", get_secret('mongodbconnurl')).option(
         "collection", collection).option("database", mongodb).option(
             "pipeline", json.dumps(pipeline)).schema(schema).load()
@@ -364,7 +369,8 @@ def delta_table_partition_ovrewrite(df, table, partition_cols: List[str]):
 
 def delta_table_ovrewrite(df, table):
     if df.count() != 0:
-        df.coalesce(1).write.format("delta").mode("overwrite").saveAsTable(f"{table}")
+        df.coalesce(1).write.format("delta").mode(
+            "overwrite").saveAsTable(f"{table}")
 
 
 pb_access_token = None

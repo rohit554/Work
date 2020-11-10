@@ -8,12 +8,14 @@ def dim_evaluation_form_questions(spark: SparkSession, extract_date, extract_sta
     questions.text as questionText,
     questions.commentsRequired as commentsRequired, questions.helpText as helpText,
     questions.isCritical as isCritical, questions.isKill as isKill,
-    questions.naEnabled as naEnabled, questions.type as questionType
+    questions.naEnabled as naEnabled, questions.type as questionType, sourceRecordIdentifier, soucePartition
     from (
     select evaluationFormId, questionGroups.id as questionGroupId,
-    explode(questionGroups.questions) as questions
+    explode(questionGroups.questions) as questions, sourceRecordIdentifier, soucePartition
     from (
-    select id as evaluationFormId, explode(questionGroups) as questionGroups from raw_evaluation_forms
+    select id as evaluationFormId, explode(questionGroups) as questionGroups,recordIdentifier as sourceRecordIdentifier,
+concat(extractDate, '|', extractIntervalStartTime, '|', extractIntervalEndTime) as soucePartition
+ from raw_evaluation_forms
     )
     )
                     """)

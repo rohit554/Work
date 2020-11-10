@@ -40,7 +40,7 @@ def get_campaign(spark):
         df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb=db)
         df.registerTempTable("campaign")
         df = spark.sql("""
-                        select  campaign_id.oid campaignId,
+                        select  distinct campaign_id.oid campaignId,
                                 cast(start_date as date) start_date,
                                 cast(end_date as date) endDate,
                                 is_active isActive,

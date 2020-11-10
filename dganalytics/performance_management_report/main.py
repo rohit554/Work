@@ -1,3 +1,4 @@
+from dganalytics.performance_management_report.queries import activity_mapping
 from dganalytics.utils.utils import get_spark_session, env
 from dganalytics.performance_management_report import queries
 import argparse
@@ -12,7 +13,8 @@ pipelines = {
     "questions": queries.get_questions,
     "levels": queries.get_levels,
     "user_campaign": queries.get_user_campaign,
-    "logins": queries.get_logins
+    "logins": queries.get_logins,
+    "activity_mapping": queries.get_activity_mapping
 }
 
 if __name__ == "__main__":

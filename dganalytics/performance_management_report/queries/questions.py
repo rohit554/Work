@@ -151,7 +151,7 @@ def get_questions(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'quiz', schema)
     df.registerTempTable("questions")
     df = spark.sql("""
-                    select  answer_given answerGiven,
+                    select  distinct answer_given answerGiven,
                             cast(answered_date as date) answeredDate,
                             campaign_id.oid campaignId,
                             replace(replace(replace(replace(correct_answer, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' ') correctAnswer,

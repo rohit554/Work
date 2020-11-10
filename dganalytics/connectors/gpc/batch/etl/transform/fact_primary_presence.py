@@ -5,10 +5,13 @@ def fact_primary_presence(spark: SparkSession, extract_date, extract_start_time,
     primary_presence = spark.sql(f"""
                                     select distinct userId, primaryPresence.startTime,
                                     primaryPresence.endTime, primaryPresence.systemPresence,
-            cast(primaryPresence.startTime as date) as startDate from (
-        select userId, explode(primaryPresence) as primaryPresence from raw_users_details
+            cast(primaryPresence.startTime as date) as startDate, sourceRecordIdentifier, soucePartition from (
+        select userId, explode(primaryPresence) as primaryPresence,
+            recordIdentifier as sourceRecordIdentifier,
+            concat(extractDate, '|', extractIntervalStartTime, '|', extractIntervalEndTime) as soucePartition
+         from raw_users_details
                     where extractDate = '{extract_date}'
-                    and  startTime = '{extract_start_time}' and endTime = '{extract_end_time}')
+                    and  extractIntervalStartTime = '{extract_start_time}' and extractIntervalEndTime = '{extract_end_time}')
                                     """)
     primary_presence.registerTempTable("primary_presence")
     spark.sql("""

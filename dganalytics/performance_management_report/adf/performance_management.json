@@ -221,6 +221,30 @@
                         }
                     },
                     {
+                        "name": "activity_mapping",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/performance_management_report/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "activity_mapping"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
                         "name": "logins",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],

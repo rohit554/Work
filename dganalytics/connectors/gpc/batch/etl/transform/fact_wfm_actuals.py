@@ -2,25 +2,25 @@ from pyspark.sql import SparkSession
 
 
 def fact_wfm_actuals(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
-    orig_wfm_actuals = spark.sql(f"""
-        select distinct userId,startDate,actualsEndDate, endDate, actuals.actualActivityCategory,
-        actuals.endOffsetSeconds, actuals.startOffsetSeconds,
-                                    cast(startDate as date) startDatePart
-    from (
-    select userId, startDate, actualsEndDate, endDate, impact,
-    explode(actuals) as actuals from (
-    select * from raw_wfm_adherence where extractDate = '{extract_date}'
-    and  startTime = '{extract_start_time}' and endTime = '{extract_end_time}')
-    ) 
-                            """)
-    orig_wfm_actuals.registerTempTable("orig_wfm_actuals")
-    wfm_actuals = spark.sql("""
-    select userId, startDate, actualsEndDate, endDate, actualActivityCategory,
-    endOffsetSeconds, startOffsetSeconds, startDatePart from (
-            select *, row_number() over(partition by userId, startDate,
-            actualsEndDate, startOffsetSeconds
-        order by startOffsetSeconds, endOffsetSeconds desc) as rnk from orig_wfm_actuals ) a
-        where a.rnk = 1
+    wfm_actuals = spark.sql(f"""
+    select 
+ userId, managementUnitId,
+cast(replace(replace(startDate, 'Z', ''), 'z', '') as timestamp) + cast(concat("INTERVAL ", startOffsetSeconds, " SECONDS") as INTERVAL) as startDate,
+cast(cast(replace(replace(startDate, 'Z', ''), 'z', '') as timestamp) + cast(concat("INTERVAL ", startOffsetSeconds, " SECONDS") as INTERVAL) as date) as startDatePart,
+cast(replace(replace(startDate, 'Z', ''), 'z', '') as timestamp) + cast(concat("INTERVAL ", endOffsetSeconds, " SECONDS") as INTERVAL) as endDate,
+actualActivityCategory, sourceRecordIdentifier, soucePartition
+from (
+select userId, managementUnitId, startDate, endDate, actualsEndDate, actuals.actualActivityCategory, 
+actuals.startOffsetSeconds, actuals.endOffsetSeconds, sourceRecordIdentifier, soucePartition
+from (
+select 
+userId, managementUnitId, startDate, endDate, actualsEndDate, explode(actuals) actuals, recordIdentifier as sourceRecordIdentifier,
+        concat(extractDate, '|', extractIntervalStartTime, '|', extractIntervalEndTime) as soucePartition
+	from raw_wfm_adherence where
+                            extractDate = '{extract_date}'
+                            and  extractIntervalStartTime = '{extract_start_time}' and extractIntervalEndTime = '{extract_end_time}'
+) a
+)
                 """)
 
     wfm_actuals.registerTempTable("wfm_actuals")
@@ -30,8 +30,6 @@ def fact_wfm_actuals(spark: SparkSession, extract_date, extract_start_time, extr
                 on source.userId = target.userId
                     and source.startDate = target.startDate
                     and source.startDatePart = target.startDatePart
-                    and source.endDate = target.endDate
-                    and source.startOffsetSeconds = target.startOffsetSeconds
                 WHEN MATCHED THEN
                     UPDATE SET *
                 WHEN NOT MATCHED THEN
