@@ -26,4 +26,4 @@ if __name__ == "__main__":
             f"select * from dg_performance_management.{table} where orgId = '{tenant_org_id}'")
         df = df.drop("orgId")
         export_powerbi_csv(tenant_org_id, df, f"pm_{table}")
-    exec_powerbi_refresh('70eebbe4-5a1d-4f7e-bc3e-d2755b84e37f', 'f93c6f87-23db-4200-8260-4d515931cbed')
+    exec_powerbi_refresh('70eebbe4-5a1d-4f7e-bc3e-d2755b84e37f', '415f8122-1c56-400d-9464-54d064305dfb')

@@ -3,6 +3,7 @@ from pyspark.sql import SparkSession
 
 def fact_wfm_actuals(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     wfm_actuals = spark.sql(f"""
+    select * from (
     select 
  userId, managementUnitId,
 cast(replace(replace(startDate, 'Z', ''), 'z', '') as timestamp) + cast(concat("INTERVAL ", startOffsetSeconds, " SECONDS") as INTERVAL) as startDate,
@@ -20,7 +21,8 @@ userId, managementUnitId, startDate, endDate, actualsEndDate, explode(actuals) a
                             extractDate = '{extract_date}'
                             and  extractIntervalStartTime = '{extract_start_time}' and extractIntervalEndTime = '{extract_end_time}'
 ) a
-)
+))
+where startDate != endDate
                 """)
 
     wfm_actuals.registerTempTable("wfm_actuals")

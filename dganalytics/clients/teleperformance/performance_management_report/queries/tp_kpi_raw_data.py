@@ -44,7 +44,7 @@ def get_tp_kpi_raw_data(spark):
             f"https://teleperformance.datagamz.com/api/auth/getKpiData?start_date={start_date}&orgid={org.upper()}")
         df = spark.read.schema(schema).json(spark._sc.parallelize(
             tp_data.json()['data']))
-        df = tp_data.withColumn("orgId", lit(org))
+        df = df.withColumn("orgId", lit(org))
         # df = df.union(tp_data)
 
     # df = holden_data.union(tp_data)

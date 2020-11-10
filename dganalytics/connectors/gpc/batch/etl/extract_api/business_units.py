@@ -14,7 +14,6 @@ def exec_business_units(spark: SparkSession, tenant: str, run_id: str,
     business_units = []
     if check_api_response(bus, "divisions", tenant, run_id) == 'OK':
         bu_ids = [id['selfUri'] for id in bus.json()['entities']]
-        buid = bu_ids[0]
         for buid in bu_ids:
             bu = rq.get(
                 f"{get_api_url(tenant)}{buid}?expand=settings", headers=api_headers)

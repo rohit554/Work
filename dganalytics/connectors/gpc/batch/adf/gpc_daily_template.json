@@ -486,6 +486,45 @@
                         }
                     },
                     {
+                        "name": "presence_definitions",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "groups",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/extract_api/main.py",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
+                                "--api_name",
+                                "presence_definitions"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
                         "name": "dim_wrapup_codes",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
