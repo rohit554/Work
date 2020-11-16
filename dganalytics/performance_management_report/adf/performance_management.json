@@ -411,6 +411,12 @@
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
+                            },
+                            {
+                                "activity": "activity_mapping",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
                             }
                         ],
                         "userProperties": [],

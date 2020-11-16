@@ -1,0 +1,231 @@
+{
+    "fields": [
+        {
+            "metadata": {},
+            "name": "agent_id",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "call_type",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "completed_at",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "created_at",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "email",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "external_ref",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "long"
+        },
+        {
+            "metadata": {},
+            "name": "interaction_data",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": {
+                    "fields": [
+                        {
+                            "metadata": {},
+                            "name": "created_at",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "custom_key",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "custom_value",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "id",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "interaction_id",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "updated_at",
+                            "nullable": true,
+                            "type": "string"
+                        }
+                    ],
+                    "type": "struct"
+                },
+                "type": "array"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "phone_number",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "respondent_language",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "responses",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": {
+                    "fields": [
+                        {
+                            "metadata": {},
+                            "name": "id",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "interaction_id",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "question_id",
+                            "nullable": true,
+                            "type": "long"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "question_label",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "recording_url",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "response",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "response_type",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "submitted_at",
+                            "nullable": true,
+                            "type": "string"
+                        }
+                    ],
+                    "type": "struct"
+                },
+                "type": "array"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "restricted",
+            "nullable": true,
+            "type": "long"
+        },
+        {
+            "metadata": {},
+            "name": "scheduled_at",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "status",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "survey_id",
+            "nullable": true,
+            "type": "long"
+        },
+        {
+            "metadata": {},
+            "name": "survey_type",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "unsubscribe_link_short",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "updated_at",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "uuid",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "weblink",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "weblink_short",
+            "nullable": true,
+            "type": "string"
+        }
+    ],
+    "type": "struct"
+}

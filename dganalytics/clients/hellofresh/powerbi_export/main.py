@@ -2,16 +2,26 @@ from dganalytics.utils.utils import get_spark_session, export_powerbi_csv
 from dganalytics.connectors.gpc.gpc_utils import get_dbname
 from dganalytics.clients.hellofresh import powerbi_export
 import argparse
+import os
 
 pipelines = {
-    "conversation_metrics_daily_summary": powerbi_export.export_conversion_metrics_daily_summary,
-    "users_primary_presence": powerbi_export.export_users_primary_presence,
     "user_groups_region_sites": powerbi_export.export_user_groups_region_sites,
-    "users_routing_status": powerbi_export.export_users_routing_status,
-    "users_info": powerbi_export.export_users_info,
+    "wrapup_codes": powerbi_export.export_wrapup_codes,
+    "routing_queues": powerbi_export.export_routing_queues,
+    "evaluation_forms_answer_options": powerbi_export.export_evaluation_forms_answer_options,
+    "evaluation_forms_questions": powerbi_export.export_evaluation_forms_questions,
+    "evaluation_details_info": powerbi_export.export_evaluation_details_info,
+    "evaluation_question_scores": powerbi_export.export_evaluation_question_scores,
+    "users_routing_status_sliced": powerbi_export.export_users_routing_status_sliced,
     "user_roles": powerbi_export.export_user_roles,
-    "evaluation_question_scores": powerbi_export.export_evaluation_question_scores
+    "users_info": powerbi_export.export_users_info,
+    "users_primary_presence": powerbi_export.export_users_primary_presence,
+    "conversation_metrics_daily_summary": powerbi_export.export_conversion_metrics_daily_summary,
+    "wfm_day_metrics": powerbi_export.export_wfm_day_metrics,
+    "wfm_actuals": powerbi_export.export_wfm_actuals,
+    "survey_summary": powerbi_export.export_survey_summary
 }
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -28,4 +38,4 @@ if __name__ == "__main__":
     app_name = "genesys_powerbi_extract"
     spark = get_spark_session(app_name, tenant, default_db=db_name)
     df = pipelines[export_name](spark, tenant)
-    export_powerbi_csv(tenant, df, export_name)
+    export_powerbi_csv(tenant, df, os.path.join('current_implementation', export_name))

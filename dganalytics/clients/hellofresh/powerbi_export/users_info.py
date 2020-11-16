@@ -6,7 +6,6 @@ import os
 
 def export_users_info(spark: SparkSession, tenant: str):
 
-    tenant_path, db_path, log_path = get_path_vars(tenant)
     df = spark.sql("""
             select department, division.id as divisionKey, division.id as divisionId, division.name as divisionName, 
 email, id as userKey, id as userId, manager.id as managerKey, manager.id as managerId,

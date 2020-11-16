@@ -29,11 +29,11 @@ dim_evaluation_forms = """
 dim_evaluations = """
             select
                 evaluationId , evaluatorId , agentId , evaluationFormId ,
-                status , date_format(assignedDate, 'yyyyMMdd') assignedDate,
+                status , int(date_format(assignedDate, 'yyyyMMdd')) assignedDate,
                 int(date_format(assignedDate, 'HHmmss')) assignedTime,
-                date_format(releaseDate, 'yyyyMMdd') releaseDate,
+                int(date_format(releaseDate, 'yyyyMMdd')) releaseDate,
                 int(date_format(releaseDate, 'HHmmss')) releaseTime,
-                mediaType, neverRelease
+                mediaType, neverRelease, queueId, wrapUpCode
              from dim_evaluations
             """
 
@@ -126,9 +126,9 @@ fact_evaluation_total_scores = """
 fact_primary_presence = """
             select
                 userId ,
-                date_format(startTime, 'yyyyMMdd') startDate,
+                int(date_format(startTime, 'yyyyMMdd')) startDate,
                 int(date_format(startTime, 'HHmmss')) startTime,
-                date_format(endTime, 'yyyyMMdd') endDate,
+                int(date_format(endTime, 'yyyyMMdd')) endDate,
                 int(date_format(endTime, 'HHmmss')) endTime,
                 systemPresence
             from fact_primary_presence
@@ -137,9 +137,9 @@ fact_primary_presence = """
 fact_routing_status = """
             select
                 userId ,
-                date_format(startTime, 'yyyyMMdd') startDate,
+                int(date_format(startTime, 'yyyyMMdd')) startDate,
                 int(date_format(startTime, 'HHmmss')) startTime,
-                date_format(endTime, 'yyyyMMdd') endDate,
+                int(date_format(endTime, 'yyyyMMdd')) endDate,
                 int(date_format(endTime, 'HHmmss')) endTime,
                 routingStatus
             from fact_routing_status
@@ -149,11 +149,11 @@ fact_wfm_actuals = """
             select
                 userId ,
                 managementUnitId,
-                date_format(from_unixtime(unix_timestamp(startDate) + startOffsetSeconds), 'yyyyMMdd') startDate,
-                int(date_format(from_unixtime(unix_timestamp(startDate) + startOffsetSeconds), 'yyyyMMdd')) startTime,
-                date_format(from_unixtime(unix_timestamp(endDate) + startOffsetSeconds), 'yyyyMMdd') endDate,
-                int(date_format(from_unixtime(unix_timestamp(endDate) + startOffsetSeconds), 'yyyyMMdd')) endTime,
-                actualActivityCategory, (endOffsetSeconds - startOffsetSeconds) duration
+                int(date_format(startDate, 'yyyyMMdd')) startDate,
+                int(date_format(startDate, 'HHmmss')) startTime,
+                int(date_format(endDate, 'yyyyMMdd')) endDate,
+                int(date_format(endDate, 'HHmmss')) endTime,
+                actualActivityCategory, (to_unix_timestamp(endDate) - to_unix_timestamp(startDate)) duration
             from fact_wfm_actuals
             """
 
@@ -161,9 +161,9 @@ fact_wfm_day_metrics = """
             select
                 userId,
                 managementUnitId,
-                date_format(startDate, 'yyyyMMdd') startDate,
+                int(date_format(startDate, 'yyyyMMdd')) startDate,
                 int(date_format(startDate, 'HHmmss')) startTime,
-                date_format(endDate, 'yyyyMMdd') endDate,
+                int(date_format(endDate, 'yyyyMMdd')) endDate,
                 int(date_format(endDate, 'HHmmss')) endTime,
                 actualLengthSecs , adherenceScheduleSecs,
                 conformanceActualSecs , conformanceScheduleSecs,
@@ -175,9 +175,9 @@ fact_wfm_exceptions = """
             select
                 userId,
                 managementUnitId,
-                date_format(startDate, 'yyyyMMdd') startDate,
+                int(date_format(startDate, 'yyyyMMdd')) startDate,
                 int(date_format(startDate, 'HHmmss')) startTime,
-                date_format(endDate, 'yyyyMMdd') endDate,
+                int(date_format(endDate, 'yyyyMMdd')) endDate,
                 int(date_format(endDate, 'HHmmss')) endTime,
                 actualActivityCategory, impact, routingStatus, scheduledActivityCategory,
                 scheduledActivityCodeId, systemPresence, secondaryPresenceId

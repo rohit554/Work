@@ -1,0 +1,369 @@
+{
+    "fields": [
+        {
+            "metadata": {},
+            "name": "agent_score",
+            "nullable": true,
+            "type": "long"
+        },
+        {
+            "metadata": {},
+            "name": "compulsory",
+            "nullable": true,
+            "type": "long"
+        },
+        {
+            "metadata": {},
+            "name": "disabled",
+            "nullable": true,
+            "type": "long"
+        },
+        {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "long"
+        },
+        {
+            "metadata": {},
+            "name": "max_response",
+            "nullable": true,
+            "type": "long"
+        },
+        {
+            "metadata": {},
+            "name": "question_label",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "question_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "sound_files",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    },
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "da-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "de-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "fr-CA",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "fr-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "nl-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "sv-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "question_type",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "response_options",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": {
+                    "fields": [
+                        {
+                            "metadata": {},
+                            "name": "label",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "prompt",
+                            "nullable": true,
+                            "type": {
+                                "fields": [
+                                    {
+                                        "metadata": {},
+                                        "name": "text",
+                                        "nullable": true,
+                                        "type": {
+                                            "fields": [
+                                                {
+                                                    "metadata": {},
+                                                    "name": "da-default",
+                                                    "nullable": true,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "metadata": {},
+                                                    "name": "de-default",
+                                                    "nullable": true,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "metadata": {},
+                                                    "name": "default",
+                                                    "nullable": true,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "metadata": {},
+                                                    "name": "fr-default",
+                                                    "nullable": true,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "metadata": {},
+                                                    "name": "nl-default",
+                                                    "nullable": true,
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "metadata": {},
+                                                    "name": "sv-default",
+                                                    "nullable": true,
+                                                    "type": "string"
+                                                }
+                                            ],
+                                            "type": "struct"
+                                        }
+                                    }
+                                ],
+                                "type": "struct"
+                            }
+                        }
+                    ],
+                    "type": "struct"
+                },
+                "type": "array"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "scale_label_max_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "da-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "de-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "fr-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "nl-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "sv-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "scale_label_mid_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "de-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "fr-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "nl-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "scale_label_min_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "da-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "de-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "fr-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "nl-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "sv-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "timeout",
+            "nullable": true,
+            "type": "long"
+        },
+        {
+            "metadata": {},
+            "name": "transcribe",
+            "nullable": true,
+            "type": "long"
+        }
+    ],
+    "type": "struct"
+}

@@ -2,13 +2,17 @@ from dganalytics.utils.utils import get_spark_session, export_powerbi_csv, get_p
 from pyspark.sql import SparkSession
 from dganalytics.connectors.gpc.gpc_utils import pb_export_parser, get_dbname, gpc_utils_logger
 import os
+import pandas as pd
 
 
 def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str):
 
     tenant_path, db_path, log_path = get_path_vars(tenant)
-    queue_timezones = spark.read.option("header", "true").csv(
-        os.path.join(tenant_path, 'data', 'config', 'Queue_TimeZone_Mapping.csv'))
+    queue_timezones = pd.read_csv(os.path.join(tenant_path, 'data',
+                                               'config', 'Queue_TimeZone_Mapping.csv'), header=0)
+    # queue_mapping = spark.read.option("header", "true").csv(
+    #    os.path.join('file:', tenant_path, 'data', 'config', 'Queue_TimeZone_Mapping.csv'))
+    queue_timezones = spark.createDataFrame(queue_timezones)
     queue_timezones.registerTempTable("queue_timezones")
 
     df = spark.sql("""
@@ -47,7 +51,7 @@ def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str):
 		sum(nHandle) as tHandleCount,
 		sum(round(tHeldComplete ,3)*1000) as tHeld,
 		sum(nHeldComplete) as tHeldCount,
-		sum(round(tHeldComplete ,3)*1000) as tHeldCompleteCount,
+		sum(round(tHeldComplete ,3)*1000) as tHeldComplete,
 		sum(round(tIvr ,3)*1000) as tIvr,
 		sum(round(tNotResponding,3)*1000) as tNotResponding,
 		sum(round(tShortAbandon,3)*1000) as tShortAbandon,

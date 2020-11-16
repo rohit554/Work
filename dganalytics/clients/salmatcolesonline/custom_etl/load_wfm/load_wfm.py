@@ -14,7 +14,11 @@ if __name__ == '__main__':
     tenant_path, db_path, log_path = get_path_vars(tenant)
     print("start loading WFM data for colesonline" + input_file)
 
+    '''
     df = pd.read_csv(
+        "/dbfs/mnt/datagamz/salmatcolesonline/data/raw/verint_wfm/" + input_file)
+    '''
+    df = pd.read_excel(
         "/dbfs/mnt/datagamz/salmatcolesonline/data/raw/verint_wfm/" + input_file)
 
     df = df.rename(columns={

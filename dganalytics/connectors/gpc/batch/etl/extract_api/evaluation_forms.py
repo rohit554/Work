@@ -18,7 +18,22 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str,
     while True:
         i = i + 1
         body = {
-            "pageSize": 100,
+            "pageSize": 1000,
+            "pageNumber": i
+        }
+        resp = rq.get(f"{get_api_url(tenant)}/api/v2/quality/publishedforms/evaluations",
+                      headers=api_headers, params=body)
+        if resp.status_code != 200:
+            logger.exception("Evaluation Forms API Failed" + resp.text)
+
+        if len(resp.json()['entities']) == 0:
+            break
+        evaluation_forms.append(resp.json()['entities'])
+    i = 0
+    while True:
+        i = i + 1
+        body = {
+            "pageSize": 1000,
             "pageNumber": i
         }
         resp = rq.get(f"{get_api_url(tenant)}/api/v2/quality/forms/evaluations",
@@ -31,24 +46,40 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str,
         evaluation_forms.append(resp.json()['entities'])
     evaluation_forms = [item['id']
                         for sublist in evaluation_forms for item in sublist]
-    logger.info("Extracting Evaluation Form Versions")
+    evaluation_forms = list(set(evaluation_forms))
+    '''
+    logger.info("Extracting Evaluation Form Versions " + str(len(evaluation_forms)))
+    j = 0
     for e in evaluation_forms:
+        body = {
+            "pageSize": 1000,
+            "pageNumber": 1
+        }
+        j = j + 1
+        print("getting evluation form versions for " + str(j) + " out of " + str(len(evaluation_forms)))
         versions_resp = rq.get(
-            f"{get_api_url(tenant)}/api/v2/quality/forms/evaluations/{e}/versions", headers=api_headers)
+            f"{get_api_url(tenant)}/api/v2/quality/forms/evaluations/{e}/versions", headers=api_headers, params=body)
         if versions_resp.status_code != 200:
             logger.exception("Evaluation Form Versions API Failed" + versions_resp.text)
+            raise Exception
 
         versions_list.append(versions_resp.json()['entities'])
 
     versions_list = [item for sublist in versions_list for item in sublist]
     versions_list = [item['id'] for item in versions_list]
-
+    '''
     logger.info("Extracting Evaluation Form questions for all Versions")
-    for e in versions_list:
+    logger.info("Extracting Evaluation Forms " + str(len(versions_list)))
+    j = 0
+    # for e in versions_list:
+    for e in evaluation_forms:
+        j = j + 1
+        print("getting evluation form versions for " + str(j) + " out of " + str(len(versions_list)))
         resp = rq.get(
             f"{get_api_url(tenant)}/api/v2/quality/forms/evaluations/{e}", headers=api_headers)
         if resp.status_code != 200:
             logger.exception("Evaluation Forms API Failed" + resp.text)
+            raise Exception
 
         evaluation_forms_list.append(resp.json())
 

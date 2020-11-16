@@ -1,7 +1,7 @@
 import requests as rq
 import json
 from pyspark.sql import SparkSession
-from dganalytics.connectors.gpc.gpc_utils import authorize, get_api_url, process_raw_data
+from dganalytics.connectors.gpc.gpc_utils import process_raw_data
 from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger, gpc_request
 
 

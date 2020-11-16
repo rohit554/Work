@@ -24,7 +24,7 @@
         "factoryId": "[concat('Microsoft.DataFactory/factories/dg', parameters('env'), 'adf')]",
         "factoryname": "[concat('dg', parameters('env'), 'adf')]",
         "AzureKeyVault_baseUrl": "[concat('https://dg', parameters('env') ,'secrets.vault.azure.net/')]",
-        "dailyDay1TriggerStart": "[dateTimeAdd(parameters('baseTime'), 'P1D', 'yyyy-MM-ddT00:00:00Z')]"
+        "dailyDay1TriggerStart": "[dateTimeAdd(parameters('baseTime'), 'P0D', 'yyyy-MM-ddT00:00:00Z')]"
     },
     "resources": [
         {
@@ -1411,14 +1411,12 @@
                         }
                     }
                 ],
-                "type": "ScheduleTrigger",
+                "type": "TumblingWindowTrigger",
                 "typeProperties": {
-                    "recurrence": {
-                        "frequency": "Hour",
-                        "interval": 4,
-                        "startTime": "[variables('dailyDay1TriggerStart')]",
-                        "timeZone": "UTC"
-                    }
+                    "frequency": "Hour",
+                    "interval": 4,
+                    "startTime": "[variables('dailyDay1TriggerStart')]",
+                    "maxConcurrency": 1
                 }
             },
             "dependsOn": [

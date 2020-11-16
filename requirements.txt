@@ -17,3 +17,4 @@ azure-storage-file-datalake
 websocket_client
 dnspython
 pymongo
+xlrd

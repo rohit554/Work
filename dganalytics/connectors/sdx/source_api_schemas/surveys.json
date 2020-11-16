@@ -1,0 +1,461 @@
+{
+    "fields": [
+        {
+            "metadata": {},
+            "name": "closing_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "sound_files",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    },
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "da-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "de-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "fr-CA",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "fr-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "nl-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "sv-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "description",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "email_from_address_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "email_from_name_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "email_subject_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "da-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "de-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "fr-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "nl-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "sv-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "greeting_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "sound_files",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    },
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "da-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "de-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "fr-CA",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "fr-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "nl-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "sv-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "long"
+        },
+        {
+            "metadata": {},
+            "name": "inbound_number",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "instructions_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "da-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "de-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "fr-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "nl-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "sv-default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "invalid_response_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "sound_files",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    },
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "logo_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "name",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "outbound_number",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "redirect_prompt",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "default",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "redirect_timeout",
+            "nullable": true,
+            "type": "long"
+        },
+        {
+            "metadata": {},
+            "name": "sms_number",
+            "nullable": true,
+            "type": "string"
+        }
+    ],
+    "type": "struct"
+}
