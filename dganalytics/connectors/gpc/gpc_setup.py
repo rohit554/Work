@@ -333,6 +333,7 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                     startDate timestamp,
                     startDatePart date,
                     endDate timestamp,
+                    impact string,
                     actualLengthSecs int,
                     adherenceScheduleSecs int,
                     conformanceActualSecs int,

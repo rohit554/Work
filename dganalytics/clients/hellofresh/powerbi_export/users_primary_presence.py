@@ -22,7 +22,6 @@ def export_users_primary_presence(spark: SparkSession, tenant: str):
                     'users_primary_presence' pTableFlag
                 from fact_primary_presence fp, user_timezone ut
                 where fp.userId = ut.userId
-                limit 100000
     """)
 
     return df

@@ -27,10 +27,10 @@ def export_wfm_day_metrics(spark: SparkSession, tenant: str):
                 fw.exceptionCount,
                 fw.exceptionDurationSecs,
                 fw.impactSeconds,
-                fw.scheduleLengthSecs
+                fw.scheduleLengthSecs,
+                fw.impact impact 
             from gpc_hellofresh.fact_wfm_day_metrics fw, user_timezone ut
             where fw.userId = ut.userId
-            limit 100000
     """)
 
     return df

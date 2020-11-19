@@ -21,6 +21,5 @@ def export_wfm_actuals(spark: SparkSession, tenant: str):
                     0 startOffsetSeconds
             from gpc_hellofresh.fact_wfm_actuals fw, user_timezone ut
             where fw.userId = ut.userId
-            limit 100000
     """)
     return df

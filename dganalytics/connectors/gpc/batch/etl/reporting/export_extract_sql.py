@@ -167,7 +167,7 @@ fact_wfm_day_metrics = """
                 int(date_format(endDate, 'HHmmss')) endTime,
                 actualLengthSecs , adherenceScheduleSecs,
                 conformanceActualSecs , conformanceScheduleSecs,
-                dayStartOffsetSecs , exceptionCount , exceptionDurationSecs , impactSeconds , scheduleLengthSecs
+                dayStartOffsetSecs , exceptionCount , exceptionDurationSecs , impactSeconds , scheduleLengthSecs, impact
             from fact_wfm_day_metrics
             """
 

@@ -68,7 +68,6 @@ def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str):
            group by 
            cast(from_utc_timestamp(a.emitDateTime, trim(c.timeZone)) as date), a.originatingDirection,
            a.agentId, a.mediaType, a.messageType, a.wrapUpCode , a.queueId 
-		   limit 100000
     """)
 
     return df

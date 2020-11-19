@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 def fact_wfm_day_metrics(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     wfm_day_metrics = spark.sql(f"""
     select 
-    wfm.userId, managementUnitId, wfm.startDate, wfm.startDatePart, wfm.endDate, 
+    wfm.userId, managementUnitId, wfm.startDate, wfm.startDatePart, wfm.endDate, impact,
         wfm.actualLengthSecs,
 wfm.adherenceScheduleSecs, wfm.conformanceActualSecs, wfm.conformanceScheduleSecs,
 wfm.dayStartOffsetSecs, wfm.exceptionCount, wfm.exceptionDurationSecs,
@@ -16,13 +16,13 @@ cast(replace(replace(startDate, 'Z', ''), 'z', '') as timestamp) + cast(concat("
 cast(cast(replace(replace(startDate, 'Z', ''), 'z', '') as timestamp) + cast(concat("INTERVAL ", dayStartOffsetSecs, " SECONDS") as INTERVAL) as date) as startDatePart,
 coalesce(cast(replace(replace(startDate, 'Z', ''), 'z', '') as timestamp) + 
 	cast(concat("INTERVAL ", nextdayStartOffsetSecs, " SECONDS") as INTERVAL), 
-	cast(replace(replace(endDate, 'Z', ''), 'z', '') as timestamp)) as endDate,
+	cast(replace(replace(endDate, 'Z', ''), 'z', '') as timestamp)) as endDate, impact, 
 actualLengthSecs,
 adherenceScheduleSecs, conformanceActualSecs, conformanceScheduleSecs,
 dayStartOffsetSecs, exceptionCount, exceptionDurationSecs,
 impactSeconds, scheduleLengthSecs, sourceRecordIdentifier, soucePartition
 from (
-select userId, managementUnitId, startDate, endDate, actualsEndDate, dayMetrics.actualLengthSecs,
+select userId, managementUnitId, startDate, endDate, actualsEndDate, impact, dayMetrics.actualLengthSecs,
 dayMetrics.adherenceScheduleSecs, dayMetrics.conformanceActualSecs, dayMetrics.conformanceScheduleSecs,
 dayMetrics.dayStartOffsetSecs, dayMetrics.exceptionCount, dayMetrics.exceptionDurationSecs,
 dayMetrics.impactSeconds, dayMetrics.scheduleLengthSecs,
@@ -30,7 +30,8 @@ lead(dayMetrics.dayStartOffsetSecs) over(partition by userId, startDate order by
 sourceRecordIdentifier, soucePartition
 from (
 select 
-rwa.userId, mu.managementId  as managementUnitId, rwa.startDate, rwa.endDate, rwa.actualsEndDate, explode(rwa.dayMetrics) dayMetrics, 
+rwa.userId, mu.managementId  as managementUnitId, rwa.startDate, rwa.endDate, rwa.actualsEndDate, rwa.impact,
+ explode(rwa.dayMetrics) dayMetrics, 
 rwa.recordIdentifier as sourceRecordIdentifier,
 concat(rwa.extractDate, '|', rwa.extractIntervalStartTime, '|', rwa.extractIntervalEndTime) as soucePartition
 from raw_wfm_adherence rwa, raw_management_unit_users mu

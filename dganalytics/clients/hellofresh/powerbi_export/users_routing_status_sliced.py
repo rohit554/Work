@@ -20,7 +20,6 @@ from_utc_timestamp(frs.startTime, trim(ut.timeZone)) timeSlot,
 'users_routing_status' pTableFlag
 from gpc_hellofresh.fact_routing_status frs, user_timezone ut
     where frs.userId = ut.userId
-    limit 100000
     """)
 
     return df
