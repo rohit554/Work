@@ -42,6 +42,7 @@ where a.evaluationFormId = b.evaluationFormId
 and a.evaluationId = c.evaluationId
 and a.queueId = d.queueId 
             and d.queueName = e.queueName
+            limit 100000
     """)
 
     return df

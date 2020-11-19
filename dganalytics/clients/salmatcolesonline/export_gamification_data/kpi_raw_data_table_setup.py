@@ -34,7 +34,12 @@ spark.sql(f"""
                     CountDailyAcwTimeEmail int,
                     SumDailyAcwTime float,
                     CountDailyAcwTime int,
-                    SumDailyNotRespondingTime float
+                    SumDailyNotRespondingTime float,
+                    CountDailyHandleChat int,
+                    CountDailyHandleEmail int,
+                    CountDailyHandleVoice int,
+                    CountDailyHandleMessage int,
+                    CountDailyHandle int
                 )
                 using delta
                 partitioned by(date)

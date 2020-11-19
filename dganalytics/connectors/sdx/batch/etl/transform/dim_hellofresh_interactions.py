@@ -3,12 +3,24 @@ from pyspark.sql.functions import first
 
 
 def dim_hellofresh_interactions(spark: SparkSession, extract_date, extract_start_time, extract_end_time, tenant):
-    interaction_list = spark.sql(f"""select agent_id, call_type, completed_at,created_at, email, external_ref, id as interaction_id, restricted, scheduled_at, 
-                                  status as statusDescription, survey_id, survey_type, updated_at, respondent_language, interaction_data, responses, cast(created_at as date) as created_at_part
+    interaction_list = spark.sql(f"""
+                        select agent_id, call_type, completed_at,created_at, email, external_ref,
+                            interaction_id, restricted, scheduled_at, 
+                                  statusDescription, survey_id, survey_type, updated_at,
+                                  respondent_language, interaction_data, responses,
+                                  created_at_part
+                             from (
+                        select agent_id, call_type, completed_at,created_at, email, external_ref,
+                                        id as interaction_id, restricted, scheduled_at, 
+                                  status as statusDescription, survey_id, survey_type, updated_at,
+                                  respondent_language, interaction_data, responses,
+                                  cast(created_at as date) as created_at_part,
+                                  row_number() over(partition by id order by updated_at desc) as rn
                                from raw_interactions
                                where extractDate = '{extract_date}'
                             and  extractIntervalStartTime = '{extract_start_time}'
-                             and extractIntervalEndTime = '{extract_end_time}' """)
+                             and extractIntervalEndTime = '{extract_end_time}' 
+                             ) where rn = 1""")
     interaction_list.registerTempTable("interaction_list")
     interaction_data = spark.sql(
         """select col.* from (select explode(interaction_data) from interaction_list)""")
@@ -110,19 +122,13 @@ def dim_hellofresh_interactions(spark: SparkSession, extract_date, extract_start
                 when not matched then insert *
             """)
 
-    spark.sql("""
-            merge into dim_hellofresh_interactions as target
-                using gpc_hellofresh.dim_wrapup_codes as source
-                    on source.wrapupCode = wrapUpName
-                when matched then 
-                    update set target.wrapUpCodeKey = source.wrapupId
-            """)
     spark.sql(f"""
             merge into dim_hellofresh_interactions as target
                 using gpc_hellofresh.dim_wrapup_codes as source
                     on source.wrapupCode = target.wrapUpName
                     and target.wrapUpCodeKey is null
                     and target.surveySentDatePart >= (cast('{extract_date}' as date) - 35)
+                    and target.surveySentDatePart <= (cast('{extract_date}' as date) + 2)
                 when matched then 
                     update set target.wrapUpCodeKey = source.wrapupId
             """)

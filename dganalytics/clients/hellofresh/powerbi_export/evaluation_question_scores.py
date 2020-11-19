@@ -13,6 +13,7 @@ a.questionId questionKey,
 a.score
 from gpc_hellofresh.fact_evaluation_question_scores a, gpc_hellofresh.dim_evaluations b
 where a.evaluationId = b.evaluationId
+limit 100000
     """)
 
     return df

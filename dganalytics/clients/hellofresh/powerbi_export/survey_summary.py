@@ -61,6 +61,7 @@ def export_survey_summary(spark: SparkSession, tenant: str):
                 a.originatingDirection
 from sdx_hellofresh.dim_hellofresh_interactions a left join queue_mapping e
 where trim(lower(a.callType)) = trim(lower(e.queueName))
+limit 100000
     """)
 
     return df

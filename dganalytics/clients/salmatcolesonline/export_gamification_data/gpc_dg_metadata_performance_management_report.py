@@ -12,7 +12,8 @@ select
 		SumDailyQAScoreEmail, CountDailyQAScoreEmail, SumDailyQAScore, CountDailyQAScore, SumDailyHoldTimeVoice, CountDailyHoldTimeVoice, 
 		SumDailyHoldTimeMessage, CountDailyHoldTimeMessage, SumDailyHoldTimeEmail, CountDailyHoldTimeEmail, 
 		SumDailyHoldTime, CountDailyHoldTime, SumDailyAcwTimeVoice, CountDailyAcwTimeVoice, SumDailyAcwTimeMessage, CountDailyAcwTimeMessage, 
-		SumDailyAcwTimeEmail, CountDailyAcwTimeEmail, SumDailyAcwTime, CountDailyAcwTime, SumDailyNotRespondingTime
+		SumDailyAcwTimeEmail, CountDailyAcwTimeEmail, SumDailyAcwTime, CountDailyAcwTime, SumDailyNotRespondingTime,
+		CountDailyHandleChat, CountDailyHandleEmail, CountDailyHandleVoice, CountDailyHandleMessage, CountDailyHandle
 from
 	(
 	select
@@ -23,7 +24,8 @@ from
 		SumDailyQAScoreEmail, CountDailyQAScoreEmail, SumDailyQAScore, CountDailyQAScore, SumDailyHoldTimeVoice, CountDailyHoldTimeVoice, 
 		SumDailyHoldTimeMessage, CountDailyHoldTimeMessage, SumDailyHoldTimeEmail, CountDailyHoldTimeEmail, 
 		SumDailyHoldTime, CountDailyHoldTime, SumDailyAcwTimeVoice, CountDailyAcwTimeVoice, SumDailyAcwTimeMessage, CountDailyAcwTimeMessage, 
-		SumDailyAcwTimeEmail, CountDailyAcwTimeEmail, SumDailyAcwTime, CountDailyAcwTime, SumDailyNotRespondingTime
+		SumDailyAcwTimeEmail, CountDailyAcwTimeEmail, SumDailyAcwTime, CountDailyAcwTime, SumDailyNotRespondingTime,
+		CountDailyHandleChat, CountDailyHandleEmail, CountDailyHandleVoice, CountDailyHandleMessage, CountDailyHandle
 	from
 		(
 		select
@@ -33,7 +35,8 @@ from
 				SumDailyHoldTimeVoice, CountDailyHoldTimeVoice, 
 		SumDailyHoldTimeMessage, CountDailyHoldTimeMessage, SumDailyHoldTimeEmail, CountDailyHoldTimeEmail, 
 		SumDailyHoldTime, CountDailyHoldTime, SumDailyAcwTimeVoice, CountDailyAcwTimeVoice, SumDailyAcwTimeMessage, CountDailyAcwTimeMessage, 
-		SumDailyAcwTimeEmail, CountDailyAcwTimeEmail, SumDailyAcwTime, CountDailyAcwTime, SumDailyNotRespondingTime
+		SumDailyAcwTimeEmail, CountDailyAcwTimeEmail, SumDailyAcwTime, CountDailyAcwTime, SumDailyNotRespondingTime, CountDailyHandleChat, 
+		CountDailyHandleEmail, CountDailyHandleVoice, CountDailyHandleMessage, CountDailyHandle
 		from
 			(
 			SELECT
@@ -53,7 +56,12 @@ from
 				sum(case when lower(mediaType) = 'email' then coalesce(tAcw, 0) else 0 end) as SumDailyAcwTimeEmail, 
 				sum(case when lower(mediaType) = 'email' then coalesce(nAcw , 0) else 0 end) as CountDailyAcwTimeEmail, 
 				sum(coalesce(tAcw, 0)) as SumDailyAcwTime,
-				sum(coalesce(nAcw , 0)) as CountDailyAcwTime
+				sum(coalesce(nAcw , 0)) as CountDailyAcwTime,
+				sum(case when lower(mediaType) = 'chat' then coalesce(nHandle , 0) else 0 end) as CountDailyHandleChat, 
+				sum(case when lower(mediaType) = 'email' then coalesce(nHandle , 0) else 0 end) as CountDailyHandleEmail, 
+				sum(case when lower(mediaType) = 'voice' then coalesce(nHandle , 0) else 0 end) as CountDailyHandleVoice, 
+				sum(case when lower(mediaType) = 'message' then coalesce(nHandle , 0) else 0 end) as CountDailyHandleMessage, 
+				sum(coalesce(nHandle , 0)) as CountDailyHandle
 			FROM
 				fact_conversation_metrics
 			WHERE

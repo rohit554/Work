@@ -9,7 +9,7 @@ spark = get_spark_session(app_name=app_name, tenant=tenant)
 
 
 spark.sql(f"""
-        create table if not exists 
+        create table if not exists
             dg_performance_management.hellofresh_kpi_raw_data
             (
                 userId string,
@@ -26,7 +26,7 @@ spark.sql(f"""
         """)
 
 spark.sql(f"""
-        create table if not exists 
+        create table if not exists
             dg_performance_management.hellofresh_users
             (
                 userId string,
