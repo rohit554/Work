@@ -20,13 +20,9 @@ a.answerId answerKey,
 a.markedNA,
 a.questionId questionKey,
 a.score
-from gpc_hellofresh.fact_evaluation_question_scores a, gpc_hellofresh.dim_evaluations b,
-gpc_hellofresh.dim_routing_queues d, queue_mapping e
+from gpc_hellofresh.fact_evaluation_question_scores a, gpc_hellofresh.dim_evaluations b
 where a.evaluationId = b.evaluationId
 and a.conversationDatePart = b.conversationDatePart
-and b.queueId = d.queueId
-and d.queueName = e.queueName
-and e.region {" = 'US'" if region == 'US' else " <> 'US'"}
     """)
 
     return df

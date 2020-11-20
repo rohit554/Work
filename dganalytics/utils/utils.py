@@ -61,7 +61,7 @@ def export_powerbi_csv(tenant, df, file_name):
 
     op_file = os.path.join(
         f"{tenant_path}", 'data', 'pbdatasets', f"{file_name}")
-    df.write.mode("overwrite").option("header", True).opion("encoding", "utf-16").option("timestampFormat",
+    df.write.mode("overwrite").option("header", True).option("encoding", "utf-16").option("timestampFormat",
     "yyyy-MM-dd HH:mm:ss")\
         .option("escape", '"').option("quote", '"').option("quoteMode",
                                                            "NON_NUMERIC").option("dateFormat", "yyyy-MM-dd").csv(op_file)

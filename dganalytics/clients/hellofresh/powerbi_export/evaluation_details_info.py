@@ -44,7 +44,6 @@ and a.evaluationId = c.evaluationId
 and a.conversationDatePart = c.conversationDatePart
 and a.queueId = d.queueId
             and d.queueName = e.queueName
-            and e.region {" = 'US'" if region == 'US' else " <> 'US'"}
     """)
 
     return df
