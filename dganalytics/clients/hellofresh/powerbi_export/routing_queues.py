@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 
-def export_routing_queues(spark: SparkSession, tenant: str):
+def export_routing_queues(spark: SparkSession, tenant: str, region: str):
     tenant_path, db_path, log_path = get_path_vars(tenant)
     queue_mapping = pd.read_csv(os.path.join(tenant_path, 'data',
                                              'config', 'Queue_TimeZone_Mapping.csv'), header=0)

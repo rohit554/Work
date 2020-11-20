@@ -37,5 +37,8 @@ if __name__ == "__main__":
 
     app_name = "genesys_powerbi_extract"
     spark = get_spark_session(app_name, tenant, default_db=db_name)
-    df = pipelines[export_name](spark, tenant)
-    export_powerbi_csv(tenant, df, export_name)
+    df = pipelines[export_name](spark, tenant, 'US')
+    export_powerbi_csv(tenant, df, os.path.join('US', export_name))
+
+    df = pipelines[export_name](spark, tenant, 'nonUS')
+    export_powerbi_csv(tenant, df, os.path.join('nonUS', export_name))

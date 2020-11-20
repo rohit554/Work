@@ -14,13 +14,13 @@ if __name__ == "__main__":
     tenants = [
         {
             "name": "salmatcolesonline",
-            "pb_workspace": "b09cb911-9e40-45a9-892f-3061a249a8ec",
-            "pb_roi_dataset": "2b8a0763-451c-40f2-a05d-54acb6c50ea8"
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": "8db1907d-47aa-408e-a196-42c15218fb6e"
         },
         {
             "name": "atnt",
-            "pb_workspace": "",
-            "pb_roi_dataset": ""
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": "9127c77a-bc06-4dd3-a006-d9ee6a7b25e7"
         }
     ]
     app_name = "performance_management_powerbi_export"

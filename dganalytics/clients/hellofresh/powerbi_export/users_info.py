@@ -4,7 +4,7 @@ from dganalytics.connectors.gpc.gpc_utils import pb_export_parser, get_dbname, g
 import os
 
 
-def export_users_info(spark: SparkSession, tenant: str):
+def export_users_info(spark: SparkSession, tenant: str, region: str):
 
     df = spark.sql("""
             select department, division.id as divisionKey, division.id as divisionId, division.name as divisionName, 

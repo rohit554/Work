@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 
-def export_survey_summary(spark: SparkSession, tenant: str):
+def export_survey_summary(spark: SparkSession, tenant: str, region: str):
     tenant_path, db_path, log_path = get_path_vars(tenant)
     queue_mapping = pd.read_csv(os.path.join(tenant_path, 'data',
                                              'config', 'Queue_TimeZone_Mapping.csv'), header=0)
@@ -13,7 +13,7 @@ def export_survey_summary(spark: SparkSession, tenant: str):
     queue_mapping = spark.createDataFrame(queue_mapping)
     queue_mapping.registerTempTable("queue_mapping")
 
-    df = spark.sql("""
+    df = spark.sql(f"""
            select 
                 a.surveyId,
                 a.agentId,
@@ -60,7 +60,8 @@ def export_survey_summary(spark: SparkSession, tenant: str):
                 a.usCsatMaxResponse,
                 a.originatingDirection
 from sdx_hellofresh.dim_hellofresh_interactions a left join queue_mapping e
-where trim(lower(a.callType)) = trim(lower(e.queueName))
+on trim(lower(a.callType)) = trim(lower(e.queueName))
+    where e.region {" = 'US'" if region == 'US' else " <> 'US'"}
     """)
 
     return df

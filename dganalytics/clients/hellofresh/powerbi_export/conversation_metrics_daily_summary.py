@@ -5,7 +5,7 @@ import os
 import pandas as pd
 
 
-def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str):
+def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str, region: str):
 
     tenant_path, db_path, log_path = get_path_vars(tenant)
     queue_timezones = pd.read_csv(os.path.join(tenant_path, 'data',
@@ -15,7 +15,7 @@ def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str):
     queue_timezones = spark.createDataFrame(queue_timezones)
     queue_timezones.registerTempTable("queue_timezones")
 
-    df = spark.sql("""
+    df = spark.sql(f"""
             select 
 	cast(from_utc_timestamp(a.emitDateTime, trim(c.timeZone)) as date) as emitDate, a.originatingDirection,
 		'' purpose , a.agentId userKey, a.mediaType, a.messageType, a.wrapUpCode wrapUpCodeKey, a.queueId queueKey,
@@ -63,9 +63,10 @@ def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str):
 		sum(nTalkComplete) as tTalkCompleteCount,
 		sum(nHeldComplete) as tHeldCompleteCount
         from gpc_hellofresh.fact_conversation_metrics a, gpc_hellofresh.dim_routing_queues b, queue_timezones c
-        where a.queueId = b.queueId 
+        where a.queueId = b.queueId
             and b.queueName = c.queueName
-           group by 
+			and c.region {" = 'US'" if region == 'US' else " <> 'US'"}
+           group by
            cast(from_utc_timestamp(a.emitDateTime, trim(c.timeZone)) as date), a.originatingDirection,
            a.agentId, a.mediaType, a.messageType, a.wrapUpCode , a.queueId 
     """)

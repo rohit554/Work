@@ -3,14 +3,14 @@ from pyspark.sql import SparkSession
 import os
 import pandas as pd
 
-def export_wfm_actuals(spark: SparkSession, tenant: str):
+def export_wfm_actuals(spark: SparkSession, tenant: str, region: str):
 
     tenant_path, db_path, log_path = get_path_vars(tenant)
     user_timezone = pd.read_csv(os.path.join(tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'), header=0)
     user_timezone = spark.createDataFrame(user_timezone)
     user_timezone.registerTempTable("user_timezone")
 
-    df = spark.sql("""
+    df = spark.sql(f"""
            select
                     fw.userId userKey,
                     from_utc_timestamp(fw.startDate, trim(ut.timeZone)) startDate,
@@ -21,5 +21,6 @@ def export_wfm_actuals(spark: SparkSession, tenant: str):
                     0 startOffsetSeconds
             from gpc_hellofresh.fact_wfm_actuals fw, user_timezone ut
             where fw.userId = ut.userId
+            and ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
     """)
     return df

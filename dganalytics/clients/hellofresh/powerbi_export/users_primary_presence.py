@@ -5,7 +5,7 @@ import os
 import pandas as pd
 
 
-def export_users_primary_presence(spark: SparkSession, tenant: str):
+def export_users_primary_presence(spark: SparkSession, tenant: str, region: str):
 
     tenant_path, db_path, log_path = get_path_vars(tenant)
     user_timezone = pd.read_csv(os.path.join(
@@ -13,7 +13,7 @@ def export_users_primary_presence(spark: SparkSession, tenant: str):
     user_timezone = spark.createDataFrame(user_timezone)
     user_timezone.registerTempTable("user_timezone")
 
-    df = spark.sql("""
+    df = spark.sql(f"""
             select 
                 fp.userId as UserKey, fp.userId, 
                     from_utc_timestamp(fp.startTime, trim(ut.timeZone)) startTime,
@@ -22,6 +22,7 @@ def export_users_primary_presence(spark: SparkSession, tenant: str):
                     'users_primary_presence' pTableFlag
                 from fact_primary_presence fp, user_timezone ut
                 where fp.userId = ut.userId
+                    and ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
     """)
 
     return df

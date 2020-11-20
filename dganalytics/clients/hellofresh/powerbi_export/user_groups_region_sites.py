@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 
-def export_user_groups_region_sites(spark: SparkSession, tenant: str):
+def export_user_groups_region_sites(spark: SparkSession, tenant: str, region: str):
 
     tenant_path, db_path, log_path = get_path_vars(tenant)
     group_timezones = pd.read_csv(os.path.join(
