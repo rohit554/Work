@@ -6,11 +6,14 @@ import pandas as pd
 
 def export_survey_summary(spark: SparkSession, tenant: str, region: str):
     tenant_path, db_path, log_path = get_path_vars(tenant)
-    queue_mapping = pd.read_csv(os.path.join(tenant_path, 'data',
-                                             'config', 'Queue_TimeZone_Mapping.csv'), header=0)
-    # queue_mapping = spark.read.option("header", "true").csv(
-    #    os.path.join('file:', tenant_path, 'data', 'config', 'Queue_TimeZone_Mapping.csv'))
-    queue_mapping = spark.createDataFrame(queue_mapping)
+    queue_timezones = pd.read_json(os.path.join(tenant_path, 'data',
+                                                'config', 'Queue_TimeZone_Mapping.json'))
+    queue_timezones = pd.DataFrame(queue_timezones['values'].tolist())
+    header = queue_timezones.iloc[0]
+    queue_timezones = queue_timezones[1:]
+    queue_timezones.columns = header
+
+    queue_mapping = spark.createDataFrame(queue_timezones)
     queue_mapping.registerTempTable("queue_mapping")
 
     df = spark.sql(f"""

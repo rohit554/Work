@@ -7,8 +7,17 @@ import pandas as pd
 def export_user_groups_region_sites(spark: SparkSession, tenant: str, region: str):
 
     tenant_path, db_path, log_path = get_path_vars(tenant)
+    '''
     group_timezones = pd.read_csv(os.path.join(
         tenant_path, 'data', 'config', 'DG_Team_Group_Site_TimeZone_Mapping.csv'), header=0)
+    '''
+    group_timezones = pd.read_json(os.path.join(
+        tenant_path, 'data', 'config', 'DG_Team_Group_Site_TimeZone_Mapping.json'))
+    group_timezones = pd.DataFrame(group_timezones['values'].tolist())
+    header = group_timezones.iloc[0]
+    group_timezones = group_timezones[1:]
+    group_timezones.columns = header
+
     group_timezones = spark.createDataFrame(group_timezones)
     group_timezones.registerTempTable("group_timezones")
 
