@@ -56,15 +56,19 @@ def get_mongo_conxn(mongodb_conxnx_uri):
 
 def export_powerbi_csv(tenant, df, file_name):
     tenant_path, db_path, log_path = get_path_vars(tenant)
+    old_path = tenant_path
     if "dbfs" in tenant_path:
         tenant_path = "file://" + tenant_path
 
     op_file = os.path.join(
         f"{tenant_path}", 'data', 'pbdatasets', f"{file_name}")
+    shutil.rmtree(os.path.join(
+        f"{old_path}", 'data', 'pbdatasets', f"{file_name}"))
     df.write.mode("overwrite").option("header", True).option("encoding", "utf-16").option("timestampFormat",
-    "yyyy-MM-dd HH:mm:ss")\
+                                                                                          "yyyy-MM-dd HH:mm:ss")\
         .option("escape", '"').option("quote", '"').option("quoteMode",
                                                            "NON_NUMERIC").option("dateFormat", "yyyy-MM-dd").csv(op_file)
+
 
 def get_env():
     try:
@@ -73,8 +77,16 @@ def get_env():
             raise Exception(
                 "Please configure datagamz_env - local/dev/uat/prd")
     except Exception as e:
-        raise Exception(
-            "Please configure datagamz_env - local/dev/uat/prd")
+        tenant_path, db_path, log_path = get_path_vars('datagamz')
+        if os.path.exists(os.path.join(tenant_path, 'env.txt')):
+            with open(os.path.join(tenant_path, 'env.txt'), 'r') as f:
+                environment = f.read()
+                if environment not in ["local", "dev", "uat", "prd"]:
+                    raise Exception(
+                        "Please configure datagamz_env - local/dev/uat/prd")
+        else:
+            raise Exception(
+                "Please configure datagamz_env - local/dev/uat/prd")
     return environment
 
 
@@ -255,10 +267,10 @@ def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_
                                ("spark.sql.shuffle.partitions", 5),
                                ("spark.databricks.delta.snapshotPartitions", 3)
                                ])
-                               #,
-                               #("spark.executor.extraJavaOptions",
-                               # "-Duser.timezone=UTC"),
-                               #("spark.sql.session.timeZone", "UTC") 
+    # ,
+    # ("spark.executor.extraJavaOptions",
+    # "-Duser.timezone=UTC"),
+    #("spark.sql.session.timeZone", "UTC")
 
     if addtl_conf:
         for k, v in addtl_conf.items():

@@ -24,7 +24,7 @@
         "factoryId": "[concat('Microsoft.DataFactory/factories/dg', parameters('env'), 'adf')]",
         "factoryname": "[concat('dg', parameters('env'), 'adf')]",
         "AzureKeyVault_baseUrl": "[concat('https://dg', parameters('env') ,'secrets.vault.azure.net/')]",
-        "dailyDay1TriggerStart": "[dateTimeAdd(parameters('baseTime'), 'P0D', 'yyyy-MM-ddT00:00:00Z')]"
+        "dailyDay1TriggerStart": "[dateTimeAdd(parameters('baseTime'), 'P0D', 'yyyy-MM-ddT00:30:00Z')]"
     },
     "resources": [
         {
@@ -645,6 +645,53 @@
                             "referenceName": "AzureDatabricks",
                             "type": "LinkedServiceReference"
                         }
+                    },
+                    {
+                        "name": "powerbi_refresh",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "survey_summary",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "wfm_actuals",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "wfm_day_metrics",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "conversation_metrics_daily_summary",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/powerbi_refresh.py",
+                            "parameters": [
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
                     }
                 ],
                 "concurrency": 1,
@@ -675,7 +722,7 @@
                 "type": "TumblingWindowTrigger",
                 "typeProperties": {
                     "frequency": "Hour",
-                    "interval": 8,
+                    "interval": 6,
                     "startTime": "[variables('dailyDay1TriggerStart')]",
                     "maxConcurrency": 1
                 }

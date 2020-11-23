@@ -40,14 +40,14 @@ def dim_hellofresh_interactions(spark: SparkSession, extract_date, extract_start
                                                                              'Open text', 'US CSAT']
                                                           ).agg(first('response'),
                                                                 first('max_response'))
-    responses = responses.selectExpr("interaction_id", "substring(replace(replace(replace(replace(`Comments_first(response, false)`, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' '),0,3900) as Comments", "`CSAT_first(response, false)` as csat",
-                                     "`CSAT_first(max_response, false)` as csatMaxResponse", "`Improvement Categories_first(response, false)` as improvementCategories",
-                                     "`Agent CSAT_first(response, false)` as agentCsat", "`Agent CSAT_first(max_response, false)` as agentCsatMaxResponse", "`FCR_first(response, false)` as fcr",
-                                     "`FCR_first(max_response, false)` as fcrMaxResponse", "`CC NPS_first(response, false)` as nps", "`CC NPS_first(max_response, false)` as npsMaxResponse",
-                                     "`CES_first(response, false)` as ces", "`CES_first(max_response, false)` as cesMaxResponse",
-                                     "substring(replace(replace(replace(replace(`Open text_first(response, false)`, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' '), 0, 3900) as openText",
-                                     "`Self-serve CSAT_first(response, false)` as selServerCsat", "`Self-serve CSAT_first(max_response, false)` as selServerCsatMaxResponse",
-                                     "`US CSAT_first(response, false)` as usCsat", "`US CSAT_first(max_response, false)` as usCsatMaxResponse")
+    responses = responses.selectExpr("interaction_id", "substring(replace(replace(replace(replace(`Comments_first(response)`, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' '),0,3900) as Comments", "`CSAT_first(response)` as csat",
+                                     "`CSAT_first(max_response)` as csatMaxResponse", "`Improvement Categories_first(response)` as improvementCategories",
+                                     "`Agent CSAT_first(response)` as agentCsat", "`Agent CSAT_first(max_response)` as agentCsatMaxResponse", "`FCR_first(response)` as fcr",
+                                     "`FCR_first(max_response)` as fcrMaxResponse", "`CC NPS_first(response)` as nps", "`CC NPS_first(max_response)` as npsMaxResponse",
+                                     "`CES_first(response)` as ces", "`CES_first(max_response)` as cesMaxResponse",
+                                     "substring(replace(replace(replace(replace(`Open text_first(response)`, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' '), 0, 3900) as openText",
+                                     "`Self-serve CSAT_first(response)` as selServerCsat", "`Self-serve CSAT_first(max_response)` as selServerCsatMaxResponse",
+                                     "`US CSAT_first(response)` as usCsat", "`US CSAT_first(max_response)` as usCsatMaxResponse")
     interactions = interaction_list.join(interaction_data, on=[
                                          'interaction_id'], how="left").join(responses, on=['interaction_id'], how='left')
 
