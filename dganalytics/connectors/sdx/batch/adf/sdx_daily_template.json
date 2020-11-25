@@ -280,6 +280,7 @@
                 "typeProperties": {
                     "frequency": "Hour",
                     "interval": 12,
+                    "delay": "00:05:00",
                     "startTime": "[variables('dailyDay1TriggerStart')]",
                     "maxConcurrency": 1
                 }
