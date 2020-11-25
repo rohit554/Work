@@ -21,9 +21,9 @@
              "args": [
                  "--tenant=hellofresh",
                 "--run_id=t2",
-                 "--extract_start_time=2020-10-20T12:00:00Z",
+                 "--extract_start_time=2020-10-20T00:00:00Z",
                  "--extract_end_time=2020-10-21T00:00:00Z",
-                 "--api_name=evaluation_forms",
+                 "--api_name=interactions",
                  "--transformation=dim_hellofresh_interactions",
                  "--org_id=salmatcolesonline",
                  "--pipeline=tp_kpi_raw_data",

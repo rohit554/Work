@@ -26,6 +26,11 @@ if __name__ == "__main__":
             "name": "holden",
             "pb_workspace": "",
             "pb_roi_dataset": ""
+        },
+        {
+            "name": "walmart",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
         }
     ]
     app_name = "performance_management_powerbi_export"
@@ -35,6 +40,7 @@ if __name__ == "__main__":
     tables = ["activity_wise_points", "badges", "campaign", "challenges", "levels", "logins", "questions",
               "quizzes", "user_campaign", "users", "tp_kpi_raw_data", "tp_campaign_activities"]
     for tenant in tenants:
+        print(f"generatin ROI csv files for {tenant}")
         for table in tables:
             df = spark.sql(
                 f"select * from dg_performance_management.{table} where orgId = '{tenant['name']}'")

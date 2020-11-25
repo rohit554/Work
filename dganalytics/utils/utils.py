@@ -63,7 +63,7 @@ def export_powerbi_csv(tenant, df, file_name):
     op_file = os.path.join(
         f"{tenant_path}", 'data', 'pbdatasets', f"{file_name}")
     shutil.rmtree(os.path.join(
-        f"{old_path}", 'data', 'pbdatasets', f"{file_name}"))
+        f"{old_path}", 'data', 'pbdatasets', f"{file_name}"), ignore_errors=True)
     df.write.mode("overwrite").option("header", True).option("encoding", "utf-16").option("timestampFormat",
                                                                                           "yyyy-MM-dd HH:mm:ss")\
         .option("escape", '"').option("quote", '"').option("quoteMode",
@@ -79,12 +79,14 @@ def get_env():
     except Exception as e:
         tenant_path, db_path, log_path = get_path_vars('datagamz')
         if os.path.exists(os.path.join(tenant_path, 'env.txt')):
+            print("check for environment file - exists")
             with open(os.path.join(tenant_path, 'env.txt'), 'r') as f:
-                environment = f.read()
+                environment = f.readline().strip()
                 if environment not in ["local", "dev", "uat", "prd"]:
                     raise Exception(
                         "Please configure datagamz_env - local/dev/uat/prd")
         else:
+            print("check for environment file - does not exists")
             raise Exception(
                 "Please configure datagamz_env - local/dev/uat/prd")
     return environment

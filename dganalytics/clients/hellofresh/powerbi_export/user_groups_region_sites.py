@@ -27,7 +27,7 @@ def export_user_groups_region_sites(spark: SparkSession, tenant: str, region: st
 	a.userId, a.groupName groupName, b.region, b.site, b.timeZone, 
 	row_number() over(partition by a.userId order by a.groupName) as rn
 	from gpc_hellofresh.dim_user_groups a, group_timezones b
-	where a.groupName  = b.agentGroupName
+	where lower(a.groupName)  = lower(b.agentGroupName)
 	) where rn= 1
 
         """)

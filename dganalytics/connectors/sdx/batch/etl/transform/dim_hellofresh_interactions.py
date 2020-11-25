@@ -128,7 +128,6 @@ def dim_hellofresh_interactions(spark: SparkSession, extract_date, extract_start
                     on source.wrapupCode = target.wrapUpName
                     and target.wrapUpCodeKey is null
                     and target.surveySentDatePart >= (cast('{extract_date}' as date) - 35)
-                    and target.surveySentDatePart <= (cast('{extract_date}' as date) + 2)
                 when matched then 
                     update set target.wrapUpCodeKey = source.wrapupId
             """)
@@ -138,7 +137,6 @@ def dim_hellofresh_interactions(spark: SparkSession, extract_date, extract_start
                     on source.userEmail = target.agentEmail
                     and target.userKey is null
                     and target.surveySentDatePart >= (cast('{extract_date}' as date) - 35)
-                    and target.surveySentDatePart <= (cast('{extract_date}' as date) + 2)
                 when matched then 
                     update set target.userKey = source.userId
             """)
@@ -148,7 +146,6 @@ def dim_hellofresh_interactions(spark: SparkSession, extract_date, extract_start
                     on split(source.userEmail, '@')[0] = split(target.agentEmail, '-')[1]
                     and target.userKey is null
                     and target.surveySentDatePart >= (cast('{extract_date}' as date) - 35)
-                    and target.surveySentDatePart <= (cast('{extract_date}' as date) + 2)
                 when matched then 
                     update set target.userKey = source.userId
             """)
@@ -159,7 +156,6 @@ def dim_hellofresh_interactions(spark: SparkSession, extract_date, extract_start
                     on source.queueName = target.callType
                     and target.queueKey is null
                     and target.surveySentDatePart >= (cast('{extract_date}' as date) - 35)
-                    and target.surveySentDatePart <= (cast('{extract_date}' as date) + 2)
                 when matched then 
                     update set target.queueKey = source.queueId
             """)
@@ -168,11 +164,10 @@ def dim_hellofresh_interactions(spark: SparkSession, extract_date, extract_start
             merge into dim_hellofresh_interactions as target
                 using (select distinct conversationId, originatingDirection from gpc_hellofresh.dim_conversations 
                         where conversationStartDate >= (cast('{extract_date}' as date) - 40)
-                        and conversationStartDate <= (cast('{extract_date}' as date) + 3)) as source
+                        ) as source
                     on source.conversationId = target.conversationId
                     and target.originatingDirection is null
                     and target.surveySentDatePart >= (cast('{extract_date}' as date) - 35)
-                    and target.surveySentDatePart <= (cast('{extract_date}' as date) + 2)
                 when matched then
                     update set target.originatingDirection = source.originatingDirection
             """)

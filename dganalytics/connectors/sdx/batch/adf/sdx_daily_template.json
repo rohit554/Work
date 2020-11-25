@@ -153,7 +153,7 @@
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],
                         "policy": {
-                            "timeout": "00:30:00",
+                            "timeout": "02:00:00",
                             "retry": 0,
                             "retryIntervalInSeconds": 1800,
                             "secureOutput": false,
@@ -271,7 +271,7 @@
                         },
                         "parameters": {
                             "tenant": "[parameters('tenant')]",
-                            "extract_start_time": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ssZ')}",
+                            "extract_start_time": "@{formatDateTime(dateTimeAdd(trigger().outputs.windowStartTime, '-P15D'),'yyyy-MM-ddTHH:mm:ssZ')}",
                             "extract_end_time": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddTHH:mm:ssZ')}"
                         }
                     }
@@ -279,7 +279,7 @@
                 "type": "TumblingWindowTrigger",
                 "typeProperties": {
                     "frequency": "Hour",
-                    "interval": 4,
+                    "interval": 12,
                     "startTime": "[variables('dailyDay1TriggerStart')]",
                     "maxConcurrency": 1
                 }
