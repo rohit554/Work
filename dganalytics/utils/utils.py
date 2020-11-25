@@ -73,22 +73,24 @@ def export_powerbi_csv(tenant, df, file_name):
 def get_env():
     try:
         environment = os.environ['datagamz_env']
-        if environment not in ["local", "dev", "uat", "prd"]:
-            raise Exception(
-                "Please configure datagamz_env - local/dev/uat/prd")
+        # if environment not in ["local", "dev", "uat", "prd"]:
+        #     raise Exception(
+        #         "Please configure datagamz_env - local/dev/uat/prd")
     except Exception as e:
-        tenant_path, db_path, log_path = get_path_vars('datagamz')
-        if os.path.exists(os.path.join(tenant_path, 'env.txt')):
-            print("check for environment file - exists")
-            with open(os.path.join(tenant_path, 'env.txt'), 'r') as f:
-                environment = f.readline().strip()
-                if environment not in ["local", "dev", "uat", "prd"]:
-                    raise Exception(
-                        "Please configure datagamz_env - local/dev/uat/prd")
-        else:
-            print("check for environment file - does not exists")
-            raise Exception(
-                "Please configure datagamz_env - local/dev/uat/prd")
+        try:
+            secret_name = 'datagamz-env'
+            dbutils = get_dbutils()
+            environment = dbutils.secrets.get(scope='dgsecretscope', key=secret_name)
+        except Exception as e:
+            try:
+                logging.warning("Failed to read secrets from dbutils. Reading secrets.json")
+                print("Falling back to reading secrets.json")
+                with open(os.path.join(os.path.expanduser("~"), "datagamz", "analytics", "secrets.json")) as f:
+                    secrets = json.loads(f.read())
+                environment = secrets[secret_name]
+            except:
+                logging.error("Failed to load environment name. Please check configurations")
+                raise
     return environment
 
 
