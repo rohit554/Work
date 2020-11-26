@@ -31,7 +31,58 @@ if __name__ == "__main__":
             "name": "walmart",
             "pb_workspace": "",
             "pb_roi_dataset": ""
-        }
+        },
+        {
+            "name": "adobe",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
+        },
+        {
+            "name": "ingram",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
+        },
+        {
+            "name": "intermedia",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
+        },
+        {
+            "name": "tiktok",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
+        },
+        {
+            "name": "captioncall",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
+        },
+        {
+            "name": "captioncall",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
+        },
+        {
+            "name": "icicidirect",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
+        },
+        {
+            "name": "icicifastag",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
+        },
+        {
+            "name": "nre",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
+        },
+        {
+            "name": "apl",
+            "pb_workspace": "",
+            "pb_roi_dataset": ""
+        },
+
     ]
     app_name = "performance_management_powerbi_export"
 
