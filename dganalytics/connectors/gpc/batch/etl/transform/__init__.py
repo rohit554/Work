@@ -17,3 +17,4 @@ from dganalytics.connectors.gpc.batch.etl.transform.fact_wfm_actuals import fact
 from dganalytics.connectors.gpc.batch.etl.transform.fact_wfm_day_metrics import fact_wfm_day_metrics
 from dganalytics.connectors.gpc.batch.etl.transform.fact_wfm_exceptions import fact_wfm_exceptions
 from dganalytics.connectors.gpc.batch.etl.transform.dim_wrapup_codes import dim_wrapup_codes
+from dganalytics.connectors.gpc.batch.etl.transform.fact_wfm_forecast import fact_wfm_forecast

@@ -9,6 +9,8 @@ from dganalytics.connectors.gpc.batch.etl.extract_api.business_units import exec
 from dganalytics.connectors.gpc.batch.etl.extract_api.management_units import exec_management_units
 from dganalytics.connectors.gpc.batch.etl.extract_api.management_unit_users import exec_management_unit_users
 from dganalytics.connectors.gpc.batch.etl.extract_api.activity_codes import exec_activity_codes
+from dganalytics.connectors.gpc.batch.etl.extract_api.wfm_forecast import exec_wfm_forecast_api
+from dganalytics.connectors.gpc.batch.etl.extract_api.wfm_planninggroups import exec_wfm_planninggroups
 
 if __name__ == "__main__":
     tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()
@@ -65,6 +67,12 @@ if __name__ == "__main__":
                 spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "activity_codes":
             exec_activity_codes(
+                spark, tenant, run_id, extract_start_time, extract_end_time)
+        elif api_name == "wfm_forecast":
+            exec_wfm_forecast_api(
+                spark, tenant, run_id, extract_start_time, extract_end_time)
+        elif api_name == "wfm_planninggroups":
+            exec_wfm_planninggroups(
                 spark, tenant, run_id, extract_start_time, extract_end_time)
         else:
             logger.exception("invalid api name")

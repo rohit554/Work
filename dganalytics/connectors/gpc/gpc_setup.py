@@ -484,6 +484,25 @@ def create_raw_table(api_name: str, spark: SparkSession, db_name: str):
                      from {table_name} limit 0"""
     spark.sql(create_qry)
 
+    spark.sql(
+        f"""create table if not exists {db_name}.fact_wfm_forecast
+            (
+                FORECAST_ID string,
+                PLANNING_GROUP_ID string,
+                IntervalStart timestamp,
+                WEEKDATE string,
+                PLANNING_GROUP string,
+                DATA_REF_DT timestamp,
+                BU_NAME string,
+                averageHandleTimeSeconds float,
+                offered float,
+                META_REF_DT timestamp
+            )
+            using delta
+            PARTITIONED BY (WEEKDATE)
+            LOCATION '{db_path}/{db_name}/fact_wfm_forecast'
+            """
+    )
     return True
 
 
@@ -504,6 +523,9 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     create_raw_table("management_unit_users", spark, db_name)
     create_raw_table("activity_codes", spark, db_name)
     create_raw_table("presence_definitions", spark, db_name)
+    create_raw_table("wfm_forecast_data", spark, db_name)
+    create_raw_table("wfm_forecast_meta", spark, db_name)
+    create_raw_table("wfm_planninggroups", spark, db_name)
 
     return True
 

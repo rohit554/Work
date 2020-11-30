@@ -12,3 +12,4 @@ build/
 .vscode/
 !*devcontainer.json*
 .vscode/launch.json
+.notebooks/*
