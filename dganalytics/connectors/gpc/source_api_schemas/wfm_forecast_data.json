@@ -1,0 +1,91 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "id",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "weekDate",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "result",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "planningGroups",
+            "nullable": true,
+            "type": {
+              "containsNull": true,
+              "elementType": {
+                "fields": [
+                  {
+                    "metadata": {},
+                    "name": "averageHandleTimeSecondsPerInterval",
+                    "nullable": true,
+                    "type": {
+                      "containsNull": true,
+                      "elementType": "double",
+                      "type": "array"
+                    }
+                  },
+                  {
+                    "metadata": {},
+                    "name": "offeredPerInterval",
+                    "nullable": true,
+                    "type": {
+                      "containsNull": true,
+                      "elementType": "double",
+                      "type": "array"
+                    }
+                  },
+                  {
+                    "metadata": {},
+                    "name": "planningGroupId",
+                    "nullable": true,
+                    "type": "string"
+                  }
+                ],
+                "type": "struct"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "metadata": {},
+            "name": "referenceStartDate",
+            "nullable": true,
+            "type": "timestamp"
+          },
+          {
+            "metadata": {},
+            "name": "weekCount",
+            "nullable": true,
+            "type": "long"
+          },
+          {
+            "metadata": {},
+            "name": "weekNumber",
+            "nullable": true,
+            "type": "long"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "downloadUrl",
+      "nullable": true,
+      "type": "string"
+    }
+  ],
+  "type": "struct"
+}
