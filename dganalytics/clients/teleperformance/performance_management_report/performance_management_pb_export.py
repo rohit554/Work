@@ -14,8 +14,8 @@ if __name__ == "__main__":
     tenants = [
         {
             "name": "bcp",
-            "pb_workspace": "",
-            "pb_roi_dataset": ""
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": "74f7111b-257b-4dbd-8c12-750bf47e114f"
         },
         {
             "name": "bob",
@@ -29,13 +29,13 @@ if __name__ == "__main__":
         },
         {
             "name": "walmart",
-            "pb_workspace": "",
-            "pb_roi_dataset": ""
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": "7a8ba40d-e2bc-4601-a4cf-32cfd0828523"
         },
         {
             "name": "adobe",
-            "pb_workspace": "",
-            "pb_roi_dataset": ""
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": "fb8907e4-50b2-4394-9b32-848351d63ca3"
         },
         {
             "name": "ingram",
@@ -54,8 +54,8 @@ if __name__ == "__main__":
         },
         {
             "name": "captioncall",
-            "pb_workspace": "",
-            "pb_roi_dataset": ""
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": "c1ee55b4-6a6c-4fad-8524-642a5675fe28"
         },
         {
             "name": "captioncall",
