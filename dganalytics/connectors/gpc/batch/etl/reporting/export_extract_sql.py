@@ -195,3 +195,21 @@ dim_bu_mu_mapping = """
                     from raw_management_units a, raw_business_units  b
                         where a.businessUnit.id = b.id
                     """
+
+fact_wfm_forecast = """ \
+    SELECT FORECAST_ID, \
+            PLANNING_GROUP_ID, \
+                BU_ID as BUSINESS_UNIT_ID, \
+                    int(date_format(IntervalStart, 'yyyyMMdd')) IntervalStartDate, \
+                        int(date_format(IntervalStart, 'HHmmss')) IntervalStartTime, \
+                            int(date_format(WEEKDATE, 'yyyyMMdd')) WEEKDATE, \
+                                PLANNING_GROUP, \
+                                    int(date_format(DATA_REF_DT, 'yyyyMMdd')) DATA_REF_DATE, \
+                                        int(date_format(DATA_REF_DT, 'HHmmss')) DATA_REF_TIME, \
+                                            BU_NAME, \
+                                                averageHandleTimeSeconds, \
+                                                    offered, \
+                                                        int(date_format(META_REF_DT, 'yyyyMMdd')) META_REF_DATE, \
+                                                            int(date_format(META_REF_DT, 'HHmmss')) META_REF_TIME \
+                                                                FROM fact_wfm_forecast \
+;"""
