@@ -42,6 +42,7 @@ def transform(this_dataframe):
         "DATA_REF_DT",
         "META_REF_DT",
         "BU_NAME",
+        "BU_ID",
         F.col("AvgHandled_Offered.averageHandleTimeSecondsPerInterval").alias("averageHandleTimeSeconds"),
         F.col("AvgHandled_Offered.offeredPerInterval").alias("offered"),
         F.col("AvgHandled_Offered.IntervalStart").alias("IntervalStart")
@@ -56,7 +57,8 @@ def fact_wfm_forecast(spark, extract_date, extract_start_time, extract_end_time)
                     RESULT.offeredPerInterval as offeredPerInterval, \
                         DATA_REF_DT, \
                             META_REF_DT, \
-                                BU_NAME \
+                                BU_NAME, \
+                                    BU_ID \
     FROM \
     ( SELECT data.id as FORECAST_ID ,\
         data.weekDate as WEEKDATE, \
@@ -99,6 +101,7 @@ def fact_wfm_forecast(spark, extract_date, extract_start_time, extract_end_time)
         "FORECAST_ID",
         "PLANNING_GROUP_ID",
         "IntervalStart",
+        "BU_ID"
     ]
     from delta.tables import DeltaTable
     fact_wfm_forecast_data = DeltaTable.forName(spark,tableOrViewName="fact_wfm_forecast")
