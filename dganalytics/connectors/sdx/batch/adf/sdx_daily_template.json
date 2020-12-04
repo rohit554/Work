@@ -271,7 +271,7 @@
                         },
                         "parameters": {
                             "tenant": "[parameters('tenant')]",
-                            "extract_start_time": "@{formatDateTime(dateTimeAdd(trigger().outputs.windowStartTime, '-P15D'),'yyyy-MM-ddTHH:mm:ssZ')}",
+                            "extract_start_time": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ssZ')}",
                             "extract_end_time": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddTHH:mm:ssZ')}"
                         }
                     }
@@ -279,8 +279,8 @@
                 "type": "TumblingWindowTrigger",
                 "typeProperties": {
                     "frequency": "Hour",
-                    "interval": 12,
-                    "delay": "00:05:00",
+                    "interval": 6,
+                    "delay": "00:15:00",
                     "startTime": "[variables('dailyDay1TriggerStart')]",
                     "maxConcurrency": 1
                 }

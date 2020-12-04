@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 def fact_routing_status(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     routing_status = spark.sql(f"""
                                 select distinct userId, routingStatus.startTime,
-                                routingStatus.endTime, routingStatus.routingStatus,
+                                coalesce(routingStatus.endTime, current_timestamp()) endTime, routingStatus.routingStatus,
                                 cast(routingStatus.startTime as date) as startDate, 
                                 sourceRecordIdentifier, soucePartition from (
     select userId, explode(routingStatus) as routingStatus,
@@ -19,7 +19,6 @@ def fact_routing_status(spark: SparkSession, extract_date, extract_start_time, e
                 delete from fact_routing_status a where exists (
                         select 1 from routing_status b where a.userId = b.userId
                         and a.startDate = b.startDate and a.startTime = b.startTime
-                        and a.endTime = b.endTime
                 )
                 """)
     spark.sql("insert into fact_routing_status select * from routing_status")
