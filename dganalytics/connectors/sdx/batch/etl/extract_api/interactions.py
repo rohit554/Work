@@ -19,8 +19,7 @@ def exec_interactions(spark: SparkSession, tenant: str, run_id: str, extract_sta
             "params": {
                 "_include_responses": "true",
                 "_include_data": "true",
-                "_limit": 1000,
-                "completed": False
+                "_limit": 1000
             },
             "spark_partitions": {"max_records_per_partition": 20000},
             "tbl_overwrite": False,
@@ -30,7 +29,7 @@ def exec_interactions(spark: SparkSession, tenant: str, run_id: str, extract_sta
     resp = sdx_request(spark, tenant, 'interactions', run_id,
                        extract_start_time, extract_end_time, api_config, skip_raw_load=True)
     interactions = interactions + resp
-
+    '''
     del resp
     api_config = {
         "interactions": {
@@ -55,6 +54,7 @@ def exec_interactions(spark: SparkSession, tenant: str, run_id: str, extract_sta
 
     interactions = interactions + resp
     del resp
+    '''
 
     process_raw_data(spark, tenant, 'interactions', run_id,
                      interactions, extract_start_time, extract_end_time, len(interactions))

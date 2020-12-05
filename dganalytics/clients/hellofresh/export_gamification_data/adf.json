@@ -1,0 +1,172 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "env": {
+            "type": "string",
+            "metadata": "Environment name",
+            "defaultValue": "dev"
+        },
+        "tenant": {
+            "type": "string",
+            "metadata": "Tenant Name",
+            "defaultValue": "tenant"
+        },
+        "baseTime": {
+            "type": "string",
+            "defaultValue": "[utcNow('u')]",
+            "metadata": {
+                "description": "Schedule will start one hour from this time."
+            }
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/dg', parameters('env'), 'adf')]",
+        "factoryname": "[concat('dg', parameters('env'), 'adf')]",
+        "AzureKeyVault_baseUrl": "[concat('https://dg', parameters('env') ,'secrets.vault.azure.net/')]",
+        "dailyDay1TriggerStart": "[dateTimeAdd(parameters('baseTime'), '-P1D', 'yyyy-MM-ddT00:00:00Z')]"
+    },
+    "resources": [
+        {
+            "name": "[concat(variables('factoryname'), '/AzureKeyVault')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureKeyVault",
+                "typeProperties": {
+                    "baseUrl": "[variables('AzureKeyVault_baseUrl')]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(variables('factoryname'), '/AzureDatabricks')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureDatabricks",
+                "typeProperties": {
+                    "domain": {
+                        "type": "AzureKeyVaultSecret",
+                        "store": {
+                            "referenceName": "AzureKeyVault",
+                            "type": "LinkedServiceReference"
+                        },
+                        "secretName": "databricksinstanceurl"
+                    },
+                    "accessToken": {
+                        "type": "AzureKeyVaultSecret",
+                        "store": {
+                            "referenceName": "AzureKeyVault",
+                            "type": "LinkedServiceReference"
+                        },
+                        "secretName": "databricksaccesstoken"
+                    },
+                    "existingClusterId": {
+                        "type": "AzureKeyVaultSecret",
+                        "store": {
+                            "referenceName": "AzureKeyVault",
+                            "type": "LinkedServiceReference"
+                        },
+                        "secretName": "databricksclusterid"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureKeyVault')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_gamification_export')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "Gamification_Export",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                        ],
+                        "policy": {
+                            "timeout": "00:15:00",
+                            "retry": 0,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/export_gamification_data/hellofresh_push_gamification.py",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_date",
+                                "@pipeline().parameters.extract_date",
+                                "--org_id",
+                                "@pipeline().parameters.tenant"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    }
+                ],
+                "concurrency": 1,
+                "parameters": {
+                    "tenant": {
+                        "type": "string",
+                        "defaultValue": "[parameters('tenant')]"
+                    },
+                    "extract_date": {
+                        "type": "string"
+                    }
+                },
+                "folder": {
+                    "name": "[parameters('tenant')]"
+                },
+                "annotations": []
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureDatabricks')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_gamification_export_trigger')]",
+            "type": "Microsoft.DataFactory/factories/triggers",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "runtimeState": "Stopped",
+                "pipelines": [
+                    {
+                        "pipelineReference": {
+                            "referenceName": "[concat(parameters('tenant'), '_gamification_export')]",
+                            "type": "PipelineReference"
+                        },
+                        "parameters": {
+                            "tenant": "[parameters('tenant')]",
+                            "extract_date": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddZ')}",
+                            "org_id": "[parameters('tenant')]"
+                        }
+                    }
+                ],
+                "type": "TumblingWindowTrigger",
+                "typeProperties": {
+                    "frequency": "Hour",
+                    "interval": 4,
+                    "delay": "00:05:00",
+                    "startTime": "[variables('dailyDay1TriggerStart')]",
+                    "maxConcurrency": 1
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/pipelines/', parameters('tenant'), '_gamification_export')]"
+            ]
+        }
+    ]
+}
