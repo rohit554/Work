@@ -466,23 +466,95 @@ def create_dim_tables(spark: SparkSession, db_name: str):
     spark.sql(
         f"""create table if not exists {db_name}.fact_wfm_forecast
             (
-                FORECAST_ID string,
-                PLANNING_GROUP_ID string,
-                BU_ID string,
+                forecastId string,
+                planningGroupId string,
+                buId string,
                 IntervalStart timestamp,
-                WEEKDATE string,
-                PLANNING_GROUP string,
-                DATA_REF_DT timestamp,
-                BU_NAME string,
+                weekDate string,
+                planningGroup string,
+                dataRefDate timestamp,
+                buName string,
                 averageHandleTimeSeconds float,
                 offered float,
-                META_REF_DT timestamp
+                MetaRefDate timestamp
             )
             using delta
-            PARTITIONED BY (WEEKDATE)
+            PARTITIONED BY (weekDate)
             LOCATION '{db_path}/{db_name}/fact_wfm_forecast'
             """
     )
+
+    spark.sql(f"""
+        create table if not exists {db_name}.fact_conversation_aggregate_metrics
+            (
+                date date,
+                intervalStart timestamp,
+                intervalEnd timestamp,
+                mediaType string,
+                messageType string,
+                originatingDirection string,
+                queueId string,
+                userId string,
+                wrapUpCode string,
+                nConnected int,
+                nConsult int,
+                nConsultTransferred int,
+                nError int,
+                nOffered int,
+                nOutbound int,
+                nOutboundAbandoned int,
+                nOutboundAttempted int,
+                nOutboundConnected int,
+                nOverSla int,
+                nStateTransitionError int,
+                nTransferred int,
+                nAbandon int,
+                tAbandon float,
+                nAcd int,
+                tAcd float,
+                nAcw int,
+                tAcw float,
+                nAgentResponseTime int,
+                tAgentResponseTime float,
+                nAlert int,
+                tAlert float,
+                nAnswered int,
+                tAnswered float,
+                nContacting int,
+                tContacting float,
+                nDialing int,
+                tDialing float,
+                nFlowOut int,
+                tFlowOut float,
+                nHandle int,
+                tHandle float,
+                nHeld int,
+                tHeld float,
+                nHeldComplete int,
+                tHeldComplete float,
+                nIvr int,
+                tIvr float,
+                nMonitoring int,
+                tMonitoring float,
+                nNotResponding int,
+                tNotResponding float,
+                nShortAbandon int,
+                tShortAbandon float,
+                nTalk int,
+                tTalk float,
+                nTalkComplete int,
+                tTalkComplete float,
+                nUserResponseTime int,
+                tUserResponseTime float,
+                nVoicemail int,
+                tVoicemail float,
+                nWait int,
+                tWait float
+            )
+            using delta
+            PARTITIONED BY (date)
+            LOCATION '{db_path}/{db_name}/fact_conversation_aggregate_metrics'
+            """)
     return True
 
 
@@ -527,6 +599,7 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     create_raw_table("wfm_forecast_data", spark, db_name)
     create_raw_table("wfm_forecast_meta", spark, db_name)
     create_raw_table("wfm_planninggroups", spark, db_name)
+    create_raw_table("conversation_aggregates", spark, db_name)
 
     return True
 

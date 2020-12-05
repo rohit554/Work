@@ -22,9 +22,9 @@
                  "--tenant=hellofresh",
                 "--run_id=t2",
                  "--extract_start_time=2020-12-02T00:00:00Z",
-                 "--extract_end_time=2020-12-03T00:00:00Z",
-                 "--api_name=interactions",
-                 "--transformation=dim_hellofresh_interactions",
+                 "--extract_end_time=2020-12-02T02:00:00Z",
+                 "--api_name=conversation_aggregates",
+                 "--transformation=fact_conversation_aggregate_metrics",
                  "--org_id=salmatcolesonline",
                  "--pipeline=tp_kpi_raw_data",
                  "--export_name=evaluation_forms_questions"

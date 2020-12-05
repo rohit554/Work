@@ -1,0 +1,155 @@
+{
+    "fields": [
+        {
+            "metadata": {},
+            "name": "data",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": {
+                    "fields": [
+                        {
+                            "metadata": {},
+                            "name": "interval",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "metrics",
+                            "nullable": true,
+                            "type": {
+                                "containsNull": true,
+                                "elementType": {
+                                    "fields": [
+                                        {
+                                            "metadata": {},
+                                            "name": "metric",
+                                            "nullable": true,
+                                            "type": "string"
+                                        },
+                                        {
+                                            "metadata": {},
+                                            "name": "stats",
+                                            "nullable": true,
+                                            "type": {
+                                                "fields": [
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "count",
+                                                        "nullable": true,
+                                                        "type": "long"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "current",
+                                                        "nullable": true,
+                                                        "type": "double"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "denominator",
+                                                        "nullable": true,
+                                                        "type": "double"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "max",
+                                                        "nullable": true,
+                                                        "type": "double"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "min",
+                                                        "nullable": true,
+                                                        "type": "double"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "numerator",
+                                                        "nullable": true,
+                                                        "type": "double"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "ratio",
+                                                        "nullable": true,
+                                                        "type": "double"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "sum",
+                                                        "nullable": true,
+                                                        "type": "double"
+                                                    },
+                                                    {
+                                                        "metadata": {},
+                                                        "name": "target",
+                                                        "nullable": true,
+                                                        "type": "double"
+                                                    }
+                                                ],
+                                                "type": "struct"
+                                            }
+                                        }
+                                    ],
+                                    "type": "struct"
+                                },
+                                "type": "array"
+                            }
+                        }
+                    ],
+                    "type": "struct"
+                },
+                "type": "array"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "group",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "mediaType",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "messageType",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "originatingDirection",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "queueId",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "userId",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "wrapUpCode",
+                        "nullable": true,
+                        "type": "string"
+                    }
+                ],
+                "type": "struct"
+            }
+        }
+    ],
+    "type": "struct"
+}

@@ -24,6 +24,7 @@ transform_to_method = {
     "fact_wfm_exceptions": transform.fact_wfm_exceptions,
     "dim_wrapup_codes": transform.dim_wrapup_codes,
     "fact_wfm_forecast": transform.fact_wfm_forecast,
+    "fact_conversation_aggregate_metrics": transform.fact_conversation_aggregate_metrics
 }
 
 

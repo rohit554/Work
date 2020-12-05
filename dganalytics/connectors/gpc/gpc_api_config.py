@@ -224,13 +224,13 @@ gpc_end_points = {
         "tbl_overwrite": True,
         "raw_primary_key": ["id"]
     },
-     "wfm_forecast_meta": {
+    "wfm_forecast_meta": {
         "endpoint": "/api/v2/workforcemanagement/businessunits/{b}/weeks/{w}/shorttermforecasts/{sfi}",
         "extract_type": "custom",
         "spark_partitions": {"max_records_per_partition": 100000},
         "table_name": "wfm_forecast_meta",
         "tbl_overwrite": False,
-        "raw_primary_key": ["id","weekDate"]
+        "raw_primary_key": ["id", "weekDate"]
     },
     "wfm_forecast_data": {
         "endpoint": "/api/v2/workforcemanagement/businessunits/{b}/weeks/{w}/shorttermforecasts/{sfi}/data",
@@ -238,7 +238,7 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 100000},
         "table_name": "wfm_forecast_data",
         "tbl_overwrite": False,
-        "raw_primary_key": ["id","weekDate"]
+        "raw_primary_key": ["id", "weekDate"]
     },
     "wfm_planninggroups": {
         "endpoint": "/api/v2/workforcemanagement/businessunits/{b}/planninggroups",
@@ -246,6 +246,27 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 100000},
         "table_name": "wfm_planninggroups",
         "tbl_overwrite": False,
-        "raw_primary_key": ["id","businessUnitId"]
+        "raw_primary_key": ["id", "businessUnitId"]
     },
+    "conversation_aggregates": {
+        "endpoint": "/api/v2/analytics/conversations/aggregates/query",
+        "request_type": "POST",
+        "paging": False,
+        "cursor": False,
+        "interval": True,
+        "params": {
+            "granularity": "PT15M",
+            "groupBy": ["userId", "mediaType", "messageType", "originatingDirection", "queueId", "wrapUpCode"],
+            "metrics": ["nBlindTransferred", "nConnected", "nConsult", "nConsultTransferred",
+                        "nError", "nOffered", "nOutbound", "nOutboundAbandoned", "nOutboundAttempted",
+                        "nOutboundConnected", "nOverSla", "nStateTransitionError", "nTransferred",
+                        "tAbandon", "tAcd", "tAcw", "tAgentResponseTime", "tAlert", "tAnswered",
+                        "tContacting", "tDialing", "tFlowOut", "tHandle", "tHeld", "tHeldComplete", "tIvr",
+                        "tMonitoring", "tNotResponding", "tShortAbandon", "tTalk", "tTalkComplete",
+                        "tUserResponseTime", "tVoicemail", "tWait"]
+        },
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "tbl_overwrite": False,
+        "entity_name": "results",
+    }
 }
