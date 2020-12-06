@@ -16,8 +16,11 @@ def exec_conversation_aggregates(spark: SparkSession, tenant: str, run_id: str,
 
     start = datetime.strptime(extract_start_time, '%Y-%m-%dT%H:%M:%S')
     end = datetime.strptime(extract_end_time, '%Y-%m-%dT%H:%M:%S')
+    print(start)
+    print(end)
 
-    for i in range(0, math.ceil((end - start).seconds / 3600)):
+    for i in range(0, math.ceil(((end - start).seconds + ((end - start).days * 86400)) / 3600)):
+        print(i)
         print(
             f"conversation aggregates extracting for interval - {start + timedelta(hours=i)} to {start + timedelta(hours=i + 1)}")
         resp_list = gpc_request(spark, tenant, 'conversation_aggregates', run_id,
@@ -27,6 +30,8 @@ def exec_conversation_aggregates(spark: SparkSession, tenant: str, run_id: str,
                                  ).strftime('%Y-%m-%dT%H:%M:%S'),
                                 skip_raw_load=True)
         conv_agg = conv_agg + resp_list
+
+    print(str(len(conv_agg)))
 
     # conv_agg = [json.dumps(conv) for conv in conv_agg]
 

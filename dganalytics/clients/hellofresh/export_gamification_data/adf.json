@@ -150,7 +150,7 @@
                         },
                         "parameters": {
                             "tenant": "[parameters('tenant')]",
-                            "extract_date": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddZ')}",
+                            "extract_date": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-dd')}",
                             "org_id": "[parameters('tenant')]"
                         }
                     }
@@ -158,7 +158,7 @@
                 "type": "TumblingWindowTrigger",
                 "typeProperties": {
                     "frequency": "Hour",
-                    "interval": 4,
+                    "interval": 8,
                     "delay": "00:05:00",
                     "startTime": "[variables('dailyDay1TriggerStart')]",
                     "maxConcurrency": 1

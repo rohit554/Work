@@ -104,13 +104,21 @@ from
                                             """)
 
     agg_metrics.registerTempTable("conversation_agg_metrics")
-    dist_dates = spark.sql("select distinct date, intervalStart, intervalEnd from conversation_agg_metrics")
+
+    incorrect_interval_data = spark.sql(f"""
+			select count(*) as count from conversation_agg_metrics 
+      			where cast((intervalEnd - intervalStart) as string) != '15 minutes'
+                        """).rdd.collect()[0]['count']
+    if incorrect_interval_data > 0:
+        raise Exception("Incorrect interval in aggregates - only 15 min intervals are allowed")
+    dist_dates = spark.sql(
+        "select distinct date, intervalStart, intervalEnd from conversation_agg_metrics")
     dist_dates.registerTempTable("dist_dates")
-    spark.sql(f"""delete from fact_conversation_aggregate_metrics where 
-                                                exists (select 1 from dist_dates
-                                                    where dist_dates.date = fact_conversation_aggregate_metrics.date
-                                                    and dist_dates.intervalStart = fact_conversation_aggregate_metrics.intervalStart
-                                                    and dist_dates.intervalEnd = fact_conversation_aggregate_metrics.intervalEnd
+    spark.sql(f"""delete from fact_conversation_aggregate_metrics a where 
+                                                exists (select 1 from dist_dates b
+                                                    where b.`date` = a.`date`
+                                                    and b.`intervalStart` = a.`intervalStart`
+                                                    and b.`intervalEnd` = a.`intervalEnd`
                                                         )
                                 """)
     spark.sql(

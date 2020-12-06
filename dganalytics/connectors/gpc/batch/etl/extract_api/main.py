@@ -87,6 +87,6 @@ if __name__ == "__main__":
         logger.exception(
             f"Error Occured in GPC Extraction for {extract_start_time}_{extract_end_time}_{tenant}_{api_name}")
         logger.exception(e, stack_info=True, exc_info=True)
-        raise
+        raise Exception
     finally:
         flush_utils(spark, logger)

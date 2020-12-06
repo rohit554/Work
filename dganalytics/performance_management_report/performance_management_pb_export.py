@@ -20,7 +20,7 @@ if __name__ == "__main__":
         {
             "name": "atnt",
             "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
-            "pb_roi_dataset": "9127c77a-bc06-4dd3-a006-d9ee6a7b25e7"
+            "pb_roi_dataset": "d3dbc8fb-6765-4c8d-9c01-6039fb4693a0"
         }
     ]
     app_name = "performance_management_powerbi_export"

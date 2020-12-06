@@ -8,6 +8,7 @@ from dganalytics.clients.hellofresh.export_gamification_data.keyword_map_table i
 
 def get_base_data(spark: SparkSession, extract_date: str):
     tenant_path, db_path, log_path = get_path_vars('hellofresh')
+    spark.sql(keyword_map)
     queue_timezones = pd.read_json(os.path.join(tenant_path, 'data',
                                                 'config', 'Queue_TimeZone_Mapping.json'))
     queue_timezones = pd.DataFrame(queue_timezones['values'].tolist())
@@ -229,7 +230,7 @@ def push_uk_data(spark):
                 csat CSAT,
                 (voice_tHeldComplete + voice_tTalkComplete + voice_tAcw)/float(voice_nHandle) `AHT - Voice`,
                 (chat_tTalkComplete + chat_tAcw)/float(chat_nHandle) `AHT - Chat`,
-                (email_tTalkComplete + email_tAcw)/float(email_nHandle) `AHT - Email`
+                (email_tTalkComplete + email_tAcw)/float(email_nHandle) `AHT - Email`,
                 conformancePercentage Conformance,
                 adherencePercentage Adherence,
                 (nAnswered/((interacting_duration + idle_duration)/3600)) Productivity
@@ -254,7 +255,7 @@ def push_ca_data(spark):
                 csat CSAT,
                 (voice_tHeldComplete + voice_tTalkComplete + voice_tAcw)/float(voice_nHandle) `AHT - Voice`,
                 (chat_tTalkComplete + chat_tAcw)/float(chat_nHandle) `AHT - Chat`,
-                (email_tTalkComplete + email_tAcw)/float(email_nHandle) `AHT - Email`
+                (email_tTalkComplete + email_tAcw)/float(email_nHandle) `AHT - Email`,
                 conformancePercentage Conformance,
                 adherencePercentage Adherence,
                 (nAnswered/((interacting_duration + idle_duration)/3600)) Productivity
@@ -279,7 +280,7 @@ if __name__ == "__main__":
     try:
         logger.info("hellofresh_push_gamification_data")
 
-        df = get_base_data(spark, extract_date, org_id)
+        df = get_base_data(spark, extract_date)
         df = df.drop_duplicates()
         df.registerTempTable("hf_game_data")
 
