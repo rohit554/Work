@@ -496,6 +496,7 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 queueId string,
                 userId string,
                 wrapUpCode string,
+                nBlindTransferred int,
                 nConnected int,
                 nConsult int,
                 nConsultTransferred int,

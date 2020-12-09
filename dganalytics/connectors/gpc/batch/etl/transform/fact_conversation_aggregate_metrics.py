@@ -13,6 +13,7 @@ def fact_conversation_aggregate_metrics(spark: SparkSession, extract_date, extra
 	queueId,
 	userId,
 	wrapUpCode,
+	nBlindTransferred_count nBlindTransferred,
 	nConnected_count nConnected,
 	nConsult_count nConsult,
 	nConsultTransferred_count nConsultTransferred,
