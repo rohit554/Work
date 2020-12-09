@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 def fact_primary_presence(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     primary_presence = spark.sql(f"""
                                     select distinct userId, primaryPresence.startTime,
-                                    coalesce(primaryPresence.endTime, current_timestamp()) endTime, primaryPresence.systemPresence,
+                                    coalesce(primaryPresence.endTime, cast('{extract_end_time}' as timestamp)) endTime, primaryPresence.systemPresence,
             cast(primaryPresence.startTime as date) as startDate, sourceRecordIdentifier, soucePartition from (
         select userId, explode(primaryPresence) as primaryPresence,
             recordIdentifier as sourceRecordIdentifier,

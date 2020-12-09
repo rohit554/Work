@@ -2,7 +2,7 @@ from dganalytics.utils.utils import exec_powerbi_refresh
 from time import sleep
 
 if __name__ == "__main__":
-    exec_powerbi_refresh("70eebbe4-5a1d-4f7e-bc3e-d2755b84e37f", "415f8122-1c56-400d-9464-54d064305dfb")
+    # exec_powerbi_refresh("70eebbe4-5a1d-4f7e-bc3e-d2755b84e37f", "415f8122-1c56-400d-9464-54d064305dfb")
     exec_powerbi_refresh("70eebbe4-5a1d-4f7e-bc3e-d2755b84e37f", "86adeeff-f684-48ca-a0b6-1899441a250b")
     exec_powerbi_refresh("70eebbe4-5a1d-4f7e-bc3e-d2755b84e37f", "cc3b2f02-70c1-4c29-b55f-da43b0ddfd29")
     exec_powerbi_refresh("70eebbe4-5a1d-4f7e-bc3e-d2755b84e37f", "4a27fe85-62ba-4efd-a260-66ccb7345aa6")

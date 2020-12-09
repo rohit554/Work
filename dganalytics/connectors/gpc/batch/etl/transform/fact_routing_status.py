@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 def fact_routing_status(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     routing_status = spark.sql(f"""
                                 select distinct userId, routingStatus.startTime,
-                                coalesce(routingStatus.endTime, current_timestamp()) endTime, routingStatus.routingStatus,
+                                coalesce(routingStatus.endTime, cast('{extract_end_time}' as timestamp)) endTime, routingStatus.routingStatus,
                                 cast(routingStatus.startTime as date) as startDate, 
                                 sourceRecordIdentifier, soucePartition from (
     select userId, explode(routingStatus) as routingStatus,

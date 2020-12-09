@@ -70,9 +70,7 @@ from gpc_hellofresh.fact_routing_status frs, user_timezone ut
                             1800
                         ))
                         timeSlot, timeDiff, pTableFlag from routing
-                            where 
-                            cast((((floor((to_unix_timestamp(startTime) - 978267600)/1800.0) * 30) * 60) + 978267600) as long) 
-                            < cast((((floor((to_unix_timestamp(endTime) - 978267600)/1800.0) * 30) * 60) + 978267600) as long)
+                            where  startTime < endTime
                         )
                 """)
 
