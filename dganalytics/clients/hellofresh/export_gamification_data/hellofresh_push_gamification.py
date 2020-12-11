@@ -146,9 +146,7 @@ def get_base_data(spark: SparkSession, extract_date: str):
         (
         select
         cast(from_utc_timestamp(s.surveySentDate, trim(c.timeZone)) as date) date, s.userKey userId, 
-        (case when sum(case when coalesce(s.csatAchieved, 0) > 0 then 1 else 0 end) > 0 
-            then cast(sum(coalesce(s.csatAchieved,0)) as float)/sum(case when coalesce(s.csatAchieved, 0) > 0 then 1 else 0 end) 
-            else 0 end) as csat
+        round(sum(coalesce(s.csatAchieved, 0))/sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) * 20, 0) as csat
         from sdx_hellofresh.dim_hellofresh_interactions  s, gpc_hellofresh.dim_routing_queues b, queue_timezones c
         where s.surveySentDatePart >=  ((cast('{extract_date}' as date)) - {backword_days})
         and s.queueKey = b.queueId

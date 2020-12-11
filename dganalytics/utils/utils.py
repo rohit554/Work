@@ -213,6 +213,7 @@ def get_gamification_token():
     auth_resp = requests.post(
         f"{gamification_url}/api/auth/getAccessToken/", data=body)
     if auth_resp.status_code != 200 or 'access_token' not in auth_resp.json().keys():
+        print(auth_resp.text)
         raise Exception("unable to get gamification access token")
 
     return auth_resp.json()['access_token'], auth_resp.json()['userId']
