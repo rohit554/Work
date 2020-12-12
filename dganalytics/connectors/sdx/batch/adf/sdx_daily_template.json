@@ -90,7 +90,7 @@
                         "dependsOn": [],
                         "policy": {
                             "timeout": "00:30:00",
-                            "retry": 0,
+                            "retry": 1,
                             "retryIntervalInSeconds": 1800,
                             "secureOutput": false,
                             "secureInput": false
@@ -122,7 +122,7 @@
                         "dependsOn": [],
                         "policy": {
                             "timeout": "00:30:00",
-                            "retry": 0,
+                            "retry": 1,
                             "retryIntervalInSeconds": 1800,
                             "secureOutput": false,
                             "secureInput": false
@@ -154,7 +154,7 @@
                         "dependsOn": [],
                         "policy": {
                             "timeout": "02:00:00",
-                            "retry": 0,
+                            "retry": 1,
                             "retryIntervalInSeconds": 1800,
                             "secureOutput": false,
                             "secureInput": false
@@ -205,7 +205,7 @@
                         ],
                         "policy": {
                             "timeout": "00:30:00",
-                            "retry": 0,
+                            "retry": 1,
                             "retryIntervalInSeconds": 1800,
                             "secureOutput": false,
                             "secureInput": false
