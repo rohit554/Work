@@ -40,7 +40,10 @@ def get_base_data(spark: SparkSession, extract_date: str):
         cm.voice_nAcw, cm.voice_nHeldComplete, cm.voice_nHandle, cm.voice_nTalkComplete,
         cm.social_nAcw, cm.social_nHeldComplete, cm.social_nHandle, cm.social_nTalkComplete,
         us.duration, us.interacting_duration, us.idle_duration, us.not_responding_duration,
-        qa.totalScore, wfm.adherencePercentage, wfm.conformancePercentage, kw.kw_count, survey.csat
+        qa.totalScore, wfm.adherencePercentage, wfm.conformancePercentage, kw.kw_count, survey.csat,
+        wfm.adherenceScheduleSecs, wfm.exceptionDurationSecs, wfm.adherenceScheduleSecs,
+        wfm.conformanceActualSecs, wfm.conformanceScheduleSecs, qa.totalScoreSum, qa.totalScoreCount,
+        survey.csatSum, survey.csatCount
         from (select userId, date, department from gpc_hellofresh.dim_users,
             (select explode(sequence((cast('{extract_date}' as date))-{backword_days} + 2, (cast('{extract_date}' as date))+1, interval 1 day )) as date) dates) u
         left join
@@ -100,7 +103,9 @@ def get_base_data(spark: SparkSession, extract_date: str):
         select 
         cast(from_utc_timestamp(a.releaseDate, trim(e.timeZone)) as date) date,
         a.agentId,
-        avg(c.totalScore) totalScore
+        avg(c.totalScore) totalScore,
+        sum(c.totalScore) totalScoreSum,
+        count(c.totalScore) totalScoreCount
         from gpc_hellofresh.dim_evaluations a, gpc_hellofresh.dim_evaluation_forms b,
             gpc_hellofresh.fact_evaluation_total_scores c,
         gpc_hellofresh.dim_routing_queues d, queue_timezones e
@@ -118,7 +123,11 @@ def get_base_data(spark: SparkSession, extract_date: str):
         (select
         cast(from_utc_timestamp(fw.startDate, trim(ut.timeZone)) as date) date,  fw.userId,
         ((sum(fw.adherenceScheduleSecs) - sum(exceptionDurationSecs))/(sum(fw.adherenceScheduleSecs))) * 100 as adherencePercentage,
-        (sum(fw.conformanceActualSecs)/sum(fw.conformanceScheduleSecs)) * 100 as conformancePercentage
+        sum(fw.adherenceScheduleSecs) adherenceScheduleSecs,
+        sum(fw.exceptionDurationSecs) exceptionDurationSecs,
+        (sum(fw.conformanceActualSecs)/sum(fw.conformanceScheduleSecs)) * 100 as conformancePercentage,
+        sum(fw.conformanceActualSecs) conformanceActualSecs,
+        sum(fw.conformanceScheduleSecs) conformanceScheduleSecs
         from gpc_hellofresh.fact_wfm_day_metrics fw, user_timezone ut
                     where fw.userId = ut.userId
                     and fw.startDatePart >= ((cast('{extract_date}' as date)) - {backword_days})
@@ -146,7 +155,9 @@ def get_base_data(spark: SparkSession, extract_date: str):
         (
         select
         cast(from_utc_timestamp(s.surveySentDate, trim(c.timeZone)) as date) date, s.userKey userId, 
-        round(sum(coalesce(s.csatAchieved, 0))/sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) * 20, 0) as csat
+        round(sum(coalesce(s.csatAchieved, 0))/sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) * 20, 0) as csat,
+        sum(coalesce(s.csatAchieved, 0)) csatSum,
+        sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) csatCount
         from sdx_hellofresh.dim_hellofresh_interactions  s, gpc_hellofresh.dim_routing_queues b, queue_timezones c
         where s.surveySentDatePart >=  ((cast('{extract_date}' as date)) - {backword_days})
         and s.queueKey = b.queueId
@@ -178,8 +189,6 @@ def push_anz_data(spark):
         chat_tAcw/chat_nAcw `Chat ACW`,
         social_tAcw/social_nAcw `Social ACW`,
         voice_tHeldComplete/voice_nHeldComplete `Voice Hold Time`,
-        chat_tHeldComplete/chat_nHeldComplete `Chat Hold Time`,
-        social_tHeldComplete/social_nHeldComplete `Social Hold Time`,
         not_responding_duration `Not Responding Time`,
         csat CSAT
         from
@@ -187,7 +196,7 @@ def push_anz_data(spark):
         where department in ('EP AU Manila', 'HF AU Sydney', 'HF AU Manila', 'HF NZ Sydney', 'HF NZ Manila', 'EP AU Sydney')
         )
         where not (Conformance is null and `QA Score` is null and Adherence is null and Keyword is null and `Voice ACW` is null and `Chat ACW` is null and `Social ACW` is null
-        and `Voice Hold Time` is null and `Chat Hold Time` is null and `Social Hold Time` is null and `Not Responding Time` is null and CSAT is null)
+        and `Voice Hold Time` is null and `Not Responding Time` is null and CSAT is null)
     """)
     push_gamification_data(anz.toPandas(), 'HELLOFRESHANZ', 'ANZConnection')
     return True

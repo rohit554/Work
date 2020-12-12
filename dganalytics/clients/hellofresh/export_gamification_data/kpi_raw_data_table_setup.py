@@ -60,7 +60,15 @@ spark.sql(f"""
                     adherencePercentage float,
                     conformancePercentage float,
                     kw_count float,
-                    csat float
+                    csat float,
+                    adherenceScheduleSecs int,
+                    exceptionDurationSecs int,
+                    conformanceActualSecs int,
+                    conformanceScheduleSecs int,
+                    totalScoreSum float,
+                    totalScoreCount int,
+                    csatSum float,
+                    csatCount int
                 )
                 using delta
                 partitioned by(date)
