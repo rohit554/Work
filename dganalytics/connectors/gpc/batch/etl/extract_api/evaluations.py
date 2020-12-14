@@ -4,6 +4,7 @@ from pyspark.sql import SparkSession
 from dganalytics.connectors.gpc.gpc_utils import authorize, get_api_url, process_raw_data
 from dganalytics.connectors.gpc.gpc_utils import get_interval
 from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger, gpc_request
+from datetime import datetime, timedelta
 
 
 def get_evaluators(spark: SparkSession) -> list:
@@ -19,10 +20,10 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_
     evaluators = get_evaluators(spark)
     api_headers = authorize(tenant)
     evaluation_details_list = []
+    extract_start_time = (datetime.strptime(extract_start_time, '%Y-%m-%dT%H:%M:%S') - timedelta(days=45)).strftime('%Y-%m-%dT%H:%M:%S')
     start_time = get_interval(
         extract_start_time, extract_end_time).split("/")[0]
     end_time = get_interval(extract_start_time, extract_end_time).split("/")[1]
-    e = evaluators[0]
     for e in evaluators:
         body = {
             "startTime": start_time,
@@ -50,7 +51,7 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_
 
     evaluation_details_list = [
         item for sublist in evaluation_details_list for item in sublist]
-    #evaluation_details_list = [json.dumps(ed)
+    # evaluation_details_list = [json.dumps(ed)
     #                           for ed in evaluation_details_list]
     process_raw_data(spark, tenant, 'evaluations', run_id,
                      evaluation_details_list, extract_start_time, extract_end_time, len(evaluators))

@@ -21,9 +21,9 @@
              "args": [
                  "--tenant=hellofresh",
                 "--run_id=t2",
-                 "--extract_start_time=2020-12-02T00:00:00Z",
+                 "--extract_start_time=2020-12-01T00:00:00Z",
                  "--extract_end_time=2020-12-02T02:00:00Z",
-                 "--api_name=conversation_aggregates",
+                 "--api_name=evaluations",
                  "--transformation=fact_conversation_aggregate_metrics",
                  "--org_id=salmatcolesonline",
                  "--pipeline=tp_kpi_raw_data",
