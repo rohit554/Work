@@ -63,4 +63,7 @@ if __name__ == "__main__":
             print(f"table row count - {df.count()}")
             df = df.drop("orgId")
             export_powerbi_csv(tenant['name'], df, f"pm_{table}")
-        exec_powerbi_refresh(tenant['pb_workspace'], tenant['pb_roi_dataset'])
+        if tenant['name'] == 'hellofresh':
+            exec_powerbi_refresh(tenant['pb_workspace'], '2bd5448c-095b-465e-82d0-15fce5f31128')
+        else:
+            exec_powerbi_refresh(tenant['pb_workspace'], tenant['pb_roi_dataset'])

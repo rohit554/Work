@@ -19,8 +19,8 @@ if __name__ == "__main__":
         },
         {
             "name": "bob",
-            "pb_workspace": "",
-            "pb_roi_dataset": ""
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": "b9e11a5c-9817-4e67-bf79-3fa45458ec0e"
         },
         {
             "name": "holden",
@@ -39,8 +39,8 @@ if __name__ == "__main__":
         },
         {
             "name": "ingram",
-            "pb_workspace": "",
-            "pb_roi_dataset": ""
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": "a6bb7cb9-1f4e-4c14-a56a-139e19ad254a"
         },
         {
             "name": "intermedia",
@@ -58,19 +58,14 @@ if __name__ == "__main__":
             "pb_roi_dataset": "c1ee55b4-6a6c-4fad-8524-642a5675fe28"
         },
         {
-            "name": "captioncall",
-            "pb_workspace": "",
-            "pb_roi_dataset": ""
-        },
-        {
             "name": "icicidirect",
-            "pb_workspace": "",
-            "pb_roi_dataset": ""
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": "2e11b65b-d8ca-47a2-a11a-226093ea84b5"
         },
         {
             "name": "icicifastag",
-            "pb_workspace": "",
-            "pb_roi_dataset": ""
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": "d4c60017-1640-4e86-9b46-204e0e4437c8"
         },
         {
             "name": "nre",
@@ -79,8 +74,8 @@ if __name__ == "__main__":
         },
         {
             "name": "apl",
-            "pb_workspace": "",
-            "pb_roi_dataset": ""
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": "30e9a066-8d4a-4a65-a0c4-246dd53f015b"
         },
 
     ]
