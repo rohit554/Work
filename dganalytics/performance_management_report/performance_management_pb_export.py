@@ -30,7 +30,7 @@ if __name__ == "__main__":
         {
             "name": "netflix",
             "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
-            "pb_roi_dataset": ""
+            "pb_roi_dataset": "0caba8c1-b25e-4d53-a2ed-21af044539e7"
         },
         {
             "name": "westerndigitalchina",
@@ -65,5 +65,7 @@ if __name__ == "__main__":
             export_powerbi_csv(tenant['name'], df, f"pm_{table}")
         if tenant['name'] == 'hellofresh':
             exec_powerbi_refresh(tenant['pb_workspace'], '2bd5448c-095b-465e-82d0-15fce5f31128')
+            exec_powerbi_refresh(tenant['pb_workspace'], 'db5385f6-64e6-4c44-8812-830b072623a8')
+            exec_powerbi_refresh(tenant['pb_workspace'], '501b284a-3d4a-4e95-859e-3be77becd6bc')
         else:
             exec_powerbi_refresh(tenant['pb_workspace'], tenant['pb_roi_dataset'])
