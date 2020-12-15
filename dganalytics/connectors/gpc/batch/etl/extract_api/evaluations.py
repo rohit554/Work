@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 def get_evaluators(spark: SparkSession) -> list:
     evaluators = spark.sql("""select distinct userId  from (
-	select id as userId, explode(authorization.roles) as roles  from raw_users where lower(state) = 'active'
+        select id as userId, explode(authorization.roles) as roles  from raw_users where lower(state) = 'active'
             ) where lower(roles.name) like '%evalua%'""").toPandas()['userId'].tolist()
     return evaluators
 
@@ -20,10 +20,10 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_
     evaluators = get_evaluators(spark)
     api_headers = authorize(tenant)
     evaluation_details_list = []
-    extract_start_time = (datetime.strptime(extract_start_time, '%Y-%m-%dT%H:%M:%S') - timedelta(days=45)).strftime('%Y-%m-%dT%H:%M:%S')
+    api_start_time = (datetime.strptime(extract_start_time, '%Y-%m-%dT%H:%M:%S') - timedelta(days=45)).strftime('%Y-%m-%dT%H:%M:%S')
     start_time = get_interval(
-        extract_start_time, extract_end_time).split("/")[0]
-    end_time = get_interval(extract_start_time, extract_end_time).split("/")[1]
+        api_start_time, extract_end_time).split("/")[0]
+    end_time = get_interval(api_start_time, extract_end_time).split("/")[1]
     for e in evaluators:
         body = {
             "startTime": start_time,
