@@ -197,6 +197,7 @@ def push_anz_data(spark):
         )
         where not (Conformance is null and `QA Score` is null and Adherence is null and Keyword is null and `Voice ACW` is null and `Chat ACW` is null and `Social ACW` is null
         and `Voice Hold Time` is null and `Not Responding Time` is null and CSAT is null)
+        and cast(date as date) >= (cast(date as date) - 4)
     """)
     push_gamification_data(anz.toPandas(), 'HELLOFRESHANZ', 'ANZConnection')
     return True
@@ -222,6 +223,7 @@ def push_us_data(spark):
             )
             where not (`Voice ACW` is null and `Chat ACW` is null and `Email ACW` is null
             and `Voice Hold Time` is null and `Chat Hold Time` is null and `Email Hold Time` is null and `Not Responding Time` is null and CSAT is null)
+            and cast(date as date) >= (cast(date as date) - 4)
     """)
     push_gamification_data(us.toPandas(), 'HELLOFRESHUS', 'USAConnection')
     return True
@@ -247,6 +249,7 @@ def push_uk_data(spark):
             )
             where not (`Productivity` is null and `Adherence` is null and `Conformance` is null
             and `AHT - Email` is null and `AHT - Chat` is null and `AHT - Voice` is null and `CSAT` is null and `QA Score` is null)
+            and cast(date as date) >= (cast(date as date) - 4)
     """)
     push_gamification_data(uk.toPandas(), 'HELLOFRESHUK', 'ukconnection')
     return True
@@ -272,6 +275,7 @@ def push_ca_data(spark):
             )
             where not (`Productivity` is null and `Adherence` is null and `Conformance` is null
             and `AHT - Email` is null and `AHT - Chat` is null and `AHT - Voice` is null and `CSAT` is null and `QA Score` is null)
+            and cast(date as date) >= (cast(date as date) - 4)
     """)
     push_gamification_data(ca.toPandas(), 'HELLOFRESHCA', 'HFCA')
     return True

@@ -19,7 +19,7 @@
             },
             "console": "integratedTerminal",
              "args": [
-                 "--tenant=hellofresh",
+                 "--tenant=salmatcolesonline",
                 "--run_id=t2",
                  "--extract_start_time=2020-12-01T00:00:00Z",
                  "--extract_end_time=2020-12-02T02:00:00Z",
@@ -27,7 +27,8 @@
                  "--transformation=fact_conversation_aggregate_metrics",
                  "--org_id=salmatcolesonline",
                  "--pipeline=tp_kpi_raw_data",
-                 "--export_name=evaluation_forms_questions"
+                 "--export_name=evaluation_forms_questions",
+                 "--input_file=Probe_ColesOnline_20201213.xlsx"
              ]
             /*
             "args": [

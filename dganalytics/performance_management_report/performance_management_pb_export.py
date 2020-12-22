@@ -42,6 +42,11 @@ if __name__ == "__main__":
             "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
             "pb_roi_dataset": ""
         },
+        {
+            "name": "vodafonetpdbu",
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": ""
+        },
     ]
     app_name = "performance_management_powerbi_export"
 

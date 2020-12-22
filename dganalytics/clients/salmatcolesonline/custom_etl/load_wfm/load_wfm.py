@@ -19,7 +19,7 @@ if __name__ == '__main__':
         "/dbfs/mnt/datagamz/salmatcolesonline/data/raw/verint_wfm/" + input_file)
     '''
     df = pd.read_excel(
-        "/dbfs/mnt/datagamz/salmatcolesonline/data/raw/verint_wfm/" + input_file)
+        "/dbfs/mnt/datagamz/salmatcolesonline/data/raw/verint_wfm/" + input_file, engine='openpyxl')
 
     df = df.rename(columns={
         "Date": "Date",
