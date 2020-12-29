@@ -48,7 +48,7 @@ def get_base_data(spark: SparkSession, extract_date: str):
             (select explode(sequence((cast('{extract_date}' as date))-{backword_days} + 2, (cast('{extract_date}' as date))+1, interval 1 day )) as date) dates) u
         left join
         (select
-        cast(from_utc_timestamp(a.emitDateTime, trim(c.timeZone)) as date) date, a.userId agentId,
+        cast(from_utc_timestamp(a.intervalStart, trim(c.timeZone)) as date) date, a.userId agentId,
         sum(a.nAnswered) nAnswered, sum(a.tAnswered) tAnswered,
         sum(a.nAcw) nAcw, sum(a.tAcw) tAcw,
         sum(a.nHeldComplete) nHeldComplete, sum(a.tHeldComplete) tHeldComplete,
