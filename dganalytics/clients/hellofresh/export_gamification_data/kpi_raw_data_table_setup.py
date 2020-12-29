@@ -68,7 +68,9 @@ spark.sql(f"""
                     totalScoreSum float,
                     totalScoreCount int,
                     csatSum float,
-                    csatCount int
+                    csatCount int,
+                    userPresenceOqtTime int,
+                    userPresenceTotalTime int
                 )
                 using delta
                 partitioned by(date)

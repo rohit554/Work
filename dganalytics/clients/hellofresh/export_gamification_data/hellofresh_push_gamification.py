@@ -24,7 +24,7 @@ def get_base_data(spark: SparkSession, extract_date: str):
     user_timezone = spark.createDataFrame(user_timezone)
     user_timezone.registerTempTable("user_timezone")
 
-    backword_days = 7
+    backword_days = 9
 
     df = spark.sql(f"""
         select * from (
@@ -43,7 +43,7 @@ def get_base_data(spark: SparkSession, extract_date: str):
         qa.totalScore, wfm.adherencePercentage, wfm.conformancePercentage, kw.kw_count, survey.csat,
         wfm.adherenceScheduleSecs, wfm.exceptionDurationSecs, wfm.adherenceScheduleSecs,
         wfm.conformanceActualSecs, wfm.conformanceScheduleSecs, qa.totalScoreSum, qa.totalScoreCount,
-        survey.csatSum, survey.csatCount
+        survey.csatSum, survey.csatCount, up.oqtTime userPresenceOqtTime, up.totalTime userPresenceTotalTime
         from (select userId, date, department from gpc_hellofresh.dim_users,
             (select explode(sequence((cast('{extract_date}' as date))-{backword_days} + 2, (cast('{extract_date}' as date))+1, interval 1 day )) as date) dates) u
         left join
@@ -98,6 +98,19 @@ def get_base_data(spark: SparkSession, extract_date: str):
         ) us
         on us.userId = u.userId
         and us.date = u.date
+        left join
+        (
+            select
+        cast(from_utc_timestamp(fpp.startTime, trim(ut.timeZone)) as date) date, fpp.userId, 
+        sum(case when fpp.systemPresence in ('ON_QUEUE', 'TRAINING') then to_unix_timestamp(endTime) - to_unix_timestamp(startTime) else null end) oqtTime,
+        sum(case when fpp.systemPresence in ('AWAY','BUSY','MEETING','AVAILABLE','IDLE','ON_QUEUE','MEAL','BREAK','TRAINING') then to_unix_timestamp(endTime) - to_unix_timestamp(startTime) else null end) totalTime
+        from gpc_hellofresh.fact_primary_presence fpp, user_timezone ut
+            where fpp.userId = ut.userId
+                and fpp.startDate >= ((cast('{extract_date}' as date)) - {backword_days})
+            group by cast(from_utc_timestamp(fpp.startTime, trim(ut.timeZone)) as date), fpp.userId
+        ) up
+        on up.userId = u.userId
+        and up.date = u.date
         left join
         (
         select 
@@ -168,6 +181,7 @@ def get_base_data(spark: SparkSession, extract_date: str):
         survey.userId = u.userId
         and survey.date = u.date
         )
+        where cast(date as date) >=  (cast('{extract_date}' as date) - ({backword_days} + 2))
 
     """)
     df.cache()
@@ -193,11 +207,10 @@ def push_anz_data(spark):
         csat CSAT
         from
         hf_game_data
-        where department in ('EP AU Manila', 'HF AU Sydney', 'HF AU Manila', 'HF NZ Sydney', 'HF NZ Manila', 'EP AU Sydney')
+        where department in ('EP AU Manila', 'HF AU Sydney', 'HF AU Manila', 'HF NZ Sydney', 'HF NZ Manila', 'EP AU Sydney', 'MultiBrand ANZ Sydney')
         )
         where not (Conformance is null and `QA Score` is null and Adherence is null and Keyword is null and `Voice ACW` is null and `Chat ACW` is null and `Social ACW` is null
         and `Voice Hold Time` is null and `Not Responding Time` is null and CSAT is null)
-        and cast(date as date) >= (cast(date as date) - 4)
     """)
     push_gamification_data(anz.toPandas(), 'HELLOFRESHANZ', 'ANZConnection')
     return True
@@ -209,23 +222,22 @@ def push_us_data(spark):
             select 
             userId `UserID`,
             date_format(cast(date as date), 'MM/dd/yyyy') `Date`,
+            tAcw/nAcw `ACW`,
             not_responding_duration `Not Responding Time`,
-            csat CSAT,
+            csat `CSAT`,
+            ((userPresenceOqtTime * 1.0)/userPresenceTotalTime)*100 `OQT`,
             voice_tAcw/voice_nAcw `Voice ACW`,
             chat_tAcw/chat_nAcw `Chat ACW`,
             email_tAcw/chat_nAcw `Email ACW`,
-            voice_tHeldComplete/voice_nHeldComplete `Voice Hold Time`,
-            email_tHeldComplete/voice_nHeldComplete `Email Hold Time`,
-            chat_tHeldComplete/chat_nHeldComplete `Chat Hold Time`
+            voice_tHeldComplete/voice_nHeldComplete `Voice Hold Time` 
             from
             hf_game_data
             where department in ('MultiBrand US Newark')
             )
-            where not (`Voice ACW` is null and `Chat ACW` is null and `Email ACW` is null
-            and `Voice Hold Time` is null and `Chat Hold Time` is null and `Email Hold Time` is null and `Not Responding Time` is null and CSAT is null)
-            and cast(date as date) >= (cast(date as date) - 4)
+            where not (`ACW` is null and `Voice ACW` is null and `Chat ACW` is null and `Email ACW` is null
+            and `Voice Hold Time` is null and `Not Responding Time` is null and CSAT is null and OQT is null)
     """)
-    push_gamification_data(us.toPandas(), 'HELLOFRESHUS', 'USAConnection')
+    push_gamification_data(us.toPandas(), 'HELLOFRESHUS', 'NewHFUSConnection')
     return True
 
 
@@ -245,11 +257,10 @@ def push_uk_data(spark):
                 (nAnswered/((interacting_duration + idle_duration)/3600)) Productivity
             from
             hf_game_data
-            where department in ('HF UK Manila')
+            where department in ('HF UK Manila', 'INT. Manila')
             )
             where not (`Productivity` is null and `Adherence` is null and `Conformance` is null
             and `AHT - Email` is null and `AHT - Chat` is null and `AHT - Voice` is null and `CSAT` is null and `QA Score` is null)
-            and cast(date as date) >= (cast(date as date) - 4)
     """)
     push_gamification_data(uk.toPandas(), 'HELLOFRESHUK', 'ukconnection')
     return True
@@ -275,7 +286,6 @@ def push_ca_data(spark):
             )
             where not (`Productivity` is null and `Adherence` is null and `Conformance` is null
             and `AHT - Email` is null and `AHT - Chat` is null and `AHT - Voice` is null and `CSAT` is null and `QA Score` is null)
-            and cast(date as date) >= (cast(date as date) - 4)
     """)
     push_gamification_data(ca.toPandas(), 'HELLOFRESHCA', 'HFCA')
     return True
