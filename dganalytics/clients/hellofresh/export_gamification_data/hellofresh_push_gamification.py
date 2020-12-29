@@ -48,7 +48,7 @@ def get_base_data(spark: SparkSession, extract_date: str):
             (select explode(sequence((cast('{extract_date}' as date))-{backword_days} + 2, (cast('{extract_date}' as date))+1, interval 1 day )) as date) dates) u
         left join
         (select
-        cast(from_utc_timestamp(a.emitDateTime, trim(c.timeZone)) as date) date, a.agentId,
+        cast(from_utc_timestamp(a.emitDateTime, trim(c.timeZone)) as date) date, a.userId agentId,
         sum(a.nAnswered) nAnswered, sum(a.tAnswered) tAnswered,
         sum(a.nAcw) nAcw, sum(a.tAcw) tAcw,
         sum(a.nHeldComplete) nHeldComplete, sum(a.tHeldComplete) tHeldComplete,
@@ -75,12 +75,12 @@ def get_base_data(spark: SparkSession, extract_date: str):
         sum(case when mediaType = 'message' then a.nHandle else null end) social_nHandle, sum(case when mediaType = 'message' then a.tHandle else null end) social_tHandle,
         sum(case when mediaType = 'message' then a.nTalkComplete else null end) social_nTalkComplete, sum(case when mediaType = 'message' then a.tTalkComplete else null end) social_tTalkComplete
 
-        from gpc_hellofresh.fact_conversation_metrics a, gpc_hellofresh.dim_routing_queues b, queue_timezones c
+        from gpc_hellofresh.fact_conversation_aggregate_metrics a, gpc_hellofresh.dim_routing_queues b, queue_timezones c
                 where a.queueId = b.queueId
                     and b.queueName = c.queueName
-                    and emitDate >= ((cast('{extract_date}' as date)) - {backword_days})
+                    and cast(intervalStart as date) >= ((cast('{extract_date}' as date)) - {backword_days})
         group by
-                cast(from_utc_timestamp(a.emitDateTime, trim(c.timeZone)) as date), a.agentId) cm
+                cast(from_utc_timestamp(a.intervalStart, trim(c.timeZone)) as date), a.userId) cm
         on cm.agentId = u.userId
         and cm.date = u.date
         left join
