@@ -24,17 +24,17 @@ def get_base_data(spark: SparkSession, extract_date: str):
     user_timezone = spark.createDataFrame(user_timezone)
     user_timezone.registerTempTable("user_timezone")
 
-    backword_days = 9
+    backword_days = 16
 
     df = spark.sql(f"""
         select * from (
         select
-        u.userId, u.date, u.department, cm.nAnswered, cm.tAnswered, cm.nAcw, cm.tAcw, cm.nHeldComplete, cm.tHeldComplete,
-        cm.nHandle, cm.tHandle, cm.nTalkComplete, cm.tTalkComplete,
-        cm.chat_tAcw, cm.chat_tHeldComplete, cm.chat_tHandle, cm.chat_tTalkComplete,
-        cm.email_tAcw, cm.email_tHeldComplete, cm.email_tHandle, cm.email_tTalkComplete,
-        cm.voice_tAcw, cm.voice_tHeldComplete, cm.voice_tHandle, cm.voice_tTalkComplete,
-        cm.social_tAcw, cm.social_tHeldComplete, cm.social_tHandle, cm.social_tTalkComplete,
+        u.userId, u.date, u.department, cm.nAnswered, cm.tAnswered/1000.0 tAnswered, cm.nAcw, cm.tAcw/1000.0 tAcw, cm.nHeldComplete, cm.tHeldComplete/1000.0 tHeldComplete,
+        cm.nHandle, cm.tHandle/1000.0 tHandle, cm.nTalkComplete, cm.tTalkComplete/1000.0 tTalkComplete,
+        cm.chat_tAcw/1000.0 chat_tAcw, cm.chat_tHeldComplete/1000.0 chat_tHeldComplete, cm.chat_tHandle/1000.0 chat_tHandle, cm.chat_tTalkComplete/1000.0 chat_tTalkComplete,
+        cm.email_tAcw/1000.0 email_tAcw, cm.email_tHeldComplete/1000.0 email_tHeldComplete, cm.email_tHandle/1000.0 email_tHandle, cm.email_tTalkComplete/1000.0 email_tTalkComplete,
+        cm.voice_tAcw/1000.0 voice_tAcw, cm.voice_tHeldComplete/1000.0 voice_tHeldComplete, cm.voice_tHandle/1000.0 voice_tHandle, cm.voice_tTalkComplete/1000.0 voice_tTalkComplete,
+        cm.social_tAcw/1000.0 social_tAcw, cm.social_tHeldComplete/1000.0 social_tHeldComplete, cm.social_tHandle/1000.0 social_tHandle, cm.social_tTalkComplete/1000.0 social_tTalkComplete,
         cm.chat_nAcw, cm.chat_nHeldComplete, cm.chat_nHandle, cm.chat_nTalkComplete,
         cm.email_nAcw, cm.email_nHeldComplete, cm.email_nHandle, cm.email_nTalkComplete,
         cm.voice_nAcw, cm.voice_nHeldComplete, cm.voice_nHandle, cm.voice_nTalkComplete,
