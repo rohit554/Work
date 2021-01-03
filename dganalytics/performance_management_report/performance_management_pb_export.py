@@ -61,7 +61,7 @@ if __name__ == "__main__":
             print(f"extracting Table - {table}")
             if tenant['name'] == 'hellofresh':
                 df = spark.sql(
-                    f"select * from dg_performance_management.{table} where orgId like 'hellofresh%'")
+                    f"select * from dg_performance_management.{table} where orgId in ('hellofreshanz', 'hellofreshca', 'hellofreshuk', 'hellofreshus')")
             else:
                 df = spark.sql(
                     f"select * from dg_performance_management.{table} where orgId = '{tenant['name']}'")
