@@ -72,5 +72,6 @@ if __name__ == "__main__":
             exec_powerbi_refresh(tenant['pb_workspace'], '2bd5448c-095b-465e-82d0-15fce5f31128')
             exec_powerbi_refresh(tenant['pb_workspace'], 'db5385f6-64e6-4c44-8812-830b072623a8')
             exec_powerbi_refresh(tenant['pb_workspace'], '501b284a-3d4a-4e95-859e-3be77becd6bc')
+            exec_powerbi_refresh(tenant['pb_workspace'], '45df9cb2-3dea-4c5e-b95a-60ee56e6cdb2')
         else:
             exec_powerbi_refresh(tenant['pb_workspace'], tenant['pb_roi_dataset'])

@@ -80,7 +80,7 @@ if __name__ == "__main__":
         {
             "name": "barclayhsc",
             "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
-            "pb_roi_dataset": ""
+            "pb_roi_dataset": "b4011242-22ff-435a-b82a-4d940169b314"
         },
 
     ]
