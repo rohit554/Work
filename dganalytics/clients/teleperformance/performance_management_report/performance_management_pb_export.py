@@ -77,6 +77,11 @@ if __name__ == "__main__":
             "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
             "pb_roi_dataset": "30e9a066-8d4a-4a65-a0c4-246dd53f015b"
         },
+        {
+            "name": "barclayhsc",
+            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
+            "pb_roi_dataset": ""
+        },
 
     ]
     app_name = "performance_management_powerbi_export"

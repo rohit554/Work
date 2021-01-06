@@ -26,7 +26,7 @@
                  "--api_name=evaluations",
                  "--transformation=fact_conversation_aggregate_metrics",
                  "--org_id=salmatcolesonline",
-                 "--pipeline=tp_kpi_raw_data",
+                 "--pipeline=activity_wise_points",
                  "--export_name=evaluation_forms_questions",
                  "--input_file=Probe_ColesOnline_20201213.xlsx"
              ]

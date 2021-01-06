@@ -10,6 +10,56 @@ pipeline = [
             "org_id": 1.0
         }
     },
+
+    {
+        "$lookup": {
+            "from": "Organization",
+            "let": {
+                "oid": "$org_id"
+            },
+            "pipeline": [
+                {
+                    "$match": {
+                        "$expr": {
+                            "$and": [
+                                {
+                                    "$eq": [
+                                        "$org_id",
+                                        "$$oid"
+                                    ]
+                                },
+                                {
+                                    "$eq": [
+                                        "$type",
+                                        "Organisation"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "$project": {
+                        "timezone": {
+                            "$ifNull": [
+                                "$timezone",
+                                "Australia/Melbourne"
+                            ]
+                        }
+                    }
+                }
+            ],
+            "as": "org"
+        }
+    },
+
+    {
+        "$unwind": {
+            "path": "$org",
+            "preserveNullAndEmptyArrays": True
+        }
+    },
+
     {
         "$unwind": {
             "path": "$questionnaire",
@@ -24,27 +74,73 @@ pipeline = [
             "quiz_start_date": "$questionnaire.start_date",
             "quiz_created_by": "$questionnaire.created_by",
             "quiz_team_id": "$questionnaire.team_id",
+            "quiz_user": "$questionnaire.users",
+            "quiz_type": {"$arrayElemAt": ["$questionnaire.users", 0]},
+            "timezone": "$org.timezone",
             "org_id": "$org_id",
+            "users": "$game_design.gd_users"
+        }
+    },
+    {
+        "$addFields": {
             "users": {
-                "$filter": {
-                    "input": "$game_design.gd_users",
-                    "as": "q",
-                    "cond": {
-                        "$eq": [
-                            "$$q.team_id",
-                            "$questionnaire.team_id"
-                        ]
-                    }
+                "$switch": {
+                    "branches": [
+                        {
+                            "case": {
+                                "$ne": [
+                                    {
+                                        "$ifNull": ["$quiz_type.user_id", True]},
+                                    True
+                                ]
+                            },
+                            "then": "$quiz_user"
+                        },
+                        {
+                            "case": {
+                                "$eq": [
+                                    "$quiz_type.all_users_in_campaign",
+                                    False
+                                ]
+                            },
+                            "then": {
+                                "$filter": {
+                                    "input": "$users",
+                                    "as": "q",
+                                    "cond": {
+                                        "$and": [
+                                            {
+                                                "$eq": [
+                                                    "$$q.team_id",
+                                                    "$quiz_type.team_id"
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                    ],
+                    "default": "$users"
                 }
             }
         }
     },
+
+    {
+        "$project": {
+            "quiz_user": 0,
+            "quiz_type": 0,
+        }
+    },
+
     {
         "$unwind": {
             "path": "$users",
             "preserveNullAndEmptyArrays": False
         }
     },
+
     {
         "$lookup": {
             "from": "User",
@@ -82,12 +178,14 @@ pipeline = [
             "as": "agent_data"
         }
     },
+
     {
         "$unwind": {
             "path": "$agent_data",
             "preserveNullAndEmptyArrays": False
         }
     },
+
     {
         "$lookup": {
             "from": "quiz",
@@ -154,7 +252,32 @@ pipeline = [
                     0.0
                 ]
             },
-            "answered_date": "$quiz_data.answered_date",
+            "quiz_start_date":{
+                "$dateToString": {
+                    "format": "%Y-%m-%d",
+                    "date": {
+                        "$toDate": {
+                            "$dateToString": {
+                                "date": "$quiz_start_date",
+                                "timezone": "$timezone"
+                            }
+                        }
+                    }
+                }
+            },
+            "answered_date": {
+                "$dateToString": {
+                    "format": "%Y-%m-%d",
+                    "date": {
+                        "$toDate": {
+                            "$dateToString": {
+                                "date": "$quiz_data.answered_date",
+                                "timezone": "$timezone"
+                            }
+                        }
+                    }
+                }
+            },
             "total_questions": {
                 "$ifNull": [
                     "$quiz_data.total_questions",
@@ -167,98 +290,10 @@ pipeline = [
                     0.0
                 ]
             },
-            "org_id": "$org_id",
-            "quiz_start_date": 1.0
+            "org_id": "$org_id"
         }
     },
-    {
-        "$lookup": {
-            "from": "Organization",
-            "let": {
-                "oid": "$org_id"
-            },
-            "pipeline": [
-                {
-                    "$match": {
-                        "$expr": {
-                            "$and": [
-                                {
-                                    "$eq": [
-                                        "$org_id",
-                                        "$$oid"
-                                    ]
-                                },
-                                {
-                                    "$eq": [
-                                        "$type",
-                                        "Organisation"
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "$project": {
-                        "timezone": {
-                            "$ifNull": [
-                                "$timezone",
-                                "Australia/Melbourne"
-                            ]
-                        }
-                    }
-                }
-            ],
-            "as": "org"
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$org",
-            "preserveNullAndEmptyArrays": True
-        }
-    },
-    {
-        "$project": {
-            "campaign_id": 1.0,
-            "quiz_id": 1.0,
-            "quiz_name": 1.0,
-            "user_id": 1.0,
-            "team_lead_mongo_id": 1.0,
-            "user_mongo_id": 1.0,
-            "quiz_status": 1.0,
-            "no_of_correct_questions": 1.0,
-            "answered_date": {
-                "$dateToString": {
-                    "format": "%Y-%m-%d",
-                    "date": {
-                        "$toDate": {
-                            "$dateToString": {
-                                "date": "$answered_date",
-                                "timezone": "$org.timezone"
-                            }
-                        }
-                    }
-                }
-            },
-            "total_questions": 1.0,
-            "quiz_percentage_score": 1.0,
-            "org_id": 1.0,
-            "quiz_start_date": {
-                "$dateToString": {
-                    "format": "%Y-%m-%d",
-                    "date": {
-                        "$toDate": {
-                            "$dateToString": {
-                                "date": "$quiz_start_date",
-                                "timezone": "$org.timezone"
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+
 ]
 
 schema = StructType([StructField('answered_date', StringType(), True),
@@ -276,7 +311,8 @@ schema = StructType([StructField('answered_date', StringType(), True),
                          [StructField('oid', StringType(), True)]), True),
                      StructField('total_questions', DoubleType(), True),
                      StructField('user_id', StringType(), True),
-                     StructField('user_mongo_id', StructType([StructField('oid', StringType(), True)]), True),
+                     StructField('user_mongo_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
                      StructField('quiz_start_date', StringType(), True)])
 
 
@@ -303,4 +339,5 @@ def get_quizzes(spark):
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
         'orgId').saveAsTable("dg_performance_management.quizzes")
     '''
-    delta_table_partition_ovrewrite(df, "dg_performance_management.quizzes", ['orgId'])
+    delta_table_partition_ovrewrite(
+        df, "dg_performance_management.quizzes", ['orgId'])

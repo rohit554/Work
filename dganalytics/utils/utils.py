@@ -301,7 +301,7 @@ def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_
 
 def exec_mongo_pipeline(spark, pipeline, collection, schema, mongodb=None):
     if mongodb is None:
-        mongodb = f"dggamification{env if env != 'local' else 'dev'}"
+        mongodb = f"dggamification{env if env != 'local' else 'uat'}"
     # mongodb = 'dggamificationprd'
     df = spark.read.format("mongo").option("uri", get_secret('mongodbconnurl')).option(
         "collection", collection).option("database", mongodb).option(

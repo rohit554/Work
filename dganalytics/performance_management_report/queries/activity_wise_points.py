@@ -170,8 +170,145 @@ schema = StructType([StructField('campaign_id', StructType(
     StructField('activity_name', StringType(), True),
     StructField('target', DoubleType(), True),
     StructField('date', StringType(), True),
-    StructField('mongoUserId', StringType(), True)
+    StructField('mongoUserId', StringType(), True),
+    StructField('awarded_by', StringType(), True)
 ])
+
+badge_bonus_points_pipeline = [
+    {
+        "$match": {
+            "outcome_type": "badge"
+        }
+    },
+    {
+        "$project": {
+            "outcome_quantity": 1.0,
+            "user_id": 1.0,
+            "campaign_id": 1.0,
+            "awarded_by": 1.0,
+            "activity_name": "Badges Bonus Points",
+            "creation_date": 1.0,
+            "outcome_type": 1.0
+        }
+    },
+    {
+        "$lookup": {
+            "from": "User",
+            "let": {
+                    "userid": "$user_id"
+            },
+            "pipeline": [
+                {
+                    "$match": {
+                        "$expr": {
+                            "$and": [
+                                {
+                                    "$eq": [
+                                        "$user_id",
+                                        "$$userid"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "$project": {
+                        "_id": 1.0,
+                        "org_id": 1.0
+                    }
+                }
+            ],
+            "as": "users"
+        }
+    },
+    {
+        "$unwind": {
+            "path": "$users",
+            "preserveNullAndEmptyArrays": False
+        }
+    },
+    {
+        "$project": {
+            "outcome_quantity": 1.0,
+            "user_id": 1.0,
+            "campaign_id": 1.0,
+            "awarded_by": 1.0,
+            "activity_name": 1.0,
+            "creation_date": 1.0,
+            "mongo_user_id": "$users._id",
+            "org_id": "$users.org_id",
+            "outcome_type": 1.0
+        }
+    },
+    {
+        "$lookup": {
+            "from": "Organization",
+            "let": {
+                    "oid": "$org_id"
+            },
+            "pipeline": [
+                {
+                    "$match": {
+                        "$expr": {
+                            "$and": [
+                                {
+                                    "$eq": [
+                                        "$org_id",
+                                        "$$oid"
+                                    ]
+                                },
+                                {
+                                    "$eq": [
+                                        "$type",
+                                        "Organisation"
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "$project": {
+                        "timezone": 1.0
+                    }
+                }
+            ],
+            "as": "org"
+        }
+    },
+    {
+        "$unwind": {
+            "path": "$org",
+            "preserveNullAndEmptyArrays": True
+        }
+    },
+    {
+        "$project": {
+            "points": "$outcome_quantity",
+            "user_id": 1.0,
+            "campaign_id": 1.0,
+            "awarded_by": 1.0,
+            "activity_name": 1.0,
+            "date": {
+                "$dateToString": {
+                    "format": "%Y-%m-%d",
+                    "date": {
+                        "$toDate": {
+                            "$dateToString": {
+                                "date": "$creation_date",
+                                "timezone": "$org.timezone"
+                            }
+                        }
+                    }
+                }
+            },
+            "mongoUserId": "$mongo_user_id",
+            "org_id": 1.0,
+            "outcome_type": 1.0
+        }
+    }
+]
 
 
 def get_activity_wise_points(spark):
@@ -183,7 +320,9 @@ def get_activity_wise_points(spark):
         print(oid)
         org_id = oid.upper()
     '''
-    df = exec_mongo_pipeline(spark, pipeline, 'User_Outcome', schema)
+    df_activity_points = exec_mongo_pipeline(spark, pipeline, 'User_Outcome', schema)
+    df_badge_bonus = exec_mongo_pipeline(spark, badge_bonus_points_pipeline, 'User_Outcome', schema)
+    df = df_activity_points.union(df_badge_bonus)
     df.registerTempTable("activity_wise_points")
     df = spark.sql("""
                     select  distinct a.campaign_id.oid as campaignId,
@@ -202,6 +341,7 @@ def get_activity_wise_points(spark):
                             a.target as target,
                             cast(a.date as date) as date,
                             b.mongoUserId as mongoUserId,
+                            awarded_by as awardedBy,
                             lower(a.org_id) as orgId
                     from activity_wise_points a, dg_performance_management.users b
                         where a.user_id = b.userId

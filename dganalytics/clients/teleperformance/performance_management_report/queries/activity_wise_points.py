@@ -181,11 +181,11 @@ schema = StructType([StructField('campaign_id', StructType(
     StructField('activity_name', StringType(), True),
     StructField('target', DoubleType(), True),
     StructField('date', StringType(), True),
+    StructField('awardedBy', StringType(), True),
     StructField('mongoUserId', StringType(), True)
 ])
 
 databases = ['holden-prod', 'tp-prod']
-
 def get_activity_wise_points(spark):
     for db in databases:
         df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb=db)
@@ -207,6 +207,7 @@ def get_activity_wise_points(spark):
                             a.target as target,
                             cast(a.date as date) as date,
                             a.mongoUserId as mongoUserId,
+                            awardedBy as awardedBy,
                             lower(a.org_id) as orgId
                     from activity_wise_points a
                     """)

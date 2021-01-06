@@ -54,6 +54,7 @@ spark.sql(f"""
                 target double,
                 date date,
                 mongoUserId string,
+                awardedBy string,
                 orgId string
             )
             using delta

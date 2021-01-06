@@ -49,7 +49,7 @@ pipeline = [
             "campaign_id": 1.0,
             "description": "$badge_desc",
             "badge_name": "$badge_name",
-            "lead_mongo_user_id": "$teamlead_id",
+            "awarded_by_mongo_user_id": "$awarded_by", 
             "user_id": 1.0,
             "org_id": "$users.org_id"
         }
@@ -119,7 +119,7 @@ pipeline = [
             "campaign_id": 1.0,
             "description": 1.0,
             "badge_name": 1.0,
-            "lead_mongo_user_id": 1.0,
+            "awarded_by_mongo_user_id": 1.0,
             "user_id": 1.0,
             "org_id": 1.0
         }
@@ -131,7 +131,7 @@ schema = StructType([StructField('badge_name', StringType(), True),
                          [StructField('oid', StringType(), True)]), True),
                      StructField('date', StringType(), True),
                      StructField('description', StringType(), True),
-                     StructField('lead_mongo_user_id', StructType(
+                     StructField('awarded_by_mongo_user_id', StructType(
                          [StructField('oid', StringType(), True)]), True),
                      StructField('user_id', StringType(), True),
                      StructField('org_id', StringType(), True)])
@@ -145,7 +145,7 @@ def get_badges(spark):
                             campaign_id.oid campaignId,
                             cast(date as date) date,
                             replace(replace(replace(replace(replace(description, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' '),',','') description,
-                            lead_mongo_user_id.oid leadMongoUserId,
+                            awarded_by_mongo_user_id.oid leadMongoUserId,
                             user_id userId,
                             lower(org_id) orgId
                     from badges
