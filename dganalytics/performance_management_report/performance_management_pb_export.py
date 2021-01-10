@@ -1,54 +1,16 @@
 from dganalytics.utils.utils import get_spark_session, get_path_vars, export_powerbi_csv, exec_powerbi_refresh
 import argparse
 import os
-
+import pandas as pd
 if __name__ == "__main__":
-    '''
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--tenant_org_id', required=True)
 
-    args, unknown_args = parser.parse_known_args()
-    tenant_org_id = args.tenant_org_id
-    '''
-
-    tenants = [
-        {
-            "name": "salmatcolesonline",
-            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
-            "pb_roi_dataset": "8db1907d-47aa-408e-a196-42c15218fb6e"
-        },
-        {
-            "name": "atnt",
-            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
-            "pb_roi_dataset": "d3dbc8fb-6765-4c8d-9c01-6039fb4693a0"
-        },
-        {
-            "name": "hellofresh",
-            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
-            "pb_roi_dataset": ""
-        },
-        {
-            "name": "netflix",
-            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
-            "pb_roi_dataset": "0caba8c1-b25e-4d53-a2ed-21af044539e7"
-        },
-        {
-            "name": "westerndigitalchina",
-            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
-            "pb_roi_dataset": ""
-        },
-        {
-            "name": "godaddy",
-            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
-            "pb_roi_dataset": ""
-        },
-        {
-            "name": "vodafonetpdbu",
-            "pb_workspace": "92a9a9da-6078-4253-be21-deed20046b7d",
-            "pb_roi_dataset": ""
-        },
-    ]
     app_name = "performance_management_powerbi_export"
+
+    tenant_path, db_path, log_path = get_path_vars('datagamz')
+    tenants_df = pd.read_csv(os.path.join(
+        tenant_path, 'data', 'config', 'PowerBI_ROI_DataSets_AutoRefresh_Config.csv'))
+    tenants_df = tenants_df[tenants_df['platform'] == 'new']
+    tenants = tenants_df.to_dict('records')
 
     spark = get_spark_session(
         app_name=app_name, tenant='datagamz', default_db='dg_performance_management')
@@ -56,22 +18,29 @@ if __name__ == "__main__":
               "quizzes", "user_campaign", "users", "activity_mapping"]
     for tenant in tenants:
         print(f"Getting ROI data for {tenant}")
+        if 'hellofresh' in tenant['name']:
+            continue
         tenant_path, db_path, log_path = get_path_vars(tenant['name'])
+
         for table in tables:
+
             print(f"extracting Table - {table}")
-            if tenant['name'] == 'hellofresh':
-                df = spark.sql(
-                    f"select * from dg_performance_management.{table} where orgId in ('hellofreshanz', 'hellofreshca', 'hellofreshuk', 'hellofreshus')")
-            else:
-                df = spark.sql(
-                    f"select * from dg_performance_management.{table} where orgId = '{tenant['name']}'")
+            df = spark.sql(
+                f"select * from dg_performance_management.{table} where orgId = '{tenant['name']}'")
             print(f"table row count - {df.count()}")
             df = df.drop("orgId")
             export_powerbi_csv(tenant['name'], df, f"pm_{table}")
-        if tenant['name'] == 'hellofresh':
-            exec_powerbi_refresh(tenant['pb_workspace'], '2bd5448c-095b-465e-82d0-15fce5f31128')
-            exec_powerbi_refresh(tenant['pb_workspace'], 'db5385f6-64e6-4c44-8812-830b072623a8')
-            exec_powerbi_refresh(tenant['pb_workspace'], '501b284a-3d4a-4e95-859e-3be77becd6bc')
-            exec_powerbi_refresh(tenant['pb_workspace'], '45df9cb2-3dea-4c5e-b95a-60ee56e6cdb2')
-        else:
-            exec_powerbi_refresh(tenant['pb_workspace'], tenant['pb_roi_dataset'])
+
+        exec_powerbi_refresh(
+            tenant['pb_workspace'], tenant['pb_roi_dataset'])
+
+    # for Hellofresh
+
+    for table in tables:
+        df = spark.sql(
+            f"select * from dg_performance_management.{table} where orgId in ('hellofreshanz', 'hellofreshca', 'hellofreshuk', 'hellofreshus')")
+        df = df.drop("orgId")
+        export_powerbi_csv('hellofresh', df, f"pm_{table}")
+
+    for rec in tenants_df[tenants_df['name'].str.contains('hellofresh')].to_dict('records'):
+        exec_powerbi_refresh(rec['pb_workspace'], rec['pb_roi_dataset'])
