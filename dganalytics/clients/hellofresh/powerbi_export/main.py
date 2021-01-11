@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import get_spark_session, export_powerbi_csv
+from dganalytics.utils.utils import get_spark_session, export_powerbi_csv, export_powerbi_parquet
 from dganalytics.connectors.gpc.gpc_utils import get_dbname
 from dganalytics.clients.hellofresh import powerbi_export
 import argparse
@@ -38,7 +38,11 @@ if __name__ == "__main__":
     app_name = "genesys_powerbi_extract"
     spark = get_spark_session(app_name, tenant, default_db=db_name)
     df = pipelines[export_name](spark, tenant, 'US')
-    export_powerbi_csv(tenant, df, os.path.join('US', export_name))
+    # export_powerbi_csv(tenant, df, os.path.join('US', export_name))
+    # commented CSV export Power BI allowing parquet files
+    export_powerbi_parquet(tenant, df, os.path.join('US', export_name))
 
     df = pipelines[export_name](spark, tenant, 'nonUS')
-    export_powerbi_csv(tenant, df, os.path.join('nonUS', export_name))
+    # commented CSV export Power BI allowing parquet files
+    # export_powerbi_csv(tenant, df, os.path.join('nonUS', export_name))
+    export_powerbi_parquet(tenant, df, os.path.join('nonUS', export_name))

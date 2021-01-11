@@ -69,6 +69,20 @@ def export_powerbi_csv(tenant, df, file_name):
         .option("escape", '"').option("quote", '"').option("quoteMode",
                                                            "NON_NUMERIC").option("dateFormat", "yyyy-MM-dd").csv(op_file)
 
+def export_powerbi_parquet(tenant, df, file_name):
+    tenant_path, db_path, log_path = get_path_vars(tenant)
+    old_path = tenant_path
+    if "dbfs" in tenant_path:
+        tenant_path = "file://" + tenant_path
+
+    op_file_parquet = os.path.join(
+        f"{tenant_path}", 'data', 'pbdatasets', 'parquet', f"{file_name}")
+    shutil.rmtree(os.path.join(
+        f"{old_path}", 'data', 'pbdatasets', 'parquet', f"{file_name}"), ignore_errors=True)
+    df.write.mode("overwrite").option("header", True).option("encoding", "utf-16").option("timestampFormat",
+                                                                                          "yyyy-MM-dd HH:mm:ss")\
+        .option("escape", '"').option("quote", '"').option("compression", "snappy").option("quoteMode",
+                                                                                           "NON_NUMERIC").option("dateFormat", "yyyy-MM-dd").parquet(op_file_parquet)
 
 def get_env():
     try:
@@ -80,16 +94,19 @@ def get_env():
         try:
             secret_name = 'datagamz-env'
             dbutils = get_dbutils()
-            environment = dbutils.secrets.get(scope='dgsecretscope', key=secret_name)
+            environment = dbutils.secrets.get(
+                scope='dgsecretscope', key=secret_name)
         except Exception as e:
             try:
-                logging.warning("Failed to read secrets from dbutils. Reading secrets.json")
+                logging.warning(
+                    "Failed to read secrets from dbutils. Reading secrets.json")
                 print("Falling back to reading secrets.json")
                 with open(os.path.join(os.path.expanduser("~"), "datagamz", "analytics", "secrets.json")) as f:
                     secrets = json.loads(f.read())
                 environment = secrets[secret_name]
             except:
-                logging.error("Failed to load environment name. Please check configurations")
+                logging.error(
+                    "Failed to load environment name. Please check configurations")
                 raise
     return environment
 
