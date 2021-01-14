@@ -89,7 +89,7 @@ from
 					select
 						group, explode(data) data
 					from
-						gpc_hellofresh.raw_conversation_aggregates
+					raw_conversation_aggregates
                     where 
                         extractIntervalStartTime = '{extract_start_time}'
                         and extractIntervalEndTime = '{extract_end_time}'
