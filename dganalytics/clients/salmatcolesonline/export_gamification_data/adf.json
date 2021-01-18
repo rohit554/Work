@@ -11,20 +11,12 @@
             "type": "string",
             "metadata": "Tenant Name",
             "defaultValue": "tenant"
-        },
-        "baseTime": {
-            "type": "string",
-            "defaultValue": "[utcNow('u')]",
-            "metadata": {
-                "description": "Schedule will start one hour from this time."
-            }
         }
     },
     "variables": {
         "factoryId": "[concat('Microsoft.DataFactory/factories/dg', parameters('env'), 'adf')]",
         "factoryname": "[concat('dg', parameters('env'), 'adf')]",
-        "AzureKeyVault_baseUrl": "[concat('https://dg', parameters('env') ,'secrets.vault.azure.net/')]",
-        "dailyDay1TriggerStart": "[dateTimeAdd(parameters('baseTime'), 'P1D', 'yyyy-MM-ddT00:30:00Z')]"
+        "AzureKeyVault_baseUrl": "[concat('https://dg', parameters('env') ,'secrets.vault.azure.net/')]"
     },
     "resources": [
         {
@@ -79,47 +71,47 @@
             ]
         },
         {
-            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_control_gpc_pipeline')]",
+            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_Gamification_Export')]",
             "type": "Microsoft.DataFactory/factories/pipelines",
             "apiVersion": "2018-06-01",
             "properties": {
                 "activities": [
                     {
-                        "name": "Genesys extract",
-                        "type": "ExecutePipeline",
+                        "name": "Gamification_Export",
+                        "type": "DatabricksSparkPython",
                         "dependsOn": [],
-                        "userProperties": [],
                         "policy": {
-                            "timeout": "01:00:00",
+                            "timeout": "00:30:00",
                             "retry": 1,
-                            "retryIntervalInSeconds": 1800,
+                            "retryIntervalInSeconds": 180,
                             "secureOutput": false,
                             "secureInput": false
                         },
+                        "userProperties": [],
                         "typeProperties": {
-                            "pipeline": {
-                                "referenceName": "salmatcolesonline_gpc_daily_extract",
-                                "type": "PipelineReference"
-                            },
-                            "waitOnCompletion": true,
-                            "parameters": {
-                                "tenant": {
-                                    "value": "@pipeline().parameters.tenant",
-                                    "type": "Expression"
-                                },
-                                "extract_date": {
-                                    "value": "@pipeline().parameters.extract_date",
-                                    "type": "Expression"
-                                }
-                            }
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/salmatcolesonline/export_gamification_data/salmatcolesonline_push_gamification.py",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_date",
+                                "@pipeline().parameters.extract_date",
+                                "--org_id",
+                                "@pipeline().parameters.tenant"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
                         }
                     },
                     {
-                        "name": "Gamification_Export",
+                        "name": "KPI  Raw Data",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "Genesys extract",
+                                "activity": "Gamification_Export",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
@@ -128,13 +120,13 @@
                         "policy": {
                             "timeout": "00:30:00",
                             "retry": 1,
-                            "retryIntervalInSeconds": 1800,
+                            "retryIntervalInSeconds": 180,
                             "secureOutput": false,
                             "secureInput": false
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/salmatcolesonline/export_gamification_data/gpc_dg_metadata_colesonline_export.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/salmatcolesonline/export_gamification_data/salmatcolesonline_push_roi_kpi_raw_data.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
@@ -169,39 +161,6 @@
             },
             "dependsOn": [
                 "[concat(variables('factoryId'), '/linkedServices/AzureDatabricks')]"
-            ]
-        },
-        {
-            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_control_gpc')]",
-            "type": "Microsoft.DataFactory/factories/triggers",
-            "apiVersion": "2018-06-01",
-            "properties": {
-                "annotations": [],
-                "runtimeState": "Stopped",
-                "pipelines": [
-                    {
-                        "pipelineReference": {
-                            "referenceName": "[concat(parameters('tenant'), '_control_gpc_pipeline')]",
-                            "type": "PipelineReference"
-                        },
-                        "parameters": {
-                            "tenant": "[parameters('tenant')]",
-                            "extract_date": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-dd')}"
-                        }
-                    }
-                ],
-                "type": "ScheduleTrigger",
-                "typeProperties": {
-                    "recurrence": {
-                        "frequency": "Hour",
-                        "interval": 6,
-                        "startTime": "[variables('dailyDay1TriggerStart')]",
-                        "timeZone": "UTC"
-                    }
-                }
-            },
-            "dependsOn": [
-                "[concat(variables('factoryId'), '/pipelines/', parameters('tenant'), '_control_gpc_pipeline')]"
             ]
         }
     ]
