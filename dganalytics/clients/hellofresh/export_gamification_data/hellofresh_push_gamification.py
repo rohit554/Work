@@ -251,7 +251,7 @@ def push_uk_data(spark):
                 csat CSAT,
                 (voice_tHeldComplete + voice_tTalkComplete + voice_tAcw)/float(voice_nHandle) `AHT - Voice`,
                 (chat_tTalkComplete + chat_tAcw)/float(chat_nHandle) `AHT - Chat`,
-                (email_tTalkComplete + email_tAcw)/float(email_nHandle) `AHT - Email`,
+                (social_tTalkComplete + social_tAcw)/float(social_nHandle) `AHT - Social`,
                 conformancePercentage Conformance,
                 adherencePercentage Adherence,
                 (nAnswered/((interacting_duration + idle_duration)/3600)) Productivity
@@ -260,7 +260,7 @@ def push_uk_data(spark):
             where department in ('HF UK Manila', 'INT. Manila')
             )
             where not (`Productivity` is null and `Adherence` is null and `Conformance` is null
-            and `AHT - Email` is null and `AHT - Chat` is null and `AHT - Voice` is null and `CSAT` is null and `QA Score` is null)
+            and `AHT - Social` is null and `AHT - Chat` is null and `AHT - Voice` is null and `CSAT` is null and `QA Score` is null)
     """)
     push_gamification_data(uk.toPandas(), 'HELLOFRESHUK', 'ukconnection')
     return True
