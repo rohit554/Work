@@ -37,9 +37,9 @@ def export_user_groups_region_sites(spark: SparkSession, tenant: str, region: st
         "userId as userKey", "groupName", "region", "site", "timeZone as time_zone")
     
     realtime_config = spark.sql("""
-        select a.groupName, a.userId, c.userFullName name from (
+        select groupName, userId, name from (
 	select 
-	a.userId, a.groupName groupName, b.region, b.site, b.timeZone, 
+	a.userId, a.groupName groupName, b.region, b.site, b.timeZone, c.userFullName name, 
 	row_number() over(partition by a.userId order by a.groupName) as rn
 	from gpc_hellofresh.dim_user_groups a, group_timezones b, gpc_hellofresh.dim_users c
 	where lower(a.groupName)  = lower(b.agentGroupName)
