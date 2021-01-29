@@ -4,9 +4,8 @@ from .helpers import mongo_utils
 
 
 from dganalytics.clients import holden
-from dganalytics.clients import vodafoneqatar
+# from dganalytics.clients import vodafoneqatar
 
 config = {
-    'holden': holden.ssis_replacement_config,
-    'vodafoneqatar': vodafoneqatar.ssis_replacement_config,
+    'holden': holden.ssis_replacement_config
 }
