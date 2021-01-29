@@ -13,3 +13,4 @@ build/
 !*devcontainer.json*
 .vscode/launch.json
 .notebooks/*
+.DS_Store
