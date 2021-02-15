@@ -59,7 +59,7 @@ schema = StructType([StructField('date', StringType(), True),
                      StructField('login_attempt', IntegerType(), True),
                      StructField('user_id', StringType(), True)])
 
-databases = ['holden-prod', 'tp-prod']
+databases = ['tp-prod']
 
 def get_logins(spark):
     for db in databases:

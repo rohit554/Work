@@ -185,7 +185,7 @@ schema = StructType([StructField('campaign_id', StructType(
     StructField('mongoUserId', StringType(), True)
 ])
 
-databases = ['holden-prod', 'tp-prod']
+databases = ['tp-prod']
 def get_activity_wise_points(spark):
     for db in databases:
         df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb=db)

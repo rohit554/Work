@@ -33,7 +33,7 @@ schema = StructType([StructField('campaign_id', StructType([StructField('oid', S
                          'name', StringType(), True),
                      StructField('org_id', StringType(), True), StructField('start_date', StringType(), True)])
 
-databases = ['holden-prod', 'tp-prod']
+databases = ['tp-prod']
 
 def get_campaign(spark):
     for db in databases:

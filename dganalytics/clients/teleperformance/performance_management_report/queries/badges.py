@@ -72,7 +72,7 @@ schema = StructType([StructField('badge_name', StringType(), True),
                      StructField('user_id', StringType(), True),
                      StructField('org_id', StringType(), True)])
 
-databases = ['holden-prod', 'tp-prod']
+databases = ['tp-prod']
 
 def get_badges(spark):
     for db in databases:

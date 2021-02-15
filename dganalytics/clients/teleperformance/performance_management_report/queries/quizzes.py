@@ -201,7 +201,7 @@ schema = StructType([StructField('answered_date', StringType(), True),
                      StructField('user_mongo_id', StructType([StructField('oid', StringType(), True)]), True),
                      StructField('quiz_start_date', StringType(), True)])
 
-databases = ['holden-prod', 'tp-prod']
+databases = ['tp-prod']
 
 def get_quizzes(spark):
     for db in databases:

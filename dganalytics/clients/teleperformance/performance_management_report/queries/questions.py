@@ -77,7 +77,7 @@ schema = StructType([StructField('answer_given', StringType(), True),
                      StructField('subject_area', StringType(), True),
                      StructField('user_id', StringType(), True)])
 
-databases = ['holden-prod', 'tp-prod']
+databases = ['tp-prod']
 
 def get_questions(spark):
     for db in databases:

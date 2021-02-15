@@ -91,7 +91,7 @@ schema = StructType([StructField('achieved_date', TimestampType(), True),
                          [StructField('oid', StringType(), True)]), True),
                      StructField('user_id', StringType(), True)])
 
-databases = ['holden-prod', 'tp-prod']
+databases = ['tp-prod']
 
 def get_levels(spark):
     for db in databases:
