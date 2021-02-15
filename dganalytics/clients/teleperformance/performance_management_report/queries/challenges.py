@@ -273,7 +273,7 @@ schema = StructType([StructField('action', StringType(), True),
                      StructField('org_id', StringType(), True),
                      StructField('status', StringType(), True)])
 
-databases = ['holden-prod', 'tp-prod']
+databases = ['tp-prod']
 
 def get_challenges(spark):
     for db in databases:

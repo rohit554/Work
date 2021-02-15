@@ -131,7 +131,7 @@ schema = StructType([StructField('Email', StringType(), True),
                      StructField('isActive', BooleanType(), True),
                      StructField('isDeleted', BooleanType(), True)])
 
-databases = ['holden-prod', 'tp-prod']
+databases = ['tp-prod']
 
 
 def get_users(spark):
