@@ -15,7 +15,7 @@ pipeline = [
                 {
                     "$unwind": {
                         "path": "$game_design.gd_teams",
-                        "preserveNullAndEmptyArrays": True
+                        "preserveNullAndEmptyArrays": False
                     }
                 },
                 {
@@ -54,7 +54,7 @@ pipeline = [
                 {
                     "$unwind": {
                         "path": "$game_design.gd_users",
-                        "preserveNullAndEmptyArrays": True
+                        "preserveNullAndEmptyArrays": False
                     }
                 },
                 {
