@@ -61,11 +61,8 @@ def get_activity_wise_points(spark):
     df = None
 
     for org_id_row in org_id_rows:
-        print(org_id_row.asDict())
         org_id = org_id_row.asDict()['org_id']
         org_timezone = org_id_row.asDict()['timezone']
-
-        print('Org: ', org_id, ', tz: ', org_timezone)
 
         activity_points_pipeline = [{
             "$match": {
