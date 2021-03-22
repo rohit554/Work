@@ -26,97 +26,85 @@ schema = StructType([
     StructField('awarded_by', StringType(), True)
 ])
 
-org_timezone_schema = StructType(
-    [StructField('timezone', StringType(), False)])
+org_timezone_schema = StructType([
+    StructField('org_id', StringType(), True),
+    StructField('timezone', StringType(), False)])
 
 
 def get_activity_wise_points(spark):
-    org_id_rows = spark.sql(
-        "select distinct orgId from dg_performance_management.campaign order by orgId"
-    ).select("orgId").collect()
+    org_timezone_pipeline = [{
+        "$match": {
+            "$expr": {
+                "$and": [
+                {
+                    "$eq": ["$type", "Organisation"]
+                }, {
+                    "$eq": ["$is_active", True]
+                }, {
+                    "$eq": ["$is_deleted", False]
+                }]
+            }
+        }
+    }, {
+        "$project": {
+            "org_id": 1,
+            "timezone": {
+                "$ifNull": ["$timezone", "Australia/Melbourne"]
+            }
+        }
+    }]
+
+    org_id_rows = exec_mongo_pipeline(
+        spark, org_timezone_pipeline, 'Organization',
+        org_timezone_schema).select("*").collect()
 
     df = None
 
     for org_id_row in org_id_rows:
-        org_id = org_id_row.asDict()['orgId']
+        print(org_id_row.asDict())
+        org_id = org_id_row.asDict()['org_id']
+        org_timezone = org_id_row.asDict()['timezone']
 
-        org_timezone_pipeline = [{
+        print('Org: ', org_id, ', tz: ', org_timezone)
+
+        activity_points_pipeline = [{
             "$match": {
-                "$expr": {
-                    "$and": [{
-                        "$eq": [{
-                            "$strcasecmp": ["$org_id", org_id]
-                        }, 0]
-                    }, {
-                        "$eq": ["$type", "Organisation"]
-                    }, {
-                        "$eq": ["$is_active", True]
-                    }, {
-                        "$eq": ["$is_deleted", False]
-                    }]
-                }
+                "org_id": org_id,
+                "outcome_type": "points"
             }
         }, {
             "$project": {
-                "timezone": {
-                    "$ifNull": ["$timezone", "Australia/Melbourne"]
-                }
-            }
-        }]
-
-        org_timezone_row = exec_mongo_pipeline(
-            spark, org_timezone_pipeline, 'Organization',
-            org_timezone_schema).select("timezone").first()
-
-        if org_timezone_row:
-            org_timezone = org_timezone_row.asDict()['timezone']
-
-            activity_points_pipeline = [{
-                "$match": {
-                    "$expr": {
-                        "$and": [{
-                            "$eq": [{
-                                "$strcasecmp": ["$org_id", org_id]
-                            }, 0]
-                        }, {
-                            "$eq": ["$outcome_type", "points"]
-                        }]
-                    }
-                }
-            }, {
-                "$project": {
-                    "campaign_id": 1,
-                    "activityId": "$outcome_id",
-                    "user_id": 1,
-                    "points": "$outcome_quantity",
-                    "outcome_type": 1,
-                    "team_id": 1,
-                    "kpi_name": 1,
-                    "org_id": 1,
-                    "field_name": 1,
-                    "field_value": 1,
-                    "frequency": 1,
-                    "entity_name": 1,
-                    "no_of_times_performed": 1,
-                    "activity_name": "$outcome_name",
-                    "target": "$quartile_target",
-                    "date": {
-                        "$cond": {
-                            "if": {
-                                "$and": [{
-                                    "$eq": ["$creation_date", None]
-                                }]
-                            },
-                            "then": None,
-                            "else": {
-                                "$dateToString": {
-                                    "format": "%Y-%m-%d",
-                                    "date": {
-                                        "$toDate": {
-                                            "$dateToString": {
-                                                "date": "$creation_date",
-                                                "timezone": org_timezone
-                                            }
+                "campaign_id": 1,
+                "activityId": "$outcome_id",
+                "user_id": 1,
+                "points": "$outcome_quantity",
+                "outcome_type": 1,
+                "team_id": 1,
+                "kpi_name": 1,
+                "org_id": 1,
+                "field_name": 1,
+                "field_value": 1,
+                "frequency": 1,
+                "entity_name": 1,
+                "no_of_times_performed": 1,
+                "activity_name": "$outcome_name",
+                "target": "$quartile_target",
+                "date": {
+                    "$cond": {
+                        "if": {
+                            "$and": [{
+                                "$eq": ["$creation_date", None]
+                            }]
+                        },
+                        "then": None,
+                        "else": {
+                            "$dateToString": {
+                                "format": "%Y-%m-%d",
+                                "date": {
+                                    "$toDate": {
+                                        "$dateToString": {
+                                            "date": "$creation_date",
+                                            "timezone": org_timezone
                                         }
                                     }
                                 }
@@ -124,98 +112,92 @@ def get_activity_wise_points(spark):
                         }
                     }
                 }
-            }]
+            }
+        }]
 
-            badge_bonus_points_pipeline = [{
-                "$match": {
-                    "$expr": {
-                        "$and": [{
-                            "$eq": [{
-                                "$strcasecmp": ["$org_id", org_id]
-                            }, 0]
-                        }, {
-                            "$eq": ["$outcome_type", "badge"]
-                        }]
+        badge_bonus_points_pipeline = [{
+            "$match": {
+                "org_id": org_id,
+                "outcome_type": "badge"
+            }
+        }, {
+            "$project": {
+                "outcome_quantity": 1,
+                "user_id": 1,
+                "campaign_id": 1,
+                "awarded_by": 1,
+                "activity_name": "Badges Bonus Points",
+                "creation_date": 1,
+                "outcome_type": 1,
+                "org_id": 1
+            }
+        }, {
+            "$lookup": {
+                "from":
+                "User",
+                "let": {
+                    "userid": "$user_id"
+                },
+                "pipeline": [{
+                    "$match": {
+                        "$expr": {
+                            "$and": [{
+                                "$eq": ["$user_id", "$$userid"]
+                            }]
+                        }
                     }
-                }
-            }, {
-                "$project": {
-                    "outcome_quantity": 1,
-                    "user_id": 1,
-                    "campaign_id": 1,
-                    "awarded_by": 1,
-                    "activity_name": "Badges Bonus Points",
-                    "creation_date": 1,
-                    "outcome_type": 1,
-                    "org_id": 1
-                }
-            }, {
-                "$lookup": {
-                    "from":
-                    "User",
-                    "let": {
-                        "userid": "$user_id"
-                    },
-                    "pipeline": [{
-                        "$match": {
-                            "$expr": {
-                                "$and": [{
-                                    "$eq": ["$user_id", "$$userid"]
-                                }]
-                            }
-                        }
-                    }, {
-                        "$project": {
-                            "_id": 1.0,
-                            "org_id": 1.0
-                        }
-                    }],
-                    "as":
-                    "users"
-                }
-            }, {
-                "$unwind": {
-                    "path": "$users",
-                    "preserveNullAndEmptyArrays": False
-                }
-            }, {
-                "$project": {
-                    "points": "$outcome_quantity",
-                    "user_id": 1,
-                    "campaign_id": 1,
-                    "awarded_by": 1,
-                    "activity_name": 1,
-                    "date": {
-                        "$dateToString": {
-                            "format": "%Y-%m-%d",
-                            "date": {
-                                "$toDate": {
-                                    "$dateToString": {
-                                        "date": "$creation_date",
-                                        "timezone": org_timezone
-                                    }
+                }, {
+                    "$project": {
+                        "_id": 1.0,
+                        "org_id": 1.0
+                    }
+                }],
+                "as":
+                "users"
+            }
+        }, {
+            "$unwind": {
+                "path": "$users",
+                "preserveNullAndEmptyArrays": False
+            }
+        }, {
+            "$project": {
+                "points": "$outcome_quantity",
+                "user_id": 1,
+                "campaign_id": 1,
+                "awarded_by": 1,
+                "activity_name": 1,
+                "date": {
+                    "$dateToString": {
+                        "format": "%Y-%m-%d",
+                        "date": {
+                            "$toDate": {
+                                "$dateToString": {
+                                    "date": "$creation_date",
+                                    "timezone": org_timezone
                                 }
                             }
                         }
-                    },
-                    "mongoUserId": "$users._id",
-                    "org_id": 1,
-                    "outcome_type": 1
-                }
-            }]
+                    }
+                },
+                "mongoUserId": "$users._id",
+                "org_id": 1,
+                "outcome_type": 1
+            }
+        }]
 
-            activity_points_df = exec_mongo_pipeline(spark,
-                                                     activity_points_pipeline,
-                                                     'User_Outcome', schema)
-            badge_bonus_points_df = exec_mongo_pipeline(
-                spark, badge_bonus_points_pipeline, 'User_Outcome', schema)
+        activity_points_df = exec_mongo_pipeline(spark,
+                                                    activity_points_pipeline,
+                                                    'User_Outcome', schema)
+        badge_bonus_points_df = exec_mongo_pipeline(
+            spark, badge_bonus_points_pipeline, 'User_Outcome', schema)
 
-            if df is None:
-                df = activity_points_df
-            else:
-                df = df.union(activity_points_df)
+        if df is None:
+            df = activity_points_df
+        else:
+            df = df.union(activity_points_df)
 
-            df = df.union(badge_bonus_points_df)
+        df = df.union(badge_bonus_points_df)
 
     df.registerTempTable("activity_wise_points")
 
