@@ -5,9 +5,7 @@ def build_pipeline(org_id: str, org_timezone: str):
     pipeline = [
         {
             "$match": {
-                "$expr": {
-                    "$eq": [{"$strcasecmp": ["$org_id", org_id]}, 0]
-                },
+                "org_id": org_id,
                 "works_for.role_id": {
                     "$ne": "Team Manager"
                 },
@@ -354,53 +352,44 @@ schema = StructType([StructField('action', StringType(), True),
                      StructField('status', StringType(), True)])
 
 org_timezone_schema = StructType([
-        StructField('timezone', StringType(), False)
-])
+    StructField('org_id', StringType(), True),
+    StructField('timezone', StringType(), False)])
+
 
 def get_challenges(spark):
-    org_id_rows = spark.sql(
-        "select distinct orgId from dg_performance_management.campaign order by orgId"
-    ).select("orgId").collect()
+    org_timezone_pipeline = [{
+        "$match": {
+            "$expr": {
+                "$and": [
+                {
+                    "$eq": ["$type", "Organisation"]
+                }, {
+                    "$eq": ["$is_active", True]
+                }, {
+                    "$eq": ["$is_deleted", False]
+                }]
+            }
+        }
+    }, {
+        "$project": {
+            "org_id": 1,
+            "timezone": {
+                "$ifNull": ["$timezone", "Australia/Melbourne"]
+            }
+        }
+    }]
+
+    org_id_rows = exec_mongo_pipeline(
+        spark, org_timezone_pipeline, 'Organization',
+        org_timezone_schema).select("*").collect()
     
     df = None
 
     # Get campaign & challenges for each org
     for org_id_row in org_id_rows:
-        org_id = org_id_row.asDict()['orgId']
+        org_id = org_id_row.asDict()['org_id']
+        org_timezone = org_id_row.asDict()['timezone']
 
-        org_timezone_pipeline = [{
-            "$match": {
-                "$expr": {
-                    "$and": [{
-                        "$eq": [{
-                            "$strcasecmp": ["$org_id", org_id]
-                        }, 0]
-                    }, {
-                        "$eq": ["$type", "Organisation"]
-                    }, {
-                        "$eq": ["$is_active", True]
-                    }, {
-                        "$eq": ["$is_deleted", False]
-                    }]
-                }
-            }
-        }, {
-            "$project": {
-                "org_id": 1.0,
-                "timezone": {
-                    "$ifNull": ["$timezone", "Australia/Melbourne"]
-                }
-            }
-        }]
-
-        org_timezone_row = exec_mongo_pipeline(
-            spark, org_timezone_pipeline, 'Organization',
-            org_timezone_schema).select("timezone").first()
-
-        if not org_timezone_row:
-            continue
-        
-        org_timezone = org_timezone_row.asDict()['timezone']
         pipeline = build_pipeline(org_id, org_timezone)
 
         challenges_df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
