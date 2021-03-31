@@ -85,6 +85,7 @@ def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str, re
 			AND b.queueName = c.queueName
 			AND c.region {" = 'US'" if region == 'US' else " <> 'US'" }
 		GROUP BY
+			c.timeZone,
 			a.originatingDirection,
 			a.userId,
 			a.mediaType,
