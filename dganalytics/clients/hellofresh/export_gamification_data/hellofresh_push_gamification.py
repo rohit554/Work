@@ -207,7 +207,7 @@ def push_anz_data(spark):
         csat CSAT
         from
         hf_game_data
-        where department in ('EP AU Manila', 'HF AU Sydney', 'HF AU Manila', 'HF NZ Sydney', 'HF NZ Manila', 'EP AU Sydney', 'MultiBrand ANZ Sydney')
+        where department in ('EP AU Manila', 'HF AU Sydney', 'HF AU Manila', 'HF NZ Sydney', 'HF NZ Manila', 'EP AU Sydney', 'MultiBrand ANZ Sydney', 'HF AU Cebu')
         )
         where not (Conformance is null and `QA Score` is null and Adherence is null and Keyword is null and `Voice ACW` is null and `Chat ACW` is null and `Social ACW` is null
         and `Voice Hold Time` is null and `Not Responding Time` is null and CSAT is null)
