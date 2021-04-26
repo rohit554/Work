@@ -110,9 +110,9 @@ pipeline = [
                                     "cond": {
                                         "$and": [
                                             {
-                                                "$eq": [
+                                                "$in": [
                                                     "$$q.team_id",
-                                                    "$quiz_type.team_id"
+                                                    "$quiz_user.team_id"
                                                 ]
                                             }
                                         ]
