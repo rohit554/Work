@@ -1,97 +1,97 @@
 from dganalytics.utils.utils import get_spark_session, push_gamification_data, export_powerbi_csv
-from dganalytics.connectors.gpc.gpc_utils import dg_metadata_export_parser, get_dbname, gpc_utils_logger
+from dganalytics.connectors.gpc.gpc_utils import dg_metadata_export_parser, get_dbname, gpc_utils_logger, get_path_vars
 from pyspark.sql import SparkSession
+import os
+import pandas as pd
 
+def get_probeabg_data(spark: SparkSession, extract_date: str):
+    backword_days = 16
 
-def get_probeabg_data(spark: SparkSession, extract_date: str, org_id: str):
     df = spark.sql(f"""
-select * from (
-select
-	COALESCE(cqnr.UserID,
-		wfm.UserID) as UserID, COALESCE(cqnr.Date,
-		wfm.Date) as Date, DailyAdherencePercentage, AvgDailyQAScoreVoice, AvgDailyQAScoreMessage, 
-		AvgDailyQAScoreEmail, AvgDailyQAScore, AvgDailyHoldTimeVoice, 
-		AvgDailyHoldTimeMessage, AvgDailyHoldTimeEmail, AvgDailyHoldTime, AvgDailyAcwTimeVoice, AvgDailyAcwTimeMessage, 
-		AvgDailyAcwTimeEmail, AvgDailyAcwTime, SumDailyNotRespondingTime
-from
-	(
-	select
-		COALESCE(cnr.UserID,
-		quality.UserID) as UserID, COALESCE(cnr.Date,
-		quality.Date) as Date, AvgDailyQAScoreVoice, AvgDailyQAScoreMessage, AvgDailyQAScoreEmail, AvgDailyQAScore, AvgDailyHoldTimeVoice, AvgDailyHoldTimeMessage, AvgDailyHoldTimeEmail, AvgDailyHoldTime, AvgDailyAcwTimeVoice, AvgDailyAcwTimeMessage, AvgDailyAcwTimeEmail, AvgDailyAcwTime, SumDailyNotRespondingTime
-	from
-		(
-		select
-			COALESCE(conv.UserID,
-			nr.UserID) as UserID, COALESCE(conv.Date,
-			nr.Date) as Date, AvgDailyHoldTimeVoice, AvgDailyHoldTimeMessage, AvgDailyHoldTimeEmail, AvgDailyHoldTime, AvgDailyAcwTimeVoice, AvgDailyAcwTimeMessage, AvgDailyAcwTimeEmail, AvgDailyAcwTime, SumDailyNotRespondingTime
-		from
-			(
-			SELECT
-				agentId as UserID, cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) as Date, sum(case when lower(mediaType) = 'voice' then coalesce(tHeldComplete, 0) else 0 end)/ sum(case when mediaType = 'voice' then coalesce(nHeldComplete, 0) else 0 end) as AvgDailyHoldTimeVoice, sum(case when lower(mediaType) = 'message' then coalesce(tHeldComplete, 0) else 0 end)/ sum(case when mediaType = 'message' then coalesce(nHeldComplete, 0) else 0 end) as AvgDailyHoldTimeMessage, sum(case when lower(mediaType) = 'email' then coalesce(tHeldComplete, 0) else 0 end)/ sum(case when mediaType = 'email' then coalesce(nHeldComplete , 0) else 0 end) as AvgDailyHoldTimeEmail, sum(coalesce(tHeldComplete, 0))/ sum(coalesce(nHeldComplete, 0)) as AvgDailyHoldTime, sum(case when lower(mediaType) = 'voice' then coalesce(tAcw, 0) else 0 end)/ sum(case when mediaType = 'voice' then coalesce(nAcw , 0) else 0 end) as AvgDailyAcwTimeVoice, sum(case when lower(mediaType) = 'message' then coalesce(tAcw, 0) else 0 end)/ sum(case when mediaType = 'message' then coalesce(nAcw , 0) else 0 end) as AvgDailyAcwTimeMessage, sum(case when lower(mediaType) = 'email' then coalesce(tAcw, 0) else 0 end)/ sum(case when mediaType = 'email' then coalesce(nAcw , 0) else 0 end) as AvgDailyAcwTimeEmail, sum(coalesce(tAcw, 0))/ sum(coalesce(nAcw , 0)) as AvgDailyAcwTime
-			FROM
-				fact_conversation_metrics
-			WHERE
-				cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) <= (cast('{extract_date}' as date))
-                and cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) >= (cast('{extract_date}' as date) -7)
-			group by
-				agentId , cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) ) conv
-		FULL OUTER JOIN (
-			select
-				userId as UserID, cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) as Date, sum(unix_timestamp(endTime) - unix_timestamp(startTime)) as SumDailyNotRespondingTime
-			from
-				fact_routing_status
-			where
-				routingStatus = 'NOT_RESPONDING'
-				and cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) <= (cast('{extract_date}' as date))
-                and cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) >= (cast('{extract_date}' as date) - 7)
-			group by
-				userId, cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) ) nr on
-			nr.UserID = conv.UserID
-			and nr.Date = conv.Date ) cnr
-	FULL OUTER JOIN (
-		select
-			b.agentId as UserID, cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) as Date, AVG(case when upper(b.mediaType) = 'CALL' then a.totalScore else NULL end) as AvgDailyQAScoreVoice, AVG(case when upper(b.mediaType) = 'MESSAGE' then a.totalScore else NULL end) as AvgDailyQAScoreMessage, AVG(case when upper(b.mediaType) = 'EMAIL' then a.totalScore else NULL end) as AvgDailyQAScoreEmail, AVG(a.totalScore) as AvgDailyQAScore
-		from
-			fact_evaluation_total_scores a, dim_evaluations b
-		where
-			a.evaluationId = b.evaluationId
-			and cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) <= (cast('{extract_date}' as date))
-            and cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) >= (cast('{extract_date}' as date) - 7)
-		group by
-			b.agentId, cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) ) quality on
-		quality.UserID = cnr.UserID
-		and cnr.Date = quality.Date ) cqnr
-	FULL OUTER JOIN
-	(
-		 select a.genesysUserId as UserID, a.Date, a.TimeAdheringToSchedule as DailyAdherencePercentage
-from dg_probeabg.wfm_verint_export a
- where 
- a.`Date` <= (cast('{extract_date}' as date))
- and a.`Date` >= (cast('{extract_date}' as date) - 7)
-	) wfm		
-	on wfm.UserID = cqnr.UserID
-	and wfm.Date = cqnr.Date
-)		
-where
-	UserID is not NULL and Date is not NULL
+                    SELECT * FROM (SELECT  userId UserID, department
+                    FROM gpc_probeabg.dim_users) AS U
+                    LEFT JOIN (
+                        SELECT agentId,
+                            CAST(from_utc_timestamp(emitDateTime, 'Australia/Sydney') AS date) AS Date,
+                            SUM(CASE WHEN lower(mediaType) = 'voice' THEN COALESCE(tHeldComplete, 0) ELSE 0 END)/ SUM(CASE WHEN mediaType = 'voice' THEN COALESCE(nHeldComplete, 0) ELSE 0 END) AS AvgDailyHoldTimeVoice,
+                            SUM(CASE WHEN lower(mediaType) = 'message' THEN COALESCE(tHeldComplete, 0) ELSE 0 END)/ SUM(CASE WHEN mediaType = 'message' THEN COALESCE(nHeldComplete, 0) ELSE 0 END) AS AvgDailyHoldTimeMessage,
+                            SUM(CASE WHEN lower(mediaType) = 'email' THEN COALESCE(tHeldComplete, 0) ELSE 0 END)/ SUM(CASE WHEN mediaType = 'email' THEN COALESCE(nHeldComplete , 0) ELSE 0 END) AS AvgDailyHoldTimeEmail,
+                            SUM(coalesce(tHeldComplete, 0))/ SUM(COALESCE(nHeldComplete, 0)) AS AvgDailyHoldTime,
+                            SUM(CASE WHEN lower(mediaType) = 'voice' THEN COALESCE(tAcw, 0) ELSE 0 END)/ SUM(CASE WHEN mediaType = 'voice' THEN COALESCE(nAcw , 0) ELSE 0 END) AS AvgDailyAcwTimeVoice,
+                            SUM(CASE WHEN lower(mediaType) = 'message' THEN COALESCE(tAcw, 0) ELSE 0 END)/ SUM(CASE WHEN mediaType = 'message' THEN COALESCE(nAcw , 0) ELSE 0 END) AS AvgDailyAcwTimeMessage,
+                            SUM(CASE WHEN lower(mediaType) = 'email' THEN COALESCE(tAcw, 0) ELSE 0 END)/ SUM(CASE WHEN mediaType = 'email' THEN COALESCE(nAcw , 0) ELSE 0 END) AS AvgDailyAcwTimeEmail,
+                            SUM(COALESCE(tAcw, 0))/ SUM(COALESCE(nAcw , 0)) as AvgDailyAcwTime,
+                            SUM(CASE WHEN lower(mediaType) = 'voice' THEN COALESCE(thandle, 0) ELSE 0 END)/ SUM(CASE WHEN mediaType = 'voice' THEN COALESCE(nhandle , 0) ELSE 0 END) AS AvgDailyHandleTimeVoice,
+                            SUM(CASE WHEN lower(mediaType) = 'message' THEN COALESCE(thandle, 0) ELSE 0 END)/ SUM(CASE WHEN mediaType = 'message' THEN COALESCE(nhandle , 0) ELSE 0 END) AS AvgDailyHandleTimeMessage,
+                            SUM(CASE WHEN lower(mediaType) = 'email' THEN COALESCE(thandle, 0) ELSE 0 END)/ SUM(CASE WHEN mediaType = 'email' THEN COALESCE(nhandle , 0) ELSE 0 END) AS AvgDailyHandleTimeEmail,
+                            SUM(COALESCE(thandle, 0))/ SUM(COALESCE(nhandle , 0)) as AvgDailyHandleTime
+                        FROM gpc_probeabg.fact_conversation_metrics
+                        WHERE CAST(from_utc_timestamp(emitDateTime, 'Australia/Sydney') AS date) <= (CAST('{extract_date}' AS date))
+                          and CAST(from_utc_timestamp(emitDateTime, 'Australia/Sydney') AS date) >= (CAST('{extract_date}' AS date) - {backword_days})
+                        GROUP BY agentId, CAST(from_utc_timestamp(emitDateTime, 'Australia/Sydney') AS date)) AS FCM
+                      ON U.userId = FCM.agentId
+                      WHERE department IS NOT NULL
+	                        AND UserID IS NOT NULL
+                            AND Date IS NOT NULL
                 """)
+
+    df.cache()
     return df
 
+def push_sales_data(spark):
+    sales = spark.sql("""
+        SELECT * FROM (
+            SELECT 
+                UserID AS `UserID`,
+                date_format(cast(Date as date), 'dd-MM-yyyy') AS `Date`,
+                AvgDailyAcwTime AS ACW,
+                AvgDailyHoldTime AS `Hold time`,
+                AvgDailyHandleTime AS AHT
+                
+            FROM
+            probeabg_game_data
+            WHERE department in ('Sales')
+        )
+        WHERE NOT (ACW IS NULL AND `Hold time` IS NULL AND AHT IS NULL)
+    """)
+    push_gamification_data(sales.toPandas(), 'PROBEABGSALES', 'ProbeABGSales')
+    return True
+
+def push_service_data(spark):
+    service = spark.sql("""
+        SELECT * FROM (
+            SELECT 
+                UserID `UserID`,
+                date_format(cast(Date as date), 'dd-MM-yyyy') `Date`,
+                AvgDailyAcwTime ACW,
+                AvgDailyHoldTime `Average hold time`,
+                AvgDailyHandleTime AHT,
+                NULL Adherence
+            FROM
+            probeabg_game_data
+            WHERE department in ('Service')
+        )
+        WHERE NOT (ACW IS NULL AND `Average hold time` IS NULL AND AHT IS NULL)
+    """)
+    push_gamification_data(service.toPandas(), 'PROBEABGSERVICE', 'ProbeABGServices')
+    return True
 
 if __name__ == "__main__":
     tenant, run_id, extract_date, org_id = dg_metadata_export_parser()
+    tenant = 'probeabg'
     db_name = get_dbname(tenant)
-    app_name = "gpc_dg_metadata_probeabg_export"
+    app_name = "probeabg_push_gamification_data"
     spark = get_spark_session(app_name, tenant, default_db=db_name)
     logger = gpc_utils_logger(tenant, app_name)
     try:
-        logger.info("gpc_dg_metadata_probeabg_export")
+        logger.info("probeabg_push_gamification_data")
 
-        df = get_probeabg_data(spark, extract_date, org_id)
+        df = get_probeabg_data(spark, extract_date)
         df = df.drop_duplicates()
-        push_gamification_data(
-            df.toPandas(), 'PROBEABG', 'ProbeABG')
+        df.registerTempTable("probeabg_game_data")
+
+        push_sales_data(spark)
+        push_service_data(spark)
 
     except Exception as e:
         logger.exception(e, stack_info=True, exc_info=True)
