@@ -31,7 +31,7 @@ def get_probeabg_data(spark: SparkSession, extract_date: str):
                         GROUP BY agentId, CAST(from_utc_timestamp(emitDateTime, 'Australia/Sydney') AS date)) AS FCM
                       ON U.userId = FCM.agentId
                       WHERE department IS NOT NULL
-	                        AND UserID IS NOT NULL
+	                        AND userId IS NOT NULL
                             AND Date IS NOT NULL
                 """)
 
@@ -42,8 +42,8 @@ def push_sales_data(spark):
     sales = spark.sql("""
         SELECT * FROM (
             SELECT 
-                UserID AS `UserID`,
-                date_format(cast(Date as date), 'dd-MM-yyyy') AS `Date`,
+                UserID AS `UserId`,
+                date_format(cast(Date as date), 'dd/MM/yyyy') AS `Date`,
                 AvgDailyAcwTime AS ACW,
                 AvgDailyHoldTime AS `Hold time`,
                 AvgDailyHandleTime AS AHT
@@ -61,8 +61,8 @@ def push_service_data(spark):
     service = spark.sql("""
         SELECT * FROM (
             SELECT 
-                UserID `UserID`,
-                date_format(cast(Date as date), 'dd-MM-yyyy') `Date`,
+                UserID `UserId`,
+                date_format(cast(Date as date), 'dd/MM/yyyy') `Date`,
                 AvgDailyAcwTime ACW,
                 AvgDailyHoldTime `Average hold time`,
                 AvgDailyHandleTime AHT,

@@ -3,119 +3,74 @@ from dganalytics.connectors.gpc.gpc_utils import dg_metadata_export_parser, get_
 from pyspark.sql import SparkSession
 
 
-def get_probeabg_data(spark: SparkSession, extract_date: str, org_id: str):
+def get_probeabg_data(spark: SparkSession, extract_date: str):
+    backword_days = 16
     df = spark.sql(f"""
-select * from (
-select
-	COALESCE(cqnr.UserID,
-		wfm.UserID) as UserID, COALESCE(cqnr.Date, wfm.Date) as Date, DailyAdherencePercentage, SumDailyQAScoreVoice, CountDailyQAScoreVoice, SumDailyQAScoreMessage, CountDailyQAScoreMessage, 
-		SumDailyQAScoreEmail, CountDailyQAScoreEmail, SumDailyQAScore, CountDailyQAScore, SumDailyHoldTimeVoice, CountDailyHoldTimeVoice, 
-		SumDailyHoldTimeMessage, CountDailyHoldTimeMessage, SumDailyHoldTimeEmail, CountDailyHoldTimeEmail, 
-		SumDailyHoldTime, CountDailyHoldTime, SumDailyAcwTimeVoice, CountDailyAcwTimeVoice, SumDailyAcwTimeMessage, CountDailyAcwTimeMessage, 
-		SumDailyAcwTimeEmail, CountDailyAcwTimeEmail, SumDailyAcwTime, CountDailyAcwTime, SumDailyNotRespondingTime,
-		CountDailyHandleChat, CountDailyHandleEmail, CountDailyHandleVoice, CountDailyHandleMessage, CountDailyHandle
-from
-	(
-	select
-		COALESCE(cnr.UserID,
-		quality.UserID) as UserID, COALESCE(cnr.Date,
-		quality.Date) as Date, 
-		SumDailyQAScoreVoice, CountDailyQAScoreVoice, SumDailyQAScoreMessage, CountDailyQAScoreMessage, 
-		SumDailyQAScoreEmail, CountDailyQAScoreEmail, SumDailyQAScore, CountDailyQAScore, SumDailyHoldTimeVoice, CountDailyHoldTimeVoice, 
-		SumDailyHoldTimeMessage, CountDailyHoldTimeMessage, SumDailyHoldTimeEmail, CountDailyHoldTimeEmail, 
-		SumDailyHoldTime, CountDailyHoldTime, SumDailyAcwTimeVoice, CountDailyAcwTimeVoice, SumDailyAcwTimeMessage, CountDailyAcwTimeMessage, 
-		SumDailyAcwTimeEmail, CountDailyAcwTimeEmail, SumDailyAcwTime, CountDailyAcwTime, SumDailyNotRespondingTime,
-		CountDailyHandleChat, CountDailyHandleEmail, CountDailyHandleVoice, CountDailyHandleMessage, CountDailyHandle
-	from
-		(
-		select
-			COALESCE(conv.UserID,
-			nr.UserID) as UserID, COALESCE(conv.Date,
-			nr.Date) as Date, 
-				SumDailyHoldTimeVoice, CountDailyHoldTimeVoice, 
-		SumDailyHoldTimeMessage, CountDailyHoldTimeMessage, SumDailyHoldTimeEmail, CountDailyHoldTimeEmail, 
-		SumDailyHoldTime, CountDailyHoldTime, SumDailyAcwTimeVoice, CountDailyAcwTimeVoice, SumDailyAcwTimeMessage, CountDailyAcwTimeMessage, 
-		SumDailyAcwTimeEmail, CountDailyAcwTimeEmail, SumDailyAcwTime, CountDailyAcwTime, SumDailyNotRespondingTime, CountDailyHandleChat, 
-		CountDailyHandleEmail, CountDailyHandleVoice, CountDailyHandleMessage, CountDailyHandle
-		from
-			(
-			SELECT
-				agentId as UserID, cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) as Date, 
-				sum(case when lower(mediaType) = 'voice' then coalesce(tHeldComplete, 0) else 0 end) as SumDailyHoldTimeVoice,
-				sum(case when lower(mediaType) = 'voice' then coalesce(nHeldComplete, 0) else 0 end) as CountDailyHoldTimeVoice, 
-				sum(case when lower(mediaType) = 'message' then coalesce(tHeldComplete, 0) else 0 end) as SumDailyHoldTimeMessage,
-				sum(case when lower(mediaType) = 'message' then coalesce(nHeldComplete, 0) else 0 end) as CountDailyHoldTimeMessage, 
-				sum(case when lower(mediaType) = 'email' then coalesce(tHeldComplete, 0) else 0 end) as SumDailyHoldTimeEmail,
-				sum(case when lower(mediaType) = 'email' then coalesce(nHeldComplete , 0) else 0 end) as CountDailyHoldTimeEmail, 
-				sum(coalesce(tHeldComplete, 0)) as SumDailyHoldTime, 
-				sum(coalesce(nHeldComplete, 0)) as CountDailyHoldTime, 
-				sum(case when lower(mediaType) = 'voice' then coalesce(tAcw, 0) else 0 end) as SumDailyAcwTimeVoice, 
-				sum(case when lower(mediaType) = 'voice' then coalesce(nAcw , 0) else 0 end) as CountDailyAcwTimeVoice, 
-				sum(case when lower(mediaType) = 'message' then coalesce(tAcw, 0) else 0 end)  as SumDailyAcwTimeMessage, 
-				sum(case when lower(mediaType) = 'message' then coalesce(nAcw , 0) else 0 end) as CountDailyAcwTimeMessage, 
-				sum(case when lower(mediaType) = 'email' then coalesce(tAcw, 0) else 0 end) as SumDailyAcwTimeEmail, 
-				sum(case when lower(mediaType) = 'email' then coalesce(nAcw , 0) else 0 end) as CountDailyAcwTimeEmail, 
-				sum(coalesce(tAcw, 0)) as SumDailyAcwTime,
-				sum(coalesce(nAcw , 0)) as CountDailyAcwTime,
-				sum(case when lower(mediaType) = 'chat' then coalesce(nHandle , 0) else 0 end) as CountDailyHandleChat, 
-				sum(case when lower(mediaType) = 'email' then coalesce(nHandle , 0) else 0 end) as CountDailyHandleEmail, 
-				sum(case when lower(mediaType) = 'voice' then coalesce(nHandle , 0) else 0 end) as CountDailyHandleVoice, 
-				sum(case when lower(mediaType) = 'message' then coalesce(nHandle , 0) else 0 end) as CountDailyHandleMessage, 
-				sum(coalesce(nHandle , 0)) as CountDailyHandle
-			FROM
-				fact_conversation_metrics
-			WHERE
-				cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) <= (cast('{extract_date}' as date))
-                and cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) >= (cast('{extract_date}' as date) -15)
-			group by
-				agentId , cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) ) conv
-		FULL OUTER JOIN (
-			select
-				userId as UserID, cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) as Date, sum(unix_timestamp(endTime) - unix_timestamp(startTime)) as SumDailyNotRespondingTime
-			from
-				fact_routing_status
-			where
-				routingStatus = 'NOT_RESPONDING'
-				and cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) <= (cast('{extract_date}' as date))
-                and cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) >= (cast('{extract_date}' as date) - 15)
-			group by
-				userId, cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) ) nr on
-			nr.UserID = conv.UserID
-			and nr.Date = conv.Date ) cnr
-	FULL OUTER JOIN (
-		select
-			b.agentId as UserID, cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) as Date, 
-            sum(case when upper(b.mediaType) = 'CALL' and a.totalScore is not null then a.totalScore else 0.0 end) as SumDailyQAScoreVoice, 
-            sum(case when upper(b.mediaType) = 'CALL' and a.totalScore is not null then 1 else 0 end) as CountDailyQAScoreVoice, 
-            sum(case when upper(b.mediaType) = 'MESSAGE' and a.totalScore is not null then a.totalScore else 0.0 end) as SumDailyQAScoreMessage, 
-            sum(case when upper(b.mediaType) = 'MESSAGE' and a.totalScore is not null then 1 else 0 end) as CountDailyQAScoreMessage, 
-            sum(case when upper(b.mediaType) = 'EMAIL' and a.totalScore is not null then a.totalScore else 0.0 end) as SumDailyQAScoreEmail, 
-            sum(case when upper(b.mediaType) = 'EMAIL' and a.totalScore is not null then 1 else 0 end) as CountDailyQAScoreEmail, 
-            sum(case when a.totalScore is not null then a.totalScore else 0.0 end) as SumDailyQAScore,
-            sum(case when a.totalScore is not null then 1 else 0 end) as CountDailyQAScore
-		from
-			fact_evaluation_total_scores a, dim_evaluations b
-		where
-			a.evaluationId = b.evaluationId
-			and cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) <= (cast('{extract_date}' as date))
-            and cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) >= (cast('{extract_date}' as date) - 15)
-		group by
-			b.agentId, cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) ) quality on
-		quality.UserID = cnr.UserID
-		and cnr.Date = quality.Date ) cqnr
-	FULL OUTER JOIN
-	(
-		 select a.genesysUserId as UserID, a.Date, a.TimeAdheringToSchedule as DailyAdherencePercentage
-from dg_probeabg.wfm_verint_export a
- where 
- a.`Date` <= (cast('{extract_date}' as date))
- and a.`Date` >= (cast('{extract_date}' as date) - 15)
-	) wfm		
-	on wfm.UserID = cqnr.UserID
-	and wfm.Date = cqnr.Date
-)		
-where
-	UserID is not NULL and Date is not NULL
+					SELECT	U.userId,
+							FCM.date,
+							FCM.SumDailyHoldTimeVoice,
+							FCM.CountDailyHoldTimeVoice,
+							FCM.SumDailyHoldTimeMessage,
+							FCM.CountDailyHoldTimeMessage,
+							FCM.SumDailyHoldTimeEmail,
+							FCM.CountDailyHoldTimeEmail,
+							FCM.SumDailyHoldTime,
+							FCM.CountDailyHoldTime,
+							FCM.SumDailyAcwTimeVoice,
+							FCM.CountDailyAcwTimeVoice,
+							FCM.SumDailyAcwTimeMessage,
+							FCM.CountDailyAcwTimeMessage,
+							FCM.SumDailyAcwTimeEmail,
+							FCM.CountDailyAcwTimeEmail,
+							FCM.SumDailyAcwTime,
+							FCM.CountDailyAcwTime,
+							FCM.SumDailyHandleTimeVoice,
+							FCM.CountDailyHandleVoice,
+							FCM.SumDailyHandleTimeMessage,
+							FCM.CountDailyHandleMessage,
+							FCM.SumDailyHandleTimeEmail,
+							FCM.CountDailyHandleEmail,
+							FCM.SumDailyHandleTime,
+							FCM.CountDailyHandle
+                            FROM (SELECT	userId,
+											department
+									FROM gpc_probeabg.dim_users) U
+							LEFT JOIN (
+								SELECT agentId,
+										CAST(from_utc_timestamp(emitDateTime, 'Australia/Sydney') AS date) AS date, 
+										SUM(CASE WHEN LOWER(mediaType) = 'voice' THEN COALESCE(tHeldComplete, 0) ELSE 0 END) AS SumDailyHoldTimeVoice,
+										SUM(CASE WHEN LOWER(mediaType) = 'voice' THEN COALESCE(nHeldComplete, 0) ELSE 0 END) AS CountDailyHoldTimeVoice, 
+										SUM(CASE WHEN LOWER(mediaType) = 'message' THEN COALESCE(tHeldComplete, 0) ELSE 0 END) AS SumDailyHoldTimeMessage,
+										SUM(CASE WHEN LOWER(mediaType) = 'message' THEN COALESCE(nHeldComplete, 0) ELSE 0 END) AS CountDailyHoldTimeMessage, 
+										SUM(CASE WHEN LOWER(mediaType) = 'email' THEN COALESCE(tHeldComplete, 0) ELSE 0 END) AS SumDailyHoldTimeEmail,
+										SUM(CASE WHEN LOWER(mediaType) = 'email' THEN COALESCE(nHeldComplete , 0) ELSE 0 END) AS CountDailyHoldTimeEmail, 
+										SUM(COALESCE(tHeldComplete, 0)) AS SumDailyHoldTime, 
+										SUM(COALESCE(nHeldComplete, 0)) AS CountDailyHoldTime, 
+										SUM(CASE WHEN LOWER(mediaType) = 'voice' THEN COALESCE(tAcw, 0) ELSE 0 END) AS SumDailyAcwTimeVoice, 
+										SUM(CASE WHEN LOWER(mediaType) = 'voice' THEN COALESCE(nAcw , 0) ELSE 0 END) AS CountDailyAcwTimeVoice, 
+										SUM(CASE WHEN LOWER(mediaType) = 'message' THEN coalesce(tAcw, 0) ELSE 0 END)  AS SumDailyAcwTimeMessage, 
+										SUM(CASE WHEN LOWER(mediaType) = 'message' THEN coalesce(nAcw , 0) ELSE 0 END) AS CountDailyAcwTimeMessage, 
+										SUM(CASE WHEN LOWER(mediaType) = 'email' THEN coalesce(tAcw, 0) ELSE 0 END) AS SumDailyAcwTimeEmail, 
+										SUM(CASE WHEN LOWER(mediaType) = 'email' THEN coalesce(nAcw , 0) ELSE 0 END) AS CountDailyAcwTimeEmail, 
+										SUM(COALESCE(tAcw, 0)) AS SumDailyAcwTime,
+										SUM(COALESCE(nAcw , 0)) AS CountDailyAcwTime,
+										SUM(CASE WHEN LOWER(mediaType) = 'voice' THEN COALESCE(tHandle , 0) ELSE 0 END) AS SumDailyHandleTimeVoice, 
+										SUM(CASE WHEN LOWER(mediaType) = 'voice' THEN COALESCE(nHandle , 0) ELSE 0 END) AS CountDailyHandleVoice, 
+										SUM(CASE WHEN LOWER(mediaType) = 'message' THEN COALESCE(tHandle , 0) else 0 end) as SumDailyHandleTimeMessage, 
+										SUM(CASE WHEN LOWER(mediaType) = 'message' THEN COALESCE(nHandle , 0) else 0 end) as CountDailyHandleMessage, 
+										SUM(CASE WHEN LOWER(mediaType) = 'email' THEN COALESCE(tHandle , 0) ELSE 0 END) AS SumDailyHandleTimeEmail, 
+										SUM(CASE WHEN LOWER(mediaType) = 'email' THEN COALESCE(nHandle , 0) ELSE 0 END) AS CountDailyHandleEmail, 
+										SUM(COALESCE(tHandle , 0)) AS SumDailyHandleTime,
+										SUM(COALESCE(nHandle , 0)) AS CountDailyHandle
+								FROM gpc_probeabg.fact_conversation_metrics 
+								WHERE	CAST(from_utc_timestamp(emitDateTime, 'Australia/Sydney') AS date) <= (CAST('2021-04-29' AS date))
+										AND CAST(from_utc_timestamp(emitDateTime, 'Australia/Sydney') AS date) >= (CAST('2021-04-29' AS date) - 16)
+								GROUP BY	agentId,
+											CAST(from_utc_timestamp(emitDateTime, 'Australia/Sydney') AS date)
+							) FCM
+							  ON U.userId = FCM.agentId
+							WHERE
+								userId is not NULL and date is not NULL
                 """)
     return df
 
@@ -123,29 +78,29 @@ where
 if __name__ == "__main__":
     tenant, run_id, extract_date, org_id = dg_metadata_export_parser()
     db_name = get_dbname(tenant)
-    app_name = "gpc_dg_metadata_probeabg_export"
+    app_name = "probeabg_push_gamification_data"
     spark = get_spark_session(app_name, tenant, default_db=db_name)
     logger = gpc_utils_logger(tenant, app_name)
     try:
-        logger.info("gpc_dg_metadata_probeabg_export")
+        logger.info("probeabg_push_gamification_data")
 
-        df = get_probeabg_data(spark, extract_date, org_id)
+        df = get_probeabg_data(spark, extract_date)
         df = df.drop_duplicates()
         df.registerTempTable("probeabg_activity")
 
         spark.sql(f"""
-						merge into dg_probeabg.kpi_raw_data
-						using probeabg_activity 
-							on kpi_raw_data.userId = probeabg_activity.UserID
-							and kpi_raw_data.date = probeabg_activity.Date
-						when matched then 
-							update set *
-						when not matched then
-							insert *
+						MERGE INTO gpc_probeabg.kpi_raw_data
+						USING probeabg_activity 
+							ON	kpi_raw_data.userId = probeabg_activity.userId
+								AND kpi_raw_data.date = probeabg_activity.date
+						WHEN MATCHED THEN 
+							UPDATE SET *
+						WHEN NOT MATCHED THEN
+							INSERT *
 					""")
 
         pb_export = spark.sql(
-            "select * from dg_probeabg.kpi_raw_data")
+            "SELECT * FROM dg_probeabg.kpi_raw_data")
         export_powerbi_csv(tenant, pb_export, 'kpi_raw_data')
 
     except Exception as e:
