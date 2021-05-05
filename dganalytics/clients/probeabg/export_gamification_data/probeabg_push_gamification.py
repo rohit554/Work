@@ -5,12 +5,31 @@ import os
 import pandas as pd
 
 def get_probeabg_data(spark: SparkSession, extract_date: str):
-    backword_days = 16
+    backword_days = 7
 
     df = spark.sql(f"""
-                    SELECT * FROM (SELECT  userId UserID, department
-                    FROM gpc_probeabg.dim_users) AS U
-                    LEFT JOIN (
+                    SELECT  U.userId UserId,
+                            U.date Date,
+                            U.department,
+                            FCM.AvgDailyHoldTimeVoice,
+                            FCM.AvgDailyHoldTimeMessage,
+                            FCM.AvgDailyHoldTimeEmail,
+                            FCM.AvgDailyHoldTime,
+                            FCM.AvgDailyAcwTimeVoice,
+                            FCM.AvgDailyAcwTimeMessage,
+                            FCM.AvgDailyAcwTimeEmail,
+                            FCM.AvgDailyAcwTime,
+                            FCM.AvgDailyHandleTimeVoice,
+                            FCM.AvgDailyHandleTimeMessage,
+                            FCM.AvgDailyHandleTimeEmail,
+                            FCM.AvgDailyHandleTime,
+                            WFM.DailyAdherencePercentage
+                    FROM (SELECT   userId,
+                                    date,
+                                    department
+                            FROM gpc_probeabg.dim_users,
+                            (SELECT EXPLODE(SEQUENCE((CAST('{extract_date}' AS date))- {backword_days} + 2, (CAST('{extract_date}' as date))+1, interval 1 day )) as date) dates) AS U
+                    FULL OUTER JOIN (
                         SELECT agentId,
                             CAST(from_utc_timestamp(emitDateTime, 'Australia/Sydney') AS date) AS Date,
                             SUM(CASE WHEN lower(mediaType) = 'voice' THEN COALESCE(tHeldComplete, 0) ELSE 0 END)/ SUM(CASE WHEN mediaType = 'voice' THEN COALESCE(nHeldComplete, 0) ELSE 0 END) AS AvgDailyHoldTimeVoice,
@@ -30,9 +49,19 @@ def get_probeabg_data(spark: SparkSession, extract_date: str):
                           and CAST(from_utc_timestamp(emitDateTime, 'Australia/Sydney') AS date) >= (CAST('{extract_date}' AS date) - {backword_days})
                         GROUP BY agentId, CAST(from_utc_timestamp(emitDateTime, 'Australia/Sydney') AS date)) AS FCM
                       ON U.userId = FCM.agentId
-                      WHERE department IS NOT NULL
-	                        AND userId IS NOT NULL
-                            AND Date IS NOT NULL
+                        AND U.date = FCM.Date
+                    FULL OUTER JOIN (
+                      SELECT genesysUserId as UserID, Date, TimeAdheringToSchedule as DailyAdherencePercentage
+                      FROM dg_probeabg.wfm_verint_export
+                      WHERE 
+                       `Date` <= (CAST('{extract_date}' AS DATE))
+                       AND `Date` >= (CAST('{extract_date}' AS DATE) - {backword_days})
+                    ) WFM
+                    ON U.userId = WFM.UserID
+                        AND U.date = WFM.Date
+                      WHERE U.department IS NOT NULL
+	                        AND U.userId IS NOT NULL
+                            AND U.Date IS NOT NULL
                 """)
 
     df.cache()
@@ -42,7 +71,7 @@ def push_sales_data(spark):
     sales = spark.sql("""
         SELECT * FROM (
             SELECT 
-                UserID AS `UserId`,
+                UserId AS `UserId`,
                 date_format(cast(Date as date), 'dd/MM/yyyy') AS `Date`,
                 AvgDailyAcwTime AS ACW,
                 AvgDailyHoldTime AS `Hold time`,
@@ -66,12 +95,12 @@ def push_service_data(spark):
                 AvgDailyAcwTime ACW,
                 AvgDailyHoldTime `Average hold time`,
                 AvgDailyHandleTime AHT,
-                NULL Adherence
+                DailyAdherencePercentage Adherence
             FROM
             probeabg_game_data
             WHERE department in ('Service')
         )
-        WHERE NOT (ACW IS NULL AND `Average hold time` IS NULL AND AHT IS NULL)
+        WHERE NOT (ACW IS NULL AND `Average hold time` IS NULL AND AHT IS NULL AND Adherence IS NULL)
     """)
     push_gamification_data(service.toPandas(), 'PROBEABGSERVICE', 'ProbeABGServices')
     return True
