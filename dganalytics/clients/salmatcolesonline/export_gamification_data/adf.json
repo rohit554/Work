@@ -89,7 +89,7 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/salmatcolesonline/export_gamification_data/salmatcolesonline_push_gamification.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/probeabg/export_gamification_data/probeabg_push_gamification.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
@@ -126,7 +126,7 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/salmatcolesonline/export_gamification_data/salmatcolesonline_push_roi_kpi_raw_data.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/probeabg/export_gamification_data/probeabg_push_roi_kpi_raw_data.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
