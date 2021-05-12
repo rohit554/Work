@@ -3,7 +3,23 @@ from pyspark.sql import SparkSession
 from dganalytics.connectors.gpc.gpc_utils import pb_export_parser, get_dbname, gpc_utils_logger
 import os
 import pandas as pd
+import pytz
+from datetime import datetime
+from pyspark.sql.functions import udf
+from pyspark.sql.types import BooleanType
 
+def is_valid_date(dt=None, timezone="UTC"):
+    dt = datetime.fromisoformat(dt).replace(tzinfo=None)
+    try:
+        if dt is None:
+            dt = datetime.utcnow()
+        timezone = pytz.timezone(timezone)
+        timezone_aware_date = timezone.localize(dt, is_dst=None)
+        is_dst = timezone_aware_date.tzinfo._dst.seconds != 0
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 def export_users_routing_status_sliced(spark: SparkSession, tenant: str, region: str):
     tenant_path, db_path, log_path = get_path_vars(tenant)
@@ -13,17 +29,18 @@ def export_users_routing_status_sliced(spark: SparkSession, tenant: str, region:
     user_timezone.registerTempTable("user_timezone")
 
     routing = spark.sql(f"""
-            select frs.userId userKey,
-from_utc_timestamp(frs.startTime, trim(ut.timeZone)) startTime,
-from_utc_timestamp(frs.endTime, trim(ut.timeZone)) endTime,
-routingStatus routingStatus,
-from_utc_timestamp(frs.startTime, trim(ut.timeZone)) timeSlot,
-1800 timeDiff,
-'users_routing_status' pTableFlag
-from gpc_hellofresh.fact_routing_status frs, user_timezone ut
-    where frs.userId = ut.userId
-        and frs.startDate >= cast('2020-02-01' as date)
-        and ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
+            SELECT frs.userId userKey,
+            from_utc_timestamp(frs.startTime, trim(ut.timeZone)) startTime,
+            from_utc_timestamp(frs.endTime, trim(ut.timeZone)) endTime,
+            routingStatus routingStatus,
+            from_utc_timestamp(frs.startTime, trim(ut.timeZone)) timeSlot,
+            1800 timeDiff,
+            'users_routing_status' pTableFlag,
+            ut.timeZone timeZone
+            from gpc_hellofresh.fact_routing_status frs, user_timezone ut
+                where frs.userId = ut.userId
+                    and frs.startDate >= cast('2020-02-01' as date)
+                    and ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
     """)
 
     routing.registerTempTable("routing")
@@ -53,25 +70,34 @@ from gpc_hellofresh.fact_routing_status frs, user_timezone ut
     """)
     '''
     spark.conf.set("spark.sql.legacy.timeParserPolicy", "LEGACY")
+    spark.udf.register("is_valid_date_udf", is_valid_date, BooleanType())
+
     df = spark.sql("""
-                select userKey as userKey,
-                    date_format((case when startTime > from_unixtime(timeSlot) then startTime else from_unixtime(timeSlot) end), 'yyyy-MM-dd HH:mm:ss') as startTime,
-                    date_format((case when endTime > (from_unixtime(timeSlot) + interval 30 minutes) then (from_unixtime(timeSlot) + interval 30 minutes) else endTime end), 'yyyy-MM-dd HH:mm:ss') as endTime,
-                    routingStatus, date_format(from_unixtime(timeSlot), 'yyyy-MM-dd HH:mm:ss') timeSlot, 
-                    (to_unix_timestamp(case when endTime > (from_unixtime(timeSlot) + interval 30 minutes) then (from_unixtime(timeSlot) + interval 30 minutes) else endTime end)
-                            - to_unix_timestamp((case when startTime > from_unixtime(timeSlot) then startTime else from_unixtime(timeSlot) end))
-                    ) as timeDiff,
-                    pTableFlag
-                        from (
-                    select userKey, startTime, endTime, routingStatus, 
-                        explode(sequence(
-                            cast((((floor((to_unix_timestamp(startTime) - 978267600)/1800.0) * 30) * 60) + 978267600) as long),
-                            cast((((floor((to_unix_timestamp(endTime) - 978267600)/1800.0) * 30) * 60) + 978267600) as long),
-                            1800
-                        ))
-                        timeSlot, timeDiff, pTableFlag from routing
+                    SELECT  userKey as userKey,
+                            date_format((case when startTime > from_unixtime(timeSlot) then startTime else from_unixtime(timeSlot) end), 'yyyy-MM-dd HH:mm:ss') as startTime,
+                            date_format((case when endTime > (from_unixtime(timeSlot) + interval 30 minutes) then (from_unixtime(timeSlot) + interval 30 minutes) else endTime end), 'yyyy-MM-dd HH:mm:ss') as endTime,
+                            routingStatus, date_format(from_unixtime(timeSlot), 'yyyy-MM-dd HH:mm:ss') timeSlot, 
+                            (to_unix_timestamp(case when endTime > (from_unixtime(timeSlot) + interval 30 minutes) then (from_unixtime(timeSlot) + interval 30 minutes) else endTime end)
+                                    - to_unix_timestamp((case when startTime > from_unixtime(timeSlot) then startTime else from_unixtime(timeSlot) end))
+                            ) as timeDiff,
+                            pTableFlag
+                    FROM (
+                        select  userKey,
+                                startTime,
+                                endTime,
+                                routingStatus, 
+                                explode(sequence(
+                                    cast((((floor((to_unix_timestamp(startTime) - 978267600)/1800.0) * 30) * 60) + 978267600) as long),
+                                    cast((((floor((to_unix_timestamp(endTime) - 978267600)/1800.0) * 30) * 60) + 978267600) as long),
+                                    1800
+                                )) timeSlot,
+                                timeDiff,
+                                pTableFlag,
+                                timeZone
+                            from routing
                             where  startTime < endTime
                         )
+                    WHERE WHERE is_valid_date_udf(date_format((case when startTime > from_unixtime(timeSlot) then startTime else from_unixtime(timeSlot) end), 'yyyy-MM-dd HH:mm:ss'), timeZone)
                 """)
 
     return df
