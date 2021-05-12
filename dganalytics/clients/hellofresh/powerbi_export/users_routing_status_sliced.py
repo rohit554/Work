@@ -97,7 +97,7 @@ def export_users_routing_status_sliced(spark: SparkSession, tenant: str, region:
                             from routing
                             where  startTime < endTime
                         )
-                    WHERE WHERE is_valid_date_udf(date_format((case when startTime > from_unixtime(timeSlot) then startTime else from_unixtime(timeSlot) end), 'yyyy-MM-dd HH:mm:ss'), timeZone)
+                    WHERE is_valid_date_udf(date_format((case when startTime > from_unixtime(timeSlot) then startTime else from_unixtime(timeSlot) end), 'yyyy-MM-dd HH:mm:ss'), timeZone)
                 """)
 
     return df
