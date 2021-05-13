@@ -387,7 +387,7 @@ def gpc_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
         if check_api_response(resp, api_name, tenant, run_id) == "SLEEP":
             continue
         resp_json = resp.json()
-        if len(resp_json) == 0 or (entity in resp_json.keys() and len(resp_json[entity]) == 0):
+        if len(resp_json) == 0 or (entity not in resp_json.keys()) or (entity in resp_json.keys() and len(resp_json[entity]) == 0):
             break
         # resp_list.append(resp_json[entity])
 
