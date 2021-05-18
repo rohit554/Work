@@ -3,324 +3,116 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 def build_pipeline(org_id: str, org_timezone: str):     
     pipeline = [
-        {
-            "$match": {
-                "org_id": org_id,
-                "works_for.role_id": {
-                    "$ne": "Team Manager"
-                },
-                "role_id": {
-                    "$ne": "Team Manager"
-                }
-            }
-        },
-        {
-            "$project": {
-                "org_id": 1.0,
-                "name": 1.0,
-                "user_id": 1.0,
-                "works_for": {
-                    "$arrayElemAt": [
-                        "$works_for",
-                        0.0
-                    ]
-                },
-                "campaign_challenges": 1.0
-            }
-        },
-        {
-            "$unwind": {
-                "path": "$campaign_challenges",
-                "preserveNullAndEmptyArrays": False
-            }
-        },
-        {
-            "$project": {
-                "org_id": 1.0,
-                "creation_date_millis": {
-                    "$add": [
-                        {
-                            "$toLong": "$campaign_challenges.creation_date_str"
-                        },
-                        36000000.0
-                    ]
-                },
-                "acceptance_date": {
-                    "$add": [
-                        "$campaign_challenges.start_date",
-                        36000000.0
-                    ]
-                },
-                "completion_date": {
-                    "$add": [
-                        "$campaign_challenges.completion_date",
-                        36000000.0
-                    ]
-                },
-                "end_date": {
-                    "$add": [
-                        "$campaign_challenges.end_date",
-                        36000000.0
-                    ]
-                },
-                "name": 1.0,
-                "user_id": 1.0,
-                "team_id": "$works_for.team_id",
-                "role": "$works_for.role",
-                "campaign_challenges": 1.0
-            }
-        },
-        {
-            "$addFields": {
-                "creation_date": {
-                    "$toDate": "$creation_date_millis"
-                }
-            }
-        },
-        {
-            "$addFields": {
-                "challenges_accepted": {
-                    "$cond": {
-                        "if": {
-                            "$eq": [
-                                "$campaign_challenges.action",
-                                "accepted"
-                            ]
-                        },
-                        "then": 1.0,
-                        "else": 0.0
-                    }
-                },
-                "challenges_won": {
-                    "$cond": {
-                        "if": {
-                            "$and": [
-                                {
-                                    "$eq": [
-                                        "$campaign_challenges.status",
-                                        "win"
-                                    ]
-                                },
-                                {
-                                    "$eq": [
-                                        "$campaign_challenges.status",
-                                        "both wins"
-                                    ]
-                                }
-                            ]
-                        },
-                        "then": 1.0,
-                        "else": 0.0
-                    }
-                }
-            }
-        },
-        {
-            "$lookup": {
-                "from": "Campaign",
-                "let": {
-                    "id": "$campaign_challenges.challenge_id",
-                    "org_id": "$org_id"
-                },
-                "pipeline": [
-                    {
-                        "$project": {
-                            "challenge_id": "$$id",
-                            "org_id": 1.0,
-                            "name": 1.0,
-                            "is_active": 1.0,
-                            "is_deleted": 1.0,
-                            "challenges._id": 1.0,
-                            "challenges.name": 1.0,
-                            "challenges.frequency": 1.0,
-                            "challenges.desc": 1.0,
-                            "challenges.no_of_days": 1.0
-                        }
-                    },
-                    {
-                        "$match": {
-                            "$expr": {
-                                "$and": [
-                                    {
-                                        "$eq": [
-                                            "$org_id",
-                                            "$$org_id"
-                                        ]
-                                    },
-                                    {
-                                        "$in": [
-                                            "$$id",
-                                            "$challenges._id"
-                                        ]
-                                    }
+    {
+        "$match": {
+            "org_id": org_id
+        }
+    }, 
+    {
+        "$project": {
+            "org_id": 1.0,
+            "challenger_mongo_id": "$challenger_user_id",
+            "campaign_id": 1.0,
+            "challenge_name": 1.0,
+            "challenge_frequency": "$frequency",
+            "no_of_days": "$no_of_days",
+            "challengee_mongo_id": "$challengee_user_id",
+            "status": 1.0,
+            "action": 1.0,
+            "challenge_end_date": {
+                "$cond": {
+                    "if": {
+                        "$and": [
+                            {
+                                "$eq": [
+                                    "$end_date",
+                                    None
                                 ]
                             }
-                        }
+                        ]
                     },
-                    {
-                        "$project": {
-                            "org_id": 1.0,
-                            "name": 1.0,
-                            "challenges": {
-                                "$filter": {
-                                    "input": "$challenges",
-                                    "as": "c",
-                                    "cond": {
-                                        "$eq": [
-                                            "$$c._id",
-                                            "$$id"
-                                        ]
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    {
-                        "$unwind": {
-                            "path": "$challenges",
-                            "preserveNullAndEmptyArrays": False
-                        }
-                    },
-                    {
-                        "$project": {
-                            "name": 1.0,
-                            "challenge_id": "$challenges._id",
-                            "challenge_name": "$challenges.name",
-                            "challenge_frequency": "$challenges.frequency",
-                            "challenge_desc": "$challenges.desc",
-                            "no_of_days": "$challenges.no_of_days"
-                        }
-                    }
-                ],
-                "as": "challenges"
-            }
-        },
-        {
-            "$unwind": {
-                "path": "$challenges",
-                "preserveNullAndEmptyArrays": False
-            }
-        },
-        {
-            "$project": {
-                "_id": 0.0,
-                "org_id": "$org_id",
-                "challenger_mongo_id": "$_id",
-                "campaign_id": "$challenges._id",
-                "challenge_name": "$challenges.challenge_name",
-                "challenge_frequency": "$challenges.challenge_frequency",
-                "no_of_days": "$challenges.no_of_days",
-                "challengee_mongo_id": "$campaign_challenges.user_id",
-                "status": "$campaign_challenges.status",
-                "action": "$campaign_challenges.action",
-                "challenge_thrown_date": "$creation_date",
-                "challenge_acceptance_date": "$acceptance_date",
-                "challenge_end_date": "$end_date",
-                "challenge_completion_date": "$completion_date"
-            }
-        },
-        {
-            "$project": {
-                "org_id": "$org_id",
-                "challenger_mongo_id": 1.0,
-                "campaign_id": 1.0,
-                "challenge_name": 1.0,
-                "challenge_frequency": 1.0,
-                "no_of_days": 1.0,
-                "challengee_mongo_id": 1.0,
-                "status": 1.0,
-                "action": 1.0,
-                "challenge_end_date": {
-                    "$cond": {
-                        "if": {
-                            "$and": [
-                                {
-                                    "$eq": [
-                                        "$challenge_end_date", 
-                                        None
-                                    ]
-                                }
-                            ]
-                        },
-                        "then": None,
-                        "else": {
-                            "$dateToString": {
-                                "format": "%Y-%m-%d",
-                                "date": {
-                                    "$toDate": {
-                                        "$dateToString": {
-                                            "date": "$challenge_end_date",
-                                            "timezone": org_timezone
-                                        }
+                    "then": None,
+                    "else": {
+                        "$dateToString": {
+                            "format": "%Y-%m-%d",
+                            "date": {
+                                "$toDate": {
+                                    "$dateToString": {
+                                        "date": "$end_date",
+                                        "timezone": org_timezone
                                     }
                                 }
                             }
                         }
                     }
-                },
-                "challenge_thrown_date": {
-                    "$dateToString": {
-                        "format": "%Y-%m-%d",
-                        "date": {
-                            "$toDate": {
-                                "$dateToString": {
-                                    "date": "$challenge_thrown_date",
-                                    "timezone": org_timezone
+                }
+            },
+            "challenge_thrown_date": {
+                "$dateToString": {
+                    "format": "%Y-%m-%d",
+                    "date": {
+                        "$toDate": {
+                            "$dateToString": {
+                                "date": {
+                                    "$toDate": {
+                                        "$toLong": "$creation_date_str"
+                                    }
                                 }
                             }
                         }
-                    }
-                },
-                "challenge_acceptance_date": {
-                    "$cond": {
-                        "if": {
-                            "$and": [
-                                {
-                                    "$eq": [
-                                        "$challenge_acceptance_date", 
-                                        None
-                                    ]
-                                }
-                            ]
-                        },
-                        "then": None,
-                        "else": {
-                            "$dateToString": {
-                                "format": "%Y-%m-%d",
-                                "date": {
-                                    "$toDate": {
-                                        "$dateToString": {
-                                            "date": "$challenge_acceptance_date",
-                                            "timezone": org_timezone
-                                        }
+                    },
+                    "timezone": org_timezone
+                }
+            },
+            "challenge_acceptance_date": {
+                "$cond": {
+                    "if": {
+                        "$and": [
+                            {
+                                "$eq": [
+                                    "$start_date",
+                                    None
+                                ]
+                            }
+                        ]
+                    },
+                    "then": None,
+                    "else": {
+                        "$dateToString": {
+                            "format": "%Y-%m-%d",
+                            "date": {
+                                "$toDate": {
+                                    "$dateToString": {
+                                        "date": "$start_date",
+                                        "timezone": org_timezone
                                     }
                                 }
                             }
                         }
                     }
-                },
-                "challenge_completion_date": {
-                    "$cond": {
-                        "if": {
-                            "$and": [
-                                {
-                                    "$eq": [
-                                        "$challenge_completion_date", 
-                                        None
-                                    ]
-                                }
-                            ]
-                        },
-                        "then": None,
-                        "else": {
-                            "$dateToString": {
-                                "format": "%Y-%m-%d",
-                                "date": {
-                                    "$toDate": {
-                                        "$dateToString": {
-                                            "date": "$challenge_completion_date",
-                                            "timezone": org_timezone
-                                        }
+                }
+            },
+            "challenge_completion_date": {
+                "$cond": {
+                    "if": {
+                        "$and": [
+                            {
+                                "$eq": [
+                                    "$completion_date",
+                                    None
+                                ]
+                            }
+                        ]
+                    },
+                    "then": None,
+                    "else": {
+                        "$dateToString": {
+                            "format": "%Y-%m-%d",
+                            "date": {
+                                "$toDate": {
+                                    "$dateToString": {
+                                        "date": "$completion_date",
+                                        "timezone": org_timezone
                                     }
                                 }
                             }
@@ -329,7 +121,8 @@ def build_pipeline(org_id: str, org_timezone: str):
                 }
             }
         }
-    ]
+    }
+]
     return pipeline
 
 schema = StructType([StructField('action', StringType(), True),
