@@ -3,107 +3,93 @@ from pyspark.sql.types import StructType, StructField, StringType, IntegerType, 
 
 def build_pipeline(org_id: str, org_timezone: str):
     pipeline = [
-            {
-                "$match": {
-                    "org_id": org_id
-                }
-            }, 
-            { 
-                "$unwind" : { 
-                    "path" : "$campaign_levels"
-                }
-            }, 
-            { 
-                "$project" : { 
-                    "user_id" : 1.0, 
-                    "campaign_id" : "$campaign_levels.campaign_id", 
-                    "level_id" : "$campaign_levels.level", 
-                    "achieved_date" : "$campaign_levels.achieved_date", 
-                    "org_id" : 1.0
-                }
-            }, 
-            { 
-                "$lookup" : { 
-                    "from" : "Campaign", 
-                    "localField" : "campaign_id", 
-                    "foreignField" : "_id", 
-                    "as" : "campaigns"
-                }
-            }, 
-            { 
-                "$unwind" : { 
-                    "path" : "$campaigns", 
-                    "includeArrayIndex" : "arrayIndex", 
-                    "preserveNullAndEmptyArrays" : False
-                }
-            }, 
-            { 
-                "$project" : { 
-                    "user_id" : 1.0, 
-                    "campaign_id" : 1.0, 
-                    "level_id" : 1.0, 
-                    "achieved_date" : 1.0, 
-                    "campaign_name" : "$campaigns.name", 
-                    "campaign_level" : "$campaigns.levels", 
-                    "org_id" : 1.0
-                }
-            }, 
-            { 
-                "$unwind" : { 
-                    "path" : "$campaign_level", 
-                    "includeArrayIndex" : "arrayIndex", 
-                    "preserveNullAndEmptyArrays" : False
-                }
-            }, 
-            { 
-                "$match" : { 
-                    "$expr" : { 
-                        "$eq" : [
-                            "$level_id", 
-                            "$campaign_level._id"
-                        ]
+    {
+        "$match": {
+            "org_id": org_id
+        }
+    }, 
+    {
+        "$project": {
+            "name": 1.0,
+            "levels": 1.0,
+            "org_id": 1.0
+        }
+    }, 
+    {
+        "$unwind": {
+            "path": "$levels",
+            "preserveNullAndEmptyArrays": False
+        }
+    }, 
+    {
+        "$lookup": {
+            "from": "User_Levels",
+            "let": {
+                "campaignId": "$_id",
+                "levelId": "$levels._id",
+                "orgId": "$org_id"
+            },
+            "pipeline": [
+                {
+                    "$match": {
+                        "$expr": {
+                            "$and": [
+                                {
+                                    "$eq": [
+                                        "$org_id",
+                                        "$$orgId"
+                                    ]
+                                },
+                                {
+                                    "$eq": [
+                                        "$campaign_id",
+                                        "$$campaignId"
+                                    ]
+                                },
+                                {
+                                    "$eq": [
+                                        "$level_id",
+                                        "$$levelId"
+                                    ]
+                                }
+                            ]
+                        }
                     }
                 }
-            }, 
-            { 
-                "$project" : { 
-                    "_id" : 0.0, 
-                    "mongo_user_id" : "$_id", 
-                    "user_id" : 1.0, 
-                    "campaign_id" : 1.0, 
-                    "level_id" : 1.0, 
-                    "achieved_date" : 1.0, 
-                    "campaign_name" : 1.0, 
-                    "level_name" : "$campaign_levels.name", 
-                    "level_start_points" : "$campaign_level.start_points", 
-                    "level_end_points" : "$campaign_level.end_points", 
-                    "level_number" : "$campaign_level.id", 
-                    "org_id" : 1.0
+            ],
+            "as": "userLevels"
+        }
+    }, 
+    {
+        "$unwind": {
+            "path": "$userLevels",
+            "preserveNullAndEmptyArrays": False
+        }
+    }, 
+    {
+        "$project": {
+            "_id": 0.0,
+            "mongo_user_id": "$userLevels.u_id",
+            "user_id": "$userLevels.user_id",
+            "campaign_id": "$_id",
+            "level_id": "$userLevels.level_id",
+            "achieved_date": {
+                "$toDate": {
+                    "$dateToString": {
+                        "date": "$userLevels.achieved_date",
+                        "timezone": org_timezone
+                    }
                 }
             },
-            { 
-                "$project" : { 
-                    "mongo_user_id" : 1.0, 
-                    "user_id" : 1.0, 
-                    "campaign_id" : 1.0, 
-                    "level_id" : 1.0, 
-                    "achieved_date" : { 
-                        "$toDate" : { 
-                            "$dateToString" : { 
-                                "date" : "$achieved_date", 
-                                "timezone" : org_timezone
-                            }
-                        }
-                    }, 
-                    "campaign_name" : 1.0, 
-                    "level_name" : 1.0, 
-                    "level_start_points" : 1.0, 
-                    "level_end_points" : 1.0, 
-                    "level_number" : 1.0, 
-                    "org_id" : 1.0
-                }
-            }
-        ]
+            "campaign_name": "$name",
+            "level_name": "$levels.name",
+            "level_number": "$userLevels.level_no",
+            "level_start_points": "$levels.start_points",
+            "level_end_points": "$levels.end_points",
+            "org_id": 1.0
+        }
+    }
+]
 
     return pipeline
 
@@ -162,7 +148,7 @@ def get_levels(spark):
 
         pipeline = build_pipeline(org_id, org_timezone)
         
-        levels_df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
+        levels_df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
 
         if df is None:
             df = levels_df
