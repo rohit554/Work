@@ -1,7 +1,7 @@
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
-def build_pipeline(org_id: str, org_timezone: str):     
+def build_pipeline(org_id: str, org_timezone: str):  
     pipeline = [
     {
         "$match": {
@@ -185,7 +185,7 @@ def get_challenges(spark):
 
         pipeline = build_pipeline(org_id, org_timezone)
 
-        challenges_df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
+        challenges_df = exec_mongo_pipeline(spark, pipeline, 'User_Challenges', schema)
         
         if df is None:
             df = challenges_df
