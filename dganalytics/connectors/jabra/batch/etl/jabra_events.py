@@ -67,7 +67,7 @@ if __name__ == "__main__":
 
     try:
         logger.info(f"loading jabra events for {tenant}...")
-        load_jabra_events(spark, "salmatcolesonline")
+        load_jabra_events(spark, tenant)
         logger.info(f"finished loading jabra events for {tenant}!")
     except Exception as e:
         logger.exception(e, stack_info=True, exc_info=True)
