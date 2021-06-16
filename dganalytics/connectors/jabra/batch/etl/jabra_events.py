@@ -6,11 +6,11 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import to_timestamp, lit, to_date
 from pyspark.sql.types import StructType, StructField, TimestampType, StringType, IntegerType, DateType
 
-schema = StructType([StructField('userId', StringType(), True),
+schema = StructType([StructField('userId', StringType(), False),
                      StructField('eventInsertTimestamp', TimestampType(), True),
                      StructField('conversationDate', DateType(), True),
-                     StructField('conversationStartTimestamp', TimestampType(), True),
-                     StructField('conversationEndTimestamp', TimestampType(), True),
+                     StructField('conversationStartTimestamp', TimestampType(), False),
+                     StructField('conversationEndTimestamp', TimestampType(), False),
                      StructField('conversationCrossTalkRate', IntegerType(), True),
                      StructField('conversationAverageDbLevel', IntegerType(), True),
                      StructField('surroundingAverageDbLevel', IntegerType(), True),
