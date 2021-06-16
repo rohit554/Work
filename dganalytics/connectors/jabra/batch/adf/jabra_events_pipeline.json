@@ -85,7 +85,7 @@
             "properties": {
                 "activities": [
                     {
-                        "name": "dimConverations",
+                        "name": "factConverations",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],
                         "policy": {

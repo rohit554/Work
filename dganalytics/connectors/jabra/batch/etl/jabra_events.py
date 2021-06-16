@@ -41,8 +41,8 @@ def load_jabra_events(spark: SparkSession, tenant: str):
     df = df.withColumn("eventInsertTimestamp", to_timestamp(lit(current_timestamp.strftime("%Y-%m-%d %H:%M:%S"))))
     df = df.withColumn("conversationDate", to_date("conversationStartTimestamp"))
     df.createOrReplaceTempView(events_temp_table)
-    logger.info("loading new jabra events into dim_conversations")
-    spark.sql(f"insert into dim_conversations select * from {events_temp_table}")
+    logger.info("loading new jabra events into fact_conversations")
+    spark.sql(f"insert into fact_conversations select * from {events_temp_table}")
 
     for event_json_file in event_json_files:
         logger.info(f"deleting {event_json_file}...")
@@ -50,7 +50,7 @@ def load_jabra_events(spark: SparkSession, tenant: str):
 
     logger.info("exporting all jabra events to power bi...")
 
-    export_powerbi_parquet(tenant, spark.sql("select * from dim_conversations"), "jabraDimConversations")
+    export_powerbi_parquet(tenant, spark.sql("select * from fact_conversations"), "gFactConversations")
 
 
 if __name__ == "__main__":

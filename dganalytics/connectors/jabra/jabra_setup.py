@@ -14,7 +14,7 @@ def create_tables(spark: SparkSession, db_name: str):
     logger.info("creating tables")
 
     spark.sql(f"""
-                create table {db_name}.dim_conversations
+                create table {db_name}.fact_conversations
                 (
                     userId string,
                     eventInsertTimestamp timestamp,
@@ -28,7 +28,7 @@ def create_tables(spark: SparkSession, db_name: str):
                 )
             using delta
             PARTITIONED BY (conversationDate)
-            LOCATION '{db_path}/{db_name}/dim_conversations'
+            LOCATION '{db_path}/{db_name}/fact_conversations'
             """)
     return True
 
