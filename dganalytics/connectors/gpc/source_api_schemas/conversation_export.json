@@ -1,0 +1,585 @@
+{
+	"fields": [
+		{
+			"metadata": {},
+			"name": "id",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "startTime",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "endTime",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "address",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "participants",
+			"nullable": true,
+			"type": {
+				"containsNull": true,
+				"elementType": {
+					"fields": [
+						{
+							"metadata": {},
+							"name": "id",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "startTime",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "endTime",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "connectedTime",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "name",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "queueId",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "purpose",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "participantType",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "address",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "ani",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "aniName",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "dnis",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "wrapupRequired",
+							"nullable": true,
+							"type": "boolean"
+						},
+						{
+							"metadata": {},
+							"name": "attributes",
+							"nullable": true,
+							"type": {
+								"fields": [
+									{
+										"metadata": {},
+										"name": "PaymentReference",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Interaction Type",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Store",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "AmountToPay",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Process",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Screen Pop URL",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Reason",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Store Number",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Survey Resolution",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Sub-reason",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Whitelist Status",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Survey Initiated",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "ACCC",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "NumberToConferenceCall",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Entry Point",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Survey CSAT Agent",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Organisation",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Survey NPS",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Flow.InvocationData",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Comments",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Customer Formatted Number",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Delivery Type",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Survey Completed",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "scriptId",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Automation Outcome",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "ScreenPopName",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "Order Number",
+										"nullable": true,
+										"type": "string"
+									}
+								],
+								"type": "struct"
+							}
+						},
+						{
+							"metadata": {},
+							"name": "calls",
+							"nullable": true,
+							"type": {
+								"fields": [
+									{
+										"metadata": {},
+										"name": "state",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "id",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "direction",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "recording",
+										"nullable": true,
+										"type": "boolean"
+									},
+									{
+										"metadata": {},
+										"name": "recordingState",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "muted",
+										"nullable": true,
+										"type": "boolean"
+									},
+									{
+										"metadata": {},
+										"name": "confined",
+										"nullable": true,
+										"type": "boolean"
+									},
+									{
+										"metadata": {},
+										"name": "held",
+										"nullable": true,
+										"type": "boolean"
+									},
+									{
+										"metadata": {},
+										"name": "segments",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "disconnectType",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "connectedTime",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "disconnectedTime",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "disconnectReasons",
+										"nullable": true,
+										"type": {
+											"containsNull": true,
+											"elementType": {
+												"fields": [
+													{
+														"metadata": {},
+														"name": "type",
+														"nullable": true,
+														"type": "string"
+													},
+													{
+														"metadata": {},
+														"name": "code",
+														"nullable": true,
+														"type": "integer"
+													},
+													{
+														"metadata": {},
+														"name": "phrase",
+														"nullable": true,
+														"type": "string"
+													}
+												],
+												"type": "struct"
+											},
+											"type": "array"
+										}
+									},
+									{
+										"metadata": {},
+										"name": "provider",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "peerId",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "self",
+										"nullable": true,
+										"type": {
+											"fields": [
+												{
+													"metadata": {},
+													"name": "name",
+													"nullable": true,
+													"type": "string"
+												},
+												{
+													"metadata": {},
+													"name": "nameRaw",
+													"nullable": true,
+													"type": "string"
+												},
+												{
+													"metadata": {},
+													"name": "addressNormalized",
+													"nullable": true,
+													"type": "string"
+												},
+												{
+													"metadata": {},
+													"name": "addressRaw",
+													"nullable": true,
+													"type": "string"
+												},
+												{
+													"metadata": {},
+													"name": "addressDisplayable",
+													"nullable": true,
+													"type": "string"
+												}
+											],
+											"type": "struct"
+										}
+									},
+									{
+										"metadata": {},
+										"name": "other",
+										"nullable": true,
+										"type": {
+											"fields": [
+												{
+													"metadata": {},
+													"name": "name",
+													"nullable": true,
+													"type": "string"
+												},
+												{
+													"metadata": {},
+													"name": "nameRaw",
+													"nullable": true,
+													"type": "string"
+												},
+												{
+													"metadata": {},
+													"name": "addressNormalized",
+													"nullable": true,
+													"type": "string"
+												},
+												{
+													"metadata": {},
+													"name": "addressRaw",
+													"nullable": true,
+													"type": "string"
+												},
+												{
+													"metadata": {},
+													"name": "addressDisplayable",
+													"nullable": true,
+													"type": "string"
+												}
+											],
+											"type": "struct"
+										}
+									},
+									{
+										"metadata": {},
+										"name": "afterCallWorkRequired",
+										"nullable": true,
+										"type": "boolean"
+									}
+								],
+								"type": "struct"
+							}
+						},
+						{
+							"metadata": {},
+							"name": "selfUri",
+							"nullable": true,
+							"type": "string"
+						}
+					],
+					"type": "struct"
+				},
+				"type": "array"
+			}
+		},
+		{
+			"metadata": {},
+			"name": "recordingState",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "divisions",
+			"nullable": true,
+			"type": {
+				"containsNull": true,
+				"elementType": {
+					"fields": [
+						{
+							"metadata": {},
+							"name": "division",
+							"nullable": true,
+							"type": {
+								"fields": [
+									{
+										"metadata": {},
+										"name": "id",
+										"nullable": true,
+										"type": "string"
+									},
+									{
+										"metadata": {},
+										"name": "selfUri",
+										"nullable": true,
+										"type": "string"
+									}
+								],
+								"type": "struct"
+							}
+						},
+						{
+							"metadata": {},
+							"name": "entities",
+							"nullable": true,
+							"type": {
+								"containsNull": true,
+								"elementType": {
+									"fields": [
+										{
+											"metadata": {},
+											"name": "id",
+											"nullable": true,
+											"type": "string"
+										},
+										{
+											"metadata": {},
+											"name": "selfUri",
+											"nullable": true,
+											"type": "string"
+										}
+									],
+									"type": "struct"
+								},
+								"type": "array"
+							}
+						}
+					],
+					"type": "struct"
+				},
+				"type": "array"
+			}
+		},
+		{
+			"metadata": {},
+			"name": "selfUri",
+			"nullable": true,
+			"type": "string"
+		}
+	],
+	"type": "struct"
+}

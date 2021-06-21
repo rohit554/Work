@@ -1,0 +1,38 @@
+{
+	"name": "salmatcolesonline_survey_export",
+	"properties": {
+		"activities": [
+			{
+				"name": "load_survey",
+				"type": "DatabricksSparkPython",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "00:30:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/salmatcolesonline/custom_etl/load_survey/load_survey.py"
+				},
+				"linkedServiceName": {
+					"referenceName": "AzureDatabricks",
+					"type": "LinkedServiceReference"
+				}
+			}
+		],
+		"parameters": {
+			"input_file": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "salmatcolesonline"
+		},
+		"annotations": [],
+		"lastPublishTime": "2021-06-20T08:41:43Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

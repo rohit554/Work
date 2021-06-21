@@ -268,5 +268,20 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": False,
         "entity_name": "results",
-    }
+    },
+    "conversation_export": {
+        "endpoint": "/api/v2/conversationexport",
+        "request_type": "GET",
+        "paging": True,
+        "cursor": False,
+        "interval": False,
+        "params": {
+            "ids": "any",
+            "pageSize": 500
+        },
+        "entity_name": "entities",
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "tbl_overwrite": True,
+        "raw_primary_key": ["coversationId"]
+    },
 }
