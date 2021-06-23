@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from pyspark.sql.types import StructType, IntegerType, TimestampType, StructField, StringType
 from pyspark.sql import SparkSession, DataFrame, Row
-from dganalytics.utils.utils import get_spark_session, flush_utils, get_path_vars
+from dganalytics.utils.utils import get_spark_session, flush_utils, get_path_vars, export_powerbi_parquet
 from dganalytics.connectors.gpc.gpc_utils import get_interval, get_api_url, get_dbname, authorize, gpc_request, \
     extract_parser, gpc_utils_logger
 from pyspark.sql.functions import to_timestamp, lit, to_date
@@ -132,7 +132,7 @@ if __name__ == '__main__':
         if conf_df != None and not conf_df.rdd.isEmpty():
             #logic to insert data in the fact table
             merge_fact_conversation_survey(conf_df, extract_start_time, extract_end_time, spark, db_name)
-
+            export_powerbi_parquet(tenant, spark.sql(f"""select * from {db_name}.fact_conversation_survey"""), "gFactConversationSurveys")
     except Exception as e:
         logger.exception(f"Error Occured in GPC Survey Extraction for {extract_start_time}_{extract_end_time}_{tenant}_{api_name}")
         logger.exception(e, stack_info=True, exc_info=True)
