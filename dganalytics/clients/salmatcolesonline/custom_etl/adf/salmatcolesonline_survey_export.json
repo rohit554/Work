@@ -1,38 +1,167 @@
 {
-	"name": "salmatcolesonline_survey_export",
-	"properties": {
-		"activities": [
-			{
-				"name": "load_survey",
-				"type": "DatabricksSparkPython",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "00:30:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/salmatcolesonline/custom_etl/load_survey/load_survey.py"
-				},
-				"linkedServiceName": {
-					"referenceName": "AzureDatabricks",
-					"type": "LinkedServiceReference"
-				}
-			}
-		],
-		"parameters": {
-			"input_file": {
-				"type": "string"
-			}
-		},
-		"folder": {
-			"name": "salmatcolesonline"
-		},
-		"annotations": [],
-		"lastPublishTime": "2021-06-20T08:41:43Z"
-	},
-	"type": "Microsoft.DataFactory/factories/pipelines"
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": 0{
+        "env": {
+            "type": "string",
+            "metadata": "Environment name",
+            "defaultValue": "dev"
+        },
+        "tenant": {
+            "type": "string",
+            "metadata": "Tenant Name",
+            "defaultValue": "tenant"
+        },
+        "baseTime": {
+            "type": "string",
+            "defaultValue": "[utcNow('u')]",
+            "metadata": {
+                "description": "Schedule will start one hour from this time."
+            }
+        }
+    },
+    "variables": {
+        "factoryId": "[concat('Microsoft.DataFactory/factories/dg', parameters('env'), 'adf')]",
+        "factoryname": "[concat('dg', parameters('env'), 'adf')]",
+        "AzureKeyVault_baseUrl": "[concat('https://dg', parameters('env') ,'secrets.vault.azure.net/')]",
+        "gpcTriggerStart": "[dateTimeAdd(parameters('baseTime'), 'P0D', 'yyyy-MM-ddT00:00:00Z')]"
+    },
+    "resources": [
+        {
+            "name": "[concat(variables('factoryname'), '/AzureKeyVault')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureKeyVault",
+                "typeProperties": {
+                    "baseUrl": "[variables('AzureKeyVault_baseUrl')]"
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "name": "[concat(variables('factoryname'), '/AzureDatabricks')]",
+            "type": "Microsoft.DataFactory/factories/linkedServices",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "type": "AzureDatabricks",
+                "typeProperties": {
+                    "domain": {
+                        "type": "AzureKeyVaultSecret",
+                        "store": {
+                            "referenceName": "AzureKeyVault",
+                            "type": "LinkedServiceReference"
+                        },
+                        "secretName": "databricksinstanceurl"
+                    },
+                    "accessToken": {
+                        "type": "AzureKeyVaultSecret",
+                        "store": {
+                            "referenceName": "AzureKeyVault",
+                            "type": "LinkedServiceReference"
+                        },
+                        "secretName": "databricksaccesstoken"
+                    },
+                    "existingClusterId": {
+                        "type": "AzureKeyVaultSecret",
+                        "store": {
+                            "referenceName": "AzureKeyVault",
+                            "type": "LinkedServiceReference"
+                        },
+                        "secretName": "databricksclusterid"
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureKeyVault')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryname'), '/salmatcolesonline_conversation_surveys')]",
+            "type": "Microsoft.DataFactory/factories/pipelines",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "activities": [
+                    {
+                        "name": "load_survey",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "03:00:00",
+                            "retry": 1,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/salmatcolesonline/custom_etl/load_wfm/load_survey.py",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    }
+                ],
+                "parameters": {
+                    "input_file": {
+                        "type": "string"
+                    }
+                },
+                "folder": {
+                    "name": "salmatcolesonline"
+                },
+                "annotations": [],
+                "lastPublishTime": "2021-06-22T10:28:14Z"
+            },
+            "dependsOn": [
+                "[concat(variables('factoryId'), '/linkedServices/AzureDatabricks')]"
+            ]
+        },
+        {
+            "name": "[concat(variables('factoryname'), '/salmat_coles_online_load_survey')]",
+            "type": "Microsoft.DataFactory/factories/triggers",
+            "apiVersion": "2018-06-01",
+            "properties": {
+                "annotations": [],
+                "runtimeState": "Stopped",
+                "pipelines": [
+                    {
+                        "pipelineReference": {
+                            "referenceName": "salmatcolesonline_conversation_surveys",
+                            "type": "PipelineReference"
+                        },
+                        "parameters": {
+                            "tenant": "[parameters('tenant')]",
+                            "extract_start_time": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ssZ')}",
+                            "extract_end_time": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddTHH:mm:ssZ')}"
+                        }
+                    }
+                ],
+                "type": "TumblingWindowTrigger",
+                "typeProperties": {
+                    "frequency": "Hour",
+                    "interval": 24,
+                    "startTime": "[variables('gpcTriggerStart')]",
+                    "endTime": "[parameters('baseTime')]",
+                    "maxConcurrency": 1
+                }
+            },
+            "dependsOn": [
+                "salmatcolesonline_conversation_surveys"
+            ]
+        }
+    ]
 }
