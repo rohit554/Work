@@ -90,13 +90,7 @@ def transform_conversation_surveys(convs, list, conversation):
     return list
 
 if __name__ == '__main__':
-    # tenant, run_id, extract_start_time, extract_end_time, api_name =
-    # extract_parser()
-
-    tenant = 'salmatcolesonline'
-    extract_start_time = '2021-06-15T18:00:00.000'
-    extract_end_time = '2021-06-16T00:00:00.000'
-    api_name = "conversation_extract"
+    tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()
 
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
