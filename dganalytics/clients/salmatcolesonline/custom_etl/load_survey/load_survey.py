@@ -5,38 +5,95 @@ import os
 from pyspark.sql.functions import lit
 from datetime import datetime
 from pathlib import Path
-from pyspark.sql.types import StructType
-from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql.types import StructType, IntegerType, TimestampType, StructField, StringType
+from pyspark.sql import SparkSession, DataFrame, Row
 from dganalytics.utils.utils import get_spark_session, flush_utils, get_path_vars
 from dganalytics.connectors.gpc.gpc_utils import get_interval, get_api_url, get_dbname, authorize, gpc_request, \
     extract_parser, gpc_utils_logger
-from dganalytics.connectors.gpc.gpc_setup import create_raw_table
+from pyspark.sql.functions import to_timestamp, lit, to_date
 
+schema = StructType([StructField('conversationId', StringType(), True),
+  StructField('fcr', IntegerType(), True),
+  StructField('csat', IntegerType(), True),
+  StructField('fcr', IntegerType(), True)])
 
-def fact_conversation_survey(spark: SparkSession, db_name: str):
-    select_query = f"""
-                        SELECT  conversationId,
-                                startTime AS conversationStart,
-                                endTime AS conversationEnd,
-                                explode(participants.attribute) attributes
-                        (SELECT  id AS conversationId,
-                                startTime AS conversationStart,
-                                endTime AS conversationEnd,
-                                explode(participants) as participants,
-                                extractDate as soucePartition
-                        FROM {db_name}/raw_conversation_export)
-                        WHERE endTime BETWEEN (current_date() - 3) AND current_date()
-    """
+def create_fact_conversation_survey(spark: SparkSession, db_name: str):
+    spark.sql(f"""CREATE TABLE IF NOT EXISTS {db_name}.fact_conversation_survey
+            (
+                conversationId STRING,
+                csat INT,
+                nps INT,
+                fcr INT,
+                insertTimestamp TIMESTAMP
+            )
+            using delta
+            PARTITIONED BY (insertTimestamp)
+            LOCATION '{db_path}/{db_name}/fact_conversation_survey'
+            """)
+    return True
+
+def merge_fact_conversation_survey(df, extract_start_time, extract_end_time, spark: SparkSession, db_name: str):
+    current_timestamp = datetime.utcnow()
+    df = df.withColumn("insertTimestamp", to_timestamp(lit(current_timestamp.strftime("%Y-%m-%d %H:%M:%S"))))
+    df = df.drop_duplicates()
+    
+    df.createOrReplaceTempView("conversation_surveys")
+    sdf = spark.sql("SELECT * FROM conversation_surveys")
+    sdf.show()
+    spark.sql(f"""  MERGE INTO {db_name}.fact_conversation_survey
+                    USING conversation_surveys
+                        ON conversation_surveys.conversationId = fact_conversation_survey.conversationId
+                    WHEN MATCHED THEN
+                        UPDATE SET *
+                    WHEN NOT MATCHED THEN
+                        INSERT *
+                """)
 
     return True
 
 
+def get_conversations():
+	conversations = spark.sql(f"""  SELECT DISTINCT conversationId
+	                                FROM gpc_salmatcolesonline.dim_conversations
+	                                WHERE   conversationEnd IS NOT NULL
+	                                        AND conversationEnd BETWEEN '{extract_start_time}' AND '{extract_end_time}'
+	    """)
+	return conversations
+
+def transform_conversation_surveys(convs, list):
+    if convs != None and len(convs) > 0:
+        for conv in convs:
+            if conv != None and conv["participants"] != None and len(conv["participants"]) > 0:
+                
+                for participant in conv["participants"]:
+                    has_survey = False
+                    dict = { "csat": None, "fcr": None, "nps": None, "conversationId": conv["id"] }
+                    if participant != None and participant["attributes"] != None and participant["attributes"] != {}:
+                        if "Survey CSAT Agent" in participant["attributes"]:
+                            csat = participant["attributes"]["Survey CSAT Agent"]
+                            dict["csat"] = int(csat) if csat != "" and csat.isnumeric() else None
+                            has_survey = True
+                        if "Survey NPS" in participant["attributes"]:
+                            nps = participant["attributes"]["Survey NPS"]
+                            dict["nps"] = int(nps) if nps != "" and nps.isnumeric() else None
+                            has_survey = True
+                        if "Survey Resolution" in participant["attributes"]:
+                            fcr = participant["attributes"]["Survey Resolution"]
+                            dict["fcr"] = int(fcr) if fcr != "" and fcr.isnumeric() else None
+                            has_survey = True
+                    if has_survey:
+                        if dict["fcr"] != None or dict["csat"] != None or dict["nps"] != None:
+                            list.append(dict.copy())
+
+    return list
+
 if __name__ == '__main__':
-    # tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()
+    # tenant, run_id, extract_start_time, extract_end_time, api_name =
+    # extract_parser()
 
     tenant = 'salmatcolesonline'
-    extract_start_time = '2021-06-04T00:00:00.000'
-    extract_end_time = '2021-06-05T00:00:00.000'
+    extract_start_time = '2021-06-15T18:00:00.000'
+    extract_end_time = '2021-06-16T00:00:00.000'
     api_name = "conversation_extract"
 
     db_name = get_dbname(tenant)
@@ -48,79 +105,37 @@ if __name__ == '__main__':
     logger = gpc_utils_logger(tenant, app_name)
 
     try:
-        # Authorize
-        api_headers = authorize(tenant)
-
-        conversations = spark.sql(f"""
-            SELECT DISTINCT conversationId
-            FROM gpc_salmatcolesonline.dim_conversations
-            WHERE   conversationEnd IS NOT NULL
-                    AND conversationEnd BETWEEN (current_date() - 3) AND current_date()
-                    LIMIT 10
-        """)
-
-        # Raw Table
-        create_raw_table("conversation_export", spark, db_name)
-
+        create_fact_conversation_survey(spark, db_name)
+        
+        conversations = get_conversations()
+        
+        conv_df = spark.createDataFrame(spark.sparkContext.emptyRDD(), schema)
+        list = []
         if conversations != None and not conversations.rdd.isEmpty():
+            api_headers = authorize(tenant)
+            
             for conversation in conversations.rdd.collect():
-
+                
+                # Extract
                 # Conversation export API
-                conv_export_resp = rq.get(
-                    f"{get_api_url(tenant)}/api/v2/conversationexport?ids={conversation['conversationId']}",
+                conv_export_resp = rq.get(f"{get_api_url(tenant)}/api/v2/conversationexport?ids={conversation['conversationId']}",
                     headers=api_headers)
-
+                
                 convs = conv_export_resp.json()
-
+                
                 # Transform
-                if convs != None and len(convs) > 0:
-                    # df = sc.wholeTextFiles(convs).map(lambda x:ast.literal_eval(x[1]))\
-                    #   .map(lambda x: json.dumps(x))
-                    # conversation_export = spark.read.json(sc.parallelize(convs).map(lambda x: json.dumps(x)))
-                    # print(conversation_export.columns)
-                    # if("address" not in conversation_export.columns):
-                    #   conversation_export = conversation_export.withColumn("address", lit(None))
-
-                    # now = datetime.now()
-                    # conversation_export = conversation_export.withColumn("extractDate", lit(str(now)[:10]))
-                    # conversation_export.registerTempTable("conversation_export")
-                    # spark.sql(f"""MERGE INTO {db_name}.raw_conversation_export
-                    #                    using conversation_export 
-                    #                    on conversation_export.id = raw_conversation_export.id
-                    #                   WHEN MATCHED THEN
-                    #                        UPDATE SET *
-                    #                    WHEN NOT MATCHED THEN
-                    #                        INSERT *
-                    #          """)
-
-                    for conv in convs:
-                        if conv != None and conv["participants"] != None and len(conv["participants"]) > 0:
-                            for participant in conv["participants"]:
-                                csat = ""
-                                nps = ""
-                                fcr = ""
-                                if participant != None and participant["attributes"] != None:
-                                    if "Survey CSAT Agent" in participant["attributes"]:
-                                        print("conversation " + conversation['conversationId'])
-                                        csat = participant["attributes"]["Survey CSAT Agent"]
-                                        print("csat " + csat)
-                                    if "Survey NPS" in participant["attributes"]:
-                                        nps = participant["attributes"]["Survey NPS"]
-                                        print("conversation " + conversation['conversationId'])
-                                        print("nps " + nps)
-                                    if "Survey Resolution" in participant["attributes"]:
-                                        fcr = participant["attributes"]["Survey Resolution"]
-                                        print("conversation " + conversation['conversationId'])
-                                        print("fcr " + fcr)
-
-                                    # TODO: Save Dims in the DB
-                                    # TODO: Save facts in the DB
-
-                # Create Dimensions and Facts
+                list = transform_conversation_surveys(convs, list)
+        
+        
+        listJson = sc.parallelize(list)
+        conf_df = sqlContext.read.json(listJson)
+        # Load
+        if conf_df != None and not conf_df.rdd.isEmpty():
+            #logic to insert data in the fact table
+            merge_fact_conversation_survey(conf_df, extract_start_time, extract_end_time, spark, db_name)
 
     except Exception as e:
-        logger.exception(
-            f"Error Occured in GPC Survey Extraction for {extract_start_time}_{extract_end_time}_{tenant}_{api_name}")
+        logger.exception(f"Error Occured in GPC Survey Extraction for {extract_start_time}_{extract_end_time}_{tenant}_{api_name}")
         logger.exception(e, stack_info=True, exc_info=True)
         raise Exception
     finally:
