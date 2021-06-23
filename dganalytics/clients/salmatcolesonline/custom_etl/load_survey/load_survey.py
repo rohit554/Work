@@ -15,7 +15,7 @@ from pyspark.sql.functions import to_timestamp, lit, to_date
 schema = StructType([StructField('conversationId', StringType(), True),
   StructField('fcr', IntegerType(), True),
   StructField('csat', IntegerType(), True),
-  StructField('fcr', IntegerType(), True)])
+  StructField('nps', IntegerType(), True)])
 
 def create_fact_conversation_survey(spark: SparkSession, db_name: str):
     spark.sql(f"""CREATE TABLE IF NOT EXISTS {db_name}.fact_conversation_survey
@@ -127,8 +127,7 @@ if __name__ == '__main__':
                 list = transform_conversation_surveys(convs, list)
         
         
-        listJson = sc.parallelize(list)
-        conf_df = sqlContext.read.json(listJson)
+        conf_df = spark.createDataFrame(list,schema) 
         # Load
         if conf_df != None and not conf_df.rdd.isEmpty():
             #logic to insert data in the fact table
