@@ -106,7 +106,9 @@
                                 "--extract_start_time",
                                 "@pipeline().parameters.extract_start_time",
                                 "--extract_end_time",
-                                "@pipeline().parameters.extract_end_time"
+                                "@pipeline().parameters.extract_end_time",
+                                "--api_name",
+                                "conversation_export"
                             ]
                         },
                         "linkedServiceName": {
@@ -115,9 +117,19 @@
                         }
                     }
                 ],
+                "concurrency": 1,
                 "parameters": {
-                    "input_file": {
-                        "type": "string"
+                    "tenant": {
+                        "type": "string",
+                        "defaultValue": "[parameters('tenant')]"
+                    },
+                    "extract_start_time": {
+                        "type": "string",
+                        "defaultValue": "YYYY-MM-DDTHH24:MI:SSZ"
+                    },
+                    "extract_end_time": {
+                        "type": "string",
+                        "defaultValue": "YYYY-MM-DDTHH24:MI:SSZ"
                     }
                 },
                 "folder": {
@@ -144,7 +156,7 @@
                             "type": "PipelineReference"
                         },
                         "parameters": {
-                            "tenant": "[parameters('tenant')]",
+                            "tenant": "[parameters('tenant1')]",
                             "extract_start_time": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ssZ')}",
                             "extract_end_time": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddTHH:mm:ssZ')}"
                         }

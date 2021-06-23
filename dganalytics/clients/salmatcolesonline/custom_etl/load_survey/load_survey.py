@@ -13,14 +13,16 @@ from dganalytics.connectors.gpc.gpc_utils import get_interval, get_api_url, get_
 from pyspark.sql.functions import to_timestamp, lit, to_date
 
 schema = StructType([StructField('conversationId', StringType(), True),
-  StructField('fcr', IntegerType(), True),
-  StructField('csat', IntegerType(), True),
-  StructField('nps', IntegerType(), True)])
+                       StructField('agentId', StringType(), True),
+                       StructField('fcr', IntegerType(), True),
+                       StructField('csat', IntegerType(), True),
+                       StructField('nps', IntegerType(), True)])
 
 def create_fact_conversation_survey(spark: SparkSession, db_name: str):
     spark.sql(f"""CREATE TABLE IF NOT EXISTS {db_name}.fact_conversation_survey
             (
                 conversationId STRING,
+                agentId STRING,
                 csat INT,
                 nps INT,
                 fcr INT,
@@ -53,21 +55,21 @@ def merge_fact_conversation_survey(df, extract_start_time, extract_end_time, spa
 
 
 def get_conversations():
-	conversations = spark.sql(f"""  SELECT DISTINCT conversationId
+	conversations = spark.sql(f"""  SELECT DISTINCT conversationId, agentId
 	                                FROM gpc_salmatcolesonline.dim_conversations
 	                                WHERE   conversationEnd IS NOT NULL
 	                                        AND conversationEnd BETWEEN '{extract_start_time}' AND '{extract_end_time}'
 	    """)
 	return conversations
 
-def transform_conversation_surveys(convs, list):
+def transform_conversation_surveys(convs, list, conversation):
     if convs != None and len(convs) > 0:
         for conv in convs:
             if conv != None and conv["participants"] != None and len(conv["participants"]) > 0:
                 
                 for participant in conv["participants"]:
                     has_survey = False
-                    dict = { "csat": None, "fcr": None, "nps": None, "conversationId": conv["id"] }
+                    dict = { "csat": None, "fcr": None, "nps": None, "conversationId": conv["id"], "agentId": conversation["agentId"] }
                     if participant != None and participant["attributes"] != None and participant["attributes"] != {}:
                         if "Survey CSAT Agent" in participant["attributes"]:
                             csat = participant["attributes"]["Survey CSAT Agent"]
@@ -88,7 +90,13 @@ def transform_conversation_surveys(convs, list):
     return list
 
 if __name__ == '__main__':
-    tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()
+    # tenant, run_id, extract_start_time, extract_end_time, api_name =
+    # extract_parser()
+
+    tenant = 'salmatcolesonline'
+    extract_start_time = '2021-06-15T18:00:00.000'
+    extract_end_time = '2021-06-16T00:00:00.000'
+    api_name = "conversation_extract"
 
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
@@ -118,10 +126,11 @@ if __name__ == '__main__':
                 convs = conv_export_resp.json()
                 
                 # Transform
-                list = transform_conversation_surveys(convs, list)
+                list = transform_conversation_surveys(convs, list, conversation)
         
         conf_df = spark.createDataFrame(list,schema) 
-        
+        #listJson = sc.parallelize(list)
+        #conf_df = sqlContext.read.json(listJson)
         # Load
         if conf_df != None and not conf_df.rdd.isEmpty():
             #logic to insert data in the fact table
