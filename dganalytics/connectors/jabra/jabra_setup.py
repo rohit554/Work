@@ -21,7 +21,7 @@ def create_tables(spark: SparkSession, db_name: str):
                     conversationDate date,
                     conversationStartTimestamp timestamp,
                     conversationEndTimestamp timestamp,
-                    conversationCrossTalkRate int,
+                    conversationCrossTalkRate double,
                     conversationAverageDbLevel int,
                     surroundingAverageDbLevel int,
                     muteButtonPressCount int

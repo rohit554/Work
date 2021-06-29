@@ -4,14 +4,14 @@ from datetime import datetime
 from dganalytics.utils.utils import get_path_vars, get_spark_session, get_logger, export_powerbi_parquet
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import to_timestamp, lit, to_date
-from pyspark.sql.types import StructType, StructField, TimestampType, StringType, IntegerType, DateType
+from pyspark.sql.types import StructType, StructField, TimestampType, StringType, IntegerType, DateType, DoubleType
 
 schema = StructType([StructField('userId', StringType(), False),
                      StructField('eventInsertTimestamp', TimestampType(), True),
                      StructField('conversationDate', DateType(), True),
                      StructField('conversationStartTimestamp', TimestampType(), False),
                      StructField('conversationEndTimestamp', TimestampType(), False),
-                     StructField('conversationCrossTalkRate', IntegerType(), True),
+                     StructField('conversationCrossTalkRate', DoubleType(), True),
                      StructField('conversationAverageDbLevel', IntegerType(), True),
                      StructField('surroundingAverageDbLevel', IntegerType(), True),
                      StructField('muteButtonPressCount', IntegerType(), True)])
