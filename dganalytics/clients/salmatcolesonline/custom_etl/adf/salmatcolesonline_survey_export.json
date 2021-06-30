@@ -97,7 +97,7 @@
                         },
                         "userProperties": [],
                         "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/salmatcolesonline/custom_etl/load_wfm/load_survey.py",
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/salmatcolesonline/custom_etl/load_survey/load_survey.py",
                             "parameters": [
                                 "--tenant",
                                 "@pipeline().parameters.tenant",
@@ -156,9 +156,9 @@
                             "type": "PipelineReference"
                         },
                         "parameters": {
-                            "tenant": "[parameters('tenant1')]",
-                            "extract_start_time": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ssZ')}",
-                            "extract_end_time": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddTHH:mm:ssZ')}"
+                            "tenant": "[parameters('tenant')]",
+                            "extract_start_time": "@{formatDateTime(addDays(trigger().outputs.windowStartTime, -1),'yyyy-MM-ddT00:00:00Z')}",
+                            "extract_end_time": "@{formatDateTime(addDays(trigger().outputs.windowEndTime, -1),'yyyy-MM-ddT00:00:00Z')}"
                         }
                     }
                 ],
@@ -166,8 +166,8 @@
                 "typeProperties": {
                     "frequency": "Hour",
                     "interval": 24,
-                    "startTime": "[variables('gpcTriggerStart')]",
-                    "endTime": "[parameters('baseTime')]",
+                    "delay": "00:05:00",
+                    "startTime": "2021-06-23T00:00:00Z",
                     "maxConcurrency": 1
                 }
             },
