@@ -5,7 +5,7 @@ import os
 from pyspark.sql.functions import lit
 from datetime import datetime
 from pathlib import Path
-from pyspark.sql.types import StructType, IntegerType, TimestampType, StructField, StringType
+from pyspark.sql.types import StructType, IntegerType, TimestampType, StructField, StringType, BooleanType
 from pyspark.sql import SparkSession, DataFrame, Row
 from dganalytics.utils.utils import get_spark_session, flush_utils, get_path_vars, export_powerbi_parquet
 from dganalytics.connectors.gpc.gpc_utils import get_interval, get_api_url, get_dbname, authorize, gpc_request, \
@@ -13,10 +13,16 @@ from dganalytics.connectors.gpc.gpc_utils import get_interval, get_api_url, get_
 from pyspark.sql.functions import to_timestamp, lit, to_date
 
 schema = StructType([StructField('conversationId', StringType(), True),
+                       StructField('conversationStart', TimestampType(), True),
+                       StructField('conversationEnd', TimestampType(), True),
                        StructField('agentId', StringType(), True),
                        StructField('fcr', IntegerType(), True),
                        StructField('csat', IntegerType(), True),
-                       StructField('nps', IntegerType(), True)])
+                       StructField('nps', IntegerType(), True),
+                       StructField('survey_completed', BooleanType(), True),
+                       StructField('survey_completed', BooleanType(), True),
+                       StructField('survey_initiated', BooleanType(), True)]
+                    )
 
 def create_fact_conversation_survey(spark: SparkSession, db_name: str):
     spark.sql(f"""CREATE TABLE IF NOT EXISTS {db_name}.fact_conversation_survey
@@ -26,6 +32,8 @@ def create_fact_conversation_survey(spark: SparkSession, db_name: str):
                 csat INT,
                 nps INT,
                 fcr INT,
+                survey_completed BOOLEAN,
+                survey_initiated BOOLEAN,
                 insertTimestamp TIMESTAMP
             )
             using delta
@@ -55,7 +63,7 @@ def merge_fact_conversation_survey(df, extract_start_time, extract_end_time, spa
 
 
 def get_conversations():
-	conversations = spark.sql(f"""  SELECT DISTINCT conversationId, agentId
+	conversations = spark.sql(f"""  SELECT DISTINCT conversationId, agentId, conversationStart, conversationEnd
 	                                FROM gpc_salmatcolesonline.dim_conversations
 	                                WHERE   conversationEnd IS NOT NULL
 	                                        AND conversationEnd BETWEEN '{extract_start_time}' AND '{extract_end_time}'
@@ -69,7 +77,18 @@ def transform_conversation_surveys(convs, list, conversation):
                 
                 for participant in conv["participants"]:
                     has_survey = False
-                    dict = { "csat": None, "fcr": None, "nps": None, "conversationId": conv["id"], "agentId": conversation["agentId"] }
+                    dict = {
+                        "csat": None,
+                        "fcr": None,
+                        "nps": None,
+                        "survey_initiated": None,
+                        "survey_completed": None,
+                        "conversationId": conv["id"],
+                        "conversationStart": conversation["conversationStart"],
+                        "conversationEnd": conversation["conversationEnd"],
+                        "agentId": conversation["agentId"]
+                        }
+
                     if participant != None and participant["attributes"] != None and participant["attributes"] != {}:
                         if "Survey CSAT Agent" in participant["attributes"]:
                             csat = participant["attributes"]["Survey CSAT Agent"]
@@ -83,8 +102,16 @@ def transform_conversation_surveys(convs, list, conversation):
                             fcr = participant["attributes"]["Survey Resolution"]
                             dict["fcr"] = int(fcr) if fcr != "" and fcr.isnumeric() else None
                             has_survey = True
+                        if "Survey Completed" in participant["attributes"]:
+                            survey_completed = participant["attributes"]["Survey Completed"]
+                            dict["survey_completed"] = True if survey_completed == "Yes" else False
+                            has_survey = True
+                        if "Survey Initiated" in participant["attributes"]:
+                            survey_initiated = participant["attributes"]["Survey Initiated"]
+                            dict["survey_initiated"] = True if survey_initiated == "Yes" else False
+                            has_survey = True
                     if has_survey:
-                        if dict["fcr"] != None or dict["csat"] != None or dict["nps"] != None:
+                        if dict["fcr"] != None or dict["csat"] != None or dict["nps"] != None or dict["survey_completed"] != None or dict["survey_initiated"] != None:
                             list.append(dict.copy())
 
     return list
@@ -123,8 +150,6 @@ if __name__ == '__main__':
                 list = transform_conversation_surveys(convs, list, conversation)
         
         conf_df = spark.createDataFrame(list,schema) 
-        #listJson = sc.parallelize(list)
-        #conf_df = sqlContext.read.json(listJson)
         # Load
         if conf_df != None and not conf_df.rdd.isEmpty():
             #logic to insert data in the fact table
