@@ -28,6 +28,8 @@ def create_fact_conversation_survey(spark: SparkSession, db_name: str):
     spark.sql(f"""CREATE TABLE IF NOT EXISTS {db_name}.fact_conversation_survey
             (
                 conversationId STRING,
+                conversationStart TIMESTAMP,
+                conversationEnd TIMESTAMP,
                 agentId STRING,
                 csat INT,
                 nps INT,
@@ -154,7 +156,19 @@ if __name__ == '__main__':
         if conf_df != None and not conf_df.rdd.isEmpty():
             #logic to insert data in the fact table
             merge_fact_conversation_survey(conf_df, extract_start_time, extract_end_time, spark, db_name)
-            export_powerbi_parquet(tenant, spark.sql(f"""select * from {db_name}.fact_conversation_survey"""), "gFactConversationSurveys")
+            query = f"""
+                SELECT  S.*,
+                        C.originatingDirection,
+                        C.queueId,
+                        C.mediaType,
+                        C.wrapUpCode,
+                        C.wrapUpNote
+                FROM {db_name}.fact_conversation_survey S
+                INNER JOIN {db_name}.dim_conversations C
+                    ON C.conversationId = S.conversationId
+                        AND S.survey_initiated
+            """
+            export_powerbi_parquet(tenant, spark.sql(query), "gFactConversationSurveys")
     except Exception as e:
         logger.exception(f"Error Occured in GPC Survey Extraction for {extract_start_time}_{extract_end_time}_{tenant}_{api_name}")
         logger.exception(e, stack_info=True, exc_info=True)
