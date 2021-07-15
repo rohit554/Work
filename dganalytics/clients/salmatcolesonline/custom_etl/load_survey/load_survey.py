@@ -15,11 +15,11 @@ from pyspark.sql.functions import to_timestamp, lit, to_date
 schema = StructType([StructField('conversationId', StringType(), True),
                        StructField('conversationStart', TimestampType(), True),
                        StructField('conversationEnd', TimestampType(), True),
+                       StructField('mediaType', StringType(), True),
                        StructField('agentId', StringType(), True),
                        StructField('fcr', IntegerType(), True),
                        StructField('csat', IntegerType(), True),
                        StructField('nps', IntegerType(), True),
-                       StructField('survey_completed', BooleanType(), True),
                        StructField('survey_completed', BooleanType(), True),
                        StructField('survey_initiated', BooleanType(), True)]
                     )
@@ -30,6 +30,7 @@ def create_fact_conversation_survey(spark: SparkSession, db_name: str):
                 conversationId STRING,
                 conversationStart TIMESTAMP,
                 conversationEnd TIMESTAMP,
+                mediaType STRING,
                 agentId STRING,
                 csat INT,
                 nps INT,
@@ -55,6 +56,8 @@ def merge_fact_conversation_survey(df, extract_start_time, extract_end_time, spa
     spark.sql(f"""  MERGE INTO {db_name}.fact_conversation_survey
                     USING conversation_surveys
                         ON conversation_surveys.conversationId = fact_conversation_survey.conversationId
+                            AND conversation_surveys.agentId = fact_conversation_survey.agentId
+                            AND conversation_surveys.mediaType = fact_conversation_survey.mediaType
                     WHEN MATCHED THEN
                         UPDATE SET *
                     WHEN NOT MATCHED THEN
@@ -63,12 +66,20 @@ def merge_fact_conversation_survey(df, extract_start_time, extract_end_time, spa
 
     return True
 
-
 def get_conversations():
-	conversations = spark.sql(f"""  SELECT DISTINCT conversationId, agentId, conversationStart, conversationEnd
-	                                FROM gpc_salmatcolesonline.dim_conversations
-	                                WHERE   conversationEnd IS NOT NULL
-	                                        AND conversationEnd BETWEEN '{extract_start_time}' AND '{extract_end_time}'
+	conversations = spark.sql(f"""  SELECT DISTINCT D.conversationId,
+                                                    D.agentId,
+                                                    D.conversationStart,
+                                                    D.conversationEnd,
+                                                    D.mediaType
+	                                FROM gpc_salmatcolesonline.dim_conversations D
+                                    INNER JOIN gpc_salmatcolesonline.fact_conversation_metrics F
+                                        ON D.conversationId = F.conversationId
+                                            AND D.agentId = F.agentId
+                                            AND (COALESCE(F.nHandle, 0) + COALESCE(F.tHandle, 0)) > 0
+                                            AND D.mediaType = F.mediaType
+	                                WHERE   D.conversationEnd IS NOT NULL
+	                                        AND D.conversationEnd BETWEEN '{extract_start_time}' AND '{extract_end_time}'
 	    """)
 	return conversations
 
@@ -88,7 +99,8 @@ def transform_conversation_surveys(convs, list, conversation):
                         "conversationId": conv["id"],
                         "conversationStart": conversation["conversationStart"],
                         "conversationEnd": conversation["conversationEnd"],
-                        "agentId": conversation["agentId"]
+                        "agentId": conversation["agentId"],
+                        "mediaType": conversation["mediaType"]
                         }
 
                     if participant != None and participant["attributes"] != None and participant["attributes"] != {}:
@@ -157,15 +169,14 @@ if __name__ == '__main__':
             #logic to insert data in the fact table
             merge_fact_conversation_survey(conf_df, extract_start_time, extract_end_time, spark, db_name)
             query = f"""
-                SELECT  S.*,
+                SELECT  DISTINCT S.*,
                         C.originatingDirection,
-                        C.queueId,
-                        C.mediaType,
-                        C.wrapUpCode,
-                        C.wrapUpNote
+                        C.queueId
                 FROM {db_name}.fact_conversation_survey S
                 INNER JOIN {db_name}.dim_conversations C
                     ON C.conversationId = S.conversationId
+                        AND C.agentId = S.agentId
+                        AND C.mediaType = S.mediaType
                         AND S.survey_initiated
             """
             export_powerbi_parquet(tenant, spark.sql(query), "gFactConversationSurveys")
