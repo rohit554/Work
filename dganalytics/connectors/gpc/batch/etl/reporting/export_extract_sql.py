@@ -28,7 +28,7 @@ dim_evaluation_forms = """
 
 dim_evaluations = """
             select
-                evaluationId , evaluatorId , agentId , evaluationFormId ,
+                evaluationId , evaluatorId , agentId , evaluationFormId , conversationId, conversationDate,
                 status , int(date_format(assignedDate, 'yyyyMMdd')) assignedDate,
                 int(date_format(assignedDate, 'HHmmss')) assignedTime,
                 int(date_format(releaseDate, 'yyyyMMdd')) releaseDate,
