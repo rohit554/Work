@@ -83,6 +83,7 @@ fact_conversation_metrics = """
                     sum(nTalkComplete) nTalkComplete,
                     sum(nTransferred) nTransferred,
                     sum(tAbandon) tAbandon,
+                    sum(tAnswered) tAnswered,
                     sum(tContacting) tContacting,
                     sum(tDialing) tDialing,
                     sum(tHandle) tHandle,
