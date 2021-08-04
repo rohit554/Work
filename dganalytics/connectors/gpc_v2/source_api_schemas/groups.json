@@ -1,0 +1,171 @@
+{
+   "fields": [
+      {
+         "metadata": {},
+         "name": "addresses",
+         "nullable": true,
+         "type": {
+            "containsNull": true,
+            "elementType": {
+               "fields": [
+                  {
+                     "metadata": {},
+                     "name": "display",
+                     "nullable": true,
+                     "type": "string"
+                  },
+                  {
+                     "metadata": {},
+                     "name": "mediaType",
+                     "nullable": true,
+                     "type": "string"
+                  },
+                  {
+                     "metadata": {},
+                     "name": "type",
+                     "nullable": true,
+                     "type": "string"
+                  }
+               ],
+               "type": "struct"
+            },
+            "type": "array"
+         }
+      },
+      {
+         "metadata": {},
+         "name": "chat",
+         "nullable": true,
+         "type": {
+            "fields": [
+               {
+                  "metadata": {},
+                  "name": "jabberId",
+                  "nullable": true,
+                  "type": "string"
+               }
+            ],
+            "type": "struct"
+         }
+      },
+      {
+         "metadata": {},
+         "name": "dateModified",
+         "nullable": true,
+         "type": "timestamp"
+      },
+      {
+         "metadata": {},
+         "name": "description",
+         "nullable": true,
+         "type": "string"
+      },
+      {
+         "metadata": {},
+         "name": "id",
+         "nullable": true,
+         "type": "string"
+      },
+      {
+         "metadata": {},
+         "name": "images",
+         "nullable": true,
+         "type": {
+            "containsNull": true,
+            "elementType": {
+               "fields": [
+                  {
+                     "metadata": {},
+                     "name": "imageUri",
+                     "nullable": true,
+                     "type": "string"
+                  },
+                  {
+                     "metadata": {},
+                     "name": "resolution",
+                     "nullable": true,
+                     "type": "string"
+                  }
+               ],
+               "type": "struct"
+            },
+            "type": "array"
+         }
+      },
+      {
+         "metadata": {},
+         "name": "memberCount",
+         "nullable": true,
+         "type": "long"
+      },
+      {
+         "metadata": {},
+         "name": "name",
+         "nullable": true,
+         "type": "string"
+      },
+      {
+         "metadata": {},
+         "name": "owners",
+         "nullable": true,
+         "type": {
+            "containsNull": true,
+            "elementType": {
+               "fields": [
+                  {
+                     "metadata": {},
+                     "name": "id",
+                     "nullable": true,
+                     "type": "string"
+                  },
+                  {
+                     "metadata": {},
+                     "name": "selfUri",
+                     "nullable": true,
+                     "type": "string"
+                  }
+               ],
+               "type": "struct"
+            },
+            "type": "array"
+         }
+      },
+      {
+         "metadata": {},
+         "name": "rulesVisible",
+         "nullable": true,
+         "type": "boolean"
+      },
+      {
+         "metadata": {},
+         "name": "selfUri",
+         "nullable": true,
+         "type": "string"
+      },
+      {
+         "metadata": {},
+         "name": "state",
+         "nullable": true,
+         "type": "string"
+      },
+      {
+         "metadata": {},
+         "name": "type",
+         "nullable": true,
+         "type": "string"
+      },
+      {
+         "metadata": {},
+         "name": "version",
+         "nullable": true,
+         "type": "long"
+      },
+      {
+         "metadata": {},
+         "name": "visibility",
+         "nullable": true,
+         "type": "string"
+      }
+   ],
+   "type": "struct"
+}

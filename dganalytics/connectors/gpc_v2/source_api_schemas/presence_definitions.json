@@ -1,0 +1,41 @@
+{
+    "fields": [
+        {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "name",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "name": "languageLabels",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+        },
+        {
+            "metadata": {},
+            "name": "systemPresence",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "deactivated",
+            "nullable": true,
+            "type": "boolean"
+        },
+        {
+            "metadata": {},
+            "name": "primary",
+            "nullable": true,
+            "type": "boolean"
+        }
+    ],
+    "type": "struct"
+}

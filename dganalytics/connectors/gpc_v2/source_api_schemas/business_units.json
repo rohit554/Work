@@ -1,0 +1,127 @@
+{
+    "fields": [
+        {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "name",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "division",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "id",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "selfUri",
+                        "nullable": true,
+                        "type": "string"
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "settings",
+            "nullable": true,
+            "type": {
+                "fields": [
+                    {
+                        "metadata": {},
+                        "name": "startDayOfWeek",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "timeZone",
+                        "nullable": true,
+                        "type": "string"
+                    },
+                    {
+                        "metadata": {},
+                        "name": "shortTermForecasting",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "defaultHistoryWeeks",
+                                    "nullable": true,
+                                    "type": "integer"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    },
+                    {
+                        "metadata": {},
+                        "name": "metadata",
+                        "nullable": true,
+                        "type": {
+                            "fields": [
+                                {
+                                    "metadata": {},
+                                    "name": "version",
+                                    "nullable": true,
+                                    "type": "integer"
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "modifiedBy",
+                                    "nullable": true,
+                                    "type": {
+                                        "fields": [
+                                            {
+                                                "metadata": {},
+                                                "name": "id",
+                                                "nullable": true,
+                                                "type": "string"
+                                            },
+                                            {
+                                                "metadata": {},
+                                                "name": "selfUri",
+                                                "nullable": true,
+                                                "type": "string"
+                                            }
+                                        ],
+                                        "type": "struct"
+                                    }
+                                },
+                                {
+                                    "metadata": {},
+                                    "name": "dateModified",
+                                    "nullable": true,
+                                    "type": "string"
+                                }
+                            ],
+                            "type": "struct"
+                        }
+                    }
+                ],
+                "type": "struct"
+            }
+        },
+        {
+            "metadata": {},
+            "name": "selfUri",
+            "nullable": true,
+            "type": "string"
+        }
+    ],
+    "type": "struct"
+}

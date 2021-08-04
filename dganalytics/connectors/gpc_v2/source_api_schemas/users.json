@@ -1,0 +1,1461 @@
+{
+    "fields":[
+       {
+          "metadata":{
+ 
+          },
+          "name":"acdAutoAnswer",
+          "nullable":true,
+          "type":"boolean"
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"addresses",
+          "nullable":true,
+          "type":{
+             "containsNull":true,
+             "elementType":{
+                "fields":[
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"address",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"display",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"extension",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"mediaType",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"type",
+                      "nullable":true,
+                      "type":"string"
+                   }
+                ],
+                "type":"struct"
+             },
+             "type":"array"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"authorization",
+          "nullable":true,
+          "type":{
+             "fields":[
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"permissionPolicies",
+                   "nullable":true,
+                   "type":{
+                      "containsNull":true,
+                      "elementType":{
+                         "fields":[
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"actionSet",
+                               "nullable":true,
+                               "type":{
+                                  "containsNull":true,
+                                  "elementType":"string",
+                                  "type":"array"
+                               }
+                            },
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"allowConditions",
+                               "nullable":true,
+                               "type":"boolean"
+                            },
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"domain",
+                               "nullable":true,
+                               "type":"string"
+                            },
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"entityName",
+                               "nullable":true,
+                               "type":"string"
+                            },
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"namedResources",
+                               "nullable":true,
+                               "type":{
+                                  "containsNull":true,
+                                  "elementType":"string",
+                                  "type":"array"
+                               }
+                            },
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"resourceCondition",
+                               "nullable":true,
+                               "type":"string"
+                            },
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"resourceConditionNode",
+                               "nullable":true,
+                               "type":{
+                                  "fields":[
+                                     {
+                                        "metadata":{
+ 
+                                        },
+                                        "name":"conjunction",
+                                        "nullable":true,
+                                        "type":"string"
+                                     },
+                                     {
+                                        "metadata":{
+ 
+                                        },
+                                        "name":"operands",
+                                        "nullable":true,
+                                        "type":{
+                                           "containsNull":true,
+                                           "elementType":"string",
+                                           "type":"array"
+                                        }
+                                     },
+                                     {
+                                        "metadata":{
+ 
+                                        },
+                                        "name":"terms",
+                                        "nullable":true,
+                                        "type":{
+                                           "containsNull":true,
+                                           "elementType":{
+                                              "fields":[
+                                                 {
+                                                    "metadata":{
+ 
+                                                    },
+                                                    "name":"operands",
+                                                    "nullable":true,
+                                                    "type":{
+                                                       "containsNull":true,
+                                                       "elementType":{
+                                                          "fields":[
+                                                             {
+                                                                "metadata":{
+ 
+                                                                },
+                                                                "name":"type",
+                                                                "nullable":true,
+                                                                "type":"string"
+                                                             },
+                                                             {
+                                                                "metadata":{
+ 
+                                                                },
+                                                                "name":"value",
+                                                                "nullable":true,
+                                                                "type":"string"
+                                                             }
+                                                          ],
+                                                          "type":"struct"
+                                                       },
+                                                       "type":"array"
+                                                    }
+                                                 },
+                                                 {
+                                                    "metadata":{
+ 
+                                                    },
+                                                    "name":"operator",
+                                                    "nullable":true,
+                                                    "type":"string"
+                                                 },
+                                                 {
+                                                    "metadata":{
+ 
+                                                    },
+                                                    "name":"terms",
+                                                    "nullable":true,
+                                                    "type":{
+                                                       "containsNull":true,
+                                                       "elementType":"string",
+                                                       "type":"array"
+                                                    }
+                                                 },
+                                                 {
+                                                    "metadata":{
+ 
+                                                    },
+                                                    "name":"variableName",
+                                                    "nullable":true,
+                                                    "type":"string"
+                                                 }
+                                              ],
+                                              "type":"struct"
+                                           },
+                                           "type":"array"
+                                        }
+                                     }
+                                  ],
+                                  "type":"struct"
+                               }
+                            }
+                         ],
+                         "type":"struct"
+                      },
+                      "type":"array"
+                   }
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"permissions",
+                   "nullable":true,
+                   "type":{
+                      "containsNull":true,
+                      "elementType":"string",
+                      "type":"array"
+                   }
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"roles",
+                   "nullable":true,
+                   "type":{
+                      "containsNull":true,
+                      "elementType":{
+                         "fields":[
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"id",
+                               "nullable":true,
+                               "type":"string"
+                            },
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"name",
+                               "nullable":true,
+                               "type":"string"
+                            }
+                         ],
+                         "type":"struct"
+                      },
+                      "type":"array"
+                   }
+                }
+             ],
+             "type":"struct"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"biography",
+          "nullable":true,
+          "type":{
+             "fields":[
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"biography",
+                   "nullable":true,
+                   "type":"string"
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"hobbies",
+                   "nullable":true,
+                   "type":{
+                      "containsNull":true,
+                      "elementType":"string",
+                      "type":"array"
+                   }
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"interests",
+                   "nullable":true,
+                   "type":{
+                      "containsNull":true,
+                      "elementType":"string",
+                      "type":"array"
+                   }
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"spouse",
+                   "nullable":true,
+                   "type":"string"
+                }
+             ],
+             "type":"struct"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"certifications",
+          "nullable":true,
+          "type":{
+             "containsNull":true,
+             "elementType":"string",
+             "type":"array"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"chat",
+          "nullable":true,
+          "type":{
+             "fields":[
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"jabberId",
+                   "nullable":true,
+                   "type":"string"
+                }
+             ],
+             "type":"struct"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"department",
+          "nullable":true,
+          "type":"string"
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"division",
+          "nullable":true,
+          "type":{
+             "fields":[
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"id",
+                   "nullable":true,
+                   "type":"string"
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"name",
+                   "nullable":true,
+                   "type":"string"
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"selfUri",
+                   "nullable":true,
+                   "type":"string"
+                }
+             ],
+             "type":"struct"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"email",
+          "nullable":true,
+          "type":"string"
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"employerInfo",
+          "nullable":true,
+          "type":{
+             "fields":[
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"dateHire",
+                   "nullable":true,
+                   "type":"string"
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"employeeId",
+                   "nullable":true,
+                   "type":"string"
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"employeeType",
+                   "nullable":true,
+                   "type":"string"
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"officialName",
+                   "nullable":true,
+                   "type":"string"
+                }
+             ],
+             "type":"struct"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"geolocation",
+          "nullable":true,
+          "type":{
+             "fields":[
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"city",
+                   "nullable":true,
+                   "type":"string"
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"country",
+                   "nullable":true,
+                   "type":"string"
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"id",
+                   "nullable":true,
+                   "type":"string"
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"region",
+                   "nullable":true,
+                   "type":"string"
+                }
+             ],
+             "type":"struct"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"groups",
+          "nullable":true,
+          "type":{
+             "containsNull":true,
+             "elementType":{
+                "fields":[
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"id",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"selfUri",
+                      "nullable":true,
+                      "type":"string"
+                   }
+                ],
+                "type":"struct"
+             },
+             "type":"array"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"id",
+          "nullable":true,
+          "type":"string"
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"images",
+          "nullable":true,
+          "type":{
+             "containsNull":true,
+             "elementType":{
+                "fields":[
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"imageUri",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"resolution",
+                      "nullable":true,
+                      "type":"string"
+                   }
+                ],
+                "type":"struct"
+             },
+             "type":"array"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"languagePreference",
+          "nullable":true,
+          "type":"string"
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"languages",
+          "nullable":true,
+          "type":{
+             "containsNull":true,
+             "elementType":{
+                "fields":[
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"id",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"languageUri",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"name",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"proficiency",
+                      "nullable":true,
+                      "type":"double"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"selfUri",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"state",
+                      "nullable":true,
+                      "type":"string"
+                   }
+                ],
+                "type":"struct"
+             },
+             "type":"array"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"locations",
+          "nullable":true,
+          "type":{
+             "containsNull":true,
+             "elementType":{
+                "fields":[
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"coordinates",
+                      "nullable":true,
+                      "type":{
+                         "fields":[
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"x",
+                               "nullable":true,
+                               "type":"double"
+                            },
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"y",
+                               "nullable":true,
+                               "type":"double"
+                            }
+                         ],
+                         "type":"struct"
+                      }
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"floorplanId",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"locationDefinition",
+                      "nullable":true,
+                      "type":{
+                         "fields":[
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"id",
+                               "nullable":true,
+                               "type":"string"
+                            },
+                            {
+                               "metadata":{
+ 
+                               },
+                               "name":"selfUri",
+                               "nullable":true,
+                               "type":"string"
+                            }
+                         ],
+                         "type":"struct"
+                      }
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"notes",
+                      "nullable":true,
+                      "type":"string"
+                   }
+                ],
+                "type":"struct"
+             },
+             "type":"array"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"manager",
+          "nullable":true,
+          "type":{
+             "fields":[
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"id",
+                   "nullable":true,
+                   "type":"string"
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"selfUri",
+                   "nullable":true,
+                   "type":"string"
+                }
+             ],
+             "type":"struct"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"name",
+          "nullable":true,
+          "type":"string"
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"primaryContactInfo",
+          "nullable":true,
+          "type":{
+             "containsNull":true,
+             "elementType":{
+                "fields":[
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"address",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"display",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"extension",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"mediaType",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"type",
+                      "nullable":true,
+                      "type":"string"
+                   }
+                ],
+                "type":"struct"
+             },
+             "type":"array"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"profileSkills",
+          "nullable":true,
+          "type":{
+             "containsNull":true,
+             "elementType":"string",
+             "type":"array"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"selfUri",
+          "nullable":true,
+          "type":"string"
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"skills",
+          "nullable":true,
+          "type":{
+             "containsNull":true,
+             "elementType":{
+                "fields":[
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"id",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"name",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"proficiency",
+                      "nullable":true,
+                      "type":"double"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"selfUri",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"skillUri",
+                      "nullable":true,
+                      "type":"string"
+                   },
+                   {
+                      "metadata":{
+ 
+                      },
+                      "name":"state",
+                      "nullable":true,
+                      "type":"string"
+                   }
+                ],
+                "type":"struct"
+             },
+             "type":"array"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"state",
+          "nullable":true,
+          "type":"string"
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"station",
+          "nullable":true,
+          "type":{
+             "fields":[
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"associatedStation",
+                   "nullable":true,
+                   "type":{
+                      "fields":[
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"associatedDate",
+                            "nullable":true,
+                            "type":"timestamp"
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"associatedUser",
+                            "nullable":true,
+                            "type":{
+                               "fields":[
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"id",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"selfUri",
+                                     "nullable":true,
+                                     "type":"string"
+                                  }
+                               ],
+                               "type":"struct"
+                            }
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"defaultUser",
+                            "nullable":true,
+                            "type":{
+                               "fields":[
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"id",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"selfUri",
+                                     "nullable":true,
+                                     "type":"string"
+                                  }
+                               ],
+                               "type":"struct"
+                            }
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"id",
+                            "nullable":true,
+                            "type":"string"
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"providerInfo",
+                            "nullable":true,
+                            "type":{
+                               "fields":[
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"edgeGroupId",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"locationId",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"name",
+                                     "nullable":true,
+                                     "type":"string"
+                                  }
+                               ],
+                               "type":"struct"
+                            }
+                         }
+                      ],
+                      "type":"struct"
+                   }
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"defaultStation",
+                   "nullable":true,
+                   "type":{
+                      "fields":[
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"associatedDate",
+                            "nullable":true,
+                            "type":"timestamp"
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"associatedUser",
+                            "nullable":true,
+                            "type":{
+                               "fields":[
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"id",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"selfUri",
+                                     "nullable":true,
+                                     "type":"string"
+                                  }
+                               ],
+                               "type":"struct"
+                            }
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"defaultUser",
+                            "nullable":true,
+                            "type":{
+                               "fields":[
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"id",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"selfUri",
+                                     "nullable":true,
+                                     "type":"string"
+                                  }
+                               ],
+                               "type":"struct"
+                            }
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"id",
+                            "nullable":true,
+                            "type":"string"
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"providerInfo",
+                            "nullable":true,
+                            "type":{
+                               "fields":[
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"edgeGroupId",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"locationId",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"name",
+                                     "nullable":true,
+                                     "type":"string"
+                                  }
+                               ],
+                               "type":"struct"
+                            }
+                         }
+                      ],
+                      "type":"struct"
+                   }
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"effectiveStation",
+                   "nullable":true,
+                   "type":{
+                      "fields":[
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"associatedDate",
+                            "nullable":true,
+                            "type":"timestamp"
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"associatedUser",
+                            "nullable":true,
+                            "type":{
+                               "fields":[
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"id",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"selfUri",
+                                     "nullable":true,
+                                     "type":"string"
+                                  }
+                               ],
+                               "type":"struct"
+                            }
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"defaultUser",
+                            "nullable":true,
+                            "type":{
+                               "fields":[
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"id",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"selfUri",
+                                     "nullable":true,
+                                     "type":"string"
+                                  }
+                               ],
+                               "type":"struct"
+                            }
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"id",
+                            "nullable":true,
+                            "type":"string"
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"providerInfo",
+                            "nullable":true,
+                            "type":{
+                               "fields":[
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"edgeGroupId",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"locationId",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"name",
+                                     "nullable":true,
+                                     "type":"string"
+                                  }
+                               ],
+                               "type":"struct"
+                            }
+                         }
+                      ],
+                      "type":"struct"
+                   }
+                },
+                {
+                   "metadata":{
+ 
+                   },
+                   "name":"lastAssociatedStation",
+                   "nullable":true,
+                   "type":{
+                      "fields":[
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"associatedDate",
+                            "nullable":true,
+                            "type":"timestamp"
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"associatedUser",
+                            "nullable":true,
+                            "type":{
+                               "fields":[
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"id",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"selfUri",
+                                     "nullable":true,
+                                     "type":"string"
+                                  }
+                               ],
+                               "type":"struct"
+                            }
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"defaultUser",
+                            "nullable":true,
+                            "type":{
+                               "fields":[
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"id",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"selfUri",
+                                     "nullable":true,
+                                     "type":"string"
+                                  }
+                               ],
+                               "type":"struct"
+                            }
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"id",
+                            "nullable":true,
+                            "type":"string"
+                         },
+                         {
+                            "metadata":{
+ 
+                            },
+                            "name":"providerInfo",
+                            "nullable":true,
+                            "type":{
+                               "fields":[
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"edgeGroupId",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"locationId",
+                                     "nullable":true,
+                                     "type":"string"
+                                  },
+                                  {
+                                     "metadata":{
+ 
+                                     },
+                                     "name":"name",
+                                     "nullable":true,
+                                     "type":"string"
+                                  }
+                               ],
+                               "type":"struct"
+                            }
+                         }
+                      ],
+                      "type":"struct"
+                   }
+                }
+             ],
+             "type":"struct"
+          }
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"title",
+          "nullable":true,
+          "type":"string"
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"username",
+          "nullable":true,
+          "type":"string"
+       },
+       {
+          "metadata":{
+ 
+          },
+          "name":"version",
+          "nullable":true,
+          "type":"long"
+       }
+    ],
+    "type":"struct"
+ }

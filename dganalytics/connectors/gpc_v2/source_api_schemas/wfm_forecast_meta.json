@@ -1,0 +1,455 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "creationMethod",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "description",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "id",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "businessUnitId",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "legacy",
+      "nullable": true,
+      "type": "boolean"
+    },
+    {
+      "metadata": {},
+      "name": "metadata",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "dateModified",
+            "nullable": true,
+            "type": "timestamp"
+          },
+          {
+            "metadata": {},
+            "name": "modifiedBy",
+            "nullable": true,
+            "type": {
+              "fields": [
+                {
+                  "metadata": {},
+                  "name": "id",
+                  "nullable": true,
+                  "type": "string"
+                },
+                {
+                  "metadata": {},
+                  "name": "selfUri",
+                  "nullable": true,
+                  "type": "string"
+                }
+              ],
+              "type": "struct"
+            }
+          },
+          {
+            "metadata": {},
+            "name": "version",
+            "nullable": true,
+            "type": "long"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "generationResults",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "planningGroupResults",
+            "nullable": true,
+            "type": {
+              "containsNull": true,
+              "elementType": {
+                "fields": [
+                  {
+                    "metadata": {},
+                    "name": "planningGroupId",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "metricResults",
+                    "nullable": true,
+                    "type": {
+                      "containsNull": true,
+                      "elementType": {
+                        "fields": [
+                          {
+                            "metadata": {},
+                            "name": "metric",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "forecastingMethod",
+                            "nullable": true,
+                            "type": "string"
+                          }
+                        ],
+                        "type": "struct"
+                      },
+                      "type": "array"
+                    }
+                  }
+                ],
+                "type": "struct"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "metadata": {},
+            "name": "modifiedBy",
+            "nullable": true,
+            "type": {
+              "fields": [
+                {
+                  "metadata": {},
+                  "name": "id",
+                  "nullable": true,
+                  "type": "string"
+                },
+                {
+                  "metadata": {},
+                  "name": "selfUri",
+                  "nullable": true,
+                  "type": "string"
+                }
+              ],
+              "type": "struct"
+            }
+          },
+          {
+            "metadata": {},
+            "name": "version",
+            "nullable": true,
+            "type": "long"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "modifications",
+      "nullable": true,
+      "type": {
+        "containsNull": true,
+        "elementType": {
+          "fields": [
+            {
+              "metadata": {},
+              "name": "displayGranularity",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "enabled",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "metadata": {},
+              "name": "endIntervalIndex",
+              "nullable": true,
+              "type": "long"
+            },
+            {
+              "metadata": {},
+              "name": "granularity",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "metric",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "legacyMetric",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "planningGroupIds",
+              "nullable": true,
+              "type": {
+                "containsNull": true,
+                "elementType": "string",
+                "type": "array"
+              }
+            },
+            {
+              "metadata": {},
+              "name": "startIntervalIndex",
+              "nullable": true,
+              "type": "long"
+            },
+            {
+              "metadata": {},
+              "name": "type",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "value",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "metadata": {},
+              "name": "values",
+              "nullable": true,
+              "type": {
+                "containsNull": true,
+                "elementType": {
+                  "fields": [
+                    {
+                      "metadata": {},
+                      "name": "intervalIndex",
+                      "nullable": true,
+                      "type": "long"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "value",
+                      "nullable": true,
+                      "type": "double"
+                    }
+                  ],
+                  "type": "struct"
+                },
+                "type": "array"
+              }
+            }
+          ],
+          "type": "struct"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "planningGroupsVersion",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "referenceStartDate",
+      "nullable": true,
+      "type": "timestamp"
+    },
+    {
+      "metadata": {},
+      "name": "planningGroups",
+      "nullable": true,
+      "type": {
+        "containsNull": true,
+        "fields": [
+          {
+            "metadata": {},
+            "name": "entities",
+            "nullable": true,
+            "type": {
+              "containsNull": true,
+              "elementType": {
+                "fields": [
+                  {
+                    "metadata": {},
+                    "name": "id",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "name",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "routePaths",
+                    "nullable": true,
+                    "type": {
+                      "containsNull": true,
+                      "elementType": {
+                        "fields": [
+                          {
+                            "metadata": {},
+                            "name": "queue",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "mediaType",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "language",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "skills",
+                            "nullable": true,
+                            "type": {
+                              "containsNull": true,
+                              "elementType": "string",
+                              "type": "array"
+                            }
+                          }
+                        ],
+                        "type": "struct"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  {
+                    "metadata": {},
+                    "name": "serviceGoalTemplate",
+                    "nullable": true,
+                    "type": {
+                      "containsNull": true,
+                      "fields": [
+                        {
+                          "metadata": {},
+                          "name": "serviceLevel",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        {
+                          "metadata": {},
+                          "name": "averageSpeedOfAnswer",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        {
+                          "metadata": {},
+                          "name": "abandonRate",
+                          "nullable": true,
+                          "type": "string"
+                        }
+                      ],
+                      "type": "struct"
+                    }
+                  }
+                ],
+                "type": "struct"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "selfUri",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "sourceDays",
+      "nullable": true,
+      "type": {
+        "containsNull": true,
+        "elementType": {
+          "fields": [
+            {
+              "metadata": {},
+              "name": "dataKey",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "date",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "dayOfWeek",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "fileName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "weight",
+              "nullable": true,
+              "type": "long"
+            }
+          ],
+          "type": "struct"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "timeZone",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "weekCount",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "weekDate",
+      "nullable": true,
+      "type": "string"
+    }
+  ],
+  "type": "struct"
+}
