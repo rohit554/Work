@@ -265,6 +265,7 @@ def fact_conversation_evaluations(extract_start_time: str, extract_end_time: str
     return f"""
         SELECT 
           conversationId,
+          conversationDate,
           agentId,
           evaluationId,
           evaluatorId,
@@ -278,12 +279,14 @@ def fact_conversation_evaluations(extract_start_time: str, extract_end_time: str
           questionGroupId,
           questionScore.questionId AS questionId,
           questionScore.answerId AS answerId,
+          questionScore.comments AS comments,
           questionScore.failedKillQuestion AS failedKillQuestion,
           questionScore.markedNA AS markedNA,
           questionScore.score AS score
         FROM (
           SELECT
             conversationId,
+            conversationDate,
             agentId,
             evaluationId,
             evaluatorId,
@@ -300,6 +303,7 @@ def fact_conversation_evaluations(extract_start_time: str, extract_end_time: str
             SELECT
                 DISTINCT id AS evaluationId,
                 conversation.id AS conversationId,
+                conversationDate,
                 agent.id AS agentId,
                 evaluator.id AS evaluatorId,
                 evaluationForm.id AS evaluationFormId,
