@@ -243,7 +243,8 @@ def push_gamification_data(df: pd.DataFrame, org_id: str, connection_name: str):
         "email": get_secret("gamificationuser"),
         "id_token": token,
         "orgid": org_id,
-        "accessType": "active_directory"
+        "accessType": "active_directory",
+        "Authorization": f"Bearer {token}"
     }
     prefix = "# Mandatory fields are Date & UserID (Format must be YYYY-MM-DD)"
     a = tempfile.NamedTemporaryFile()
