@@ -34,6 +34,10 @@ def get_tbl_overwrite(api_name: str):
     return gpc_end_points[api_name]['tbl_overwrite']
 
 
+def get_drop_duplicates(api_name: str):
+    return gpc_end_points[api_name]['drop_duplicates']
+
+
 def get_raw_tbl_name(api_name: str):
     if 'table_name' in gpc_end_points[api_name].keys():
         return 'raw_' + gpc_end_points[api_name]['table_name']
@@ -171,8 +175,13 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
     n_partitions = get_spark_partitions_num(api_name, record_count)
     schema = get_schema(api_name)
     db_name = get_dbname(tenant)
-    df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
-        spark._sc.parallelize(resp_list, n_partitions), schema=schema).drop_duplicates()
+
+    if get_drop_duplicates(api_name):
+        df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
+            spark._sc.parallelize(resp_list, n_partitions), schema=schema).drop_duplicates()
+    else:
+        df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
+            spark._sc.parallelize(resp_list, n_partitions), schema=schema)
 
     df = df.withColumn("extractDate", to_date(lit(extract_start_time[0:10])))
     df = df.withColumn("extractIntervalStartTime", to_timestamp(lit(extract_start_time)))

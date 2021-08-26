@@ -33,7 +33,7 @@ dim_evaluations = """
                 int(date_format(assignedDate, 'HHmmss')) assignedTime,
                 int(date_format(releaseDate, 'yyyyMMdd')) releaseDate,
                 int(date_format(releaseDate, 'HHmmss')) releaseTime,
-                mediaType, neverRelease, queueId, wrapUpCode
+                mediaType, agentHasRead, neverRelease, queueId, wrapUpCode
              from dim_evaluations
             """
 

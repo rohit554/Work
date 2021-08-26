@@ -14,6 +14,7 @@ gpc_end_points = {
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": True,
+        "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
     "routing_queues": {
@@ -28,6 +29,7 @@ gpc_end_points = {
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 50000},
         "tbl_overwrite": True,
+        "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
     "groups": {
@@ -42,6 +44,7 @@ gpc_end_points = {
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": True,
+        "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
     "users_details": {
@@ -56,6 +59,7 @@ gpc_end_points = {
         "entity_name": "userDetails",
         "spark_partitions": {"max_records_per_partition": 30000},
         "tbl_overwrite": False,
+        "drop_duplicates": True,
         "raw_primary_key": ["userId", "extractDate"]
     },
     "users_details_job": {
@@ -71,6 +75,7 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 30000},
         "table_name": "users_details",
         "tbl_overwrite": False,
+        "drop_duplicates": True,
         "raw_primary_key": ["userId", "extractDate"]
     },
     "wrapup_codes": {
@@ -85,6 +90,7 @@ gpc_end_points = {
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 50000},
         "tbl_overwrite": True,
+        "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
     "conversation_details": {
@@ -99,6 +105,7 @@ gpc_end_points = {
         "entity_name": "conversations",
         "spark_partitions": {"max_records_per_partition": 5000},
         "tbl_overwrite": False,
+        "drop_duplicates": False,
         "raw_primary_key": ["conversationId"]
     },
     "conversation_details_job": {
@@ -115,6 +122,7 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 5000},
         "table_name": "conversation_details",
         "tbl_overwrite": False,
+        "drop_duplicates": False,
         "raw_primary_key": ["conversationId"]
     },
     "wfm_adherence": {
@@ -123,6 +131,7 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 30000},
         "table_name": "wfm_adherence",
         "tbl_overwrite": False,
+        "drop_duplicates": True,
         "raw_primary_key": ["userId", "startDate", "endDate"]
     },
     "evaluations": {
@@ -139,6 +148,7 @@ gpc_end_points = {
         "table_name": "evaluations",
         "entity_name": "entities",
         "tbl_overwrite": False,
+        "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
     "evaluation_forms": {
@@ -147,6 +157,7 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 100000},
         "table_name": "evaluation_forms",
         "tbl_overwrite": True,
+        "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
     "divisions": {
@@ -161,6 +172,7 @@ gpc_end_points = {
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": True,
+        "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
     "business_units": {
@@ -168,6 +180,7 @@ gpc_end_points = {
         "extract_type": "custom",
         "spark_partitions": {"max_records_per_partition": 100000},
         "tbl_overwrite": True,
+        "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
     "management_units": {
@@ -182,6 +195,7 @@ gpc_end_points = {
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": True,
+        "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
     "management_unit_users": {
@@ -195,6 +209,7 @@ gpc_end_points = {
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": True,
+        "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
     "activity_codes": {
@@ -208,6 +223,7 @@ gpc_end_points = {
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": True,
+        "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
     "presence_definitions": {
@@ -222,6 +238,7 @@ gpc_end_points = {
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 50000},
         "tbl_overwrite": True,
+        "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
     "wfm_forecast_meta": {
@@ -230,6 +247,7 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 100000},
         "table_name": "wfm_forecast_meta",
         "tbl_overwrite": False,
+        "drop_duplicates": True,
         "raw_primary_key": ["id", "weekDate"]
     },
     "wfm_forecast_data": {
@@ -238,6 +256,7 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 100000},
         "table_name": "wfm_forecast_data",
         "tbl_overwrite": False,
+        "drop_duplicates": True,
         "raw_primary_key": ["id", "weekDate"]
     },
     "wfm_planninggroups": {
@@ -246,6 +265,7 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 100000},
         "table_name": "wfm_planninggroups",
         "tbl_overwrite": False,
+        "drop_duplicates": True,
         "raw_primary_key": ["id", "businessUnitId"]
     }
 }

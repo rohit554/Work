@@ -211,6 +211,17 @@
                     "type": "string"
                 }, {
                     "metadata": {},
+                    "name": "attributes",
+                    "nullable": true,
+                    "type": {
+                        "type": "map",
+                        "containsNull": true,
+                        "keyType": "string",
+                        "valueType": "string",
+                        "valueContainsNull": true
+                    }
+                }, {
+                    "metadata": {},
                     "name": "sessions",
                     "nullable": true,
                     "type": {
@@ -267,12 +278,32 @@
                                 "type": "string"
                             }, {
                                 "metadata": {},
+                                "name": "dispositionName",
+                                "nullable": true,
+                                "type": "string"
+                            }, {
+                                "metadata": {},
                                 "name": "dnis",
                                 "nullable": true,
                                 "type": "string"
                             }, {
                                 "metadata": {},
                                 "name": "edgeId",
+                                "nullable": true,
+                                "type": "string"
+                            }, {
+                                "metadata": {},
+                                "name": "outboundCampaignId",
+                                "nullable": true,
+                                "type": "string"
+                            }, {
+                                "metadata": {},
+                                "name": "outboundContactId",
+                                "nullable": true,
+                                "type": "string"
+                            }, {
+                                "metadata": {},
+                                "name": "outboundContactListId",
                                 "nullable": true,
                                 "type": "string"
                             }, {
