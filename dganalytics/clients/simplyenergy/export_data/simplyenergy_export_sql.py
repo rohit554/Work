@@ -49,7 +49,9 @@ dim_wrap_up_codes = """
 dim_evaluation_forms = """
     SELECT 
         DISTINCT evaluationFormId,
+        evaluationFormName,
         questionGroupId,
+        questionGroupName,
         questionGroupDefaultAnswersToHighest,
         questionGroupDefaultAnswersToNA,
         questionGroupManualWeight,
@@ -68,7 +70,9 @@ dim_evaluation_forms = """
     FROM (	
         SELECT 
             DISTINCT evaluationFormId,
+            evaluationFormName,
             questionGroupId,
+            questionGroupName,
             questionGroupDefaultAnswersToHighest,
             questionGroupDefaultAnswersToNA,
             questionGroupManualWeight,
@@ -85,6 +89,7 @@ dim_evaluation_forms = """
         FROM (
             SELECT
                 evaluationFormId,
+                evaluationFormName,
                 questionGroup.id AS questionGroupId,
                 questionGroup.name AS questionGroupName,
                 questionGroup.defaultAnswersToHighest AS questionGroupDefaultAnswersToHighest,
@@ -96,6 +101,7 @@ dim_evaluation_forms = """
             FROM (
                 SELECT
                     id AS evaluationFormId,
+                    name AS evaluationFormName,
                     explode(questionGroups) AS questionGroup
                 FROM
                     raw_evaluation_forms
