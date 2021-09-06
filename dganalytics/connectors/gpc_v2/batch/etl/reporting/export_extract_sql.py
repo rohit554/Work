@@ -109,21 +109,32 @@ fact_conversation_metrics = """
 
 fact_conversation_surveys = """
             SELECT 
-                conversationId,
-                conversationStart,
-                conversationEnd,
-                "" AS mediaType,
-                agentId,
-                oSurveyTotalScore AS csat,
-                surveyPromoterScore AS nps,
+                cs.conversationId,
+                cs.conversationStart,
+                cs.conversationEnd,
+                cm.mediaType,
+                cs.agentId,
+                cs.oSurveyTotalScore AS csat,
+                cs.surveyPromoterScore AS nps,
                 "" AS fcr,
                 case when surveyCompletedDate IS NOT NULL THEN TRUE ELSE FALSE END AS survey_completed,
-                "" AS survey_initiated,
+                case when surveyFormId IS NOT NULL THEN TRUE ELSE FALSE END AS survey_initiated,
                 eventTime AS insertTimestamp
             FROM 
-                fact_conversation_surveys
+                fact_conversation_surveys AS cs
+            LEFT JOIN (
+              SELECT
+                DISTINCT conversationId,
+                mediaType
+              FROM
+                fact_conversation_metrics
+              WHERE
+                mediaType IS NOT NULL
+              ) AS cm
+            ON 
+              cs.conversationId = cm.conversationId
             WHERE
-                eventDate >= date_add(CURRENT_DATE() , -190)
+              eventDate >= date_add(CURRENT_DATE() , -190)
             """
 
 fact_evaluation_question_group_scores = """
