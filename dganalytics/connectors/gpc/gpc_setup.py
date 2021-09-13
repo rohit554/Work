@@ -227,6 +227,29 @@ def create_dim_tables(spark: SparkSession, db_name: str):
 
     spark.sql(
         f"""
+                create table if not exists {db_name}.fact_user_presence
+                (
+                    userId string,
+                    startTime timestamp, 
+                    endTime timestamp, 
+                    systemPresence string,
+                    organizationPresenceId string,
+                    presenceDefinitionName string,
+                    presenceDefinitionSystemPresence string,
+                    presenceDefinitionDeactivated boolean,
+                    presenceDefinitionPrimary boolean,
+                    presenceDefinitionLabel string,
+                    startDate date,
+                    sourceRecordIdentifier long,
+                    soucePartition string
+                )
+                    using delta
+                    PARTITIONED BY (startDate)
+            LOCATION '{db_path}/{db_name}/fact_user_presence'"""
+    )
+
+    spark.sql(
+        f"""
                 create table if not exists {db_name}.dim_evaluations
                 (
                     evaluationId string,
