@@ -254,13 +254,25 @@ def push_uk_data(spark):
                 (social_tTalkComplete + social_tAcw)/float(social_nHandle) `AHT - Social`,
                 conformancePercentage Conformance,
                 adherencePercentage Adherence,
-                (nAnswered/((interacting_duration + idle_duration)/3600)) Productivity
+                (nAnswered/((interacting_duration + idle_duration)/3600)) Productivity,
+                userPresenceOqtTime/3600 `Total On Queue Time`,
+                (tTalkComplete/nTalkComplete) `ATT - Chat`,
+                (chat_tAcw/chat_nAcw) `ACW - Chat`
             from
             hf_game_data
             where department in ('HF UK Manila', 'INT. Manila')
             )
-            where not (`Productivity` is null and `Adherence` is null and `Conformance` is null
-            and `AHT - Social` is null and `AHT - Chat` is null and `AHT - Voice` is null and `CSAT` is null and `QA Score` is null)
+            where not (`Productivity` IS NULL
+                      AND `Adherence` IS NULL
+                      AND `Conformance` IS NULL
+                      AND `AHT - Social` IS NULL
+                      AND `AHT - Chat` IS NULL
+                      AND `AHT - Voice` IS NULL
+                      AND `CSAT` IS NULL
+                      AND `QA Score` IS NULL
+                      AND `Total On Queue Time` IS NULL
+                      AND `ATT - Chat` IS NULL
+                      AND `ACW - Chat` IS NULL)
     """)
     push_gamification_data(uk.toPandas(), 'HELLOFRESHUK', 'ukconnection')
     return True
@@ -279,13 +291,25 @@ def push_ca_data(spark):
                 (email_tTalkComplete + email_tAcw)/float(email_nHandle) `AHT - Email`,
                 conformancePercentage Conformance,
                 adherencePercentage Adherence,
-                (nAnswered/((interacting_duration + idle_duration)/3600)) Productivity
+                (nAnswered/((interacting_duration + idle_duration)/3600)) Productivity,
+                userPresenceOqtTime/3600 `Total On Queue Time`,
+                (tTalkComplete/nTalkComplete) `ATT - Chat`,
+                (tAcw/nAcw) `ACW`
+                
             from
             hf_game_data
             where department in ('HF CA Manila', 'CP CA Manila')
             )
-            where not (`Productivity` is null and `Adherence` is null and `Conformance` is null
-            and `AHT - Email` is null and `AHT - Chat` is null and `AHT - Voice` is null and `CSAT` is null and `QA Score` is null)
+            where not (`Productivity` IS NULL
+                      AND `Adherence` IS NULL
+                      AND `Conformance` IS NULL
+                      AND `AHT - Email` IS NULL
+                      AND `AHT - Chat` IS NULL
+                      AND `AHT - Voice` IS NULL
+                      AND `CSAT` IS NULL
+                      AND `QA Score` IS NULL
+                      AND `Total On Queue Time` IS NULL
+                      AND `ACW` IS NULL)
     """)
     push_gamification_data(ca.toPandas(), 'HELLOFRESHCA', 'HFCA')
     return True
