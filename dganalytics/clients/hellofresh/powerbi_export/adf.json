@@ -473,6 +473,41 @@
                         }
                     },
                     {
+                        "name": "user_presence",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "wait-1",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 1,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+                            "parameters": [
+                                "--tenant",
+                                "hellofresh",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--export_name",
+                                "user_presence"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
                         "name": "wait-2",
                         "type": "Wait",
                         "dependsOn": [

@@ -19,3 +19,4 @@ from dganalytics.connectors.gpc.batch.etl.transform.fact_wfm_exceptions import f
 from dganalytics.connectors.gpc.batch.etl.transform.dim_wrapup_codes import dim_wrapup_codes
 from dganalytics.connectors.gpc.batch.etl.transform.fact_wfm_forecast import fact_wfm_forecast
 from dganalytics.connectors.gpc.batch.etl.transform.fact_conversation_aggregate_metrics import fact_conversation_aggregate_metrics
+from dganalytics.connectors.gpc.batch.etl.transform.fact_user_presence import fact_user_presence

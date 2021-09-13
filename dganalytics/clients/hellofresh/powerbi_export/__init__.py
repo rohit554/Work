@@ -9,6 +9,7 @@ from dganalytics.clients.hellofresh.powerbi_export.users_routing_status_sliced i
 from dganalytics.clients.hellofresh.powerbi_export.user_roles import export_user_roles
 from dganalytics.clients.hellofresh.powerbi_export.users_info import export_users_info
 from dganalytics.clients.hellofresh.powerbi_export.users_primary_presence import export_users_primary_presence
+from dganalytics.clients.hellofresh.powerbi_export.user_presence import export_user_presence
 from dganalytics.clients.hellofresh.powerbi_export.conversation_metrics_daily_summary import export_conversion_metrics_daily_summary
 from dganalytics.clients.hellofresh.powerbi_export.wfm_day_metrics import export_wfm_day_metrics
 from dganalytics.clients.hellofresh.powerbi_export.wfm_actuals import export_wfm_actuals
