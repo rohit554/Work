@@ -1,0 +1,389 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "id",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "name",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "conversation",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "string"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "surveyForm",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "name",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "modifiedDate",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "published",
+            "nullable": true,
+            "type": "boolean"
+          },
+          {
+            "metadata": {},
+            "name": "disabled",
+            "nullable": true,
+            "type": "boolean"
+          },
+          {
+            "metadata": {},
+            "name": "contextId",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "language",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "header",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "footer",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "questionGroups",
+            "nullable": true,
+            "type": {
+              "containsNull": true,
+              "elementType": {
+                "fields": [
+                  {
+                    "metadata": {},
+                    "name": "id",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "name",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "type",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "naEnabled",
+                    "nullable": true,
+                    "type": "boolean"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "questions",
+                    "nullable": true,
+                    "type": {
+                      "containsNull": true,
+                      "elementType": {
+                        "fields": [
+                          {
+                            "metadata": {},
+                            "name": "id",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "text",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "helpText",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "type",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "naEnabled",
+                            "nullable": true,
+                            "type": "boolean"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "answerOptions",
+                            "nullable": true,
+                            "type": {
+                              "containsNull": true,
+                              "elementType": {
+                                "fields": [
+                                  {
+                                    "metadata": {},
+                                    "name": "id",
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  {
+                                    "metadata": {},
+                                    "name": "text",
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  {
+                                    "metadata": {},
+                                    "name": "value",
+                                    "nullable": true,
+                                    "type": "integer"
+                                  }
+                                ],
+                                "type": "struct"
+                              },
+                              "type": "array"
+                            }
+                          },
+                          {
+                            "metadata": {},
+                            "name": "maxResponseCharacters",
+                            "nullable": true,
+                            "type": "integer"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "explanationPrompt",
+                            "nullable": true,
+                            "type": "string"
+                          }
+                        ],
+                        "type": "struct"
+                      },
+                      "type": "array"
+                    }
+                  }
+                ],
+                "type": "struct"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "agent",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "name",
+            "nullable": true,
+            "type": "string"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "status",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "queue",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "id",
+            "nullable": true,
+            "type": "string"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "answers",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "totalScore",
+            "nullable": true,
+            "type": "double"
+          },
+          {
+            "metadata": {},
+            "name": "npsScore",
+            "nullable": true,
+            "type": "integer"
+          },
+          {
+            "metadata": {},
+            "name": "questionGroupScores",
+            "nullable": true,
+            "type": {
+              "containsNull": true,
+              "elementType": {
+                "fields": [
+                  {
+                    "metadata": {},
+                    "name": "questionGroupId",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "totalScore",
+                    "nullable": true,
+                    "type": "double"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "maxTotalScore",
+                    "nullable": true,
+                    "type": "double"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "markedNA",
+                    "nullable": true,
+                    "type": "boolean"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "questionScores",
+                    "nullable": true,
+                    "type": {
+                      "containsNull": true,
+                      "elementType": {
+                        "fields": [
+                          {
+                            "metadata": {},
+                            "name": "questionId",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "answerId",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "score",
+                            "nullable": true,
+                            "type": "integer"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "markedNA",
+                            "nullable": true,
+                            "type": "boolean"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "npsScore",
+                            "nullable": true,
+                            "type": "integer"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "npsTextAnswer",
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          {
+                            "metadata": {},
+                            "name": "freeTextAnswer",
+                            "nullable": true,
+                            "type": "string"
+                          }
+                        ],
+                        "type": "struct"
+                      },
+                      "type": "array"
+                    }
+                  }
+                ],
+                "type": "struct"
+              },
+              "type": "array"
+            }
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "completedDate",
+      "nullable": true,
+      "type": "string"
+    }
+  ],
+  "type": "struct"
+}

@@ -65,8 +65,8 @@ dim_evaluation_forms = """
         questionNAEnabled,
         questionType,
         answerOption.id AS answerOptionId,
-        answerOption.text AS answerOptionText,
-        answerOption.value AS answerOptionValue
+        replace(answerOption.text, "\n", " ") AS answerOptionText,
+        replace(answerOption.value, "\n", " ") AS answerOptionValue
     FROM (	
         SELECT 
             DISTINCT evaluationFormId,
@@ -321,7 +321,7 @@ def fact_conversation_evaluations(extract_start_time: str, extract_end_time: str
           questionGroupId,
           questionScore.questionId AS questionId,
           questionScore.answerId AS answerId,
-          questionScore.comments AS comments,
+          replace(questionScore.comments, "\n", " ") AS comments,
           questionScore.failedKillQuestion AS failedKillQuestion,
           questionScore.markedNA AS markedNA,
           questionScore.score AS score
@@ -428,5 +428,68 @@ def fact_user_routing_status(extract_start_time: str, extract_end_time: str):
                 raw_users_details
             WHERE
                 recordInsertTime >= '{extract_start_time}' and recordInsertTime < '{extract_end_time}'
+        )
+    """
+
+
+def fact_surveys(extract_start_time: str, extract_end_time: str):
+    return f"""
+        SELECT
+            surveyId,
+            surveyFormId,
+            surveyFormName,
+            surveyFormContextId,
+            conversationId,
+            agentId,
+            agentName,
+            queueId,
+            surveyStatus,
+            surveyCompletedDate,
+            questionGroupId,
+            questionGroupMaxTotalScore,
+            questionGroupTotalScore,
+            questionGroupMarkedNA,
+            questionScore.questionId AS questionId,
+            questionScore.answerId AS answerId,
+            questionScore.score AS score,
+            questionScore.markedNA AS markedNA,
+            questionScore.npsScore AS npsScore,
+            replace(questionScore.npsTextAnswer, "\n", " ") AS npsTextAnswer,
+            replace(questionScore.freeTextAnswer, "\n", " ") AS freeTextAnswer
+        FROM (
+            SELECT
+                surveyId,
+                surveyFormId,
+                surveyFormName,
+                surveyFormContextId,
+                conversationId,
+                agentId,
+                agentName,
+                queueId,
+                surveyStatus,
+                surveyCompletedDate,
+                questionGroupScore.questionGroupId AS questionGroupId,
+                questionGroupScore.maxTotalScore AS questionGroupMaxTotalScore,
+                questionGroupScore.totalScore AS questionGroupTotalScore,
+                questionGroupScore.markedNA AS questionGroupMarkedNA,
+                explode(questionGroupScore.questionScores) AS questionScore
+            FROM (
+                SELECT 
+                    id AS surveyId,
+                    surveyForm.id AS surveyFormId,
+                    surveyForm.name AS surveyFormName,
+                    surveyForm.contextId AS surveyFormContextId,
+                    conversation.id AS conversationId,
+                    agent.id AS agentId,
+                    agent.name AS agentName,
+                    queue.id AS queueId,
+                    status AS surveyStatus,
+                    completedDate AS surveyCompletedDate,
+                    explode(answers.questionGroupScores) AS questionGroupScore
+                FROM 
+                    raw_surveys
+                WHERE
+                    recordInsertTime >= '{extract_start_time}' and recordInsertTime < '{extract_end_time}'
+            )
         )
     """

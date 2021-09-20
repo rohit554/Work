@@ -3,6 +3,7 @@ from dganalytics.connectors.gpc_v2.gpc_utils import get_dbname, gpc_request, ext
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.conversation_details_job import exec_conversation_details_job
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.evaluation_forms import exec_evaluation_forms_api
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.evaluations import exec_evaluations_api
+from dganalytics.connectors.gpc_v2.batch.etl.extract_api.surveys import exec_surveys_api
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.users_details_job import exec_users_details_job_api
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.wfm_adherence import exec_wfm_adherence_api
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.business_units import exec_business_units
@@ -11,7 +12,6 @@ from dganalytics.connectors.gpc_v2.batch.etl.extract_api.management_unit_users i
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.activity_codes import exec_activity_codes
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.wfm_forecast import exec_wfm_forecast_api
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.wfm_planninggroups import exec_wfm_planninggroups
-from dganalytics.connectors.gpc_v2.batch.etl.extract_api.conversation_aggregates import exec_conversation_aggregates
 
 if __name__ == "__main__":
     tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()
@@ -37,6 +37,9 @@ if __name__ == "__main__":
         elif api_name == "evaluations":
             exec_evaluations_api(spark, tenant, run_id,
                                  extract_start_time, extract_end_time)
+        elif api_name == "surveys":
+            exec_surveys_api(spark, tenant, run_id,
+                             extract_start_time, extract_end_time)
         elif api_name == "users_details_job":
             exec_users_details_job_api(
                 spark, tenant, run_id, extract_start_time, extract_end_time)

@@ -267,5 +267,13 @@ gpc_end_points = {
         "tbl_overwrite": False,
         "drop_duplicates": True,
         "raw_primary_key": ["id", "businessUnitId"]
+    },
+    "surveys": {
+        "endpoint": "/api/v2/quality/conversations/{conversation_id}/surveys",
+        "extract_type": "custom",
+        "spark_partitions": {"max_records_per_partition": 100000},
+        "tbl_overwrite": False,
+        "drop_duplicates": True,
+        "raw_primary_key": ["id"]
     }
 }
