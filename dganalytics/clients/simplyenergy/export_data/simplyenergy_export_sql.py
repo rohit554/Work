@@ -65,8 +65,8 @@ dim_evaluation_forms = """
         questionNAEnabled,
         questionType,
         answerOption.id AS answerOptionId,
-        replace(answerOption.text, "\n", " ") AS answerOptionText,
-        replace(answerOption.value, "\n", " ") AS answerOptionValue
+        answerOption.text AS answerOptionText,
+        answerOption.value AS answerOptionValue
     FROM (	
         SELECT 
             DISTINCT evaluationFormId,
@@ -321,7 +321,7 @@ def fact_conversation_evaluations(extract_start_time: str, extract_end_time: str
           questionGroupId,
           questionScore.questionId AS questionId,
           questionScore.answerId AS answerId,
-          replace(questionScore.comments, "\n", " ") AS comments,
+          questionScore.comments AS comments,
           questionScore.failedKillQuestion AS failedKillQuestion,
           questionScore.markedNA AS markedNA,
           questionScore.score AS score
@@ -454,8 +454,8 @@ def fact_surveys(extract_start_time: str, extract_end_time: str):
             questionScore.score AS score,
             questionScore.markedNA AS markedNA,
             questionScore.npsScore AS npsScore,
-            replace(questionScore.npsTextAnswer, "\n", " ") AS npsTextAnswer,
-            replace(questionScore.freeTextAnswer, "\n", " ") AS freeTextAnswer
+            questionScore.npsTextAnswer AS npsTextAnswer,
+            questionScore.freeTextAnswer AS freeTextAnswer
         FROM (
             SELECT
                 surveyId,

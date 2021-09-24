@@ -47,7 +47,7 @@ if __name__ == "__main__":
         else:
             df = spark_session.sql(simplyenergy_export_sql.__dict__[export_name]).coalesce(1)
 
-        df.write.csv(path=export_path_df, mode="overwrite", sep=",", header=True, dateFormat="yyyy-MM-dd",
+        df.write.option("escape", "\"").option("multiline", "true").csv(path=export_path_df, mode="overwrite", sep=",", header=True, dateFormat="yyyy-MM-dd",
                      timestampFormat="yyyy-MM-dd HH:mm:ss", encoding="utf-8")
 
         sftp_host = get_secret(f"{tenant}SFTPHost")
