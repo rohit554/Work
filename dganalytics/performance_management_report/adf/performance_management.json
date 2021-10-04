@@ -379,6 +379,30 @@
                         }
                     },
                     {
+                        "name": "data_upload_audit_log",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 1,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/performance_management_report/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "data_upload_audit_log"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
                         "name": "wait-1",
                         "type": "Wait",
                         "dependsOn": [
@@ -414,6 +438,12 @@
                             },
                             {
                                 "activity": "activity_mapping",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "data_upload_audit_log",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
