@@ -231,3 +231,25 @@ spark.sql(f"""
             PARTITIONED BY (orgId)
             LOCATION '{db_path}/dg_performance_management/logins'
         """)
+
+spark.sql(f"""
+        create table if not exists 
+            dg_performance_management.data_upload_audit_log
+            (
+                userId string,
+                jobName string,
+                auditFile string,
+                startDate date,
+                runID string,
+                fileName string,
+                status string,
+                entityName string,
+                endDate date,
+                message string,
+                recordInserted int,
+                orgId string
+            )
+            using delta
+            PARTITIONED BY (orgId)
+            LOCATION '{db_path}/dg_performance_management/data_upload_audit_log'
+        """)

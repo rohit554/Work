@@ -9,3 +9,4 @@ from dganalytics.performance_management_report.queries.levels import get_levels
 from dganalytics.performance_management_report.queries.user_campaign import get_user_campaign
 from dganalytics.performance_management_report.queries.logins import get_logins
 from dganalytics.performance_management_report.queries.activity_mapping import get_activity_mapping
+from dganalytics.performance_management_report.queries.data_upload_audit_log import get_data_upload_audit_log
