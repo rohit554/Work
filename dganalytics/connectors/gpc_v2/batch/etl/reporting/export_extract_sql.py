@@ -107,6 +107,64 @@ fact_conversation_metrics = """
                 int(date_format(emitDateTime, 'HHmmss'))
             """
 
+fact_conversation_metrics_per_conversation = """
+                SELECT  agentId,
+                        mediaType,
+                        messageType,
+                        originatingDirection,
+                        queueId,
+                        wrapUpCode,
+                        date_format(emitDateTime, 'yyyyMMdd') emitDate,
+                        int(date_format(emitDateTime, 'HHmmss')) emitTime,
+                        conversationId,
+                        sum(nAbandon) nAbandon,
+                        sum(nAcd) nAcd,
+                        sum(nAcw) nAcw,
+                        sum(nAnswered) nAnswered,
+                        sum(nBlindTransferred) nBlindTransferred,
+                        sum(nConnected) nConnected,
+                        sum(nConsult) nConsult,
+                        sum(nConsultTransferred) nConsultTransferred,
+                        sum(nError) nError,
+                        sum(nHandle) nHandle,
+                        sum(nHeldComplete) nHeldComplete,
+                        sum(nOffered) nOffered,
+                        sum(nOutbound) nOutbound,
+                        sum(nOutboundAbandoned) nOutboundAbandoned,
+                        sum(nOutboundAttempted) nOutboundAttempted,
+                        sum(nOutboundConnected) nOutboundConnected,
+                        sum(nOverSla) nOverSla,
+                        sum(nShortAbandon) nShortAbandon,
+                        sum(nTalkComplete) nTalkComplete,
+                        sum(nTransferred) nTransferred,
+                        sum(tAbandon) tAbandon,
+                        sum(tAcd) tAcd,
+                        sum(tAcw) tAcw,
+                        sum(tAgentResponse) tAgentResponse,
+                        sum(tAnswered) tAnswered,
+                        sum(tContacting) tContacting,
+                        sum(tDialing) tDialing,
+                        sum(tHandle) tHandle,
+                        sum(tHeldComplete) tHeldComplete,
+                        sum(tIvr) tIvr,
+                        sum(tNotResponding) tNotResponding,
+                        sum(tShortAbandon) tShortAbandon,
+                        sum(tTalkComplete) tTalkComplete,
+                        sum(tVoicemail) tVoicemail,
+                        sum(tWait) tWait
+            FROM fact_conversation_metrics
+            WHERE emitDate >= date_add(CURRENT_DATE() , -190)
+            GROUP BY    agentId,
+                        mediaType,
+                        messageType,
+                        originatingDirection,
+                        queueId,
+                        wrapUpCode,
+                        date_format(emitDateTime, 'yyyyMMdd'),
+                        int(date_format(emitDateTime, 'HHmmss')),
+                        conversationId
+            """
+
 fact_conversation_surveys = """
             SELECT 
                 cs.conversationId,
