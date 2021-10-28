@@ -472,6 +472,37 @@
                         }
                     },
                     {
+                        "name": "factConversationMetricsPerConversation",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 1,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc_v2/batch/etl/reporting/gpc_pb_standard_export.py",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_name",
+                                "fact_conversation_metrics_per_conversation",
+                                "--output_file_name",
+                                "gFactConversationMetricsPerConversation"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
                         "name": "factEvaluationQuestionGroupScores",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
@@ -819,6 +850,12 @@
                             },
                             {
                                 "activity": "factConversationMetrics",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            },
+                            {
+                                "activity": "factConversationMetricsPerConversation",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
