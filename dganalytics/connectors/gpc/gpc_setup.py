@@ -110,7 +110,8 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 wrapUpNote string,
                 conversationStartDate date,
                 sourceRecordIdentifier long,
-                soucePartition string
+                soucePartition string,
+                dnit string
             )
             using delta
             PARTITIONED BY (conversationStartDate)
