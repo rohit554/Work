@@ -23,6 +23,7 @@ transform_to_method = {
     "fact_wfm_day_metrics": transform.fact_wfm_day_metrics,
     "fact_wfm_exceptions": transform.fact_wfm_exceptions,
     "dim_wrapup_codes": transform.dim_wrapup_codes,
+    "fact_sentiments": transform.fact_sentiments,
     "fact_wfm_forecast": transform.fact_wfm_forecast
 }
 

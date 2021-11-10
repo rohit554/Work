@@ -19,3 +19,4 @@ from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_wfm_day_metrics impo
 from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_wfm_exceptions import fact_wfm_exceptions
 from dganalytics.connectors.gpc_v2.batch.etl.transform.dim_wrapup_codes import dim_wrapup_codes
 from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_wfm_forecast import fact_wfm_forecast
+from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_sentiments import fact_sentiments
