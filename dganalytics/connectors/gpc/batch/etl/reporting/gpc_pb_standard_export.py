@@ -12,11 +12,10 @@ if __name__ == "__main__":
     try:
         logger.info("Generating genesys Power Bi Report Files")
 
-        if extract_name == 'dim_conversation':
+        if extract_name == 'dim_conversations':
             df = export_extract.get_dim_conversation(spark)
         else:
             df = spark.sql(export_extract_sql.__dict__[extract_name])
-        
         export_powerbi_parquet(tenant, df, output_file_name)
     except Exception as e:
         logger.exception(e, stack_info=True, exc_info=True)
