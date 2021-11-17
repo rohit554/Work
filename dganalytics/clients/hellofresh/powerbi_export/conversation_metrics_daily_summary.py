@@ -75,7 +75,9 @@ def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str, re
 			sum(round(tVoicemail, 3)) AS tVoicemail,
 			sum(round(tWait, 3)) AS tWait,
 			sum(nTalkComplete) AS tTalkCompleteCount,
-			sum(nHeldComplete) AS tHeldCompleteCount
+			sum(nHeldComplete) AS tHeldCompleteCount,
+			sum(maxAcw) AS maxAcw,
+			sum(minAcw) AS minAcw
 		FROM
 			gpc_hellofresh.fact_conversation_aggregate_metrics a,
 			gpc_hellofresh.dim_routing_queues b,

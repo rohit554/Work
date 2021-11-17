@@ -441,9 +441,46 @@
                         }
                     },
                     {
+                        "name": "dimConversations",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                        ],
+                        "policy": {
+                            "timeout": "01:00:00",
+                            "retry": 1,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc/batch/etl/reporting/gpc_pb_standard_export.py",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_name",
+                                "dim_conversations",
+                                "--output_file_name",
+                                "gDimConversations"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
                         "name": "factConversationMetrics",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
+                            {
+                                "activity": "dimConversations",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
                         ],
                         "policy": {
                             "timeout": "00:30:00",
@@ -475,6 +512,12 @@
                         "name": "factConversationMetricsPerConversation",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
+                            {
+                                "activity": "dimConversations",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
                         ],
                         "policy": {
                             "timeout": "00:30:00",
