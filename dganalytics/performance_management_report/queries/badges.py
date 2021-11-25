@@ -141,7 +141,7 @@ def get_badges(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'User_Outcome', schema)
     df.registerTempTable("badges")
     df = spark.sql("""
-                    select  distinct badge_name badgeName,
+                    select  badge_name badgeName,
                             campaign_id.oid campaignId,
                             cast(date as date) date,
                             replace(replace(replace(replace(replace(description, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' '),',','') description,
