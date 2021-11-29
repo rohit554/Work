@@ -68,6 +68,7 @@ def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str, re
 			sum(round(tHeldComplete , 3)) AS tHeldComplete,
 			sum(round(tIvr , 3)) AS tIvr,
 			sum(round(tNotResponding, 3)) AS tNotResponding,
+			sum(nNotResponding) AS nNotResponding,
 			sum(round(tShortAbandon, 3)) AS tShortAbandon,
 			sum(nShortAbandon) AS tShortAbandonCount,
 			sum(round(tTalkComplete, 3)) AS tTalk,
