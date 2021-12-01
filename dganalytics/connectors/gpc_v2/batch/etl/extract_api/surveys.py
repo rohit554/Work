@@ -8,14 +8,16 @@ from dganalytics.connectors.gpc_v2.gpc_utils import gpc_utils_logger
 
 def get_conversations(spark: SparkSession, extract_start_time: str, extract_end_time: str) -> list:
     conversations_df = spark.sql(f"""
-        SELECT
-            DISTINCT conversationId
-        FROM
-            raw_conversation_details
-        WHERE
-            extractIntervalStartTime = '{extract_start_time}'
-            AND extractIntervalEndTime = '{extract_end_time}'
-            AND conversationId IS NOT NULL
+        SELECT  DISTINCT conversationId
+        FROM (  SELECT      conversationId,
+                            explode(surveys) AS survey
+                FROM gpc_simplyenergy.raw_conversation_details
+                WHERE   extractIntervalStartTime = '{extract_start_time}'
+                        AND extractIntervalEndTime = '{extract_end_time}'
+                    AND conversationId IS NOT NULL
+                    AND surveys IS NOT NULL)
+        WHERE   survey.surveyStatus = 'InProgress'
+                OR survey.surveyStatus = 'Finished'
     """)
 
     return conversations_df
@@ -52,8 +54,10 @@ def exec_surveys_api(spark: SparkSession, tenant: str, run_id: str, extract_star
     base_url = get_api_url(tenant)
     surveys = []
 
-    for conversation in conversations_df.rdd.collect():
-        conversation_id = conversation['conversationId']
+    conv_df = conversations_df.toPandas()
+
+    for conversation in conv_df.itertuples():
+        conversation_id = conversation.conversationId
         resp_json = get_surveys(base_url, auth_headers, conversation_id, 0)
 
         if resp_json != None and len(resp_json) > 0:
