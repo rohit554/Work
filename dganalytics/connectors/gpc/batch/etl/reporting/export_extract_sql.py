@@ -107,6 +107,73 @@ fact_conversation_metrics = """
                 int(date_format(emitDateTime, 'HHmmss'))
             """
 
+fact_conversation_metrics_per_conversation = """
+                select
+                        F.agentId,
+                        F.mediaType,
+                        F.messageType,
+                        F.originatingDirection,
+                        F.queueId ,
+                        F.wrapUpCode,
+                        date_format(F.emitDateTime, 'yyyyMMdd') emitDate,
+                        int(date_format(F.emitDateTime, 'HHmmss')) emitTime,
+                        F.conversationId,
+                        D.dnis,
+                        sum(F.nAbandon) nAbandon,
+                        sum(F.nAcd) nAcd,
+                        sum(F.nAcw) nAcw,
+                        sum(F.nAnswered) nAnswered,
+                        sum(F.nBlindTransferred) nBlindTransferred,
+                        sum(F.nConnected) nConnected,
+                        sum(F.nConsult) nConsult,
+                        sum(F.nConsultTransferred) nConsultTransferred,
+                        sum(F.nError) nError,
+                        sum(F.nHandle) nHandle,
+                        sum(F.nHeldComplete) nHeldComplete,
+                        sum(F.nOffered) nOffered,
+                        sum(F.nOutbound) nOutbound,
+                        sum(F.nOutboundAbandoned) nOutboundAbandoned,
+                        sum(F.nOutboundAttempted) nOutboundAttempted,
+                        sum(F.nOutboundConnected) nOutboundConnected,
+                        sum(F.nOverSla) nOverSla,
+                        sum(F.nShortAbandon) nShortAbandon,
+                        sum(F.nTalkComplete) nTalkComplete,
+                        sum(F.nTransferred) nTransferred,
+                        sum(F.tAbandon) tAbandon,
+                        sum(F.tAcd) tAcd,
+                        sum(F.tAcw) tAcw,
+                        sum(F.tAgentResponse) tAgentResponse,
+                        sum(F.tAnswered) tAnswered,
+                        sum(F.tContacting) tContacting,
+                        sum(F.tDialing) tDialing,
+                        sum(F.tHandle) tHandle,
+                        sum(F.tHeldComplete) tHeldComplete,
+                        sum(F.tIvr) tIvr,
+                        sum(F.tNotResponding) tNotResponding,
+                        sum(F.tShortAbandon) tShortAbandon,
+                        sum(F.tTalkComplete) tTalkComplete,
+                        sum(F.tVoicemail) tVoicemail,
+                        sum(F.tWait) tWait
+                from fact_conversation_metrics F
+                INNER JOIN dim_conversations D
+                    ON F.conversationId = D.conversationId
+                    AND F.agentId = D.agentId
+                    AND F.mediaType = D.mediaType
+                where
+                    emitDate >= date_add(CURRENT_DATE() , -190)
+                GROUP BY 
+                    F.agentId,
+                    F.mediaType,
+                    F.messageType,
+                    F.originatingDirection,
+                    F.queueId, 
+                    F.wrapUpCode,
+                    date_format(F.emitDateTime, 'yyyyMMdd'),
+                    int(date_format(F.emitDateTime, 'HHmmss')),
+                    F.conversationId,
+                    D.dnis
+            """
+
 fact_evaluation_question_group_scores = """
             select
                 evaluationId , questionGroupId , markedNA , maxTotalCriticalScore , maxTotalCriticalScoreUnweighted ,
