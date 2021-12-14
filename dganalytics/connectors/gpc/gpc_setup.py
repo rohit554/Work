@@ -110,7 +110,8 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 wrapUpNote string,
                 conversationStartDate date,
                 sourceRecordIdentifier long,
-                soucePartition string
+                soucePartition string,
+                dnis string
             )
             using delta
             PARTITIONED BY (conversationStartDate)
@@ -573,7 +574,9 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 nVoicemail int,
                 tVoicemail float,
                 nWait int,
-                tWait float
+                tWait float,
+                maxAcw float,
+                minAcw float
             )
             using delta
             PARTITIONED BY (date)

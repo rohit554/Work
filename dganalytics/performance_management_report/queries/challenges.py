@@ -194,7 +194,7 @@ def get_challenges(spark):
     
     df.registerTempTable("challenges")
     df = spark.sql("""
-                    select  distinct action action,
+                    select  action action,
                             campaign_id.oid campaignId,
                             cast(challenge_thrown_date as date) challengeThrownDate,
                             cast(challenge_acceptance_date as date) challengeAcceptanceDate,

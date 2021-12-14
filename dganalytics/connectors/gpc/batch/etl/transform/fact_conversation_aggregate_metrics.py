@@ -67,11 +67,15 @@ def fact_conversation_aggregate_metrics(spark: SparkSession, extract_date, extra
 	tVoicemail_count nVoicemail,
 	tVoicemail_sum tVoicemail,
 	tWait_count nWait,
-	tWait_sum tWait
+	tWait_sum tWait,
+	tAcw_max maxAcw,
+	tAcw_min minAcws
 from
 	(
 	select
-		mediaType, messageType, originatingDirection, queueId, userId, wrapUpCode, cast(split(`interval`, "/")[0] as timestamp) intervalStart, cast(split(`interval`, "/")[1] as timestamp) intervalEnd, metric, `count`, `sum`
+		mediaType, messageType, originatingDirection, queueId,
+		userId, wrapUpCode, cast(split(`interval`, "/")[0] as timestamp) intervalStart,
+		cast(split(`interval`, "/")[1] as timestamp) intervalEnd, metric, `count`, `sum`, `max`, `min`
 	from
 		(
 		select
@@ -95,7 +99,8 @@ from
                         and extractIntervalEndTime = '{extract_end_time}'
                         and  extractDate = '{extract_date}'
                         ) ) ) ) ) pivot ( sum(`count`) `count`,
-	sum(`sum`) `sum` for metric in ("nBlindTransferred", "nConnected", "nConsult", "nConsultTransferred",
+	sum(`sum`) `sum`, max(`max`) `max`, min(`min`) `min`
+   for metric in ("nBlindTransferred", "nConnected", "nConsult", "nConsultTransferred",
                                     "nError", "nOffered", "nOutbound", "nOutboundAbandoned", "nOutboundAttempted",
                                     "nOutboundConnected", "nOverSla", "nStateTransitionError", "nTransferred",
                                     "tAbandon", "tAcd", "tAcw", "tAgentResponseTime", "tAlert", "tAnswered",

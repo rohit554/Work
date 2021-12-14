@@ -338,6 +338,45 @@
                         }
                     },
                     {
+                        "name": "fact_conversation_surveys",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            {
+                                "activity": "conversation_details_job",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 1,
+                            "retryIntervalInSeconds": 1800,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc_v2/batch/etl/transform/main.py",
+                            "parameters": [
+                                "--tenant",
+                                "@pipeline().parameters.tenant",
+                                "--run_id",
+                                "@pipeline().RunId",
+                                "--extract_start_time",
+                                "@pipeline().parameters.extract_start_time",
+                                "--extract_end_time",
+                                "@pipeline().parameters.extract_end_time",
+                                "--transformation",
+                                "fact_conversation_surveys"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
                         "name": "fact_conversation_metrics",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [

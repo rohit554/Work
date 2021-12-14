@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 def get_evaluators(spark: SparkSession) -> list:
     evaluators = spark.sql("""select distinct userId  from (
         select id as userId, explode(authorization.roles) as roles  from raw_users where lower(state) = 'active'
-            ) where lower(roles.name) like '%evalua%'""").toPandas()['userId'].tolist()
+            ) where lower(roles.name) like '%evalua%' OR lower(roles.name) = 'supervisor'""").toPandas()['userId'].tolist()
     return evaluators
 
 
@@ -45,13 +45,14 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_
 
         evaluation_details_list.append(resp.json()['entities'])
         '''
-        evaluation_details_list.append(gpc_request(spark, tenant, 'evaluations', run_id,
-                                                   extract_start_time, extract_end_time,
-                                                   api_config, skip_raw_load=True))
+        try:
+            response = gpc_request(spark, tenant, 'evaluations', run_id, extract_start_time, extract_end_time, api_config, True)
+            evaluation_details_list.append(response)
+        except Exception as ex:
+            logger.exception(ex, stack_info=True, exc_info=True)
+            
 
     evaluation_details_list = [
         item for sublist in evaluation_details_list for item in sublist]
-    # evaluation_details_list = [json.dumps(ed)
-    #                           for ed in evaluation_details_list]
     process_raw_data(spark, tenant, 'evaluations', run_id,
                      evaluation_details_list, extract_start_time, extract_end_time, len(evaluators))

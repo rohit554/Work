@@ -22,14 +22,14 @@ def export_user_groups_region_sites(spark: SparkSession, tenant: str, region: st
     group_timezones.registerTempTable("group_timezones")
 
     user_group_sites = spark.sql("""
-        SELECT  dug.userId,
-                dug.groupName groupName,
-                gt.region,
-                gt.site,
-                gt.timeZone
-        FROM gpc_hellofresh.dim_user_groups dug
-        INNER JOIN group_timezones gt
-            ON LOWER(dug.groupName) = LOWER(gt.agentGroupName)
+        select userId, groupName, region, site, timeZone from (
+	select 
+	a.userId, a.groupName groupName, b.region, b.site, b.timeZone, 
+	row_number() over(partition by a.userId order by a.groupName) as rn
+	from gpc_hellofresh.dim_user_groups a, group_timezones b
+	where lower(a.groupName)  = lower(b.agentGroupName)
+	) where rn= 1
+
         """)
     user_group_sites.toPandas().to_csv(os.path.join(tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'),
                                        header=True, index=False)
@@ -37,15 +37,16 @@ def export_user_groups_region_sites(spark: SparkSession, tenant: str, region: st
         "userId as userKey", "groupName", "region", "site", "timeZone as time_zone")
     
     realtime_config = spark.sql("""
-        SELECT  dug.groupName,
-                dug.userId,
-                du.userFullName AS name
-        FROM gpc_hellofresh.dim_user_groups dug
-        INNER JOIN group_timezones gt
-            ON  LOWER(dug.groupName) = LOWER(gt.agentGroupName)
-                AND LOWER(gt.region) = 'us'
-        INNER JOIN gpc_hellofresh.dim_users du
-            ON dug.userId = du.userId
+        select groupName, userId, name from (
+	select 
+	a.userId, a.groupName groupName, b.region, b.site, b.timeZone, c.userFullName name, 
+	row_number() over(partition by a.userId order by a.groupName) as rn
+	from gpc_hellofresh.dim_user_groups a, group_timezones b, gpc_hellofresh.dim_users c
+	where lower(a.groupName)  = lower(b.agentGroupName)
+    and a.userId = c.userId
+    and lower(b.region) = 'us'
+	) where rn= 1
+
         """).toPandas()
     realtime_config.to_csv(os.path.join(tenant_path, 'data', 'config', 'realtime_US_Users.csv'),
                            header=True, index=False)
