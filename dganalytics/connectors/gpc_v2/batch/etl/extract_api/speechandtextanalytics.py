@@ -21,7 +21,7 @@ def get_conversations(spark: SparkSession, extract_start_time: str, extract_end_
     return conversations_df
 
 
-def get_sentiments(base_url: str, auth_headers, conversation_id: str, retry_count: int):
+def get_speechandtextanalytics(base_url: str, auth_headers, conversation_id: str, retry_count: int):
     url = f"{base_url}/api/v2/speechandtextanalytics/conversations/{conversation_id}"
     resp = requests.request(method="GET", url=url, headers=auth_headers)
 
@@ -32,12 +32,12 @@ def get_sentiments(base_url: str, auth_headers, conversation_id: str, retry_coun
             logging.error(resp)
             raise Exception
 
-        logger.info(f"Rate limit exceeded for get sentiments API call, sleeping for 30 seconds, retry count {retry_count} of 3")
+        logger.info(f"Rate limit exceeded for get Speech And Text Analytics API call, sleeping for 30 seconds, retry count {retry_count} of 3")
         time.sleep(30)
 
-        return get_sentiments(base_url, auth_headers, conversation_id, retry_count)
+        return get_speechandtextanalytics(base_url, auth_headers, conversation_id, retry_count)
     elif resp.status_code == 404:
-        logger.info(f"No sentiments found for conversation {conversation_id}")
+        logger.info(f"No Speech And Text Analytics found for conversation {conversation_id}")
         return {}
     elif resp.status_code != 200:
         logger.error(resp)
@@ -46,22 +46,22 @@ def get_sentiments(base_url: str, auth_headers, conversation_id: str, retry_coun
     return resp.json()
 
 
-def exec_speechminer(spark: SparkSession, tenant: str, run_id: str, extract_start_time: str, extract_end_time: str):
+def exec_speechandtextanalytics(spark: SparkSession, tenant: str, run_id: str, extract_start_time: str, extract_end_time: str):
     global logger
-    logger = gpc_utils_logger(tenant, "gpc_sentiments")
-    logger.info(f"getting conversations extracted between {extract_start_time} and {extract_end_time} for sentiments")
+    logger = gpc_utils_logger(tenant, "gpc_speechandtextanalytics")
+    logger.info(f"getting conversations extracted between {extract_start_time} and {extract_end_time} for Speech And Text Analytics")
     conversations_df = get_conversations(spark, extract_start_time, extract_end_time)
     auth_headers = authorize(tenant)
     base_url = get_api_url(tenant)
-    sentiments = []
+    speechandtextanalytics = []
 
     for conversation in conversations_df.rdd.collect():
         conversation_id = conversation['conversationId']
-        resp_json = get_sentiments(base_url, auth_headers, conversation_id, 0)
+        resp_json = get_speechandtextanalytics(base_url, auth_headers, conversation_id, 0)
 
         if resp_json != None and len(resp_json) > 0:
-            logger.info(f"adding {len(resp_json)} sentiment(s) for conversation {conversation_id}")
-            sentiments.append(resp_json)
+            logger.info(f"adding {len(resp_json)} Speech And Text Analytics for conversation {conversation_id}")
+            speechandtextanalytics.append(resp_json)
 
-    if len(sentiments) > 0:
-        process_raw_data(spark, tenant, 'sentiments', run_id, sentiments, extract_start_time, extract_end_time, len(sentiments))
+    if len(speechandtextanalytics) > 0:
+        process_raw_data(spark, tenant, 'speechandtextanalytics', run_id, speechandtextanalytics, extract_start_time, extract_end_time, len(speechandtextanalytics))

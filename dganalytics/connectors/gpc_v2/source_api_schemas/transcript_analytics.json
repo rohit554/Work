@@ -1,0 +1,398 @@
+{
+	"fields": [
+		{
+			"metadata": {},
+			"name": "organizationId",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "conversationId",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "communicationId",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "transcripts",
+			"nullable": true,
+			"type": {
+				"containsNull": true,
+				"elementType": {
+					"fields": [
+						{
+							"metadata": {},
+							"name": "transcriptId",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "language",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "startTime",
+							"nullable": true,
+							"type": "long"
+						},
+						{
+							"metadata": {},
+							"name": "phrases",
+							"nullable": true,
+							"type": {
+								"containsNull": true,
+								"elementType": {
+									"fields": [
+										{
+											"metadata": {},
+											"name": "text",
+											"nullable": true,
+											"type": "string"
+										},
+										{
+											"metadata": {},
+											"name": "stability",
+											"nullable": true,
+											"type": "double"
+										},
+										{
+											"metadata": {},
+											"name": "startTimeMs",
+											"nullable": true,
+											"type": "long"
+										},
+										{
+											"metadata": {},
+											"name": "duration",
+											"nullable": true,
+											"type": {
+												"fields": [
+													{
+														"metadata": {},
+														"name": "milliseconds",
+														"nullable": true,
+														"type": "long"
+													}
+												],
+												"type": "struct"
+											}
+										},
+										{
+											"metadata": {},
+											"name": "words",
+											"nullable": true,
+											"type": {
+												"containsNull": true,
+												"elementType": {
+													"fields": [
+														{
+															"metadata": {},
+															"name": "word",
+															"nullable": true,
+															"type": "string"
+														},
+														{
+															"metadata": {},
+															"name": "confidence",
+															"nullable": true,
+															"type": "double"
+														},
+														{
+															"metadata": {},
+															"name": "startTimeMs",
+															"nullable": true,
+															"type": "long"
+														},
+														{
+															"metadata": {},
+															"name": "duration",
+															"nullable": true,
+															"type": {
+																"fields": [
+																	{
+																		"metadata": {},
+																		"name": "milliseconds",
+																		"nullable": true,
+																		"type": "long"
+																	}
+																],
+																"type": "struct"
+															}
+														}
+													],
+													"type": "struct"
+												},
+												"type": "array"
+											}
+										},
+										{
+											"metadata": {},
+											"name": "alternatives",
+											"nullable": true,
+											"type": {
+												"containsNull": true,
+												"elementType": {
+													"fields": [
+
+													],
+													"type": "struct"
+												},
+												"type": "array"
+											}
+										},
+										{
+											"metadata": {},
+											"name": "participantPurpose",
+											"nullable": true,
+											"type": "string"
+										}
+									]
+								},
+								"type": "array"
+							}
+						},
+						{
+							"metadata": {},
+							"name": "analytics",
+							"nullable": true,
+							"type": {
+								"fields": [
+									{
+										"metadata": {},
+										"name": "sentiment",
+										"nullable": true,
+										"type": {
+											"containsNull": true,
+											"elementType": {
+												"fields": [
+													{
+														"metadata": {},
+														"name": "participant",
+														"nullable": true,
+														"type": "string"
+													},
+													{
+														"metadata": {},
+														"name": "phrase",
+														"nullable": true,
+														"type": "string"
+													},
+													{
+														"metadata": {},
+														"name": "startTimeMs",
+														"nullable": true,
+														"type": "long"
+													},
+													{
+														"metadata": {},
+														"name": "duration",
+														"nullable": true,
+														"type": {
+															"fields": [
+																{
+																	"metadata": {},
+																	"name": "milliseconds",
+																	"nullable": true,
+																	"type": "long"
+																}
+															],
+															"type": "struct"
+														}
+													},
+													{
+														"metadata": {},
+														"name": "sentiment",
+														"nullable": true,
+														"type": "double"
+													},
+													{
+														"metadata": {},
+														"name": "phraseIndex",
+														"nullable": true,
+														"phraseIndex": "integer"
+													}
+												],
+												"type": "struct"
+											},
+											"type": "array"
+										}
+									},
+									{
+										"metadata": {},
+										"name": "topics",
+										"nullable": true,
+										"type": {
+											"containsNull": true,
+											"elementType": {
+												"fields": [
+													{
+														"metadata": {},
+														"name": "participant",
+														"nullable": true,
+														"type": "string"
+													},
+													{
+														"metadata": {},
+														"name": "topicId",
+														"nullable": true,
+														"type": "string"
+													},
+													{
+														"metadata": {},
+														"name": "topicName",
+														"nullable": true,
+														"type": "string"
+													},
+													{
+														"metadata": {},
+														"name": "topicPhrase",
+														"nullable": true,
+														"type": "string"
+													},
+													{
+														"metadata": {},
+														"name": "transcriptPhrase",
+														"nullable": true,
+														"type": "string"
+													},
+													{
+														"metadata": {},
+														"name": "confidence",
+														"nullable": true,
+														"type": "integer"
+													},
+													{
+														"metadata": {},
+														"name": "startTimeMs",
+														"nullable": true,
+														"type": "long"
+													},
+													{
+														"metadata": {},
+														"name": "duration",
+														"nullable": true,
+														"type": {
+															"fields": [
+																{
+																	"metadata": {},
+																	"name": "milliseconds",
+																	"nullable": true,
+																	"type": "long"
+																}
+															],
+															"type": "struct"
+														}
+													}
+												],
+												"type": "struct"
+											},
+											"type": "array"
+										}
+									},
+									{
+										"metadata": {},
+										"name": "acoustics",
+										"nullable": true,
+										"type": {
+											"containsNull": true,
+											"elementType": {
+												"fields": [
+													{
+														"metadata": {},
+														"name": "eventType",
+														"nullable": true,
+														"type": "string"
+													},
+													{
+														"metadata": {},
+														"name": "offsetMs",
+														"nullable": true,
+														"type": "long"
+													},
+													{
+														"metadata": {},
+														"name": "startTimeMs",
+														"nullable": true,
+														"type": "long"
+													},
+													{
+														"metadata": {},
+														"name": "durationMs",
+														"nullable": true,
+														"type": "long"
+													},
+													{
+														"metadata": {},
+														"name": "participant",
+														"nullable": true,
+														"type": "string"
+													}
+												],
+												"type": "struct"
+											},
+											"type": "array"
+										}
+									}
+								],
+								"type": "struct"
+							}
+
+						}
+					],
+					"type": "struct"
+				},
+				"type": "array"
+			}
+		},
+		{
+			"metadata": {},
+			"name": "uri",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "startTime",
+			"nullable": true,
+			"type": "long"
+		},
+		{
+			"metadata": {},
+			"name": "duration",
+			"nullable": true,
+			"type": {
+				"fields": [
+					{
+						"metadata": {},
+						"name": "milliseconds",
+						"nullable": true,
+						"type": "long"
+					}
+				],
+				"type": "struct"
+			}
+		},
+		{
+			"metadata": {},
+			"name": "mediaType",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "conversationStartTime",
+			"nullable": true,
+			"type": "long"
+		}
+	],
+	"type": "struct"
+}

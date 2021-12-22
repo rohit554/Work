@@ -12,7 +12,7 @@ from dganalytics.connectors.gpc_v2.batch.etl.extract_api.management_unit_users i
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.activity_codes import exec_activity_codes
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.wfm_forecast import exec_wfm_forecast_api
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.wfm_planninggroups import exec_wfm_planninggroups
-from dganalytics.connectors.gpc_v2.batch.etl.extract_api.speechminer import exec_speechminer
+from dganalytics.connectors.gpc_v2.batch.etl.extract_api.speechandtextanalytics import exec_speechandtextanalytics
 
 if __name__ == "__main__":
     tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()
@@ -65,8 +65,8 @@ if __name__ == "__main__":
         elif api_name == "wfm_planninggroups":
             exec_wfm_planninggroups(
                 spark, tenant, run_id, extract_start_time, extract_end_time)
-        elif api_name == "speechminer":
-            exec_wfm_planninggroups(
+        elif api_name == "speechandtextanalytics":
+            exec_speechandtextanalytics(
                 spark, tenant, run_id, extract_start_time, extract_end_time)
         else:
             logger.exception("invalid api name")

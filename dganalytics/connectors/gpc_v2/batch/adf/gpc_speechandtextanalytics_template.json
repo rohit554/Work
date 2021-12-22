@@ -79,13 +79,13 @@
             ]
         },
         {
-            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_gpc_sentiment_extract')]",
+            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_gpc_speechandtextanalytics_extract')]",
             "type": "Microsoft.DataFactory/factories/pipelines",
             "apiVersion": "2018-06-01",
             "properties": {
                 "activities": [
                     {
-                        "name": "sentiments",
+                        "name": "speechandtextanalytics",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [],
                         "policy": {
@@ -108,7 +108,7 @@
                                 "--extract_end_time",
                                 "@pipeline().parameters.extract_end_time",
                                 "--api_name",
-                                "sentiments"
+                                "speechandtextanalytics"
                             ]
                         },
                         "linkedServiceName": {
@@ -117,18 +117,18 @@
                         }
                     },
                     {
-                        "name": "fact_sentiments",
+                        "name": "fact_speechandtextanalytics",
                         "type": "DatabricksSparkPython",
                         "dependsOn": [
                             {
-                                "activity": "sentiments",
+                                "activity": "speechandtextanalytics",
                                 "dependencyConditions": [
                                     "Succeeded"
                                 ]
                             }
                         ],
                         "policy": {
-                            "timeout": "00:30:00",
+                            "timeout": "02:00:00",
                             "retry": 1,
                             "retryIntervalInSeconds": 1800,
                             "secureOutput": false,
@@ -147,7 +147,7 @@
                                 "--extract_end_time",
                                 "@pipeline().parameters.extract_end_time",
                                 "--transformation",
-                                "fact_sentiments"
+                                "fact_speechandtextanalytics"
                             ]
                         },
                         "linkedServiceName": {
@@ -181,7 +181,7 @@
             ]
         },
         {
-            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_gpc_sentiment_trigger')]",
+            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_gpc_speechandtextanalytics_trigger')]",
             "type": "Microsoft.DataFactory/factories/triggers",
             "apiVersion": "2018-06-01",
             "properties": {
@@ -190,7 +190,7 @@
                 "pipelines": [
                     {
                         "pipelineReference": {
-                            "referenceName": "[concat(parameters('tenant'), '_gpc_sentiment_extract')]",
+                            "referenceName": "[concat(parameters('tenant'), '_gpc_speechandtextanalytics_extract')]",
                             "type": "PipelineReference"
                         },
                         "parameters": {
@@ -210,7 +210,7 @@
                 }
             },
             "dependsOn": [
-                "[concat(variables('factoryId'), '/pipelines/', parameters('tenant'), '_gpc_sentiment_extract')]"
+                "[concat(variables('factoryId'), '/pipelines/', parameters('tenant'), '_gpc_speechandtextanalytics_extract')]"
             ]
         }
     ]

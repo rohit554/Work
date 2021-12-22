@@ -65,10 +65,16 @@
               "type": "double"
             },
             {
-              "metadata": {},
-              "name": "otherDurationPercentage",
-              "nullable": true,
-              "type": "double"
+                "metadata": {},
+                "name": "otherDurationPercentage",
+                "nullable": true,
+                "type": "double"
+            },
+            {
+                "metadata": {},
+                "name": "overtalkCount",
+                "nullable": true,
+                "type": "double"
             }
           ],
           "type": "struct"

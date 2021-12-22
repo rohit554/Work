@@ -513,7 +513,7 @@ def create_dim_tables(spark: SparkSession, db_name: str):
     )
     
     spark.sql(
-        f"""create table if not exists {db_name}.fact_sentiments
+        f"""CREATE TABLE IF NOT EXISTS {db_name}.fact_speechandtextanalytics
             (   
                 conversationId string,
                 sentimentScore float,
@@ -523,10 +523,11 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 silenceDurationPercentage float,
                 ivrDurationPercentage float,
                 acdDurationPercentage float,
-                otherDurationPercentage float
+                otherDurationPercentage float,
+                overtalkCount float
             )
-            using delta
-            LOCATION '{db_path}/{db_name}/fact_sentiments'
+            USING DELTA
+            LOCATION '{db_path}/{db_name}/fact_speechandtextanalytics'
             """
     )
 
@@ -573,7 +574,7 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     create_raw_table("wfm_forecast_data", spark, db_name)
     create_raw_table("wfm_forecast_meta", spark, db_name)
     create_raw_table("wfm_planninggroups", spark, db_name)
-    create_raw_table("sentiments", spark, db_name)
+    create_raw_table("speechandtextanalytics", spark, db_name)
 
     return True
 

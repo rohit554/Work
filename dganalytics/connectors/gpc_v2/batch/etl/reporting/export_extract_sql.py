@@ -306,3 +306,17 @@ fact_wfm_forecast = """ \
                                                             int(date_format(META_REF_DT, 'HHmmss')) META_REF_TIME \
                                                                 FROM fact_wfm_forecast \
 ;"""
+
+fact_speechandtextanalytics = """
+    SELECT  conversationId,
+            sentimentScore,
+            sentimentTrend,
+            agentDurationPercentage,
+            customerDurationPercentage,
+            silenceDurationPercentage,
+            ivrDurationPercentage,
+            acdDurationPercentage,
+            otherDurationPercentage,
+            overtalkCount
+    FROM fact_speechandtextanalytics
+"""
