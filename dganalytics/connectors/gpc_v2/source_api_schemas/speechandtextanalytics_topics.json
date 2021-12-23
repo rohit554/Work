@@ -1,0 +1,103 @@
+{
+	"fields": [
+		{
+			"metadata": {},
+			"name": "id",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "name",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "description",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "published",
+			"nullable": true,
+			"type": "boolean"
+		},
+		{
+			"metadata": {},
+			"name": "strictness",
+			"nullable": true,
+			"type": "integer"
+		},
+		{
+			"metadata": {},
+			"name": "programsCount",
+			"nullable": true,
+			"type": "integer"
+		},
+		{
+			"metadata": {},
+			"name": "tags",
+			"nullable": true,
+			"type": {
+				"containsNull": true,
+				"elementType": "string",
+				"type": "array"
+			}
+		},
+		{
+			"metadata": {},
+			"name": "dialect",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "participants",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "phrasesCount",
+			"nullable": true,
+			"type": "integer"
+		},
+		{
+			"metadata": {},
+			"name": "modifiedBy",
+			"nullable": true,
+			"type": {
+				"fields": [
+					{
+						"metadata": {},
+						"name": "id",
+						"nullable": true,
+						"type": "string"
+					},
+					{
+						"metadata": {},
+						"name": "selfUri",
+						"nullable": true,
+						"type": "string"
+					}
+				],
+				"type": "struct"
+			}
+		}
+		{
+			"metadata": {},
+			"name": "dateModified",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "selfUri",
+			"nullable": true,
+			"type": "string"
+		}
+	],
+	"type": "struct"
+}

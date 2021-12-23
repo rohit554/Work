@@ -284,5 +284,20 @@ gpc_end_points = {
         "tbl_overwrite": False,
         "drop_duplicates": True,
         "raw_primary_key": ["id"]
+    },
+    "speechandtextanalytics_topics": {
+        "endpoint": "/api/v2/speechandtextanalytics/topics",
+        "request_type": "GET",
+        "paging": True,
+        "cursor": False,
+        "interval": False,
+        "params": {
+            "pageSize": 10000
+        },
+        "entity_name": "entities",
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "tbl_overwrite": True,
+        "drop_duplicates": True,
+        "raw_primary_key": ["id"]
     }
 }

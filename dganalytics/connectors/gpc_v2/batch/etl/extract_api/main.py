@@ -24,7 +24,7 @@ if __name__ == "__main__":
     try:
         logger.info(f"Extracting GPC API {api_name}")
         if api_name in ["users", "routing_queues", "groups", "users_details", "wrapup_codes",
-                        "conversation_details", "divisions", "presence_definitions"]:
+                        "conversation_details", "divisions", "presence_definitions", "speechandtextanalytics_topics"]:
             df = gpc_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
         elif api_name == "conversation_details_job":
