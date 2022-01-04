@@ -8,14 +8,18 @@ from dganalytics.connectors.gpc_v2.gpc_utils import gpc_utils_logger
 
 def get_conversations(spark: SparkSession, extract_start_time: str, extract_end_time: str) -> list:
     conversations_df = spark.sql(f"""
-        SELECT
-            DISTINCT conversationId
-        FROM
-            raw_conversation_details
-        WHERE
-            extractIntervalStartTime = '{extract_start_time}'
-            AND extractIntervalEndTime = '{extract_end_time}'
-            AND conversationId IS NOT NULL
+        SELECT  DISTINCT conversationId
+        FROM (SELECT  conversationId,
+                        EXPLODE(participants.sessions) sessions
+                FROM (SELECT  conversationId,
+                            explode(participants) as participants
+                    FROM gpc_simplyenergy.raw_conversation_details
+                    WHERE   extractIntervalStartTime = '{extract_start_time}'
+                            AND extractIntervalEndTime = '{extract_end_time}'
+                            AND conversationId IS NOT NULL
+                )
+            WHERE participants.purpose = 'customer')
+       WHERE sessions.mediaType IN ('voice', 'chat', 'email')
     """)
 
     return conversations_df

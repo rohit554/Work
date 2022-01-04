@@ -85,7 +85,7 @@
 				],
 				"type": "struct"
 			}
-		}
+		},
 		{
 			"metadata": {},
 			"name": "dateModified",

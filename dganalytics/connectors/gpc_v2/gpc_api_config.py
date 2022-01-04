@@ -299,5 +299,14 @@ gpc_end_points = {
         "tbl_overwrite": True,
         "drop_duplicates": True,
         "raw_primary_key": ["id"]
+    },
+    "speechandtextanalytics_transcript": {
+        "endpoint": "api/v2/speechandtextanalytics/conversations/{conversationId}/communications/{communicationId}/transcripturl",
+        "extract_type": "custom",
+        "spark_partitions": {"max_records_per_partition": 100000},
+        "table_name": "speechandtextanalytics_transcript",
+        "tbl_overwrite": False,
+        "drop_duplicates": True,
+        "raw_primary_key": ["communicationId"]
     }
 }

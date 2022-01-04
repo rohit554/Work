@@ -72,6 +72,28 @@
 										},
 										{
 											"metadata": {},
+											"name": "offset",
+											"nullable": true,
+											"type": {
+												"fields": [
+													{
+														"metadata": {},
+														"name": "words",
+														"nullable": true,
+														"type": "integer"
+													},
+													{
+														"metadata": {},
+														"name": "chars",
+														"nullable": true,
+														"type": "integer"
+													}
+												],
+												"type": "struct"
+											}
+										},
+										{
+											"metadata": {},
 											"name": "duration",
 											"nullable": true,
 											"type": {
@@ -81,6 +103,18 @@
 														"name": "milliseconds",
 														"nullable": true,
 														"type": "long"
+													},
+													{
+														"metadata": {},
+														"name": "words",
+														"nullable": true,
+														"type": "integer"
+													},
+													{
+														"metadata": {},
+														"name": "chars",
+														"nullable": true,
+														"type": "integer"
 													}
 												],
 												"type": "struct"
@@ -123,6 +157,40 @@
 																		"name": "milliseconds",
 																		"nullable": true,
 																		"type": "long"
+																	},
+																	{
+																		"metadata": {},
+																		"name": "words",
+																		"nullable": true,
+																		"type": "integer"
+																	},
+																	{
+																		"metadata": {},
+																		"name": "chars",
+																		"nullable": true,
+																		"type": "integer"
+																	}
+																],
+																"type": "struct"
+															}
+														},
+														{
+															"metadata": {},
+															"name": "offset",
+															"nullable": true,
+															"type": {
+																"fields": [
+																	{
+																		"metadata": {},
+																		"name": "words",
+																		"nullable": true,
+																		"type": "integer"
+																	},
+																	{
+																		"metadata": {},
+																		"name": "chars",
+																		"nullable": true,
+																		"type": "integer"
 																	}
 																],
 																"type": "struct"
@@ -140,12 +208,7 @@
 											"nullable": true,
 											"type": {
 												"containsNull": true,
-												"elementType": {
-													"fields": [
-
-													],
-													"type": "struct"
-												},
+												"elementType": "string",
 												"type": "array"
 											}
 										},
@@ -155,7 +218,8 @@
 											"nullable": true,
 											"type": "string"
 										}
-									]
+									],
+									"type": "struct"
 								},
 								"type": "array"
 							}
@@ -194,6 +258,28 @@
 													},
 													{
 														"metadata": {},
+														"name": "offset",
+														"nullable": true,
+														"type": {
+															"fields": [
+																{
+																	"metadata": {},
+																	"name": "words",
+																	"nullable": true,
+																	"type": "integer"
+																},
+																{
+																	"metadata": {},
+																	"name": "chars",
+																	"nullable": true,
+																	"type": "integer"
+																}
+															],
+															"type": "struct"
+														}
+													},
+													{
+														"metadata": {},
 														"name": "duration",
 														"nullable": true,
 														"type": {
@@ -203,6 +289,18 @@
 																	"name": "milliseconds",
 																	"nullable": true,
 																	"type": "long"
+																},
+																{
+																	"metadata": {},
+																	"name": "words",
+																	"nullable": true,
+																	"type": "integer"
+																},
+																{
+																	"metadata": {},
+																	"name": "chars",
+																	"nullable": true,
+																	"type": "integer"
 																}
 															],
 															"type": "struct"
@@ -218,7 +316,7 @@
 														"metadata": {},
 														"name": "phraseIndex",
 														"nullable": true,
-														"phraseIndex": "integer"
+														"type": "integer"
 													}
 												],
 												"type": "struct"
@@ -278,6 +376,28 @@
 													},
 													{
 														"metadata": {},
+														"name": "offset",
+														"nullable": true,
+														"type": {
+															"fields": [
+																{
+																	"metadata": {},
+																	"name": "words",
+																	"nullable": true,
+																	"type": "integer"
+																},
+																{
+																	"metadata": {},
+																	"name": "chars",
+																	"nullable": true,
+																	"type": "integer"
+																}
+															],
+															"type": "struct"
+														}
+													},
+													{
+														"metadata": {},
 														"name": "duration",
 														"nullable": true,
 														"type": {
@@ -287,6 +407,18 @@
 																	"name": "milliseconds",
 																	"nullable": true,
 																	"type": "long"
+																},
+																{
+																	"metadata": {},
+																	"name": "words",
+																	"nullable": true,
+																	"type": "integer"
+																},
+																{
+																	"metadata": {},
+																	"name": "chars",
+																	"nullable": true,
+																	"type": "integer"
 																}
 															],
 															"type": "struct"
@@ -335,6 +467,28 @@
 														"name": "participant",
 														"nullable": true,
 														"type": "string"
+													},
+													{
+														"metadata": {},
+														"name": "offset",
+														"nullable": true,
+														"type": {
+															"fields": [
+																{
+																	"metadata": {},
+																	"name": "words",
+																	"nullable": true,
+																	"type": "integer"
+																},
+																{
+																	"metadata": {},
+																	"name": "chars",
+																	"nullable": true,
+																	"type": "integer"
+																}
+															],
+															"type": "struct"
+														}
 													}
 												],
 												"type": "struct"
@@ -376,6 +530,18 @@
 						"name": "milliseconds",
 						"nullable": true,
 						"type": "long"
+					},
+					{
+						"metadata": {},
+						"name": "words",
+						"nullable": true,
+						"type": "integer"
+					},
+					{
+						"metadata": {},
+						"name": "chars",
+						"nullable": true,
+						"type": "integer"
 					}
 				],
 				"type": "struct"

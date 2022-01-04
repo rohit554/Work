@@ -20,3 +20,5 @@ from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_wfm_exceptions impor
 from dganalytics.connectors.gpc_v2.batch.etl.transform.dim_wrapup_codes import dim_wrapup_codes
 from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_wfm_forecast import fact_wfm_forecast
 from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_speechandtextanalytics import fact_speechandtextanalytics
+from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_conversation_transcript_topics import fact_conversation_transcript_topics
+from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_conversation_transcript_sentiments import fact_conversation_transcript_sentiments
