@@ -43,7 +43,10 @@ def get_base_data(spark: SparkSession, extract_date: str):
                     qa.totalScore, wfm.adherencePercentage, wfm.conformancePercentage, kw.kw_count, survey.csat,
                     wfm.adherenceScheduleSecs, wfm.exceptionDurationSecs, wfm.adherenceScheduleSecs,
                     wfm.conformanceActualSecs, wfm.conformanceScheduleSecs, qa.totalScoreSum, qa.totalScoreCount,
-                    survey.csatSum, survey.csatCount, up.oqtTime userPresenceOqtTime, up.totalTime userPresenceTotalTime
+                    survey.csatSum, survey.csatCount,
+                    survey.fcr, 
+                    survey.nSurveysCompleted,
+                    up.oqtTime userPresenceOqtTime, up.totalTime userPresenceTotalTime
                     from (select userId, date, department from gpc_hellofresh.dim_users,
                         (select explode(sequence((cast('{extract_date}' as date))-{backword_days} + 2, (cast('{extract_date}' as date))+1, interval 1 day )) as date) dates) u
                     left join
@@ -170,7 +173,9 @@ def get_base_data(spark: SparkSession, extract_date: str):
                     cast(from_utc_timestamp(s.surveySentDate, trim(c.timeZone)) as date) date, s.userKey userId, 
                     round(sum(coalesce(s.csatAchieved, 0))/sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) * 20, 0) as csat,
                     sum(coalesce(s.csatAchieved, 0)) csatSum,
-                    sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) csatCount
+                    sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) csatCount,
+                    sum(case when s.status = 'Completed' THEN fcr ELSE NULL END) fcr,
+                    sum(case when s.status = 'Completed' THEN 1 ELSE 0 END) nSurveysCompleted
                     from sdx_hellofresh.dim_hellofresh_interactions  s, gpc_hellofresh.dim_routing_queues b, queue_timezones c
                     where s.surveySentDatePart >=  ((cast('{extract_date}' as date)) - {backword_days})
                     and s.queueKey = b.queueId
@@ -204,7 +209,8 @@ def push_anz_data(spark):
                         social_tAcw/social_nAcw `Social ACW`,
                         voice_tHeldComplete/voice_nHeldComplete `Voice Hold Time`,
                         not_responding_duration `Not Responding Time`,
-                        csat CSAT
+                        csat CSAT,
+                        fcr * 100 / nSurveysCompleted as `FCR Percent`
                 FROM hf_game_data
                 WHERE department IN (   'EP AU Manila',
                                         'HF AU Sydney',
@@ -240,7 +246,8 @@ def push_anz_data(spark):
                     AND `Social ACW` IS NULL
                     AND `Voice Hold Time` IS NULL
                     AND `Not Responding Time` IS NULL
-                    AND CSAT IS NULL)
+                    AND CSAT IS NULL,
+                    AND `FCR Percent` IS NULL)
     """)
     push_gamification_data(anz.toPandas(), 'HELLOFRESHANZ', 'ANZConnection')
     return True
