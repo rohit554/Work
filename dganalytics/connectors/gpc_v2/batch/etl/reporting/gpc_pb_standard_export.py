@@ -15,7 +15,7 @@ if __name__ == "__main__":
         if extract_name == 'dim_conversations':
             df = export_extract.get_dim_conversation(spark)
         elif extract_name == 'speechandtextanalytics_topics':
-            df = expost_extract.get_speechandtextanalytics_topics(spark)
+            df = export_extract.get_speechandtextanalytics_topics(spark)
         else:
             df = spark.sql(export_extract_sql.__dict__[extract_name])
 
