@@ -280,7 +280,7 @@ gpc_end_points = {
         "endpoint": "/api/v2/speechandtextanalytics/conversations/{conversation_id}",
         "extract_type": "custom",
         "spark_partitions": {"max_records_per_partition": 100000},
-        "table_name": "raw_speechandtextanalytics",
+        "table_name": "speechandtextanalytics",
         "tbl_overwrite": False,
         "drop_duplicates": True,
         "raw_primary_key": ["id"]
