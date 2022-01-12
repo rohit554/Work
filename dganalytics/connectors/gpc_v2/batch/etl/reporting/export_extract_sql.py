@@ -306,3 +306,60 @@ fact_wfm_forecast = """ \
                                                             int(date_format(META_REF_DT, 'HHmmss')) META_REF_TIME \
                                                                 FROM fact_wfm_forecast \
 ;"""
+
+fact_speechandtextanalytics = """
+    SELECT  conversationId,
+            CAST(sentimentScore * 100 AS FLOAT) sentimentScore,
+            CAST(sentimentTrend * 100 AS FLOAT) sentimentTrend,
+            agentDurationPercentage,
+            customerDurationPercentage,
+            silenceDurationPercentage,
+            ivrDurationPercentage,
+            acdDurationPercentage,
+            otherDurationPercentage,
+            overtalkCount
+    FROM fact_speechandtextanalytics
+"""
+
+fact_conversation_transcript_topics = """
+            SELECT conversationId,
+            communicationId,
+            mediaType,
+            topics.participant participant,
+            topics.topicId topicId,
+            topics.topicName topicName,
+            topics.topicPhrase topicPhrase,
+            topics.transcriptPhrase transcriptPhrase,
+            topics.confidence
+    FROM (SELECT  conversationId,
+            communicationId,
+            mediaType,
+            EXPLODE(transcripts.analytics.topics) topics
+    FROM (
+        SELECT  conversationId,
+                communicationId,
+                mediaType,
+                EXPLODE(transcripts) transcripts
+        FROM raw_speechandtextanalytics_transcript))
+"""
+
+
+fact_conversation_transcript_sentiments = """
+    SELECT DISTINCT conversationId,
+                communicationId,
+                mediaType,
+                sentiment.participant participant,
+                sentiment.phrase phrase,
+                sentiment.sentiment sentiment,
+                sentiment.phraseIndex phraseIndex
+    FROM (SELECT    conversationId,
+                communicationId,
+                mediaType,
+                EXPLODE(transcripts.analytics.sentiment) sentiment
+        FROM (
+            SELECT  conversationId,
+                    communicationId,
+                    mediaType,
+                    EXPLODE(transcripts) transcripts
+            FROM raw_speechandtextanalytics_transcript))
+"""

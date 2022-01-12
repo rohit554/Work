@@ -12,6 +12,8 @@ from dganalytics.connectors.gpc_v2.batch.etl.extract_api.management_unit_users i
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.activity_codes import exec_activity_codes
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.wfm_forecast import exec_wfm_forecast_api
 from dganalytics.connectors.gpc_v2.batch.etl.extract_api.wfm_planninggroups import exec_wfm_planninggroups
+from dganalytics.connectors.gpc_v2.batch.etl.extract_api.speechandtextanalytics import exec_speechandtextanalytics
+from dganalytics.connectors.gpc_v2.batch.etl.extract_api.speechandtextanalytics_transcript import exec_speechandtextanalytics_transcript
 
 if __name__ == "__main__":
     tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()
@@ -23,17 +25,15 @@ if __name__ == "__main__":
     try:
         logger.info(f"Extracting GPC API {api_name}")
         if api_name in ["users", "routing_queues", "groups", "users_details", "wrapup_codes",
-                        "conversation_details", "divisions", "presence_definitions"]:
+                        "conversation_details", "divisions", "presence_definitions", "speechandtextanalytics_topics"]:
             df = gpc_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
         elif api_name == "conversation_details_job":
             logger.info("Conversation details job kick off")
-            exec_conversation_details_job(
-                spark, tenant, run_id, extract_start_time, extract_end_time)
+            exec_conversation_details_job(spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "evaluation_forms":
             logger.info("Evaluation Forms kick off")
-            exec_evaluation_forms_api(
-                spark, tenant, run_id, extract_start_time, extract_end_time)
+            exec_evaluation_forms_api(spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "evaluations":
             exec_evaluations_api(spark, tenant, run_id,
                                  extract_start_time, extract_end_time)
@@ -41,36 +41,31 @@ if __name__ == "__main__":
             exec_surveys_api(spark, tenant, run_id,
                              extract_start_time, extract_end_time)
         elif api_name == "users_details_job":
-            exec_users_details_job_api(
-                spark, tenant, run_id, extract_start_time, extract_end_time)
+            exec_users_details_job_api(spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "wfm_adherence":
-            exec_wfm_adherence_api(
-                spark, tenant, run_id, extract_start_time, extract_end_time)
+            exec_wfm_adherence_api(spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "business_units":
-            exec_business_units(
-                spark, tenant, run_id, extract_start_time, extract_end_time)
+            exec_business_units(spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "management_units":
-            exec_management_units(
-                spark, tenant, run_id, extract_start_time, extract_end_time)
+            exec_management_units(spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "management_unit_users":
-            exec_management_unit_users(
-                spark, tenant, run_id, extract_start_time, extract_end_time)
+            exec_management_unit_users(spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "activity_codes":
-            exec_activity_codes(
-                spark, tenant, run_id, extract_start_time, extract_end_time)
+            exec_activity_codes(spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "wfm_forecast":
-            exec_wfm_forecast_api(
-                spark, tenant, run_id, extract_start_time, extract_end_time)
+            exec_wfm_forecast_api(spark, tenant, run_id, extract_start_time, extract_end_time)
         elif api_name == "wfm_planninggroups":
-            exec_wfm_planninggroups(
-                spark, tenant, run_id, extract_start_time, extract_end_time)
+            exec_wfm_planninggroups(spark, tenant, run_id, extract_start_time, extract_end_time)
+        elif api_name == "speechandtextanalytics":
+            exec_speechandtextanalytics(spark, tenant, run_id, extract_start_time, extract_end_time)
+        elif api_name == "speechandtextanalytics_transcript":
+            exec_speechandtextanalytics_transcript(spark, tenant, run_id, extract_start_time, extract_end_time)
         else:
             logger.exception("invalid api name")
             raise Exception
 
     except Exception as e:
-        logger.exception(
-            f"Error Occured in GPC Extraction for {extract_start_time}_{extract_end_time}_{tenant}_{api_name}")
+        logger.exception(f"Error Occured in GPC Extraction for {extract_start_time}_{extract_end_time}_{tenant}_{api_name}")
         logger.exception(e, stack_info=True, exc_info=True)
         raise Exception
     finally:

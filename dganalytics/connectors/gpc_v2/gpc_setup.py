@@ -511,6 +511,55 @@ def create_dim_tables(spark: SparkSession, db_name: str):
             LOCATION '{db_path}/{db_name}/fact_wfm_forecast'
             """
     )
+    
+    spark.sql(
+        f"""CREATE TABLE IF NOT EXISTS {db_name}.fact_speechandtextanalytics
+            (   
+                conversationId string,
+                sentimentScore float,
+                sentimentTrend float,
+                agentDurationPercentage float,
+                customerDurationPercentage float,
+                silenceDurationPercentage float,
+                ivrDurationPercentage float,
+                acdDurationPercentage float,
+                otherDurationPercentage float,
+                overtalkCount float
+            )
+            USING DELTA
+            LOCATION '{db_path}/{db_name}/fact_speechandtextanalytics'
+            """
+    )
+
+    spark.sql(f"""
+            CREATE TABLE IF NOT EXISTS {db_name}.fact_conversation_transcript_sentiments(
+                conversationId      STRING,
+                communicationId     STRING,
+                mediaType           STRING,
+                participant         STRING,
+                phrase              STRING,
+                sentiment           FLOAT,
+                phraseIndex         INT
+            )
+            USING DELTA
+            LOCATION '{db_path}/{db_name}/fact_conversation_transcript_sentiments'
+    """)
+
+    spark.sql(f"""
+            CREATE TABLE IF NOT EXISTS {db_name}.fact_conversation_transcript_topics(
+                conversationId      STRING,
+                communicationId     STRING,
+                mediaType           STRING,
+                participant         STRING,
+                topicId             STRING,
+                topicName           STRING,
+                topicPhrase         STRING,
+                transcriptPhrase    STRING,
+                confidence          INT
+            )
+            USING DELTA
+            LOCATION '{db_path}/{db_name}/fact_conversation_transcript_topics'
+    """)
 
 
 def create_raw_table(api_name: str, spark: SparkSession, db_name: str):
@@ -555,6 +604,8 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     create_raw_table("wfm_forecast_data", spark, db_name)
     create_raw_table("wfm_forecast_meta", spark, db_name)
     create_raw_table("wfm_planninggroups", spark, db_name)
+    create_raw_table("speechandtextanalytics", spark, db_name)
+    create_raw_table("speechandtextanalytics_transcript", spark, db_name)
 
     return True
 

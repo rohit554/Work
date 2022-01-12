@@ -1,0 +1,86 @@
+{
+    "fields": [
+      {
+        "metadata": {},
+        "name": "conversation",
+        "nullable": true,
+        "type": {
+          "fields": [
+            {
+              "metadata": {},
+              "name": "id",
+              "nullable": true,
+              "type": "string"
+            }
+          ],
+          "type": "struct"
+        }
+      },
+      {
+        "metadata": {},
+        "name": "sentimentScore",
+        "nullable": true,
+        "type": "double"
+      },
+      {
+        "metadata": {},
+        "name": "sentimentTrend",
+        "nullable": true,
+        "type": "double"
+      },
+      {
+        "metadata": {},
+        "name": "participantMetrics",
+        "nullable": true,
+        "type": {
+          "fields": [
+            {
+              "metadata": {},
+              "name": "agentDurationPercentage",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "metadata": {},
+              "name": "customerDurationPercentage",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "metadata": {},
+              "name": "silenceDurationPercentage",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "metadata": {},
+              "name": "ivrDurationPercentage",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+              "metadata": {},
+              "name": "acdDurationPercentage",
+              "nullable": true,
+              "type": "double"
+            },
+            {
+                "metadata": {},
+                "name": "otherDurationPercentage",
+                "nullable": true,
+                "type": "double"
+            },
+            {
+                "metadata": {},
+                "name": "overtalkCount",
+                "nullable": true,
+                "type": "double"
+            }
+          ],
+          "type": "struct"
+        }
+      }
+    ],
+    "type": "struct"
+  }
+  
