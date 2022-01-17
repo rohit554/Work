@@ -308,7 +308,7 @@ fact_wfm_forecast = """ \
 ;"""
 
 fact_speechandtextanalytics = """
-    SELECT  conversationId,
+    SELECT  DISTINCT conversationId,
             CAST(sentimentScore * 100 AS FLOAT) sentimentScore,
             CAST(sentimentTrend * 100 AS FLOAT) sentimentTrend,
             agentDurationPercentage,
@@ -322,7 +322,7 @@ fact_speechandtextanalytics = """
 """
 
 fact_conversation_transcript_topics = """
-            SELECT conversationId,
+            SELECT DISTINCT conversationId,
             communicationId,
             mediaType,
             topics.participant participant,
