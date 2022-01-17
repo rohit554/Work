@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 
 def fact_conversation_transcript_topics(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     transcript_topics = spark.sql(f"""
-                    SELECT conversationId,
+                    SELECT DISTINCT conversationId,
                     communicationId,
                     mediaType,
                     topics.participant,
@@ -20,7 +20,10 @@ def fact_conversation_transcript_topics(spark: SparkSession, extract_date, extra
                       communicationId,
                       mediaType,
                       EXPLODE(transcripts) transcripts
-              FROM raw_speechandtextanalytics_transcript))
+              FROM raw_speechandtextanalytics_transcript
+                WHERE   extractDate = '{extract_date}'
+                AND  extractIntervalStartTime = '{extract_start_time}'
+                AND extractIntervalEndTime = '{extract_end_time}'))
     """)
 
     transcript_topics.registerTempTable("transcript_topics")

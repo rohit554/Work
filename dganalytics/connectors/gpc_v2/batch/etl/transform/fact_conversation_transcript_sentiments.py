@@ -18,7 +18,10 @@ def fact_conversation_transcript_sentiments(spark: SparkSession, extract_date, e
                             communicationId,
                             mediaType,
                             EXPLODE(transcripts) transcripts
-                    FROM raw_speechandtextanalytics_transcript))
+                    FROM raw_speechandtextanalytics_transcript
+                    WHERE   extractDate = '{extract_date}'
+                    AND  extractIntervalStartTime = '{extract_start_time}'
+                    AND extractIntervalEndTime = '{extract_end_time}'))
     """)
 
     transcript_sentiments.registerTempTable("transcript_sentiments")

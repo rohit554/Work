@@ -22,7 +22,7 @@ def get_dim_conversation(spark):
 
 def get_speechandtextanalytics_topics(spark):
     df = spark.sql("""
-        SELECT  id topicId,
+        SELECT  DISTINCT id topicId,
                 name,
                 description,
                 published,

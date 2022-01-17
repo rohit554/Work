@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 
 def fact_speechandtextanalytics(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     speechandtextanalytics_metrics = spark.sql(f"""
-        SELECT  conversation.id AS conversationId,
+        SELECT  DISTINCT conversation.id AS conversationId,
                 sentimentScore,
                 sentimentTrend,
                 participantMetrics.agentDurationPercentage,
