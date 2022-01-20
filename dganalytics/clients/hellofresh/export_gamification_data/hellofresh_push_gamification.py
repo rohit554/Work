@@ -207,6 +207,9 @@ def push_anz_data(spark):
                         voice_tAcw/voice_nAcw `Voice ACW`,
                         chat_tAcw/chat_nAcw `Chat ACW`,
                         social_tAcw/social_nAcw `Social ACW`,
+                        voice_tHandle/voice_nHandle `Voice AHT`,
+                        chat_tHandle/chat_nHandle `Chat AHT`,
+                        social_tHandle/social_nHandle `Social AHT`,
                         voice_tHeldComplete/voice_nHeldComplete `Voice Hold Time`,
                         not_responding_duration `Not Responding Time`,
                         csat CSAT,
@@ -247,7 +250,10 @@ def push_anz_data(spark):
                     AND `Voice Hold Time` IS NULL
                     AND `Not Responding Time` IS NULL
                     AND CSAT IS NULL,
-                    AND `FCR Percent` IS NULL)
+                    AND `FCR Percent` IS NULL
+                    AND `Voice AHT` IS NULL
+                    AND `Chat AHT` IS NULL
+                    AND `Social AHT` IS NULL )
     """)
     push_gamification_data(anz.toPandas(), 'HELLOFRESHANZ', 'ANZConnection')
     return True
