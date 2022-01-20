@@ -206,14 +206,14 @@ def push_anz_data(spark):
                         kw_count Keyword,
                         voice_tAcw/voice_nAcw `Voice ACW`,
                         chat_tAcw/chat_nAcw `Chat ACW`,
-                        social_tAcw/social_nAcw `Social ACW`,
-                        voice_tHandle/voice_nHandle `Voice AHT`,
-                        chat_tHandle/chat_nHandle `Chat AHT`,
-                        social_tHandle/social_nHandle `Social AHT`,
+                        social_tAcw/social_nAcw `Social ACW`,                  
                         voice_tHeldComplete/voice_nHeldComplete `Voice Hold Time`,
                         not_responding_duration `Not Responding Time`,
                         csat CSAT,
-                        fcr * 100 / nSurveysCompleted as `FCR Percent`
+                        fcr * 100 / nSurveysCompleted as `FCR Percent`,
+                        voice_tHandle/voice_nHandle `AHT Voice`,
+                        chat_tHandle/chat_nHandle `AHT Chat`,
+                        social_tHandle/social_nHandle `AHT Social`
                 FROM hf_game_data
                 WHERE department IN (   'EP AU Manila',
                                         'HF AU Sydney',
@@ -249,11 +249,11 @@ def push_anz_data(spark):
                     AND `Social ACW` IS NULL
                     AND `Voice Hold Time` IS NULL
                     AND `Not Responding Time` IS NULL
-                    AND CSAT IS NULL,
+                    AND CSAT IS NULL
                     AND `FCR Percent` IS NULL
-                    AND `Voice AHT` IS NULL
-                    AND `Chat AHT` IS NULL
-                    AND `Social AHT` IS NULL )
+                    AND `AHT Voice` IS NULL
+                    AND `AHT Chat` IS NULL
+                    AND `AHT Social` IS NULL )
     """)
     push_gamification_data(anz.toPandas(), 'HELLOFRESHANZ', 'ANZConnection')
     return True
