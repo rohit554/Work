@@ -474,7 +474,7 @@ def fact_surveys(extract_start_time: str, extract_end_time: str):
                 questionGroupScore.markedNA AS questionGroupMarkedNA,
                 explode(questionGroupScore.questionScores) AS questionScore
             FROM (
-                SELECT 
+                SELECT DISTINCT 
                     id AS surveyId,
                     surveyForm.id AS surveyFormId,
                     surveyForm.name AS surveyFormName,
