@@ -66,7 +66,7 @@ schema = StructType([StructField('campaign_id', StructType(
 
 def get_activity_mapping(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
-    df.registerTempTable("activity_mapping")
+    df.createOrReplaceTempView("activity_mapping")
     df = spark.sql("""
                     select  distinct campaign_id.oid campaignId,
                             campaignName campaignName,

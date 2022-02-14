@@ -44,6 +44,6 @@ def fact_conversation_surveys(spark: SparkSession, extract_date, extract_start_t
             survey IS NOT NULL
     """)
 
-    surveys.registerTempTable("surveys")
+    surveys.createOrReplaceTempView("surveys")
     spark.sql("delete from fact_conversation_surveys where conversationId in (select distinct conversationId from surveys)")
     spark.sql("insert into fact_conversation_surveys select * from surveys")

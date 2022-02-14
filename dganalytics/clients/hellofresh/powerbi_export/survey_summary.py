@@ -14,7 +14,7 @@ def export_survey_summary(spark: SparkSession, tenant: str, region: str):
     queue_timezones.columns = header
 
     queue_mapping = spark.createDataFrame(queue_timezones)
-    queue_mapping.registerTempTable("queue_mapping")
+    queue_mapping.createOrReplaceTempView("queue_mapping")
 
     df = spark.sql(f"""
            select 

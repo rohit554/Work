@@ -82,7 +82,7 @@ databases = ['tp-prod']
 def get_questions(spark):
     for db in databases:
         df = exec_mongo_pipeline(spark, pipeline, 'quiz', schema, mongodb=db)
-        df.registerTempTable("questions")
+        df.createOrReplaceTempView("questions")
         df = spark.sql("""
                         select  distinct answer_given answerGiven,
                                 cast(answered_date as date) answeredDate,

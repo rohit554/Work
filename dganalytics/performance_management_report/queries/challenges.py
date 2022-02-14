@@ -192,7 +192,7 @@ def get_challenges(spark):
         else:
             df = df.union(challenges_df)
     
-    df.registerTempTable("challenges")
+    df.createOrReplaceTempView("challenges")
     df = spark.sql("""
                     select  action action,
                             campaign_id.oid campaignId,

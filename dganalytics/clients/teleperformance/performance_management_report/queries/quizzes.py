@@ -206,7 +206,7 @@ databases = ['tp-prod']
 def get_quizzes(spark):
     for db in databases:
         df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb=db)
-        df.registerTempTable("quizzes")
+        df.createOrReplaceTempView("quizzes")
         df = spark.sql("""
                         select  distinct cast(answered_date as date) answeredDate,
                                 campaign_id.oid campaign_id,

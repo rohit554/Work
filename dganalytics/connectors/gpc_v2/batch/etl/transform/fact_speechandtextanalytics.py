@@ -18,7 +18,7 @@ def fact_speechandtextanalytics(spark: SparkSession, extract_date, extract_start
                 AND extractIntervalEndTime = '{extract_end_time}'
     """)
 
-    speechandtextanalytics_metrics.registerTempTable("speechandtextanalytics_metrics")
+    speechandtextanalytics_metrics.createOrReplaceTempView("speechandtextanalytics_metrics")
 
     spark.sql("""DELETE FROM fact_speechandtextanalytics
                 WHERE conversationId IN (

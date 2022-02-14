@@ -21,7 +21,7 @@ def dim_hellofresh_interactions(spark: SparkSession, extract_date, extract_start
                             and  extractIntervalStartTime = '{extract_start_time}'
                              and extractIntervalEndTime = '{extract_end_time}' 
                              ) where rn = 1""")
-    interaction_list.registerTempTable("interaction_list")
+    interaction_list.createOrReplaceTempView("interaction_list")
     interaction_data = spark.sql(
         """select col.* from (select explode(interaction_data) from interaction_list)""")
 
@@ -61,7 +61,7 @@ def dim_hellofresh_interactions(spark: SparkSession, extract_date, extract_start
     )""")
     '''
 
-    interactions.registerTempTable("temp_interactions")
+    interactions.createOrReplaceTempView("temp_interactions")
     # insert into dim_hellofresh_interactions
     interactions = spark.sql("""
             select
@@ -111,7 +111,7 @@ def dim_hellofresh_interactions(spark: SparkSession, extract_date, extract_start
                 NULL originatingDirection,
                 cast((case when scheduled_at = '-0001-11-30 00:00:00' then NULL else scheduled_at end) as date) surveySentDatePart
              from temp_interactions""")
-    interactions.registerTempTable("interactions")
+    interactions.createOrReplaceTempView("interactions")
 
     spark.sql("""
             merge into dim_hellofresh_interactions as target  

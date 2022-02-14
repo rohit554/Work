@@ -13,7 +13,7 @@ def export_evaluation_question_scores(spark: SparkSession, tenant: str, region: 
     queue_timezones.columns = header
 
     queue_mapping = spark.createDataFrame(queue_timezones)
-    queue_mapping.registerTempTable("queue_mapping")
+    queue_mapping.createOrReplaceTempView("queue_mapping")
 
     df = spark.sql(f"""
             select /*+ BROADCAST(b) */ a.evaluationId evaluationKey,

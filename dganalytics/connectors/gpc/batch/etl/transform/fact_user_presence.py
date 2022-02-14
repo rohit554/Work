@@ -56,7 +56,7 @@ def fact_user_presence(spark: SparkSession, extract_date, extract_start_time, ex
         WHERE endRank = 1
     """)
 
-    user_presence.registerTempTable("user_presence")
+    user_presence.createOrReplaceTempView("user_presence")
 
     spark.sql("""
                 MERGE INTO fact_user_presence as target

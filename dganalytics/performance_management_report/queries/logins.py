@@ -125,7 +125,7 @@ schema = StructType([StructField('date', StringType(), True),
 
 def get_logins(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'Audit_Log', schema)
-    df.registerTempTable("logins")
+    df.createOrReplaceTempView("logins")
     df = spark.sql("""
                     select  distinct cast(date as date) date,
                             login_attempt loginAttempt,

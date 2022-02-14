@@ -43,7 +43,7 @@ if __name__ == '__main__':
              'TimeNotAdheringToSchedule', 'AdherenceViolations', 'Employee_ID', 'Username']]
     
     sdf = spark.createDataFrame(df)
-    sdf.registerTempTable("wfm_pre")
+    sdf.createOrReplaceTempView("wfm_pre")
     wfm_username_match = spark.sql(f"""select distinct a.Date, a.Organisation, a.Employee, a.Supervisor, a.TimeAdheringToScheduleHours,
              a.TimeNotAdheringToScheduleHours, a.TotalTimeScheduledHours, a.TimeAdheringToSchedule,
              a.TimeNotAdheringToSchedule, a.AdherenceViolations, a.Employee_ID, a.Username,
@@ -52,7 +52,7 @@ if __name__ == '__main__':
                             wfm_pre a left join gpc_{tenant}.dim_users b
                             on lower(trim(a.Username)) = trim(lower(b.userName))
                 """)
-    wfm_username_match.registerTempTable("wfm_username_match")
+    wfm_username_match.createOrReplaceTempView("wfm_username_match")
 
     wfm_simple_match = spark.sql(f"""select * from wfm_username_match where genesysUserId is not null
                         """)
@@ -77,7 +77,7 @@ if __name__ == '__main__':
                                             )
                         """)
     wfm = wfm_simple_match.union(wfm_fuzzy_match)
-    wfm.registerTempTable("wfm_temp")
+    wfm.createOrReplaceTempView("wfm_temp")
     wfm = spark.sql("""select 
                                     distinct Date, Organisation, Employee, Supervisor, TimeAdheringToScheduleHours,
                                 TimeNotAdheringToScheduleHours, TotalTimeScheduledHours, TimeAdheringToSchedule,
@@ -90,7 +90,7 @@ if __name__ == '__main__':
                                 """)
 
     
-    wfm.registerTempTable("wfm")
+    wfm.createOrReplaceTempView("wfm")
     spark.sql(f"""merge into dg_{tenant}.wfm_verint_export
                 using wfm 
                 on wfm.Date = wfm_verint_export.Date

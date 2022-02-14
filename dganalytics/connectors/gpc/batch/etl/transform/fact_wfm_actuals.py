@@ -30,7 +30,7 @@ rwa.userId, mu.managementId  as managementUnitId, rwa.startDate, rwa.endDate, rw
 where wfm.startDate != wfm.endDate
                 """)
 
-    wfm_actuals.registerTempTable("wfm_actuals")
+    wfm_actuals.createOrReplaceTempView("wfm_actuals")
     spark.sql("""
             merge into fact_wfm_actuals as target
                 using wfm_actuals as source

@@ -196,7 +196,7 @@ def get_activity_wise_points(spark):
 
         df = df.union(badge_bonus_points_df)
 
-    df.registerTempTable("activity_wise_points")
+    df.createOrReplaceTempView("activity_wise_points")
 
     df = spark.sql("""
                     select  a.campaign_id.oid as campaignId,

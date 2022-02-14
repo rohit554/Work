@@ -24,7 +24,7 @@ def fact_conversation_transcript_sentiments(spark: SparkSession, extract_date, e
                     AND extractIntervalEndTime = '{extract_end_time}'))
     """)
 
-    transcript_sentiments.registerTempTable("transcript_sentiments")
+    transcript_sentiments.createOrReplaceTempView("transcript_sentiments")
 
     spark.sql("""DELETE FROM fact_conversation_transcript_sentiments
                 WHERE conversationId IN (

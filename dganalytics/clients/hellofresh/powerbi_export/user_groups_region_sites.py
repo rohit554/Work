@@ -19,7 +19,7 @@ def export_user_groups_region_sites(spark: SparkSession, tenant: str, region: st
     group_timezones.columns = header
 
     group_timezones = spark.createDataFrame(group_timezones)
-    group_timezones.registerTempTable("group_timezones")
+    group_timezones.createOrReplaceTempView("group_timezones")
 
     user_group_sites = spark.sql("""
         select userId, groupName, region, site, timeZone from (

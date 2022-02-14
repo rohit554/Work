@@ -96,7 +96,7 @@ databases = ['tp-prod']
 def get_levels(spark):
     for db in databases:
         df = exec_mongo_pipeline(spark, pipeline, 'User', schema, mongodb=db)
-        df.registerTempTable("levels")
+        df.createOrReplaceTempView("levels")
         df = spark.sql("""
                         select  distinct achieved_date achievedDate,
                                 campaign_id.oid campaignId,

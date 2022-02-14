@@ -19,7 +19,7 @@ def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str, re
     queue_timezones.columns = header
 
     queue_timezones = spark.createDataFrame(queue_timezones)
-    queue_timezones.registerTempTable("queue_timezones")
+    queue_timezones.createOrReplaceTempView("queue_timezones")
 
     df = spark.sql(f"""
 		SELECT

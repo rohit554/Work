@@ -131,7 +131,7 @@ if __name__ == "__main__":
 
         df = get_coles_data(spark, extract_date, org_id)
         df = df.drop_duplicates()
-        df.registerTempTable("coles_activity")
+        df.createOrReplaceTempView("coles_activity")
 
         spark.sql(f"""
 						merge into dg_salmatcolesonline.kpi_raw_data

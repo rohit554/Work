@@ -100,7 +100,7 @@ def fact_wfm_forecast(spark, extract_date, extract_start_time, extract_end_time)
             AND  plg.extractDate = xdata.extractDate
     """)
     resultant = transform(dfRes)
-    resultant.registerTempTable("wfm_forecast")
+    resultant.createOrReplaceTempView("wfm_forecast")
     primary_key = [
         "forecastId",
         "planningGroupId",

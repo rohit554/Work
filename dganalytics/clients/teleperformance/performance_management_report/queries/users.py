@@ -138,7 +138,7 @@ def get_users(spark):
     for db in databases:
         print("getting data from " + db)
         df = exec_mongo_pipeline(spark, pipeline, 'User', schema, mongodb=db)
-        df.registerTempTable("users")
+        df.createOrReplaceTempView("users")
         df = spark.sql("""
                         select  distinct UserId userId,
                                 Email email,

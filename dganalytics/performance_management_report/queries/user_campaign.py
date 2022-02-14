@@ -104,7 +104,7 @@ schema = StructType([StructField('CampaignId', StructType([StructField('oid', St
 
 def get_user_campaign(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
-    df.registerTempTable("user_campaign")
+    df.createOrReplaceTempView("user_campaign")
     df = spark.sql("""
                     select  distinct CampaignId.oid campaignId,
                             TeamId.oid teamId,

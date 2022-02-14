@@ -39,7 +39,7 @@ concat(rwa.extractDate, '|', rwa.extractIntervalStartTime, '|', rwa.extractInter
     ) wfm
 where wfm.startDate != wfm.endDate
                                     """)
-    wfm_exceptions.registerTempTable("wfm_exceptions")
+    wfm_exceptions.createOrReplaceTempView("wfm_exceptions")
     spark.sql("""
                 merge into fact_wfm_exceptions as target
                     using wfm_exceptions as source

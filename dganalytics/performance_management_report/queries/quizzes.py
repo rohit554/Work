@@ -318,7 +318,7 @@ schema = StructType([StructField('answered_date', StringType(), True),
 
 def get_quizzes(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
-    df.registerTempTable("quizzes")
+    df.createOrReplaceTempView("quizzes")
     df = spark.sql("""
                     select  distinct cast(answered_date as date) answeredDate,
                             campaign_id.oid campaign_id,

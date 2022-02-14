@@ -26,7 +26,7 @@ def export_users_routing_status_sliced(spark: SparkSession, tenant: str, region:
     user_timezone = pd.read_csv(os.path.join(
         tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'), header=0)
     user_timezone = spark.createDataFrame(user_timezone)
-    user_timezone.registerTempTable("user_timezone")
+    user_timezone.createOrReplaceTempView("user_timezone")
 
     routing = spark.sql(f"""
             SELECT frs.userId userKey,
@@ -43,13 +43,13 @@ def export_users_routing_status_sliced(spark: SparkSession, tenant: str, region:
                     and ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
     """)
 
-    routing.registerTempTable("routing")
+    routing.createOrReplaceTempView("routing")
     '''
     slots = spark.sql("""select date_time from (select explode(date_time) as date_time from 
                                 (SELECT sequence(cast(concat(add_months(current_date(), -13), ' 00:00:00') as timestamp),
                                 cast(concat(current_date() + 2, ' 00:00:00') as timestamp), interval 30 minutes) as date_time))
                 """)
-    slots.registerTempTable("slots")
+    slots.createOrReplaceTempView("slots")
 
     df = spark.sql("""
 

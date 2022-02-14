@@ -64,7 +64,7 @@ databases = ['tp-prod']
 def get_logins(spark):
     for db in databases:
         df = exec_mongo_pipeline(spark, pipeline, 'Audit_Log', schema, mongodb=db)
-        df.registerTempTable("logins")
+        df.createOrReplaceTempView("logins")
         df = spark.sql("""
                         select  distinct cast(date as date) date,
                                 login_attempt loginAttempt,

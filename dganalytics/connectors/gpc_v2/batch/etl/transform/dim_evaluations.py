@@ -16,7 +16,7 @@ def dim_evaluations(spark: SparkSession, extract_date, extract_start_time, extra
                                     from raw_evaluations  where extractDate = '{extract_date}'
                                     and  extractIntervalStartTime = '{extract_start_time}' and extractIntervalEndTime = '{extract_end_time}'
                                     """)
-    pre_evaluations.registerTempTable("pre_evaluations")
+    pre_evaluations.createOrReplaceTempView("pre_evaluations")
     pre_evaluations.show()
     evaluations = spark.sql("""
                 select * from (
@@ -35,7 +35,7 @@ def dim_evaluations(spark: SparkSession, extract_date, extract_start_time, extra
     evaluations.show()
     evaluations = evaluations.drop("rn")
     
-    evaluations.registerTempTable("evaluations")
+    evaluations.createOrReplaceTempView("evaluations")
     evaluations.show()
     evaluations = spark.sql("""
                                 merge into dim_evaluations as target

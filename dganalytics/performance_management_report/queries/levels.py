@@ -155,7 +155,7 @@ def get_levels(spark):
         else:
             df = df.union(levels_df)
 
-    df.registerTempTable("levels")
+    df.createOrReplaceTempView("levels")
     df = spark.sql("""
                     select  distinct achieved_date achievedDate,
                             campaign_id.oid campaignId,

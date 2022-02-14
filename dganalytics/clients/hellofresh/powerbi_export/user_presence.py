@@ -9,7 +9,7 @@ def export_user_presence(spark: SparkSession, tenant: str, region: str):
     tenant_path, db_path, log_path = get_path_vars(tenant)
     user_timezone = pd.read_csv(os.path.join(tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'), header=0)
     user_timezone = spark.createDataFrame(user_timezone)
-    user_timezone.registerTempTable("user_timezone")
+    user_timezone.createOrReplaceTempView("user_timezone")
 
     dates = spark.sql("""
         SELECT 
@@ -20,7 +20,7 @@ def export_user_presence(spark: SparkSession, tenant: str, region: str):
         )
     """)
 
-    dates.registerTempTable("dates")
+    dates.createOrReplaceTempView("dates")
 
     pp = spark.sql(f"""
         SELECT  
@@ -42,7 +42,7 @@ def export_user_presence(spark: SparkSession, tenant: str, region: str):
               AND ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
     """)
 
-    pp.registerTempTable("presence")
+    pp.createOrReplaceTempView("presence")
 
     df = spark.sql("""
         SELECT

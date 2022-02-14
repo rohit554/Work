@@ -150,7 +150,7 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
     table_name = get_raw_tbl_name(api_name)
     logger.info(f"updating raw table for {api_name} {db_name}.{table_name}")
 
-    # df.registerTempTable(api_name)
+    # df.createOrReplaceTempView(api_name)
 
     cols = spark.table(f"{db_name}.{table_name}").columns
     cols = ",".join(cols)

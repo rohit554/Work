@@ -94,7 +94,7 @@ def get_data_upload_audit_log(spark):
         else:
             df = df.union(data_upload_logs)
 
-    df.registerTempTable("data_upload_audit_log")
+    df.createOrReplaceTempView("data_upload_audit_log")
 
 
     df = spark.sql("""

@@ -11,7 +11,7 @@ def fact_evaluation_total_scores(spark: SparkSession, extract_date, extract_star
                     from raw_evaluations  where extractDate = '{extract_date}'
                     and  extractIntervalStartTime = '{extract_start_time}' and extractIntervalEndTime = '{extract_end_time}'
                                     """)
-    evaluation_total_scores.registerTempTable("evaluation_total_scores")
+    evaluation_total_scores.createOrReplaceTempView("evaluation_total_scores")
     spark.sql("""
                 merge into fact_evaluation_total_scores as target
                     using evaluation_total_scores as source

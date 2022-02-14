@@ -8,7 +8,7 @@ def export_wfm_actuals(spark: SparkSession, tenant: str, region: str):
     tenant_path, db_path, log_path = get_path_vars(tenant)
     user_timezone = pd.read_csv(os.path.join(tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'), header=0)
     user_timezone = spark.createDataFrame(user_timezone)
-    user_timezone.registerTempTable("user_timezone")
+    user_timezone.createOrReplaceTempView("user_timezone")
 
     df = spark.sql(f"""
            select

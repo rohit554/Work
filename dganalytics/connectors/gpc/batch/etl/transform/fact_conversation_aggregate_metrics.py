@@ -109,7 +109,7 @@ from
                                     "tUserResponseTime", "tVoicemail", "tWait") )
                                             """)
 
-    agg_metrics.registerTempTable("conversation_agg_metrics")
+    agg_metrics.createOrReplaceTempView("conversation_agg_metrics")
 
     incorrect_interval_data = spark.sql(f"""
 			select count(*) as count from conversation_agg_metrics 
@@ -119,7 +119,7 @@ from
         raise Exception("Incorrect interval in aggregates - only 15 min intervals are allowed")
     dist_dates = spark.sql(
         "select distinct date, intervalStart, intervalEnd from conversation_agg_metrics")
-    dist_dates.registerTempTable("dist_dates")
+    dist_dates.createOrReplaceTempView("dist_dates")
     spark.sql(f"""delete from fact_conversation_aggregate_metrics a where 
                                                 exists (select 1 from dist_dates b
                                                     where b.`date` = a.`date`

@@ -17,12 +17,12 @@ def get_base_data(spark: SparkSession, extract_date: str):
     queue_timezones.columns = header
 
     queue_timezones = spark.createDataFrame(queue_timezones)
-    queue_timezones.registerTempTable("queue_timezones")
+    queue_timezones.createOrReplaceTempView("queue_timezones")
 
     user_timezone = pd.read_csv(os.path.join(
         tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'), header=0)
     user_timezone = spark.createDataFrame(user_timezone)
-    user_timezone.registerTempTable("user_timezone")
+    user_timezone.createOrReplaceTempView("user_timezone")
 
     backword_days = 16
 
@@ -379,7 +379,7 @@ if __name__ == "__main__":
 
         df = get_base_data(spark, extract_date)
         df = df.drop_duplicates()
-        df.registerTempTable("hf_game_data")
+        df.createOrReplaceTempView("hf_game_data")
 
         push_anz_data(spark)
         push_us_data(spark)

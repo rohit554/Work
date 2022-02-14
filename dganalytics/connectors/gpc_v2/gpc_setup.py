@@ -567,7 +567,7 @@ def create_raw_table(api_name: str, spark: SparkSession, db_name: str):
     table_name = "raw_" + f"{api_name}"
     logger.info(f"creating genesys raw table - {table_name}")
     spark.createDataFrame(spark.sparkContext.emptyRDD(),
-                          schema=schema).registerTempTable(table_name)
+                          schema=schema).createOrReplaceTempView(table_name)
     create_qry = f"""create table if not exists {db_name}.{table_name}
                         using delta partitioned by(extractDate, extractIntervalStartTime, extractIntervalEndTime) LOCATION
                                 '{db_path}/{db_name}/{table_name}'

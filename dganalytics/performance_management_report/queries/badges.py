@@ -139,7 +139,7 @@ schema = StructType([StructField('badge_name', StringType(), True),
 
 def get_badges(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'User_Outcome', schema)
-    df.registerTempTable("badges")
+    df.createOrReplaceTempView("badges")
     df = spark.sql("""
                     select  badge_name badgeName,
                             campaign_id.oid campaignId,

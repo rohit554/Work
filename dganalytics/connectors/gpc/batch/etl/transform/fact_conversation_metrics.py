@@ -110,7 +110,7 @@ def fact_conversation_metrics(spark: SparkSession, extract_date, extract_start_t
                         format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp)
                                             """)
 
-    conversation_metrics.registerTempTable("conversation_metrics")
+    conversation_metrics.createOrReplaceTempView("conversation_metrics")
     spark.sql("""delete from fact_conversation_metrics where conversationId in (
                             select distinct conversationId from conversation_metrics)""")
     spark.sql(

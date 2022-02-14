@@ -49,7 +49,7 @@ databases = ['tp-prod']
 def get_tp_campaign_activities(spark):
     for db in databases:
         df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb=db)
-        df.registerTempTable("tp_campaign_activities")
+        df.createOrReplaceTempView("tp_campaign_activities")
         df = spark.sql("""
                         select  distinct CampaignId as campaignId,
                                 ActivityId as activityId,

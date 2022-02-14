@@ -36,7 +36,7 @@ schema = StructType([StructField('campaign_id', StructType([StructField('oid', S
 
 def get_campaign(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
-    df.registerTempTable("campaign")
+    df.createOrReplaceTempView("campaign")
     df = spark.sql("""
                     select  distinct campaign_id.oid campaignId,
                             cast(start_date as date) start_date,

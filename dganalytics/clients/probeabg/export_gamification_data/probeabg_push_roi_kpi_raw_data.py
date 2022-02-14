@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
         df = get_probeabg_data(spark, extract_date, logger)
         df = df.drop_duplicates()
-        df.registerTempTable("probeabg_activity")
+        df.createOrReplaceTempView("probeabg_activity")
 
         spark.sql(f"""
 						MERGE INTO dg_probeabg.kpi_raw_data

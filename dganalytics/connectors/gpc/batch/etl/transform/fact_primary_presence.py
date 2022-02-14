@@ -13,7 +13,7 @@ def fact_primary_presence(spark: SparkSession, extract_date, extract_start_time,
                     where extractDate = '{extract_date}'
                     and  extractIntervalStartTime = '{extract_start_time}' and extractIntervalEndTime = '{extract_end_time}')
                                     """)
-    primary_presence.registerTempTable("primary_presence")
+    primary_presence.createOrReplaceTempView("primary_presence")
     spark.sql("""
                 delete from fact_primary_presence a where exists (
                         select 1 from primary_presence b where a.userId = b.userId

@@ -44,7 +44,7 @@ def dim_conversations(spark: SparkSession, extract_date, extract_start_time, ext
                                 ) )
                                     """
                               )
-    conversations.registerTempTable("conversations")
+    conversations.createOrReplaceTempView("conversations")
 
     spark.sql("""delete from dim_conversations a where exists (
                         select 1 from conversations b 

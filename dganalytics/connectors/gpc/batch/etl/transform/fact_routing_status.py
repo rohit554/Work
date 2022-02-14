@@ -14,7 +14,7 @@ def fact_routing_status(spark: SparkSession, extract_date, extract_start_time, e
                             extractDate = '{extract_date}'
                             and  extractIntervalStartTime = '{extract_start_time}' and extractIntervalEndTime = '{extract_end_time}')
                                 """)
-    routing_status.registerTempTable("routing_status")
+    routing_status.createOrReplaceTempView("routing_status")
     spark.sql("""
                 delete from fact_routing_status a where exists (
                         select 1 from routing_status b where a.userId = b.userId

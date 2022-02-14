@@ -43,7 +43,7 @@ where rwa.extractDate = '{extract_date}'
     ) wfm
     where wfm.startDate != wfm.endDate
                                     """)
-    wfm_day_metrics.registerTempTable("wfm_day_metrics")
+    wfm_day_metrics.createOrReplaceTempView("wfm_day_metrics")
     spark.sql("""
                 merge into fact_wfm_day_metrics as target
                     using wfm_day_metrics as source

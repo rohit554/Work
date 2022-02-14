@@ -395,7 +395,7 @@ def delta_table_partition_ovrewrite(df, table, partition_cols: List[str]):
         ["cast(" + c + " as string)" for c in partition_cols]) + ") in (" + lst + ")"
     print(filter_condition)
     temp_tbl_name = random_string()
-    df.registerTempTable(temp_tbl_name)
+    df.createOrReplaceTempView(temp_tbl_name)
     df.filter(filter_condition).coalesce(1).write.format(
         "delta").mode("overwrite"
                       ).partitionBy(partition_cols

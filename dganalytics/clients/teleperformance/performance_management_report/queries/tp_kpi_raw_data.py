@@ -21,7 +21,7 @@ def get_tp_kpi_raw_data(spark):
     holden_data = spark.read.schema(schema).json(spark._sc.parallelize(
         holden_data.json()['data']))
     df = holden_data.withColumn("orgId", lit('holden'))
-    df.registerTempTable("tp_kpi_raw_data")
+    df.createOrReplaceTempView("tp_kpi_raw_data")
     df = spark.sql("""
                     select  campaign_id as campaignId,
                             kpi as kpi,
@@ -49,7 +49,7 @@ def get_tp_kpi_raw_data(spark):
 
     # df = holden_data.union(tp_data)
 
-        df.registerTempTable("tp_kpi_raw_data")
+        df.createOrReplaceTempView("tp_kpi_raw_data")
         df = spark.sql("""
                         select  distinct campaign_id as campaignId,
                                 kpi as kpi,

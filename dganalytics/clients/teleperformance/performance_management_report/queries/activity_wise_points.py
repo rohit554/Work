@@ -189,7 +189,7 @@ databases = ['tp-prod']
 def get_activity_wise_points(spark):
     for db in databases:
         df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb=db)
-        df.registerTempTable("activity_wise_points")
+        df.createOrReplaceTempView("activity_wise_points")
         df = spark.sql("""
                         select  distinct a.campaign_id.oid as campaignId,
                             a.activityId as activityId,

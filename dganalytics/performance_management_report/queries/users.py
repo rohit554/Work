@@ -134,7 +134,7 @@ schema = StructType([StructField('Email', StringType(), True),
 
 def get_users(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
-    df.registerTempTable("users")
+    df.createOrReplaceTempView("users")
     df = spark.sql("""
                     select  distinct UserId userId,
                             Email email,

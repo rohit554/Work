@@ -11,14 +11,14 @@ def export_users_primary_presence(spark: SparkSession, tenant: str, region: str)
     user_timezone = pd.read_csv(os.path.join(
         tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'), header=0)
     user_timezone = spark.createDataFrame(user_timezone)
-    user_timezone.registerTempTable("user_timezone")
+    user_timezone.createOrReplaceTempView("user_timezone")
 
     dates = spark.sql("""
                     select explode(date)  as date from (SELECT
                         sequence(add_months(current_date(), -13), current_date() + 2,
                                 interval 1 day) as date)
                         """)
-    dates.registerTempTable("dates")
+    dates.createOrReplaceTempView("dates")
 
     pp = spark.sql(f"""
             select  /*+ BROADCAST(user_timezone) */ 
@@ -31,7 +31,7 @@ def export_users_primary_presence(spark: SparkSession, tenant: str, region: str)
                 where fp.userId = ut.userId
                     and ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
     """)
-    pp.registerTempTable("primary_presence")
+    pp.createOrReplaceTempView("primary_presence")
 
     df = spark.sql("""
                 select /*+ BROADCAST(dates) */  pp.UserKey, pp.userId, 
