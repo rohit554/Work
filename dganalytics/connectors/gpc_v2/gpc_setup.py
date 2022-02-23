@@ -108,7 +108,7 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 surveyCompletedDate timestamp,
                 surveyFormContextId string,
                 surveyFormId string,
-                surveyFormName timestamp,
+                surveyFormName string,
                 surveyPromoterScore int,
                 oSurveyTotalScore int,
                 eventDate date,
