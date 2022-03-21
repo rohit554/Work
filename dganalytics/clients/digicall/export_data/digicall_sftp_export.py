@@ -71,9 +71,9 @@ if __name__ == "__main__":
 
                 if export_name.startswith("fact_"):
                     export_part += 1
-                    upload_name = f"./{export_name_normalised}_{export_part}.csv"
+                    upload_name = f"./IN/{export_name_normalised}_{export_part}.csv"
                 else:
-                    upload_name = f"./{export_name_normalised}.csv"
+                    upload_name = f"./IN/{export_name_normalised}.csv"
 
                 logger.info(f"uploading {file_path} to {upload_name}...")
                 sftp_conn.put(file_path, upload_name)
