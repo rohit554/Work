@@ -380,7 +380,7 @@ def push_benx_data(spark):
               chat_tHandle/chat_nHandle `AHT Chat`,
               social_tHandle/social_nHandle `AHT Social`
               adherencePercentage `Adherence`,
-              ( nSurveySent /nHandle) `No Surveys Sent`,
+              nSurveySent `No Surveys Sent`,
               CASE WHEN userPresenceOqtTime IS NOT NULL
               THEN COALESCE(not_responding_duration, 0) * 100 / (userPresenceOqtTime) ELSE NULL END  `Not Responding TIme`
                            
