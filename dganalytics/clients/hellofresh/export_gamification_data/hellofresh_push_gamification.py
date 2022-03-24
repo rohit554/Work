@@ -173,7 +173,7 @@ def get_base_data(spark: SparkSession, extract_date: str):
                     cast(from_utc_timestamp(s.surveySentDate, trim(c.timeZone)) as date) date, s.userKey userId, 
                     round(sum(coalesce(s.csatAchieved, 0))/sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) * 20, 0) as csat,
                     sum(coalesce(s.csatAchieved, 0)) csatSum,
-                    COUNT(surveySentDate, 0) nSurveySent,
+                    COUNT(surveySentDate) nSurveySent,
                     sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) csatCount,
                     sum(case when s.status = 'Completed' THEN fcr ELSE NULL END) fcr,
                     sum(case when s.status = 'Completed' THEN 1 ELSE 0 END) nSurveysCompleted
@@ -380,7 +380,7 @@ def push_benx_data(spark):
               chat_tHandle/chat_nHandle `AHT Chat`,
               social_tHandle/social_nHandle `AHT Social`
               adherencePercentage `Adherence`,
-              ( COUNT(surveySentDate) /nHandle) `No Surveys Sent`,
+              ( nSurveySent /nHandle) `No Surveys Sent`,
               CASE WHEN userPresenceOqtTime IS NOT NULL
               THEN COALESCE(not_responding_duration, 0) * 100 / (userPresenceOqtTime) ELSE NULL END  `Not Responding TIme`
                            
