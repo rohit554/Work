@@ -372,13 +372,13 @@ def push_benx_data(spark):
     benx = spark.sql("""
         SELECT * FROM (
             SELECT
-              userId `UserID`,
+              userId `UserId`,
               date_format(cast(date as date), 'dd-MM-yyyy') `Date`,
               totalScore `QA Score`,
               csat `CSAT Score`,
               voice_tHandle/voice_nHandle `AHT Voice`,
               chat_tHandle/chat_nHandle `AHT Chat`,
-              social_tHandle/social_nHandle `AHT Social`
+              social_tHandle/social_nHandle `AHT Social`,
               adherencePercentage `Adherence`,
               nSurveySent `No Surveys Sent`,
               CASE WHEN userPresenceOqtTime IS NOT NULL
@@ -387,8 +387,7 @@ def push_benx_data(spark):
             FROM hf_game_data 
             WHERE department IN ( 'HF BNL HF AMS' )
             )
-            WHERE NOT (`Adherence` IS NULL
-                      AND `AHT Voice` IS NULL
+            WHERE NOT (`AHT Voice` IS NULL
                       AND `AHT Chat` IS NULL
                       AND `AHT Social` IS NULL
                       AND `CSAT Score` IS NULL
@@ -400,7 +399,7 @@ def push_benx_data(spark):
                       )
     """)
    
-    push_gamification_data(benx.toPandas(), 'HELLOFRESHBENX', 'HF_BENX')
+    push_gamification_data(benx.toPandas(), 'HELLOFRESHBENELUX', 'HFBenelux')
     return True 
 
 
