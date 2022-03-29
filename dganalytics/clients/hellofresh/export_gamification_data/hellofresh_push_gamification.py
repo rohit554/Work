@@ -46,7 +46,8 @@ def get_base_data(spark: SparkSession, extract_date: str):
                     survey.csatSum, survey.csatCount,
                     survey.fcr, 
                     survey.nSurveysCompleted,
-                    up.oqtTime userPresenceOqtTime, up.totalTime userPresenceTotalTime
+                    up.oqtTime userPresenceOqtTime, up.totalTime userPresenceTotalTime,
+                    wc.retentionOfCustomer
                     from (select userId, date, department from gpc_hellofresh.dim_users,
                         (select explode(sequence((cast('{extract_date}' as date))-{backword_days} + 2, (cast('{extract_date}' as date))+1, interval 1 day )) as date) dates) u
                     left join
@@ -185,6 +186,25 @@ def get_base_data(spark: SparkSession, extract_date: str):
                     on
                     survey.userId = u.userId
                     and survey.date = u.date
+
+                    left join
+                    (
+                    select  date,
+                            agentId,
+                            SUM(CASE WHEN wrapUpCode = '36185a4e-371b-4c0d-95f6-8d3fe958b8d5' THEN 1 ELSE 0 END) retentionOfCustomer
+                    from (select distinct dc.ConversationId,
+                                          cast(from_utc_timestamp(conversationEnd, trim(timeZone)) as date) date,
+                                          dc.agentId,
+                                          dc.wrapUpCode
+                    from gpc_hellofresh.dim_conversations dc, gpc_hellofresh.dim_routing_queues drq, queue_timezones qt
+                    where conversationStartDate >= ((cast('{extract_date}' as date)) - {backword_days})
+                          and drq.queueId = dc.queueId
+                          and qt.queueName = drq.queueName)
+                    group by date, agentId
+                    )wc
+                    on 
+                    wc.agentId = u.userId
+                    and wc.date = u.date
                     )
         WHERE cast(date as date) >=  (cast('{extract_date}' as date) - ({backword_days} + 2))
 
@@ -213,7 +233,8 @@ def push_anz_data(spark):
                         fcr * 100 / nSurveysCompleted as `FCR Percent`,
                         voice_tHandle/voice_nHandle `AHT Voice`,
                         chat_tHandle/chat_nHandle `AHT Chat`,
-                        social_tHandle/social_nHandle `AHT Social`
+                        social_tHandle/social_nHandle `AHT Social`,
+                        retentionOfCustomer `Retention Of Customer`
                 FROM hf_game_data
                 WHERE department IN (   'EP AU Manila',
                                         'HF AU Sydney',
@@ -253,7 +274,8 @@ def push_anz_data(spark):
                     AND `FCR Percent` IS NULL
                     AND `AHT Voice` IS NULL
                     AND `AHT Chat` IS NULL
-                    AND `AHT Social` IS NULL )
+                    AND `AHT Social` IS NULL
+                    AND `Retention Of Customer` IS NULL)
     """)
     push_gamification_data(anz.toPandas(), 'HELLOFRESHANZ', 'ANZConnection')
     return True
