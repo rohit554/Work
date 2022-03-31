@@ -11,48 +11,30 @@ pipeline = [
                 ]
             }
         }
-    }, {
-        '$project': {
-            '_id': 1,
-            'name': 1,
-            'outcome': 1,
-            'challenges': 1,
-            "org_id": 1
+    }, 
+    {
+        '$lookup': {
+            'from': 'Campaign', 
+            'localField': 'campaign_id', 
+            'foreignField': '_id', 
+            'as': 'Campaign'
         }
     }, {
         '$unwind': {
-            'path': '$outcome',
+            'path': '$Campaign', 
             'preserveNullAndEmptyArrays': False
-        }
-    }, {
-        '$unwind': {
-            'path': '$challenges',
-            'preserveNullAndEmptyArrays': False
-        }
-    }, {
-        '$addFields': {
-            'isChallengeActivty': {
-                '$cond': {
-                    'if': {
-                        '$eq': [
-                            '$outcome._id', '$challenges.outcome_id'
-                        ]
-                    },
-                    'then': True,
-                    'else': False
-                }
-            }
         }
     }, {
         '$project': {
-            'campaign_id': '$_id',
-            'campaignName': '$name',
-            'activityName': '$outcome.name',
-            'activityId': '$outcome._id',
-            'isChallengeActivty': 1,
-            'org_id': '$org_id'
+            'campaign_id': 1, 
+            'campaignName': '$Campaign.name', 
+            'activityName': '$name', 
+            'activityId': '$_id', 
+            'isChallengeActivty': '$challenge_flag', 
+            'org_id': 1
         }
     }
+
 ]
 
 
@@ -65,7 +47,7 @@ schema = StructType([StructField('campaign_id', StructType(
                     StructField('org_id', StringType(), True)])
 
 def get_activity_mapping(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
+    df = exec_mongo_pipeline(spark, pipeline, 'Outcomes', schema)
     df.createOrReplaceTempView("activity_mapping")
     df = spark.sql("""
                     select  distinct campaign_id.oid campaignId,
