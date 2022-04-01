@@ -5,14 +5,6 @@ from datetime import datetime, timedelta
 
 pipeline = [
     {
-        '$match': {
-            '$expr': {
-                '$and': [
-                ]
-            }
-        }
-    }, 
-    {
         '$lookup': {
             'from': 'Campaign', 
             'localField': 'campaign_id', 
@@ -34,15 +26,16 @@ pipeline = [
             'org_id': 1
         }
     }
-
 ]
+
 
 
 schema = StructType([StructField('campaign_id', StructType(
                          [StructField('oid', StringType(), True)]), True),
                     StructField('campaignName', StringType(), True),
                     StructField('activityName', StringType(), True),
-                    StructField('activityId', StringType(), True),
+                    StructField('activityId', StructType(
+						 [StructField('oid', StringType(), True)]), True),
                     StructField('isChallengeActivty', BooleanType(), True),
                     StructField('org_id', StringType(), True)])
 
@@ -53,7 +46,7 @@ def get_activity_mapping(spark):
                     select  distinct campaign_id.oid campaignId,
                             campaignName campaignName,
                             activityName activityName,
-                            activityId activityId,
+                            activityId.oid activityId,
                             isChallengeActivty isChallengeActivty,
                             lower(org_id) orgId
                     from activity_mapping
