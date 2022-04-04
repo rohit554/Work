@@ -73,7 +73,8 @@ spark.sql(f"""
                     userPresenceTotalTime int,
                     fcr float,
                     nSurveysCompleted int,
-                    retentionOfCustomer int
+                    retentionOfCustomer int,
+                    nSurveySent int,
                 )
                 using delta
                 partitioned by(date)

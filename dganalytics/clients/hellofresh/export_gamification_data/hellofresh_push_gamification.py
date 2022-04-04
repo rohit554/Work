@@ -43,7 +43,7 @@ def get_base_data(spark: SparkSession, extract_date: str):
                     qa.totalScore, wfm.adherencePercentage, wfm.conformancePercentage, kw.kw_count, survey.csat,
                     wfm.adherenceScheduleSecs, wfm.exceptionDurationSecs, wfm.adherenceScheduleSecs,
                     wfm.conformanceActualSecs, wfm.conformanceScheduleSecs, qa.totalScoreSum, qa.totalScoreCount,
-                    survey.csatSum, survey.csatCount,
+                    survey.csatSum, survey.csatCount,survey.nSurveySent,
                     survey.fcr, 
                     survey.nSurveysCompleted,
                     up.oqtTime userPresenceOqtTime, up.totalTime userPresenceTotalTime,
@@ -174,6 +174,7 @@ def get_base_data(spark: SparkSession, extract_date: str):
                     cast(from_utc_timestamp(s.surveySentDate, trim(c.timeZone)) as date) date, s.userKey userId, 
                     round(sum(coalesce(s.csatAchieved, 0))/sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) * 20, 0) as csat,
                     sum(coalesce(s.csatAchieved, 0)) csatSum,
+                    COUNT(surveySentDate) nSurveySent,
                     sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) csatCount,
                     sum(case when s.status = 'Completed' THEN fcr ELSE NULL END) fcr,
                     sum(case when s.status = 'Completed' THEN 1 ELSE 0 END) nSurveysCompleted
@@ -389,6 +390,41 @@ def push_ca_data(spark):
     return True
 
 
+def push_benx_data(spark):
+    benx = spark.sql("""
+        SELECT * FROM (
+            SELECT
+              userId `UserId`,
+              date_format(cast(date as date), 'dd-MM-yyyy') `Date`,
+              totalScore `QA Score`,
+              csat `CSAT Score`,
+              voice_tHandle/voice_nHandle `AHT Voice`,
+              chat_tHandle/chat_nHandle `AHT Chat`,
+              social_tHandle/social_nHandle `AHT Social`,
+              adherencePercentage `Adherence`,
+              nSurveySent `No Surveys Sent`,
+              CASE WHEN userPresenceOqtTime IS NOT NULL
+              THEN COALESCE(not_responding_duration, 0) * 100 / (userPresenceOqtTime) ELSE NULL END  `Not Responding TIme`
+                           
+            FROM hf_game_data 
+            WHERE department IN ( 'HF BNL HF AMS' )
+            )
+            WHERE NOT (`AHT Voice` IS NULL
+                      AND `AHT Chat` IS NULL
+                      AND `AHT Social` IS NULL
+                      AND `CSAT Score` IS NULL
+                      AND `QA Score` IS NULL
+                      AND `Adherence` IS NULL
+                      AND `No Surveys Sent` IS NULL
+                      AND `Not Responding TIme` IS NULL 
+                       
+                      )
+    """)
+   
+    push_gamification_data(benx.toPandas(), 'HELLOFRESHBENELUX', 'HFBenelux')
+    return True 
+
+
 if __name__ == "__main__":
     tenant, run_id, extract_date, org_id = dg_metadata_export_parser()
     tenant = 'hellofresh'
@@ -407,6 +443,7 @@ if __name__ == "__main__":
         push_us_data(spark)
         push_uk_data(spark)
         push_ca_data(spark)
+        push_benx_data(spark)
 
         spark.sql(f"""
                         MERGE INTO dg_hellofresh.kpi_raw_data
