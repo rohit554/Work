@@ -56,7 +56,7 @@ def dim_conversations(spark: SparkSession, extract_date, extract_start_time, ext
                                 from
                                     raw_conversation_details
                                 where   extractDate = '{extract_date}'
-                                        AND extractIntervalStartTime > '{extract_start_time}' AND extractIntervalEndTime < '{extract_end_time}')
+                                        AND extractIntervalStartTime = '{extract_start_time}' AND extractIntervalEndTime = '{extract_end_time}')
                             where participants.purpose = 'agent')
                           )
                                     """
