@@ -14,3 +14,4 @@ from dganalytics.clients.hellofresh.powerbi_export.conversation_metrics_daily_su
 from dganalytics.clients.hellofresh.powerbi_export.wfm_day_metrics import export_wfm_day_metrics
 from dganalytics.clients.hellofresh.powerbi_export.wfm_actuals import export_wfm_actuals
 from dganalytics.clients.hellofresh.powerbi_export.survey_summary import export_survey_summary
+from dganalytics.clients.hellofresh.powerbi_export.realtime_queue_mapping import export_realtime_queue_mapping
