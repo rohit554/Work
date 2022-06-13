@@ -13,7 +13,6 @@ def export_realtime_queue_mapping(spark: SparkSession, tenant: str, region: str)
 
 	queue_timezones = spark.createDataFrame(queue_timezones)
 	queue_timezones = queue_timezones.withColumnRenamed("Country-Brand-Language", "country_brand_language")
-	queue_timezones = queue_timezones.dropna(subset=['country_brand_language'])
 	queue_timezones.createOrReplaceTempView("queue_timezones")
 
 	queueHODashboard = pd.read_json(os.path.join(tenant_path, 'data', 'config', 'HO_Dashboard_Mapping.json'))
