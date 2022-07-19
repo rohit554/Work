@@ -1,4 +1,5 @@
 import shutil
+from statistics import mode
 from numpy.lib.utils import lookfor
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
@@ -270,56 +271,6 @@ def push_gamification_data(df: pd.DataFrame, org_id: str, connection_name: str):
         print("File data submitted to API")
     a.close()
 
-def get_gamification_token_by_tenant(tenant):
-    body = {
-        "email": get_secret(f"{tenant}gamificationuser"),
-        "password": get_secret(f"{tenant}gamificationpassword")
-    }
-    gamification_url = get_secret(f"{tenant}gamificationurl")
-
-    auth_resp = requests.post(
-        f"{gamification_url}/api/auth/getAccessToken/", data=body)
-    if auth_resp.status_code != 200 or 'access_token' not in auth_resp.json().keys():
-        print(auth_resp.text)
-        raise Exception("unable to get gamification access token")
-
-    return auth_resp.json()['access_token'], auth_resp.json()['userId']
-
-
-def push_gamification_data_for_tenant(df: pd.DataFrame, org_id: str, connection_name: str, tenant: str):
-    # df = df.sample(n=100)
-    token, user_Id = get_gamification_token_by_tenant(tenant)
-    headers = {
-        "email": get_secret(f"{tenant}gamificationuser"),
-        "id_token": token,
-        "orgid": org_id,
-        "accessType": "active_directory",
-        "Authorization": f"Bearer {token}"
-    }
-    prefix = "# Mandatory fields are Date & UserID (Format must be YYYY-MM-DD)"
-    a = tempfile.NamedTemporaryFile()
-    print(str(df.shape))
-    a.file.write(bytes(prefix + "\n", 'utf-8'))
-    a.file.write(bytes(df.to_csv(index=False, header=True, mode='a'), 'utf-8'))
-    body = {
-        "connectionName": f"{connection_name}",
-        "user_id": f"{user_Id}"
-    }
-    files = [
-        ('profile', open(a.name, 'rb'))
-    ]
-    print(f"{get_secret(f'{tenant}gamificationurl')}/api/connection/uploaDataFile")
-
-    # print(str(body))
-
-    resp = requests.post(
-        f"{get_secret(f'{tenant}gamificationurl')}/api/connection/uploaDataFile", headers=headers, files=files, data=body)
-    if resp.status_code != 200:
-        raise Exception("publishing failed")
-    else:
-        print("File data submitted to API")
-    a.close()
-
 def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_conf: dict = None):
     global env
     time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
@@ -375,7 +326,6 @@ def exec_mongo_pipeline(spark, pipeline, collection, schema, mongodb=None):
         "collection", collection).option("database", mongodb).option(
             "pipeline", json.dumps(pipeline)).schema(schema).load()
     return df
-
 
 def get_powerbi_access_token():
     global pb_access_token
