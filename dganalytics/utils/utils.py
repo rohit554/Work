@@ -1,4 +1,5 @@
 import shutil
+from statistics import mode
 from numpy.lib.utils import lookfor
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
@@ -270,7 +271,6 @@ def push_gamification_data(df: pd.DataFrame, org_id: str, connection_name: str):
         print("File data submitted to API")
     a.close()
 
-
 def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_conf: dict = None):
     global env
     time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
@@ -326,7 +326,6 @@ def exec_mongo_pipeline(spark, pipeline, collection, schema, mongodb=None):
         "collection", collection).option("database", mongodb).option(
             "pipeline", json.dumps(pipeline)).schema(schema).load()
     return df
-
 
 def get_powerbi_access_token():
     global pb_access_token

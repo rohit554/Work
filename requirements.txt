@@ -20,3 +20,5 @@ requests
 websocket_client
 websocket_client
 xlrd
+py7zr
+requests[security]

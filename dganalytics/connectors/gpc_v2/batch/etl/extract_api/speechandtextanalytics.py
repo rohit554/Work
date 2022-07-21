@@ -2,7 +2,8 @@ import json
 import requests as requests
 import time
 from pyspark.sql import SparkSession
-
+from socket import error as SocketError
+import errno
 from dganalytics.connectors.gpc_v2.gpc_utils import authorize, get_api_url, process_raw_data
 from dganalytics.connectors.gpc_v2.gpc_utils import gpc_utils_logger
 
@@ -27,13 +28,19 @@ def get_conversations(spark: SparkSession, extract_start_time: str, extract_end_
 
 def get_speechandtextanalytics(base_url: str, auth_headers, conversation_id: str, retry_count: int):
     url = f"{base_url}/api/v2/speechandtextanalytics/conversations/{conversation_id}"
-    resp = requests.request(method="GET", url=url, headers=auth_headers)
+    try:
+        resp = requests.request(method="GET", url=url, headers=auth_headers)
+    except SocketError as e:
+        if e.errno != errno.ECONNRESET:
+            raise Exception
+    except Exception as err:
+        pass
 
     if resp.status_code == 429:
         retry_count += 1
 
         if retry_count > 3:
-            logging.error(resp)
+            logger.error(resp)
             raise Exception
 
         logger.info(f"Rate limit exceeded for get Speech And Text Analytics API call, sleeping for 30 seconds, retry count {retry_count} of 3")
