@@ -19,7 +19,7 @@ def get_gamification_token_by_tenant(tenant):
     }
     gamification_url = get_secret(f"{tenant}gamificationurl")
 
-    auth_resp = reuqests.post(
+    auth_resp = requests.post(
         f"{gamification_url}/api/auth/getAccessToken/", data=body)
     if auth_resp.status_code != 200 or 'access_token' not in auth_resp.json().keys():
         print(auth_resp.text)
