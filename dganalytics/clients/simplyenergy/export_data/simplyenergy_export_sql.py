@@ -233,7 +233,7 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
                             participant.attributes["transaction_type"] AS participantTransactionType,
                             participant.attributes["transaction_id"] AS participantTransactionId,
                             participant.attributes["Mailing State"] As participantMailingState,
-                            participant.attributes["Mailing State"] As participantTandCAcceptance,
+                            participant.attributes["T&C Acceptance"] As participantTandCAcceptance,
                             explode(participant.sessions) AS session
                         FROM (
                             SELECT 
@@ -510,13 +510,12 @@ dim_user_group = """
                             raw_groups.id as groupId,
                             raw_groups.name as groupName,
                             raw_groups.description as groupDescription,
-                            raw_groups.state as groupState,
-                            users.sourceRecordIdentifier, users.soucePartition
+                            raw_groups.state as groupState
                             from
                             (
                                 select
                                     id as userId,
-                                    explode(groups) as user_groups,
+                                    explode(groups) as user_groups
                                 from raw_users
                             ) users, raw_groups
                             where users.user_groups.id = raw_groups.id
