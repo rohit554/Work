@@ -505,18 +505,18 @@ def fact_surveys(extract_start_time: str, extract_end_time: str):
     """
 
 dim_user_group = """
-                        select distinct
+                        SELECT DISTINCT
                             users.userId,
-                            raw_groups.id as groupId,
-                            raw_groups.name as groupName,
-                            raw_groups.description as groupDescription,
-                            raw_groups.state as groupState
-                            from
+                            raw_groups.id AS groupId,
+                            raw_groups.name AS groupName,
+                            raw_groups.description AS groupDescription,
+                            raw_groups.state AS groupState
+                            FROM
                             (
-                                select
-                                    id as userId,
-                                    explode(groups) as user_groups
-                                from raw_users
+                                SELECT
+                                    id AS userId,
+                                    explode(groups) AS user_groups
+                                FROM raw_users
                             ) users, raw_groups
-                            where users.user_groups.id = raw_groups.id
+                            WHERE users.user_groups.id = raw_groups.id
                     """
