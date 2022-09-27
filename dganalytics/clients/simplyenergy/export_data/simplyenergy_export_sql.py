@@ -124,6 +124,8 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
             purpose,
             participantTransactionType,
             participantTransactionId,
+            participantMailingState,
+            participantTandCAcceptance,
             mediaType,
             messageType,
             direction,
@@ -183,6 +185,8 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
                     purpose,
                     participantTransactionType,
                     participantTransactionId,
+                    participantMailingState,
+                    participantTandCAcceptance,
                     mediaType,
                     messageType,
                     direction,
@@ -205,6 +209,8 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
                         purpose,
                         participantTransactionType,
                         participantTransactionId,
+                        participantMailingState,
+                        participantTandCAcceptance,
                         session.mediaType AS mediaType,
                         session.messageType AS messageType,
                         session.direction AS direction,
@@ -226,6 +232,8 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
                             participant.purpose AS purpose,
                             participant.attributes["transaction_type"] AS participantTransactionType,
                             participant.attributes["transaction_id"] AS participantTransactionId,
+                            participant.attributes["Mailing State"] As participantMailingState,
+                            participant.attributes["T&C Acceptance"] As participantTandCAcceptance,
                             explode(participant.sessions) AS session
                         FROM (
                             SELECT 
@@ -287,6 +295,8 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
             purpose,
             participantTransactionId,
             participantTransactionType,
+            participantMailingState,
+            participantTandCAcceptance,
             mediaType,
             messageType,
             direction,
@@ -493,3 +503,20 @@ def fact_surveys(extract_start_time: str, extract_end_time: str):
             )
         )
     """
+
+dim_user_group = """
+                        SELECT DISTINCT
+                            users.userId,
+                            raw_groups.id AS groupId,
+                            raw_groups.name AS groupName,
+                            raw_groups.description AS groupDescription,
+                            raw_groups.state AS groupState
+                            FROM
+                            (
+                                SELECT
+                                    id AS userId,
+                                    explode(groups) AS user_groups
+                                FROM raw_users
+                            ) users, raw_groups
+                            WHERE users.user_groups.id = raw_groups.id
+                    """
