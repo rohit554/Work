@@ -29,7 +29,7 @@ def export_survey_summary(spark: SparkSession, tenant: str, region: str):
                 a.conversationKey,
                 a.queueKey,
                 a.userKey,
-                a.mediaType,
+                (CASE WHEN a.mediaType ="social" THEN "message" ELSE mediaType END) mediaType,
                 a.wrapUpCodeKey,
                 a.restricted,
                 from_utc_timestamp(a.surveySentDate, trim(coalesce(e.timeZone, 'UTC'))) surveySentDate,
