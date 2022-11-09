@@ -110,6 +110,22 @@ dim_evaluation_forms = """
     )
 """
 
+dim_user_group = """
+                        SELECT DISTINCT
+                            users.userId,
+                            raw_groups.id AS groupId,
+                            raw_groups.name AS groupName,
+                            raw_groups.description AS groupDescription,
+                            raw_groups.state AS groupState
+                            FROM
+                            (
+                                SELECT
+                                    id AS userId,
+                                    explode(groups) AS user_groups
+                                FROM raw_users
+                            ) users, raw_groups
+                            WHERE users.user_groups.id = raw_groups.id
+                    """
 
 def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
     return f"""
@@ -373,8 +389,7 @@ def fact_conversation_evaluations(extract_start_time: str, extract_end_time: str
           )
         )
     """
-
-
+    
 def fact_conversation_surveys(extract_start_time: str, extract_end_time: str):
     return f"""
         SELECT 
@@ -503,20 +518,33 @@ def fact_surveys(extract_start_time: str, extract_end_time: str):
             )
         )
     """
-
-dim_user_group = """
-                        SELECT DISTINCT
-                            users.userId,
-                            raw_groups.id AS groupId,
-                            raw_groups.name AS groupName,
-                            raw_groups.description AS groupDescription,
-                            raw_groups.state AS groupState
-                            FROM
-                            (
-                                SELECT
-                                    id AS userId,
-                                    explode(groups) AS user_groups
-                                FROM raw_users
-                            ) users, raw_groups
-                            WHERE users.user_groups.id = raw_groups.id
-                    """
+    
+def fact_conversation_attributes(extract_start_time: str, extract_end_time: str):
+    return f"""
+        SELECT 
+            conversationId,
+            min(conversationStart) AS conversationStart,
+            max(conversationEnd) AS conversationEnd,
+            Purpose ,
+            key as attribute_key,
+            value as attribute_value
+        FROM (
+            SELECT 
+                conversationId,
+                conversationStart,
+                conversationEnd,
+                participant.purpose as Purpose,
+                explode(participant.attributes)
+            FROM (
+                SELECT 
+                    conversationId , 
+                    conversationStart,
+                    conversationEnd,
+                    explode(participants) as participant 
+                FROM raw_conversation_details )
+                
+                WHERE
+                recordInsertTime >= '{extract_start_time}' and recordInsertTime < '{extract_end_time}'
+                )
+                )
+    """
