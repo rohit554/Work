@@ -45,7 +45,7 @@ def push_gamification_data_for_tenant(df: pd.DataFrame, org_id: str, connection_
         a.flush()
         body = {
             "connectionName": f"{connection_name}",
-            "user_id": "A" + f"{user_Id}"
+            "user_id": f"{user_Id}"
         }
         files = [
             ('profile', open(a.name, 'rb'))
