@@ -8,12 +8,13 @@ timezone = 'US/Eastern'
 backdate = 5
 
 def push_associates_data (spark, tenant, extract_date):
-	schema = StructType([
+
+    schema = StructType([
                      StructField('FirstName', StringType(), True),
                      StructField('LastName', StringType(), True),
                      StructField('UserId', StringType(), True)])
-	pipeline = [
-        {
+    pipeline = [
+            {
             "$match": {
                     "is_active": True,
                     "org_id": "BREADFINANCEASSOCIATE"
@@ -25,14 +26,13 @@ def push_associates_data (spark, tenant, extract_date):
                 "LastName": "$last_name",
                 "UserId": "$user_id"
             }
-        },
-    ]
-	
-	df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
-	df.createOrReplaceTempView("users")
+        },]
 
-	associates = spark.sql(f"""
-		SELECT  U.DGUserID AS UserID,
+    df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
+    df.createOrReplaceTempView("users")
+
+    associates = spark.sql(f"""
+        SELECT  U.DGUserID AS UserID,
                 date_format(U._date, 'dd-MM-yyyy') AS Date,
                 SUM(CASE WHEN cast(S.END_TIME - S.START_TIME AS LONG) > 0 THEN 1 ELSE 0 END) eGainLogin,
                 SUM(CASE WHEN SE.ENTRY_TYPE = 1 THEN 1 ELSE 0 END) ArticlesViewed,
@@ -65,19 +65,20 @@ def push_associates_data (spark, tenant, extract_date):
         WHERE  (S.STATUS_TYPE = 1 or S.STATUS_TYPE = 2)
               AND S.USER_TYPE = 3
         GROUP BY U._date, U.USER_ID, U.DGUserID
-	""")
+    """)
 
-	passociates = associates.drop_duplicates().toPandas()
-    passociates['USER_NAME'] = passociates.apply(lambda row: 'A' + str(row['USER_NAME']), axis=1)
-	push_gamification_data_for_tenant(pdassociates, 'BREADFINANCEASSOCIATE', 'AssociateConnection', tenant)
-	return True
+    associates = associates.drop_duplicates().toPandas()
+    associates['USER_NAME'] = associates.apply(lambda row: 'A' + str(row['USER_NAME']), axis=1)
+    push_gamification_data_for_tenant(associates, 'BREADFINANCEASSOCIATE', 'AssociateConnection', tenant)
+
+    return True
 
 def push_authors_data(spark, tenant, extract_date):
-	schema = StructType([
+    schema = StructType([
                      StructField('FirstName', StringType(), True),
                      StructField('LastName', StringType(), True),
                      StructField('UserId', StringType(), True)])
-	pipeline = [
+    pipeline = [
         {
             "$match": {
                     "is_active": True,
@@ -92,11 +93,11 @@ def push_authors_data(spark, tenant, extract_date):
             }
         },
     ]
-	
-	df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
-	df.createOrReplaceTempView("users")
 
-	authors = spark.sql(f"""
+    df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
+    df.createOrReplaceTempView("users")
+
+    authors = spark.sql(f"""
         SELECT  U.DGUserID AS UserID,
                 date_format(U._date, 'dd-MM-yyyy') AS Date,
                 SUM(CASE WHEN EHU.USER_ID IS NOT NULL THEN 1 ELSE 0 END) eGainLogin,
@@ -137,26 +138,26 @@ def push_authors_data(spark, tenant, extract_date):
     
     """)
 
-	authors = authors.drop_duplicates()
-    pdauthors = authors.toPandas()
-    pdauthors['USER_NAME'] = pdauthors.apply(lambda row: 'A' + str(row['USER_NAME']), axis=1)
-	push_gamification_data_for_tenant(pdauthors, 'BREADFINANCEAUTHOR', 'AuthorConnection', tenant)
-	return True
+    authors = authors.drop_duplicates().toPandas()
+    authors['USER_NAME'] = authors.apply(lambda row: 'A' + str(row['USER_NAME']), axis=1)
+    push_gamification_data_for_tenant(authors, 'BREADFINANCEAUTHOR', 'AuthorConnection', tenant)
+
+    return True
 
 if __name__ == "__main__":
-	parser = argparse.ArgumentParser()
-	parser.add_argument('--tenant', required=True)
-	parser.add_argument('--extract_date', required=True)
-	args, unknown_args = parser.parse_known_args()
-	tenant = args.tenant
-	extract_date = args.extract_date
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--tenant', required=True)
+    parser.add_argument('--extract_date', required=True)
+    args, unknown_args = parser.parse_known_args()
+    tenant = args.tenant
+    extract_date = args.extract_date
 
-	db_name = f"egain_{tenant}"
-	app_name = "egain_dg_gamification_export"
-	spark = get_spark_session(app_name, tenant, default_db=db_name)
-	try:
-		push_associates_data(spark, tenant, extract_date)
-		push_authors_data(spark, tenant, extract_date)
+    db_name = f"egain_{tenant}"
+    app_name = "egain_dg_gamification_export"
+    spark = get_spark_session(app_name, tenant, default_db=db_name)
+    try:
+        push_associates_data(spark, tenant, extract_date)
+        push_authors_data(spark, tenant, extract_date)
 
-	except Exception as e:
-		raise
+    except Exception as e:
+        raise
