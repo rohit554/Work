@@ -66,8 +66,10 @@ def push_associates_data (spark, tenant, extract_date):
               AND S.USER_TYPE = 3
         GROUP BY U._date, U.USER_ID, U.DGUserID
 	""")
-	associates = associates.drop_duplicates()
-	push_gamification_data_for_tenant(associates.toPandas(), 'BREADFINANCEASSOCIATE', 'AssociateConnection', tenant)
+
+	passociates = associates.drop_duplicates().toPandas()
+    passociates['USER_NAME'] = passociates.apply(lambda row: 'A' + str(row['USER_NAME']), axis=1)
+	push_gamification_data_for_tenant(pdassociates, 'BREADFINANCEASSOCIATE', 'AssociateConnection', tenant)
 	return True
 
 def push_authors_data(spark, tenant, extract_date):
@@ -134,8 +136,11 @@ def push_authors_data(spark, tenant, extract_date):
         GROUP BY U._date, U.USER_ID, U.DGUserID
     
     """)
+
 	authors = authors.drop_duplicates()
-	push_gamification_data_for_tenant(authors.toPandas(), 'BREADFINANCEAUTHOR', 'AuthorConnection', tenant)
+    pdauthors = authors.toPandas()
+    pdauthors['USER_NAME'] = pdauthors.apply(lambda row: 'A' + str(row['USER_NAME']), axis=1)
+	push_gamification_data_for_tenant(pdauthors, 'BREADFINANCEAUTHOR', 'AuthorConnection', tenant)
 	return True
 
 if __name__ == "__main__":
