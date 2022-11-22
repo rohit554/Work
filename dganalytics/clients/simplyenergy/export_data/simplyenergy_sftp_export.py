@@ -78,12 +78,12 @@ if __name__ == "__main__":
 
                 if export_name.startswith("fact_"):
                     export_part += 1
-                    if sftp_folder_path == "" or sftp_folder_path is None:
+                    if sftp_folder_path == "./" or sftp_folder_path is None:
                         upload_name = f"./{export_name_normalised}_{export_part}.csv"
                     else: 
                       upload_name = f"./{sftp_folder_path}/{export_name_normalised}_{export_part}.csv"
                 else:
-                    if sftp_folder_path == "" or sftp_folder_path is None:
+                    if sftp_folder_path == "./" or sftp_folder_path is None:
                         upload_name = f"./{export_name_normalised}.csv"
                     else: 
                       upload_name = f"./{sftp_folder_path}/{export_name_normalised}.csv"
