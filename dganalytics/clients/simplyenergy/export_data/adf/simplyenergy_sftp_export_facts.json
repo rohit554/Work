@@ -407,10 +407,14 @@
                             "referenceName": "[concat(parameters('tenant'), '_sftp_export_facts')]",
                             "type": "PipelineReference"
                         },
-                        "parameters": {
-                            "extract_start_time": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ssZ')}",
-                            "extract_end_time": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddTHH:mm:ssZ')}"
-                        }
+                      "parameters": {
+                        "extract_start_time": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ssZ')}",
+                        "extract_end_time": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddTHH:mm:ssZ')}",
+                        "sftp_host": "simplyenergySFTPHost",
+                        "sftp_username": "simplyenergySFTPUsername",
+                        "sftp_password": "simplyenergySFTPPassword",
+                        "sftp_folder_path": "./"
+                      }
                     }
                 ],
                 "type": "TumblingWindowTrigger",
