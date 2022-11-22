@@ -235,7 +235,9 @@ def push_anz_data(spark):
                         voice_tHandle/voice_nHandle `AHT Voice`,
                         chat_tHandle/chat_nHandle `AHT Chat`,
                         social_tHandle/social_nHandle `AHT Social`,
-                        retentionOfCustomer `Retention Of Customer`
+                        retentionOfCustomer `Retention Of Customer`,
+                        (tAcw/nAcw) `ACW`,
+                        tHeldComplete/nHeldComplete `Hold Time`
                 FROM hf_game_data
                 WHERE department IN (   'EP AU Manila',
                                         'HF AU Sydney',
@@ -276,7 +278,9 @@ def push_anz_data(spark):
                     AND `AHT Voice` IS NULL
                     AND `AHT Chat` IS NULL
                     AND `AHT Social` IS NULL
-                    AND `Retention Of Customer` IS NULL)
+                    AND `Retention Of Customer` IS NULL
+                    AND `ACW` IS NULL
+                    AND `Hold Time` IS NULL)
     """)
     push_gamification_data(anz.toPandas(), 'HELLOFRESHANZ', 'ANZConnection')
     return True
