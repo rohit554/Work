@@ -83,201 +83,308 @@
             "type": "Microsoft.DataFactory/factories/pipelines",
             "apiVersion": "2018-06-01",
             "properties": {
-                "activities": [
-                    {
-                        "name": "fact_conversation_metrics",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
-                            "parameters": [
-                                "--extract_start_time",
-                                "@pipeline().parameters.extract_start_time",
-                                "--extract_end_time",
-                                "@pipeline().parameters.extract_end_time",
-                                "--export_name",
-                                "fact_conversation_metrics"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "fact_conversation_evaluations",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "fact_conversation_metrics",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
-                            "parameters": [
-                                "--extract_start_time",
-                                "@pipeline().parameters.extract_start_time",
-                                "--extract_end_time",
-                                "@pipeline().parameters.extract_end_time",
-                                "--export_name",
-                                "fact_conversation_evaluations"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "fact_conversation_surveys",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "fact_conversation_metrics",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
-                            "parameters": [
-                                "--extract_start_time",
-                                "@pipeline().parameters.extract_start_time",
-                                "--extract_end_time",
-                                "@pipeline().parameters.extract_end_time",
-                                "--export_name",
-                                "fact_conversation_surveys"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "fact_user_primary_presence",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
-                            "parameters": [
-                                "--extract_start_time",
-                                "@pipeline().parameters.extract_start_time",
-                                "--extract_end_time",
-                                "@pipeline().parameters.extract_end_time",
-                                "--export_name",
-                                "fact_user_primary_presence"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "fact_user_routing_status",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
-                            "parameters": [
-                                "--extract_start_time",
-                                "@pipeline().parameters.extract_start_time",
-                                "--extract_end_time",
-                                "@pipeline().parameters.extract_end_time",
-                                "--export_name",
-                                "fact_user_routing_status"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "fact_surveys",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
-                            "parameters": [
-                                "--extract_start_time",
-                                "@pipeline().parameters.extract_start_time",
-                                "--extract_end_time",
-                                "@pipeline().parameters.extract_end_time",
-                                "--export_name",
-                                "fact_surveys"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    }
-                ],
-                "concurrency": 1,
-                "parameters": {
-                    "extract_start_time": {
-                        "type": "string",
-                        "defaultValue": "YYYY-MM-DDTHH24:MI:SSZ"
-                    },
-                    "extract_end_time": {
-                        "type": "string",
-                        "defaultValue": "YYYY-MM-DDTHH24:MI:SSZ"
-                    }
+              "activities": [
+                {
+                  "name": "fact_conversation_metrics",
+                  "type": "DatabricksSparkPython",
+                  "dependsOn": [],
+                  "policy": {
+                    "timeout": "00:30:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 1800,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "userProperties": [],
+                  "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
+                    "parameters": [
+                      "--extract_start_time",
+                      "@pipeline().parameters.extract_start_time",
+                      "--extract_end_time",
+                      "@pipeline().parameters.extract_end_time",
+                      "--export_name",
+                      "fact_conversation_metrics",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
+                    ]
+                  },
+                  "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                  }
                 },
+                {
+                  "name": "fact_conversation_evaluations",
+                  "type": "DatabricksSparkPython",
+                  "dependsOn": [
+                    {
+                      "activity": "fact_conversation_metrics",
+                      "dependencyConditions": [
+                        "Succeeded"
+                      ]
+                    }
+                  ],
+                  "policy": {
+                    "timeout": "00:30:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 1800,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "userProperties": [],
+                  "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
+                    "parameters": [
+                      "--extract_start_time",
+                      "@pipeline().parameters.extract_start_time",
+                      "--extract_end_time",
+                      "@pipeline().parameters.extract_end_time",
+                      "--export_name",
+                      "fact_conversation_evaluations",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
+                    ]
+                  },
+                  "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                  }
+                },
+                {
+                  "name": "fact_conversation_attributes",
+                  "type": "DatabricksSparkPython",
+                  "dependsOn": [
+                    {
+                      "activity": "fact_conversation_metrics",
+                      "dependencyConditions": [
+                        "Succeeded"
+                      ]
+                    }
+                  ],
+                  "policy": {
+                    "timeout": "00:30:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 1800,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "userProperties": [],
+                  "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
+                    "parameters": [
+                      "--extract_start_time",
+                      "@pipeline().parameters.extract_start_time",
+                      "--extract_end_time",
+                      "@pipeline().parameters.extract_end_time",
+                      "--export_name",
+                      "fact_conversation_attributes",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
+                    ]
+                  },
+                  "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                  }
+                },
+                {
+                  "name": "fact_conversation_surveys",
+                  "type": "DatabricksSparkPython",
+                  "dependsOn": [
+                    {
+                      "activity": "fact_conversation_metrics",
+                      "dependencyConditions": [
+                        "Succeeded"
+                      ]
+                    }
+                  ],
+                  "policy": {
+                    "timeout": "00:30:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 1800,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "userProperties": [],
+                  "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
+                    "parameters": [
+                      "--extract_start_time",
+                      "@pipeline().parameters.extract_start_time",
+                      "--extract_end_time",
+                      "@pipeline().parameters.extract_end_time",
+                      "--export_name",
+                      "fact_conversation_surveys",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
+                    ]
+                  },
+                  "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                  }
+                },
+                {
+                  "name": "fact_user_primary_presence",
+                  "type": "DatabricksSparkPython",
+                  "dependsOn": [],
+                  "policy": {
+                    "timeout": "00:30:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 1800,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "userProperties": [],
+                  "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
+                    "parameters": [
+                      "--extract_start_time",
+                      "@pipeline().parameters.extract_start_time",
+                      "--extract_end_time",
+                      "@pipeline().parameters.extract_end_time",
+                      "--export_name",
+                      "fact_user_primary_presence",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
+                    ]
+                  },
+                  "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                  }
+                },
+                {
+                  "name": "fact_user_routing_status",
+                  "type": "DatabricksSparkPython",
+                  "dependsOn": [],
+                  "policy": {
+                    "timeout": "00:30:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 1800,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "userProperties": [],
+                  "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
+                    "parameters": [
+                      "--extract_start_time",
+                      "@pipeline().parameters.extract_start_time",
+                      "--extract_end_time",
+                      "@pipeline().parameters.extract_end_time",
+                      "--export_name",
+                      "fact_user_routing_status",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
+                    ]
+                  },
+                  "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                  }
+                },
+                {
+                  "name": "fact_surveys",
+                  "type": "DatabricksSparkPython",
+                  "dependsOn": [],
+                  "policy": {
+                    "timeout": "00:30:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 1800,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "userProperties": [],
+                  "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
+                    "parameters": [
+                      "--extract_start_time",
+                      "@pipeline().parameters.extract_start_time",
+                      "--extract_end_time",
+                      "@pipeline().parameters.extract_end_time",
+                      "--export_name",
+                      "fact_surveys",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
+                    ]
+                  },
+                  "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                  }
+                }
+              ],
+                "concurrency": 1,
+              "parameters": {
+                "extract_start_time": {
+                  "type": "string",
+                  "defaultValue": "YYYY-MM-DDTHH24:MI:SSZ"
+                },
+                "extract_end_time": {
+                  "type": "string",
+                  "defaultValue": "YYYY-MM-DDTHH24:MI:SSZ"
+                },
+                "sftp_host": {
+                  "type": "string",
+                  "defaultValue": "simplyenergySFTPHost"
+                },
+                "sftp_username": {
+                  "type": "string",
+                  "defaultValue": "simplyenergySFTPUsername"
+                },
+                "sftp_password": {
+                  "type": "string",
+                  "defaultValue": "simplyenergySFTPPassword"
+                },
+                "sftp_folder_path": {
+                  "type": "string",
+                  "defaultValue": "./"
+                }
+              },
                 "folder": {
                     "name": "[parameters('tenant')]"
                 },
@@ -300,10 +407,14 @@
                             "referenceName": "[concat(parameters('tenant'), '_sftp_export_facts')]",
                             "type": "PipelineReference"
                         },
-                        "parameters": {
-                            "extract_start_time": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ssZ')}",
-                            "extract_end_time": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddTHH:mm:ssZ')}"
-                        }
+                      "parameters": {
+                        "extract_start_time": "@{formatDateTime(trigger().outputs.windowStartTime,'yyyy-MM-ddTHH:mm:ssZ')}",
+                        "extract_end_time": "@{formatDateTime(trigger().outputs.windowEndTime,'yyyy-MM-ddTHH:mm:ssZ')}",
+                        "sftp_host": "simplyenergySFTPHost",
+                        "sftp_username": "simplyenergySFTPUsername",
+                        "sftp_password": "simplyenergySFTPPassword",
+                        "sftp_folder_path": "./"
+                      }
                     }
                 ],
                 "type": "TumblingWindowTrigger",
