@@ -104,7 +104,15 @@
                       "--extract_end_time",
                       "@pipeline().parameters.extract_end_time",
                       "--export_name",
-                      "fact_conversation_metrics"
+                      "fact_conversation_metrics",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
                     ]
                   },
                   "linkedServiceName": {
@@ -139,7 +147,15 @@
                       "--extract_end_time",
                       "@pipeline().parameters.extract_end_time",
                       "--export_name",
-                      "fact_conversation_evaluations"
+                      "fact_conversation_evaluations",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
                     ]
                   },
                   "linkedServiceName": {
@@ -174,7 +190,15 @@
                       "--extract_end_time",
                       "@pipeline().parameters.extract_end_time",
                       "--export_name",
-                      "fact_conversation_attributes"
+                      "fact_conversation_attributes",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
                     ]
                   },
                   "linkedServiceName": {
@@ -209,7 +233,15 @@
                       "--extract_end_time",
                       "@pipeline().parameters.extract_end_time",
                       "--export_name",
-                      "fact_conversation_surveys"
+                      "fact_conversation_surveys",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
                     ]
                   },
                   "linkedServiceName": {
@@ -237,7 +269,15 @@
                       "--extract_end_time",
                       "@pipeline().parameters.extract_end_time",
                       "--export_name",
-                      "fact_user_primary_presence"
+                      "fact_user_primary_presence",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
                     ]
                   },
                   "linkedServiceName": {
@@ -265,7 +305,15 @@
                       "--extract_end_time",
                       "@pipeline().parameters.extract_end_time",
                       "--export_name",
-                      "fact_user_routing_status"
+                      "fact_user_routing_status",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
                     ]
                   },
                   "linkedServiceName": {
@@ -293,7 +341,15 @@
                       "--extract_end_time",
                       "@pipeline().parameters.extract_end_time",
                       "--export_name",
-                      "fact_surveys"
+                      "fact_surveys",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
                     ]
                   },
                   "linkedServiceName": {
@@ -303,16 +359,32 @@
                 }
               ],
                 "concurrency": 1,
-                "parameters": {
-                    "extract_start_time": {
-                        "type": "string",
-                        "defaultValue": "YYYY-MM-DDTHH24:MI:SSZ"
-                    },
-                    "extract_end_time": {
-                        "type": "string",
-                        "defaultValue": "YYYY-MM-DDTHH24:MI:SSZ"
-                    }
+              "parameters": {
+                "extract_start_time": {
+                  "type": "string",
+                  "defaultValue": "YYYY-MM-DDTHH24:MI:SSZ"
                 },
+                "extract_end_time": {
+                  "type": "string",
+                  "defaultValue": "YYYY-MM-DDTHH24:MI:SSZ"
+                },
+                "sftp_host": {
+                  "type": "string",
+                  "defaultValue": "simplyenergySFTPHost"
+                },
+                "sftp_username": {
+                  "type": "string",
+                  "defaultValue": "simplyenergySFTPUsername"
+                },
+                "sftp_password": {
+                  "type": "string",
+                  "defaultValue": "simplyenergySFTPPassword"
+                },
+                "sftp_folder_path": {
+                  "type": "string",
+                  "defaultValue": "./"
+                }
+              },
                 "folder": {
                     "name": "[parameters('tenant')]"
                 },
