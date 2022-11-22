@@ -315,120 +315,6 @@ def push_us_data(spark):
     return True
 
 
-def push_uk_data(spark):
-    uk = spark.sql("""
-        SELECT * FROM (
-            SELECT  userId `UserID`,
-                    date_format(cast(date as date), 'dd-MM-yyyy') `Date`,
-                    totalScore `QA Score`,
-                    csat CSAT,
-                    (voice_tHeldComplete + voice_tTalkComplete + voice_tAcw)/float(voice_nHandle) `AHT - Voice`,
-                    (chat_tTalkComplete + chat_tAcw)/float(chat_nHandle) `AHT - Chat`,
-                    (social_tTalkComplete + social_tAcw)/float(social_nHandle) `AHT - Social`,
-                    conformancePercentage Conformance,
-                    adherencePercentage Adherence,
-                    (nAnswered/((interacting_duration + idle_duration)/3600)) Productivity,
-                    userPresenceOqtTime/3600 `Total On Queue Time`,
-                    (tTalkComplete/nTalkComplete) `ATT - Chat`,
-                    (chat_tAcw/chat_nAcw) `ACW - Chat`
-            FROM hf_game_data
-            WHERE department IN (   'HF UK Manila',
-                                    'INT. Manila',
-                                    'UK HF HelloConnect Man',
-                                    'INT HF HelloConnect Man',
-                                    'HF UK HC MNL')
-            )
-            WHERE NOT (`Productivity` IS NULL
-                      AND `Adherence` IS NULL
-                      AND `Conformance` IS NULL
-                      AND `AHT - Social` IS NULL
-                      AND `AHT - Chat` IS NULL
-                      AND `AHT - Voice` IS NULL
-                      AND `CSAT` IS NULL
-                      AND `QA Score` IS NULL
-                      AND `Total On Queue Time` IS NULL
-                      AND `ATT - Chat` IS NULL
-                      AND `ACW - Chat` IS NULL)
-    """)
-    push_gamification_data(uk.toPandas(), 'HELLOFRESHUK', 'ukconnection')
-    return True
-
-
-def push_ca_data(spark):
-    ca = spark.sql("""
-        SELECT * FROM (
-            SELECT
-                userId `UserID`,
-                date_format(cast(date as date), 'dd-MM-yyyy') `Date`,
-                totalScore `QA Score`,
-                csat CSAT,
-                (voice_tHeldComplete + voice_tTalkComplete + voice_tAcw)/float(voice_nHandle) `AHT - Voice`,
-                (chat_tTalkComplete + chat_tAcw)/float(chat_nHandle) `AHT - Chat`,
-                (email_tTalkComplete + email_tAcw)/float(email_nHandle) `AHT - Email`,
-                conformancePercentage Conformance,
-                adherencePercentage Adherence,
-                (nAnswered/((interacting_duration + idle_duration)/3600)) Productivity,
-                userPresenceOqtTime/3600 `Total On Queue Time`,
-                (tTalkComplete/nTalkComplete) `ATT - Chat`,
-                (tAcw/nAcw) `ACW`
-            FROM hf_game_data
-            WHERE department IN (   'HF CA Manila',
-                                    'CP CA Manila',
-                                    'CA CP HelloConnect Man',
-                                    'CA HF HelloConnect Man',
-                                    'CP CA HC MNL',
-                                    'HF CA HC MNL')
-            )
-            WHERE NOT (`Productivity` IS NULL
-                      AND `Adherence` IS NULL
-                      AND `Conformance` IS NULL
-                      AND `AHT - Email` IS NULL
-                      AND `AHT - Chat` IS NULL
-                      AND `AHT - Voice` IS NULL
-                      AND `CSAT` IS NULL
-                      AND `QA Score` IS NULL
-                      AND `Total On Queue Time` IS NULL
-                      AND `ACW` IS NULL)
-    """)
-    push_gamification_data(ca.toPandas(), 'HELLOFRESHCA', 'HFCA')
-    return True
-
-
-def push_benx_data(spark):
-    benx = spark.sql("""
-        SELECT * FROM (
-            SELECT
-              userId `UserId`,
-              date_format(cast(date as date), 'dd-MM-yyyy') `Date`,
-              totalScore `QA Score`,
-              csat `CSAT Score`,
-              voice_tHandle/voice_nHandle `AHT Voice`,
-              chat_tHandle/chat_nHandle `AHT Chat`,
-              social_tHandle/social_nHandle `AHT Social`,
-              adherencePercentage `Adherence`,
-              nSurveySent `No Surveys Sent`,
-              CASE WHEN userPresenceOqtTime IS NOT NULL
-              THEN COALESCE(not_responding_duration, 0) * 100 / (userPresenceOqtTime) ELSE NULL END  `Not Responding TIme`
-                           
-            FROM hf_game_data 
-            WHERE department IN ( 'HF BNL HF AMS' )
-            )
-            WHERE NOT (`AHT Voice` IS NULL
-                      AND `AHT Chat` IS NULL
-                      AND `AHT Social` IS NULL
-                      AND `CSAT Score` IS NULL
-                      AND `QA Score` IS NULL
-                      AND `Adherence` IS NULL
-                      AND `No Surveys Sent` IS NULL
-                      AND `Not Responding TIme` IS NULL 
-                       
-                      )
-    """)
-   
-    push_gamification_data(benx.toPandas(), 'HELLOFRESHBENELUX', 'HFBenelux')
-    return True 
-
-
 if __name__ == "__main__":
     tenant, run_id, extract_date, org_id = dg_metadata_export_parser()
     tenant = 'hellofresh'
@@ -445,9 +331,6 @@ if __name__ == "__main__":
 
         push_anz_data(spark)
         push_us_data(spark)
-        push_uk_data(spark)
-        push_ca_data(spark)
-        push_benx_data(spark)
 
         spark.sql(f"""
                         MERGE INTO dg_hellofresh.kpi_raw_data
