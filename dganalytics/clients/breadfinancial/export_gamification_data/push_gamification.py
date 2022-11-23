@@ -68,7 +68,7 @@ def push_associates_data (spark, tenant, extract_date):
     """)
 
     associates = associates.drop_duplicates().toPandas()
-    associates['USER_NAME'] = associates.apply(lambda row: 'A' + str(row['USER_NAME']), axis=1)
+    #associates['USER_NAME'] = associates.apply(lambda row: 'A' + str(row['USER_NAME']), axis=1)
     push_gamification_data_for_tenant(associates, 'BREADFINANCEASSOCIATE', 'AssociateConnection', tenant)
 
     return True
@@ -139,7 +139,7 @@ def push_authors_data(spark, tenant, extract_date):
     """)
 
     authors = authors.drop_duplicates().toPandas()
-    authors['USER_NAME'] = authors.apply(lambda row: 'A' + str(row['USER_NAME']), axis=1)
+    #authors['USER_NAME'] = authors.apply(lambda row: 'A' + str(row['USER_NAME']), axis=1)
     push_gamification_data_for_tenant(authors, 'BREADFINANCEAUTHOR', 'AuthorConnection', tenant)
 
     return True
