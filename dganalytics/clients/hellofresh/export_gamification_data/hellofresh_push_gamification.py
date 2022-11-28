@@ -277,7 +277,8 @@ def push_anz_data(spark):
                                         'HFUK | GCUK',
                                         'INT. Manila',
                                         'YF AU HC MNL',
-                                        'YF AU MNL')
+                                        'YF AU MNL')            
+                AND date_format(cast(date as date), 'dd-MM-yyyy') >= "28-11-2022"
                 )
         WHERE NOT (Conformance IS NULL
                     AND `QA Score` IS NULL
