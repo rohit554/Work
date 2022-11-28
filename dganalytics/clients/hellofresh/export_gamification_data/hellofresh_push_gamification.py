@@ -5,6 +5,14 @@ import os
 import pandas as pd
 from dganalytics.clients.hellofresh.export_gamification_data.keyword_map_table import keyword_map
 
+def get_config_file_data(tenant_path, file_name):
+    data = pd.read_json(os.path.join(tenant_path, 'data',
+                                                'config', file_name))
+    data = pd.DataFrame(data['values'].tolist())
+    header = data.iloc[0]
+    data = data[1:]
+    data.columns = header
+    return data
 
 def get_base_data(spark: SparkSession, extract_date: str):
     tenant_path, db_path, log_path = get_path_vars('hellofresh')
@@ -216,51 +224,60 @@ def get_base_data(spark: SparkSession, extract_date: str):
 
 
 def push_anz_data(spark):
+    tenant_path, db_path, log_path = get_path_vars('hellofresh')
+    agent_groups = get_config_file_data(tenant_path, "DG_Agent_Group_Site_Timezone.json")
+    agent_groups = spark.createDataFrame(agent_groups)
+    agent_groups.createOrReplaceTempView("agent_groups")
     anz = spark.sql("""
         SELECT * FROM (
                 SELECT 
-                        userId `UserID`,
-                        date_format(cast(date as date), 'dd-MM-yyyy') `Date`,
-                        conformancePercentage Conformance,
-                        totalScore `QA Score`,
-                        adherencePercentage Adherence,
-                        kw_count Keyword,
-                        voice_tAcw/voice_nAcw `Voice ACW`,
-                        chat_tAcw/chat_nAcw `Chat ACW`,
-                        social_tAcw/social_nAcw `Social ACW`,                  
-                        voice_tHeldComplete/voice_nHeldComplete `Voice Hold Time`,
-                        not_responding_duration `Not Responding Time`,
-                        csat CSAT,
-                        fcr * 100 / nSurveysCompleted as `FCR Percent`,
-                        voice_tHandle/voice_nHandle `AHT Voice`,
-                        chat_tHandle/chat_nHandle `AHT Chat`,
-                        social_tHandle/social_nHandle `AHT Social`,
-                        retentionOfCustomer `Retention Of Customer`
-                FROM hf_game_data
-                WHERE department IN (   'EP AU Manila',
-                                        'HF AU Sydney',
-                                        'HF AU Manila',
-                                        'HF NZ Sydney',
-                                        'HF NZ Manila',
-                                        'EP AU Sydney',
-                                        'MultiBrand ANZ Sydney',
-                                        'HF AU Cebu',
-                                        'AU EP HelloConnect Man',
-                                        'AU EP HelloFresh Syd',
-                                        'AU HF HelloConnect Ceb',
-                                        'AU HF HelloConnect Man',
-                                        'AU HF HelloFresh Syd',
-                                        'NZ HelloConnect Man',
-                                        'NZ HF HelloFresh Syd',
-                                        'ANZ EP+HF HelloFresh Syd',
+                        GD.userId `UserID`,
+                        date_format(cast(GD.date as date), 'dd-MM-yyyy') `Date`,
+                        GD.conformancePercentage Conformance,
+                        GD.totalScore `QA Score`,
+                        GD.adherencePercentage Adherence,
+                        GD.kw_count Keyword,
+                        GD.voice_tAcw/GD.voice_nAcw `Voice ACW`,
+                        GD.chat_tAcw/GD.chat_nAcw `Chat ACW`,
+                        GD.social_tAcw/GD.social_nAcw `Social ACW`,                  
+                        GD.voice_tHeldComplete/GD.voice_nHeldComplete `Voice Hold Time`,
+                        GD.not_responding_duration `Not Responding Time`,
+                        GD.csat CSAT,
+                        GD.fcr * 100 / GD.nSurveysCompleted as `FCR Percent`,
+                        GD.voice_tHandle/GD.voice_nHandle `AHT Voice`,
+                        GD.chat_tHandle/GD.chat_nHandle `AHT Chat`,
+                        GD.social_tHandle/GD.social_nHandle `AHT Social`,
+                        GD.retentionOfCustomer `Retention Of Customer`,
+                        (GD.tAcw/GD.nAcw) `ACW`,
+                        GD.tHeldComplete/GD.nHeldComplete `Hold Time`
+                FROM hf_game_data GD
+                INNER JOIN gpc_hellofresh.dim_user_groups UG
+                  ON GD.userId = UG.userId
+                INNER JOIN agent_groups AG
+                  ON AG.agentGroupName = UG.groupName
+                      AND `Include in the game?` = true
+                WHERE GD.department IN ('CP CA HC MNL',
+                                        'CP CA Manila',
                                         'EP AU HC MNL',
-                                        'EP AU HF SYD',
-                                        'HF AU HC CEB',
+                                        'FA CA HC MNL',
+                                        'GC UK HC MNL',
                                         'HF AU HC MNL',
-                                        'HF AU HF SYD',
+                                        'HF AU HC PLW',
+                                        'HF AU Manila',
+                                        'HF AU Sydney',
+                                        'HF CA HC MNL',
+                                        'HF CA Manila',
+                                        'HF CA Toronto',
+                                        'HF IE HC MNL',
+                                        'HF JP HC MNL',
                                         'HF NZ HC MNL',
-                                        'HF NZ HF SYD',
-                                        'HF ANZ HF SYD')
+                                        'HF UK HC MNL',
+                                        'HF UK Manila',
+                                        'HF YF Manila',
+                                        'HFUK | GCUK',
+                                        'INT. Manila',
+                                        'YF AU HC MNL',
+                                        'YF AU MNL')
                 )
         WHERE NOT (Conformance IS NULL
                     AND `QA Score` IS NULL
@@ -276,7 +293,9 @@ def push_anz_data(spark):
                     AND `AHT Voice` IS NULL
                     AND `AHT Chat` IS NULL
                     AND `AHT Social` IS NULL
-                    AND `Retention Of Customer` IS NULL)
+                    AND `Retention Of Customer` IS NULL
+                    AND `ACW` IS NULL
+                    AND `Hold Time` IS NULL)
     """)
     push_gamification_data(anz.toPandas(), 'HELLOFRESHANZ', 'ANZConnection')
     return True
@@ -311,120 +330,6 @@ def push_us_data(spark):
     return True
 
 
-def push_uk_data(spark):
-    uk = spark.sql("""
-        SELECT * FROM (
-            SELECT  userId `UserID`,
-                    date_format(cast(date as date), 'dd-MM-yyyy') `Date`,
-                    totalScore `QA Score`,
-                    csat CSAT,
-                    (voice_tHeldComplete + voice_tTalkComplete + voice_tAcw)/float(voice_nHandle) `AHT - Voice`,
-                    (chat_tTalkComplete + chat_tAcw)/float(chat_nHandle) `AHT - Chat`,
-                    (social_tTalkComplete + social_tAcw)/float(social_nHandle) `AHT - Social`,
-                    conformancePercentage Conformance,
-                    adherencePercentage Adherence,
-                    (nAnswered/((interacting_duration + idle_duration)/3600)) Productivity,
-                    userPresenceOqtTime/3600 `Total On Queue Time`,
-                    (tTalkComplete/nTalkComplete) `ATT - Chat`,
-                    (chat_tAcw/chat_nAcw) `ACW - Chat`
-            FROM hf_game_data
-            WHERE department IN (   'HF UK Manila',
-                                    'INT. Manila',
-                                    'UK HF HelloConnect Man',
-                                    'INT HF HelloConnect Man',
-                                    'HF UK HC MNL')
-            )
-            WHERE NOT (`Productivity` IS NULL
-                      AND `Adherence` IS NULL
-                      AND `Conformance` IS NULL
-                      AND `AHT - Social` IS NULL
-                      AND `AHT - Chat` IS NULL
-                      AND `AHT - Voice` IS NULL
-                      AND `CSAT` IS NULL
-                      AND `QA Score` IS NULL
-                      AND `Total On Queue Time` IS NULL
-                      AND `ATT - Chat` IS NULL
-                      AND `ACW - Chat` IS NULL)
-    """)
-    push_gamification_data(uk.toPandas(), 'HELLOFRESHUK', 'ukconnection')
-    return True
-
-
-def push_ca_data(spark):
-    ca = spark.sql("""
-        SELECT * FROM (
-            SELECT
-                userId `UserID`,
-                date_format(cast(date as date), 'dd-MM-yyyy') `Date`,
-                totalScore `QA Score`,
-                csat CSAT,
-                (voice_tHeldComplete + voice_tTalkComplete + voice_tAcw)/float(voice_nHandle) `AHT - Voice`,
-                (chat_tTalkComplete + chat_tAcw)/float(chat_nHandle) `AHT - Chat`,
-                (email_tTalkComplete + email_tAcw)/float(email_nHandle) `AHT - Email`,
-                conformancePercentage Conformance,
-                adherencePercentage Adherence,
-                (nAnswered/((interacting_duration + idle_duration)/3600)) Productivity,
-                userPresenceOqtTime/3600 `Total On Queue Time`,
-                (tTalkComplete/nTalkComplete) `ATT - Chat`,
-                (tAcw/nAcw) `ACW`
-            FROM hf_game_data
-            WHERE department IN (   'HF CA Manila',
-                                    'CP CA Manila',
-                                    'CA CP HelloConnect Man',
-                                    'CA HF HelloConnect Man',
-                                    'CP CA HC MNL',
-                                    'HF CA HC MNL')
-            )
-            WHERE NOT (`Productivity` IS NULL
-                      AND `Adherence` IS NULL
-                      AND `Conformance` IS NULL
-                      AND `AHT - Email` IS NULL
-                      AND `AHT - Chat` IS NULL
-                      AND `AHT - Voice` IS NULL
-                      AND `CSAT` IS NULL
-                      AND `QA Score` IS NULL
-                      AND `Total On Queue Time` IS NULL
-                      AND `ACW` IS NULL)
-    """)
-    push_gamification_data(ca.toPandas(), 'HELLOFRESHCA', 'HFCA')
-    return True
-
-
-def push_benx_data(spark):
-    benx = spark.sql("""
-        SELECT * FROM (
-            SELECT
-              userId `UserId`,
-              date_format(cast(date as date), 'dd-MM-yyyy') `Date`,
-              totalScore `QA Score`,
-              csat `CSAT Score`,
-              voice_tHandle/voice_nHandle `AHT Voice`,
-              chat_tHandle/chat_nHandle `AHT Chat`,
-              social_tHandle/social_nHandle `AHT Social`,
-              adherencePercentage `Adherence`,
-              nSurveySent `No Surveys Sent`,
-              CASE WHEN userPresenceOqtTime IS NOT NULL
-              THEN COALESCE(not_responding_duration, 0) * 100 / (userPresenceOqtTime) ELSE NULL END  `Not Responding TIme`
-                           
-            FROM hf_game_data 
-            WHERE department IN ( 'HF BNL HF AMS' )
-            )
-            WHERE NOT (`AHT Voice` IS NULL
-                      AND `AHT Chat` IS NULL
-                      AND `AHT Social` IS NULL
-                      AND `CSAT Score` IS NULL
-                      AND `QA Score` IS NULL
-                      AND `Adherence` IS NULL
-                      AND `No Surveys Sent` IS NULL
-                      AND `Not Responding TIme` IS NULL 
-                       
-                      )
-    """)
-   
-    push_gamification_data(benx.toPandas(), 'HELLOFRESHBENELUX', 'HFBenelux')
-    return True 
-
-
 if __name__ == "__main__":
     tenant, run_id, extract_date, org_id = dg_metadata_export_parser()
     tenant = 'hellofresh'
@@ -440,10 +345,7 @@ if __name__ == "__main__":
         df.createOrReplaceTempView("hf_game_data")
 
         push_anz_data(spark)
-        push_us_data(spark)
-        push_uk_data(spark)
-        push_ca_data(spark)
-        push_benx_data(spark)
+        #push_us_data(spark)
 
         spark.sql(f"""
                         MERGE INTO dg_hellofresh.kpi_raw_data
