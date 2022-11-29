@@ -356,6 +356,42 @@
                     "referenceName": "AzureDatabricks",
                     "type": "LinkedServiceReference"
                   }
+                },
+                {
+                  "name": "fact_evaluation_total_scores",
+                  "type": "DatabricksSparkPython",
+                  "dependsOn": [],
+                  "policy": {
+                    "timeout": "00:30:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 1800,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "userProperties": [],
+                  "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/simplyenergy/export_data/simplyenergy_sftp_export.py",
+                    "parameters": [
+                      "--extract_start_time",
+                      "@pipeline().parameters.extract_start_time",
+                      "--extract_end_time",
+                      "@pipeline().parameters.extract_end_time",
+                      "--export_name",
+                      "fact_evaluation_total_scores",
+                      "--sftp_host",
+                      "@pipeline().parameters.sftp_host",
+                      "--sftp_username",
+                      "@pipeline().parameters.sftp_username",
+                      "--sftp_password",
+                      "@pipeline().parameters.sftp_password",
+                      "--sftp_folder_path",
+                      "@pipeline().parameters.sftp_folder_path"
+                    ]
+                  },
+                  "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                  }
                 }
               ],
                 "concurrency": 1,
