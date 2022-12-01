@@ -546,3 +546,17 @@ def fact_conversation_attributes(extract_start_time: str, extract_end_time: str)
             ) AS ca
     """
 
+def fact_evaluation_total_scores(extract_start_time: str, extract_end_time: str):
+    return f"""
+        SELECT 
+            evaluationId,
+            totalCriticalScore,
+            totalNonCriticalScore,
+            totalScore
+
+        FROM 
+            fact_evaluation_total_scores
+        WHERE
+            recordInsertTime >= '{extract_start_time}' and recordInsertTime < '{extract_end_time}'
+
+    """
