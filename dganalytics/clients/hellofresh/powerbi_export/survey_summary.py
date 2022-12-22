@@ -76,7 +76,7 @@ GPC_conversation AS(
                       EXPLODE(participants) as participants,
                       ROW_NUMBER() over(partition by conversationId order by recordInsertTime DESC) as rn
               FROM gpc_hellofresh.raw_conversation_details)
-    WHERE rn = 1
+        WHERE rn = 1
     )
   )
     SELECT SDX_interactions.*,  GPC_conversation.mediaType
