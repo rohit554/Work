@@ -15,7 +15,7 @@ if __name__ == "__main__":
     spark = get_spark_session(
         app_name=app_name, tenant='datagamz', default_db='dg_performance_management')
     tables = ["activity_wise_points", "badges", "campaign", "challenges", "levels", "logins", "questions",
-              "quizzes", "user_campaign", "users", "activity_mapping", "data_upload_audit_log"]
+              "quizzes", "user_campaign", "users", "activity_mapping", "data_upload_audit_log", "data_upload_connections", "kpi_data"]
     for tenant in tenants:
         print(f"Getting ROI data for {tenant}")
         if 'hellofresh' in tenant['name']:
