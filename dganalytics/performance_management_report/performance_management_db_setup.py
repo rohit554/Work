@@ -287,6 +287,8 @@ spark.sql(f"""
                 report_date       STRING,
                 attr_dict_key     STRING,
                 attr_value        DOUBLE,
+                num               DOUBLE,
+                denom             DOUBLE,
                 orgId             STRING
             )
             USING DELTA

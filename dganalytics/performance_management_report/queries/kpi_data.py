@@ -8,6 +8,8 @@ kpi_data_schema = StructType([
     StructField("userId", StringType(), True),
     StructField("attr_dict_key", StringType(), True),
     StructField("attr_value", DoubleType(), True),
+    StructField("num", DoubleType(), True),
+    StructField("denom", DoubleType(), True),
     StructField("report_date", StringType(), True),
     StructField("orgId", StringType(), True),
     StructField("connection_name", StringType(), True)])
@@ -24,9 +26,9 @@ def get_kpi_data(spark):
         orgs.append(tenant['name'])
 
     connection_df = spark.sql(f"""
-        SELECT  connection_name,
+        SELECT  DISTINCT connection_name,
                 orgId
-        FROM data_upload_connections
+        FROM dg_performance_management.data_upload_connections
         where orgId in ({", ".join(f"'{org}'" for org in orgs)})
     """)
 
@@ -34,7 +36,7 @@ def get_kpi_data(spark):
         connectiondf = spark.sql(f"""
             SELECT  attr_dict_key,
                     formula
-            FROM data_upload_connections
+            FROM dg_performance_management.data_upload_connections
             WHERE   connection_name = '{connection['connection_name']}'
                     AND orgId = '{connection['orgId']}'
                     AND attr_dict_key NOT IN ('user_id', "report_date")
@@ -59,15 +61,70 @@ def get_kpi_data(spark):
                     }
             },
             {
-                "$project": {
-                    "user_id": 1.0,
-                    "report_date": 1.0,
-                    "connection_name": 1.0,
+                "$lookup": {
+                    "from": "Organization",
+                    "let": {
+                        "orgId": "$org_id"
+                    },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        {
+                                            "$eq": [
+                                                "$org_id",
+                                                "$$orgId"
+                                            ]
+                                        },
+                                        {
+                                            "$eq": [
+                                                "$type",
+                                                "Organisation"
+                                            ]
+                                        },
+                                        {
+                                            "$eq": [
+                                                "$is_active",
+                                                True
+                                            ]
+                                        },
+                                        {
+                                            "$eq": [
+                                                "$is_deleted",
+                                                False
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "$project": {
+                                "_id": 0.0,
+                                "timezone": {
+                                    "$ifNull": [
+                                        "$timezone",
+                                        "Australia/Melbourne"
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    "as": "Org"
+                }
+            }, 
+            {
+                "$unwind": {
+                    "path": "$Org",
+                    "preserveNullAndEmptyArrays": False
+                }
+            },
+            {
+                "$addFields": {
                     "dimensions": {
                         "$objectToArray": data
-                    },
-                    "org_id": 1.0,
-                    "timezone": None
+                    }
                 }
             }, 
             {
@@ -75,7 +132,23 @@ def get_kpi_data(spark):
                     "path": "$dimensions",
                     "preserveNullAndEmptyArrays": False
                 }
-            }, 
+            },
+            {
+                "$addFields": {
+                    "denom": {
+                        "$concat": [
+                            "$dimensions.k",
+                            "_denom"
+                        ]
+                    },
+                    "num": {
+                        "$concat": [
+                            "$dimensions.k",
+                            "_num"
+                        ]
+                    }
+                }
+            },
             {
                 "$project": {
                     "id": "$_id",
@@ -111,6 +184,52 @@ def get_kpi_data(spark):
                     "connection_name": 1,
                     "attr_dict_key": "$dimensions.k",
                     "attr_value": "$dimensions.v",
+                    "num": {
+                        "$arrayElemAt": [
+                            {
+                                "$map": {
+                                    "input": {
+                                        "$filter": {
+                                            "input": {
+                                                "$objectToArray": "$$ROOT"
+                                            },
+                                            "cond": {
+                                                "$eq": [
+                                                    "$$this.k",
+                                                    "$num"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "in": "$$this.v"
+                                }
+                            },
+                            0.0
+                        ]
+                    },
+                    "denom": {
+                        "$arrayElemAt": [
+                            {
+                                "$map": {
+                                    "input": {
+                                        "$filter": {
+                                            "input": {
+                                                "$objectToArray": "$$ROOT"
+                                            },
+                                            "cond": {
+                                                "$eq": [
+                                                    "$$this.k",
+                                                    "$denom"
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "in": "$$this.v"
+                                }
+                            },
+                            0.0
+                        ]
+                    },
                     "orgId": "$org_id"
                 }
             }
@@ -127,6 +246,8 @@ def get_kpi_data(spark):
                             report_date,
                             attr_dict_key,
                             attr_value,
+                            num,
+                            denom,
                             lower(orgId) as orgId
                     from kpi_data
                 """)

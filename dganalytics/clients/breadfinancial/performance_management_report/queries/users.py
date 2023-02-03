@@ -72,6 +72,12 @@ pipeline = [
                                         "$works_for.team_id",
                                         "$$team_id"
                                     ]
+                                },
+                                {
+                                    "$ne": [
+                                        None,
+                                        "$$team_id"
+                                    ]
                                 }
                             ]
                         }
