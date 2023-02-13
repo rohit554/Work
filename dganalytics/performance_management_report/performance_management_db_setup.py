@@ -295,3 +295,25 @@ spark.sql(f"""
             PARTITIONED BY (orgId)
             LOCATION '{db_path}/dg_performance_management/kpi_data'
         """)
+
+spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS
+            dg_performance_management.campaign_kpis
+            (
+                campaignId      STRING,
+                kpiId           STRING,
+                name            STRING,
+                overallAggr     STRING,
+                entityName      STRING,
+                fieldName       STRING,
+                displayName     STRING,
+                unit            STRING,
+                quartile        STRING,
+                target          DOUBLE,
+                operator        STRING,
+                orgId           STRING
+            )
+            USING DELTA
+            PARTITIONED BY (orgId)
+            LOCATION '{db_path}/dg_performance_management/campaign_kpis'
+        """)

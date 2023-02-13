@@ -17,7 +17,8 @@ pipelines = {
     "activity_mapping": queries.get_activity_mapping,
     "data_upload_audit_log": queries.get_data_upload_audit_log,
     "data_upload_connections": queries.get_connections,
-    "kpi_data": queries.get_kpi_data
+    "kpi_data": queries.get_kpi_data,
+    "campaign_kpis": queries.get_campaign_kpis
 }
 
 if __name__ == "__main__":
