@@ -127,7 +127,7 @@ def push_authors_data(spark, tenant, extract_date):
                       GROUP BY U.DGUserID, U._date) EHU
           ON U.DGUserID = EHU.DGUserID AND U._date = EHU._date
           LEFT JOIN (SELECT SUM(CASE WHEN (SE.ENTRY_TYPE = 5 and SE.Result = 1) THEN 1 END) NumberOfLikes,
-                          SUM(CASE WHEN (SE.ENTRY_TYPE = 34) THEN 1 END) NumberOfViewsPerArticle,
+                          SUM(CASE WHEN (SE.ENTRY_TYPE IN (1,101,102,103,104,105,106,107,108,115,117,118,119,120,205,206,214,215,216) ) THEN 1 END) NumberOfViewsPerArticle,
                           U.DGUserID,
                           U._date
                   FROM U
