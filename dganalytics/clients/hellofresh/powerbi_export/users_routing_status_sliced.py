@@ -14,8 +14,10 @@ def is_valid_date(dt=None, timezone="UTC"):
         if dt is None:
             dt = datetime.utcnow()
         timezone = pytz.timezone(timezone)
-        timezone_aware_date = timezone.localize(dt, is_dst=None)
+        timezone_aware_date = timezone.localize(dt, is_dst=True)
         is_dst = timezone_aware_date.tzinfo._dst.seconds != 0
+        if(is_dst):
+            timezone_aware_date = timezone.localize(dt, is_dst=None)
         return True
     except Exception as e:
         print(e)
