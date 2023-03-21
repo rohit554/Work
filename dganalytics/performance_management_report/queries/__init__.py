@@ -10,3 +10,4 @@ from dganalytics.performance_management_report.queries.user_campaign import get_
 from dganalytics.performance_management_report.queries.logins import get_logins
 from dganalytics.performance_management_report.queries.activity_mapping import get_activity_mapping
 from dganalytics.performance_management_report.queries.data_upload_audit_log import get_data_upload_audit_log
+from dganalytics.performance_management_report.queries.trek_data import get_trek_data
