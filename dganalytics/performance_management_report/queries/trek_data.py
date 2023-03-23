@@ -327,4 +327,4 @@ def get_trek_data(spark):
                         lower(organization_id) orgId
                     from trek_data
                 """)
-    #delta_table_partition_ovrewrite(df, "dg_performance_management.trek_data", ['orgId'])
+    delta_table_partition_ovrewrite(df, "dg_performance_management.trek_data", ['orgId'])

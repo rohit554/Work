@@ -312,3 +312,66 @@ spark.sql(f"""
             PARTITIONED BY (orgId)
             LOCATION '{db_path}/dg_performance_management/trek_data'
         """)
+spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS
+            dg_performance_management.data_upload_connections
+            (
+                connectionId      STRING,
+                connection_name   STRING,
+                attr_display_name STRING,
+                attr_dict_key     STRING,
+                datatype          STRING,
+                unit              STRING,
+                overall_aggr      STRING,
+                formula           STRING,
+                num_aggr          STRING,
+                num               STRING,
+                denom_aggr        STRING,
+                denom             STRING,
+                orgId             STRING
+            )
+            USING DELTA
+            PARTITIONED BY (orgId)
+            LOCATION '{db_path}/dg_performance_management/data_upload_connections'
+        """)
+
+spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS
+            dg_performance_management.kpi_data
+            (
+                id                STRING,
+                connection_name   STRING,
+                userId            STRING,
+                report_date       STRING,
+                attr_dict_key     STRING,
+                attr_value        DOUBLE,
+                num               DOUBLE,
+                denom             DOUBLE,
+                orgId             STRING
+            )
+            USING DELTA
+            PARTITIONED BY (orgId)
+            LOCATION '{db_path}/dg_performance_management/kpi_data'
+        """)
+
+spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS
+            dg_performance_management.campaign_kpis
+            (
+                campaignId      STRING,
+                kpiId           STRING,
+                name            STRING,
+                overallAggr     STRING,
+                entityName      STRING,
+                fieldName       STRING,
+                displayName     STRING,
+                unit            STRING,
+                quartile        STRING,
+                target          DOUBLE,
+                operator        STRING,
+                orgId           STRING
+            )
+            USING DELTA
+            PARTITIONED BY (orgId)
+            LOCATION '{db_path}/dg_performance_management/campaign_kpis'
+        """)
