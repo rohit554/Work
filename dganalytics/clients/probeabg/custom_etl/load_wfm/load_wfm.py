@@ -46,7 +46,7 @@ if __name__ == '__main__':
     sdf.createOrReplaceTempView("wfm_pre")
     wfm_username_match = spark.sql(f"""select distinct a.Date, a.Organisation, a.Employee, a.Supervisor, a.TimeAdheringToScheduleHours,
              a.TimeNotAdheringToScheduleHours, a.TotalTimeScheduledHours, a.TimeAdheringToSchedule,
-             a.TimeNotAdheringToSchedule, a.AdherenceVio lations, a.Employee_ID, a.Username,
+             a.TimeNotAdheringToSchedule, a.AdherenceViolations, a.Employee_ID, a.Username,
              b.userId as genesysUserId, b.state
                             from 
                             wfm_pre a left join gpc_{tenant}.dim_users b
