@@ -77,7 +77,7 @@ def authorize(tenant: str):
 
     if access_token is None:
         logger.info("Authorizing GPC")
-        client_id = (f'{tenant}gpcOAuthClientId')
+        client_id = get_secret(f'{tenant}gpcOAuthClientId')
         client_secret = get_secret(f'{tenant}gpcOAuthClientSecret')
         auth_key = base64.b64encode(
             bytes(client_id + ":" + client_secret, "ISO-8859-1")).decode("ascii")

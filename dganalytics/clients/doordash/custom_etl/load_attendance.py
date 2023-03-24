@@ -3,7 +3,7 @@ import argparse
 import pandas as pd
 import datetime
 import os
-
+import numpy as np
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     tenant = 'datagamz'
     spark = get_spark_session('attendance_data', tenant)
-    customer = 'datagamz'
+    customer = 'doordashprod'
     tenant_path, db_path, log_path = get_path_vars(customer)
 
     #reading input file either csv or xlsx
@@ -24,11 +24,10 @@ if __name__ == '__main__':
         attendance = pd.read_csv(os.path.join(tenant_path, "data", "raw", "attendance", input_file))
 
     #reading date columns
-    #attendance = attendance.drop(columns=['HOD'])
-    DATE_COL = attendance.columns[18:]
+    DATE_COL = attendance.columns[14:]
     #transforming dates into columns and computing isPresent field
-    melted_df = pd.melt(attendance, id_vars=['Employee ID'], value_vars= attendance.columns[18:], var_name = 'date', value_name = 'isPresent')
-    melted_df['date'] = pd.to_datetime(melted_df['date'], format='%d/%m/%Y', errors='coerce')
+    melted_df = pd.melt(attendance, id_vars=['Employee ID'], value_vars= attendance.columns[14:], var_name = 'date', value_name = 'isPresent')
+    melted_df['date'] = pd.to_datetime(melted_df['date'], format='%d-%m-%Y', errors='coerce')
     melted_df['date'] = melted_df['date'].fillna(pd.to_datetime(melted_df['date'], format='%d-%m-%Y', errors='coerce'))
     melted_df['isPresent'] = melted_df['isPresent'].apply(lambda x: True if x == 'WFH' or x == 'P' else False)
 
@@ -42,7 +41,7 @@ if __name__ == '__main__':
         "isPresent": "isPresent"
     }, errors="raise") 
     df = df.drop_duplicates()
-
+    df['userId'] = df['userId'].astype(np.int64)
     df['reportDate'] = df['reportDate'].astype('str').str.strip()
     
     df= spark.createDataFrame(df)
@@ -51,7 +50,7 @@ if __name__ == '__main__':
     
     newDF = spark.sql(f"""merge into dg_performance_management.attendance DB
                 using attendance A
-                on A.reportDate = DB.reportDate
+                on date_format(cast(A.reportDate as date), 'dd-MM-yyyy') = date_format(cast(DB.reportDate as date), 'dd-MM-yyyy')
                 and A.userId = DB.userId
                 WHEN MATCHED THEN
                     UPDATE SET *
@@ -60,10 +59,11 @@ if __name__ == '__main__':
                 """)
     
     attendance = spark.sql("""SELECT DISTINCT userId,
-                                            reportDate,
+                                            date_format(cast(reportDate as date), 'dd-MM-yyyy') reportDate,
                                             isPresent 
                                             FROM 
                                             dg_performance_management.attendance
+                                            WHERE date_format(cast(reportDate as date), 'dd-MM-yyyy') != ''
                                             """)
     
     
