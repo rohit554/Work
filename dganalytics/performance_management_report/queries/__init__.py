@@ -13,3 +13,4 @@ from dganalytics.performance_management_report.queries.data_upload_audit_log imp
 from dganalytics.performance_management_report.queries.data_upload_connection import get_connections
 from dganalytics.performance_management_report.queries.kpi_data import get_kpi_data
 from dganalytics.performance_management_report.queries.campaign_kpis import get_campaign_kpis
+from dganalytics.performance_management_report.queries.trek_data import get_trek_data

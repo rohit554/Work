@@ -16,6 +16,7 @@ pipelines = {
     "logins": queries.get_logins,
     "activity_mapping": queries.get_activity_mapping,
     "data_upload_audit_log": queries.get_data_upload_audit_log,
+    "trek_data": queries.get_trek_data,
     "data_upload_connections": queries.get_connections,
     "kpi_data": queries.get_kpi_data,
     "campaign_kpis": queries.get_campaign_kpis

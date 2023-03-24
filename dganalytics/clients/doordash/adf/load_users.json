@@ -1,0 +1,148 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"env": {
+			"type": "string",
+			"metadata": "Environment name",
+			"defaultValue": "dev"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/dg', parameters('env'), 'adf')]",
+		"factoryname": "[concat('dg', parameters('env'), 'adf')]",
+		"AzureKeyVault_baseUrl": "[concat('https://dg', parameters('env') ,'secrets.vault.azure.net/')]"
+	},
+	"resources": [
+		{
+			"name": "[concat(variables('factoryname'), '/AzureKeyVault')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[variables('AzureKeyVault_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(variables('factoryname'), '/AzureDatabricksForPM')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureDatabricks",
+				"typeProperties": {
+					"domain": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "databricksinstanceurl"
+					},
+					"accessToken": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "databricksaccesstoken"
+					},
+					"existingClusterId": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "databricksclusteridforpm"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault')]"
+			]
+		},
+		{
+			"name": "[concat(variables('factoryname'), '/doordash_sftp_users')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "load_users",
+						"type": "DatabricksSparkPython",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "02:30:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/doordash/custom_etl/load_users.py",
+							"parameters": [
+								"--input_file",
+								"@pipeline().parameters.input_file"
+							]
+						},
+						"linkedServiceName": {
+							"referenceName": "AzureDatabricksForPM",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"parameters": {
+					"input_file": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "doordash"
+				},
+				"annotations": [],
+				"lastPublishTime": "2023-03-07T10:28:14Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDatabricksForPM')]"
+			]
+		},
+		{
+			"name": "[concat(variables('factoryname'), '/doordash_sftp_users_trigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "doordash_sftp_users",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"input_file": "@trigger().outputs.body.fileName"
+						}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/doordashprod/blobs/data/raw/user_management",
+					"blobPathEndsWith": "",
+					"ignoreEmptyBlobs": true,
+					"scope": "[concat('/subscriptions/590f7ac0-b909-4092-adb4-2ad447a5bb19/resourceGroups/dg', parameters('env'), 'analytics/providers/Microsoft.Storage/storageAccounts/dg', parameters('env'), 'lakestorage')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"doordash_sftp_users"
+			]
+		}
+	]
+}

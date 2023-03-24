@@ -489,6 +489,32 @@
                         }
                     },
                     {
+                        "name": "trek_data",
+                        "type": "DatabricksSparkPython",
+                        "dependsOn": [
+                            
+                        ],
+                        "policy": {
+                            "timeout": "00:30:00",
+                            "retry": 1,
+                            "retryIntervalInSeconds": 30,
+                            "secureOutput": false,
+                            "secureInput": false
+                        },
+                        "userProperties": [],
+                        "typeProperties": {
+                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/performance_management_report/main.py",
+                            "parameters": [
+                                "--pipeline",
+                                "trek_data"
+                            ]
+                        },
+                        "linkedServiceName": {
+                            "referenceName": "AzureDatabricks",
+                            "type": "LinkedServiceReference"
+                        }
+                    },
+                    {
                         "name": "wait-1",
                         "type": "Wait",
                         "dependsOn": [
@@ -590,6 +616,12 @@
                                     "Succeeded"
                                 ]
                             },
+                            {
+                                "activity": "trek_data",
+                                "dependencyConditions": [
+                                    "Succeeded"
+                                ]
+                            }
                             {
                                 "activity": "kpi_data",
                                 "dependencyConditions": [
