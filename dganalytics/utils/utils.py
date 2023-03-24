@@ -1,3 +1,5 @@
+from ast import Index
+from pickle import FALSE
 import shutil
 from statistics import mode
 from numpy.lib.utils import lookfor
@@ -16,6 +18,7 @@ from pyspark.sql import functions as F
 from typing import List
 import string
 import random
+from pyspark.sql.types import StructType, StructField, StringType, BooleanType, DateType
 
 
 def free_text_feild_correction(DataFrame, free_text_fields):
@@ -271,6 +274,59 @@ def push_gamification_data(df: pd.DataFrame, org_id: str, connection_name: str):
         print("File data submitted to API")
     a.close()
 
+
+def upload_gamification_users(df: pd.DataFrame, org_id: str):
+    token, user_Id = get_gamification_token()
+    headers = {
+        "email": get_secret("gamificationuser"),
+        "id_token": token,
+        "orgid": org_id,
+        "accessType": "active_directory",
+        "Authorization": f"Bearer {token}"
+    }
+    prefix = """# Mandatory fields are first_name/last_name/user_start_date/user_id/email/team/role,,,,,,,,,,,,,,,,\n# Valid values for role column are Agent/Team Lead/Team Manager,,,,,,,,,,,,,,,,\n# Valid values for gender column are Female/Male/Other,,,,,,,,,,,,,,,,\n# Valid format for user_start_date column is dd-mm-yyyy,,,,,,,,,,,,,,,,\n# Valid format for dateofbirth column is dd-mm-yyyy,,,,,,,,,,,,,,,,\n# Password length should be at least 14. It should contain one alphabet/number/special character each. If not specified default datagamz password will be set.,,,,,,,,,,,,,,,,\n"""
+    
+    data = prefix + df.to_csv(index=False)
+    
+    body = {
+        "entityName": "USERS",
+        "user_id": f"{user_Id}",
+        "originalFileName": f"{org_id}_USERS_{datetime.now()}",
+        "data": data.replace("\n","\r\n")
+    }
+    
+    resp = requests.post(
+        f"{get_secret('gamificationurl')}/api/user/uploadUserFile", headers=headers, data=body)
+    if resp.status_code != 200:
+        raise Exception("publishing failed")
+    else:
+        print("User data submitted to API") 
+
+def deactivate_gamification_users(df: pd.DataFrame, org_id: str):
+    token, user_Id = get_gamification_token()
+    headers = {
+        "email": get_secret("gamificationuser"),
+        "id_token": token,
+        "orgid": org_id,
+        "accessType": "active_directory",
+        "Authorization": f"Bearer {token}"
+    }
+
+    a = tempfile.NamedTemporaryFile()
+    print(str(df.shape))
+    a.file.write(bytes(df.to_csv(index=False, header=True, mode='a'), 'utf-8'))
+    files = [
+        ('profile', open(a.name, 'rb'))
+    ]
+
+    resp = requests.post(
+        f"{get_secret('gamificationurl')}/api/user/bulkdeactivate", headers=headers, files=files)
+    if resp.status_code != 200:
+        raise Exception("Bulk Deactivate failed failed")
+    else:
+        print("Users Deactivated Successfully")
+    a.close()
+
 def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_conf: dict = None):
     global env
     time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S")
@@ -407,8 +463,158 @@ def delta_table_ovrewrite(df, table):
         df.coalesce(1).write.format("delta").mode(
             "overwrite").saveAsTable(f"{table}")
 
+def get_mongodb_users(orgId, spark):
+    userPipeline = [{
+      "$match": {
+        "org_id": orgId
+      }
+    },
+    {
+      "$project": {
+        "first_name": 1,
+        "last_name": 1,
+        "user_id": 1,
+        "email": 1,
+        "is_active": 1,
+        "is_deleted": 1,
+        "works_for": 1,
+        "org_id": 1,
+        "communication_email": 1,
+        "user_start_date": 1,
+        "name": 1
+      }
+    },
+    {
+        "$unwind": {
+          "path": "$works_for"
+        }
+      },
+    {
+      "$project": {
+        "first_name": 1,
+        "last_name": 1,
+        "user_id": 1,
+        "email": 1,
+        "is_active": 1,
+        "is_deleted": 1,
+        "role_id": "$works_for.role_id",
+        "team_id": "$works_for.team_id",
+        "communication_email": 1,
+        "user_start_date": 1,
+        "org_id": 1,
+        "name": 1
+      }
+    },
+    {
+            "$lookup": {
+                "from": "Organization",
+                "let": {
+                    "oid": "$org_id"
+                },
+                "pipeline": [
+                    {
+                        "$match": {
+                            "$expr": {
+                                "$and": [
+                                    {
+                                        "$eq": [
+                                            "$org_id",
+                                            "$$oid"
+                                        ]
+                                    },
+                                    {
+                                        "$eq": [
+                                            "$type",
+                                            "Organisation"
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "$project": {
+                            "timezone": {
+                                "$ifNull": [
+                                    "$timezone",
+                                    "Australia/Melbourne"
+                                ]
+                            }
+                        }
+                    }
+                ],
+                "as": "org"
+            }
+        },
+
+        {
+            "$unwind": {
+                "path": "$org",
+                "preserveNullAndEmptyArrays": True
+            }
+        },{
+          "$project": {
+            "first_name": 1,
+            "last_name": 1,
+            "user_id": 1,
+            "email": 1,
+            "is_active": 1,
+            "is_deleted": 1,
+            "role_id": 1,
+            "team_id": 1,
+            "communication_email": 1,
+            "name": 1,
+            "user_start_date":{
+                    "$dateToString": {
+                        "format": "%Y-%m-%d",
+                        "date": {
+                            "$toDate": {
+                                "$dateToString": {
+                                    "date": "$user_start_date",
+                                    "timezone": "$org.timezone"
+                                }
+                            }
+                        }
+                    }
+                }
+          }
+        }]
+
+    userSchema = StructType([StructField('first_name', StringType(), True),
+                        StructField('last_name', StringType(), True),
+                        StructField('user_id', StringType(), True),
+                        StructField('email', StringType(), True),
+                        StructField('role_id', StringType(), True),
+                        StructField('team_id', StringType(), True),
+                        StructField('communication_email', StringType(), True),
+                        StructField('name', StringType(), True),
+                        StructField('user_start_date', StringType(), True),
+                        StructField('is_active', BooleanType(), True),
+                        StructField('is_deleted', BooleanType(), True)])
+
+    return exec_mongo_pipeline(spark, userPipeline, 'User', userSchema)
+
+def get_mongodb_teams(orgId, spark):
+    teamPipeline = [{
+      "$match": {
+        "org_id": orgId,
+        "type": "Team"
+      }
+    },
+    {
+      "$project": {
+        "team_id": "$_id",
+        "_id": 0,
+        "name": 1
+      }
+    }]
+
+    teamSchema = StructType([StructField('team_id', StringType(), True),
+                     StructField('name', StringType(), True)])
+    return exec_mongo_pipeline(spark, teamPipeline, 'User', teamSchema)
 
 pb_access_token = None
 dbutils = None
 secrets = None
 env = get_env()
+
