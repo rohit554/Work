@@ -320,7 +320,7 @@ def deactivate_gamification_users(df: pd.DataFrame, org_id: str):
     resp = requests.post(
         f"{get_secret('gamificationurl')}/api/user/bulkdeactivate", headers=headers, files=files)
     if resp.status_code != 200:
-        raise Exception("Bulk Deactivate failed failed")
+        raise Exception("Bulk Deactivate failed")
     else:
         print("Users Deactivated Successfully")
     a.close()

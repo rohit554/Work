@@ -148,7 +148,7 @@ if __name__ == "__main__":
             END role,
             '' `license id`,
             '' `Full Name`,
-            TRIM(U.`Communication Email`)
+            TRIM(U.`Communication Email`) `Communication Email`
             FROM users U
             WHERE NOT EXISTS (SELECT 1 FROM mongoUsers MU WHERE LOWER(MU.user_id) = LOWER(U.user_id))
                   AND (U.LWD IS NULL OR U.LWD > CURRENT_DATE())
@@ -157,11 +157,13 @@ if __name__ == "__main__":
             ORDER BY date_format(U.user_start_date, 'dd-MM-yyyy') DESC
     """)
 
-    upload_gamification_users(createUsersDF.toPandas(), customer.upper())
-    upload_gamification_users(updateUsersDF.toPandas(), customer.upper())
+    if(createUsersDF.count() > 0):
+        upload_gamification_users(createUsersDF.toPandas(), customer.upper())
+    if(updateUsersDF.count() > 0):
+        upload_gamification_users(updateUsersDF.toPandas(), customer.upper())
 
     deactivatedUsersDF = spark.sql(f"""
-        SELECT MU.user_id FROM mongoUsers MU
+        SELECT MU.user_id, '' email FROM mongoUsers MU
         WHERE role_id IN ('Agent', 'Team Lead', 'Team Manager') and (NOT EXISTS (SELECT 1 FROM Users U WHERE LOWER(U.user_id) = LOWER(MU.user_id) AND (U.LWD IS NULL OR U.LWD > CURRENT_DATE())))
         AND user_id NOT IN ('doordashprodmanager', '123445', '12345')
         AND MU.is_active
