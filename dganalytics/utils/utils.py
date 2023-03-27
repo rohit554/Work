@@ -309,21 +309,15 @@ def deactivate_gamification_users(df: pd.DataFrame, org_id: str):
         "accessType": "active_directory",
         "Authorization": f"Bearer {token}"
     }
-
-    a = tempfile.NamedTemporaryFile()
-    print(str(df.shape))
-    a.file.write(bytes(df.to_csv(index=False, header=True, mode='a'), 'utf-8'))
-    files = [
-        ('profile', open(a.name, 'rb'))
-    ]
+    payload = {}
+    files = {('profile', ('deactivateusers.csv', df.to_csv(index=False, header=True, mode='a')))}
 
     resp = requests.post(
-        f"{get_secret('gamificationurl')}/api/user/bulkdeactivate", headers=headers, files=files)
+        f"{get_secret('gamificationurl')}/api/user/bulkdeactivate", headers=headers, files=files, data=payload)
     if resp.status_code != 200:
         raise Exception("Bulk Deactivate failed")
     else:
         print("Users Deactivated Successfully")
-    a.close()
 
 def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_conf: dict = None):
     global env
