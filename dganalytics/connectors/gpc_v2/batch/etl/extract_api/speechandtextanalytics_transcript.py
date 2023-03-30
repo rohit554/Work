@@ -44,6 +44,8 @@ def exec_speechandtextanalytics_transcript(spark: SparkSession, tenant: str, run
 
         url = f"{base_url}/api/v2/speechandtextanalytics/conversations/{conversationId}/communications/{communicationId}/transcripturl"
         resp = requests.request(method="GET", url=url, headers=auth_headers)
+        if resp.status_code == 404:
+            continue
         if resp.status_code != 200:
             logger.exception(
                 "Speech and Text Analytic's transcript Url failed: " + str(resp.text))
@@ -53,6 +55,8 @@ def exec_speechandtextanalytics_transcript(spark: SparkSession, tenant: str, run
 
         transcript_resp = requests.get(url)
 
+        if transcript_resp.status_code == 404:
+            continue
         if transcript_resp.status_code != 200:
              logger.exception(
                 "Speech and Text Analytic's transcript Analytics failed: " + str(resp.text))
