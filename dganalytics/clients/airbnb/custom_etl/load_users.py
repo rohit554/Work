@@ -43,7 +43,7 @@ if __name__ == '__main__':
     tenant = 'datagamz'
     app_name = 'airbnb_users'
     spark = get_spark_session(app_name = app_name, tenant=tenant, default_db='dg_performance_management')
-    customer = 'datagamz'
+    customer = 'airbnbprod'
     tenant_path, db_path, log_path = get_path_vars(customer)
     
     mongoUsers = get_mongodb_users(customer.upper(), spark)
