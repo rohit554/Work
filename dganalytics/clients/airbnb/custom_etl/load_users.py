@@ -8,6 +8,7 @@ from pyspark.sql.types import StructType, StructField, StringType
 from pyspark.sql.functions import *
 from datetime import datetime
 from pyspark.sql.functions import unix_timestamp, from_unixtime
+import re
 
 def get_lobs(lob: str = ""):
   lob = lob.strip()
@@ -50,43 +51,65 @@ if __name__ == '__main__':
     mongoTeams = get_mongodb_teams(customer.upper(), spark)
 
     if input_file.endswith(".xlsx"):
-        users = pd.read_excel(os.path.join(tenant_path, "data", "raw", "AirBnB", input_file), sheet_name="EmpList", skiprows=3, engine='openpyxl', usecols=lambda x: 'Unnamed: 0' not in x)
+        users = pd.read_excel(os.path.join(tenant_path, "data", "raw", "user_management", input_file), sheet_name="EmpList", skiprows=3, engine='openpyxl', usecols=lambda x: 'Unnamed: 0' not in x)
         
     elif input_file.endswith(".csv"):
-        users = pd.read_csv(os.path.join(tenant_path, "data", "raw", "AirBnB", input_file))
+        users = pd.read_csv(os.path.join(tenant_path, "data", "raw", "user_management", input_file))
+        
+    elif input_file.endswith(".xlsb"):
+        xls = pd.ExcelFile(os.path.join(tenant_path, "data", "raw", "user_management", input_file))
         
         for sheet in xls.sheet_names:
             sheetDf = pd.read_excel(xls, sheet)
             frames = [users, sheetDf]
             users = pd.concat(frames)
-    
-    #global lobs 
+     
     lobs = pd.read_csv(os.path.join(tenant_path, "data", "config", "campaing_lob_mapping.csv"))
     spark.conf.set("spark.sql legacy.timeParserPolicy", "LEGACY")
     spark.udf.register("get_lob_udf", get_lobs, StringType())
         
     name_parts = users['Name'].str.split(expand=True)
     users['first_name'], users['middle_name'], users['last_name'] = name_parts[0], '', name_parts[1]
+    
     users = users.rename(columns={'Gender': 'gender'})
     users['gender'].fillna('Other', inplace=True)
+    
+    replace_dict = {0: '', '-': '', '--': '', 'DNA': '','Profile not Active' : ''}
+    users = users.fillna('')
+    users['CCMS ID'] = users['CCMS ID'].replace(replace_dict)
+    users = users.rename(columns={'CCMS ID': 'user_id'})
+  
     users['DOJ'] = users['DOJ'].apply(lambda doj: datetime.now().strftime("%d-%m-%Y") if doj == 'DNA' else pd.to_datetime(doj).strftime('%d-%m-%Y'))
     users = users.rename(columns={'DOJ': 'user_start_date'})
 
-    users['email'] = users['CCMS ID'].replace(['-', '--', 'DNA', 'Profile not Active', 0, np.nan], '').apply(lambda x: x + "@teleperformancedibs.com" if len(str(x)) > 0 else '')
+    users['email'] = users['user_id'].replace(['-', '--', 'DNA', 'Profile not Active', 0, np.nan], '').apply(lambda x: x + "@datagamz.com" if len(str(x)) > 0 else '')
 
     users = users.rename(columns={'Supervisor': 'team'}).assign(team=lambda x: "Teamlead " + x["team"])
+    users['team'] = users['team'].str.replace('[^a-zA-Z0-9\s]+', '')
     
     users = users.rename(columns={'Designation': 'role'})
     users['role'] = np.where(users['role'] == 'Ambassador', 'Agent', 
                          np.where(users['role'].isin(['Team Leader -  Operations', 'Trainer', 'Team Leader -  MIS']), 'Team Lead', 'Team Manager'))
 
 
+    pattern = r'[\W_]'
+    users['first_name'] = users['first_name'].str.replace(pattern, '', regex=True)
+    users['last_name'] = users['last_name'].str.replace(pattern, '', regex=True)
+    default_email = np.where(
+                          (users['last_name'].isin(['', '.']) | users['last_name'].isna()),
+                           users['first_name'] + '@datagamz.com',
+                           users['first_name'] + '.' + users['last_name'] + '@datagamz.com')
     users = users.rename(columns={'Email ID': 'Communication Email'})
-    users['Communication Email'] = np.where(users['Communication Email'].isin(['-', '--', 'DNA']) | users['Communication Email'].isna(), users['first_name'] + '.' + users['last_name'] + '@datagamz.com', users['Communication Email'])
+    users['Communication Email'] = np.where(
+                                        users['Communication Email'].isin(['-', '--', 'DNA']) | users['Communication Email'].isna(),
+                                        default_email,
+                                        users['Communication Email'])
+    users['Communication Email'] = np.where(
+                                     users['Communication Email'].isin(['-', '--', 'DNA', '']) | users['Communication Email'].isna(),
+                                     default_email,
+                                     users['Communication Email'])
 
     users.insert(1, 'password', '')
-    #users.insert(5, 'gender', 'Other')
-    users.insert(6, 'user_id', users['CCMS ID'])
     users.insert(9, 'contact_info.address', '')
     users.insert(10, 'contact_info.city', '')
     users.insert(11, 'contact_info.country', '')
