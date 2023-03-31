@@ -84,7 +84,8 @@ if __name__ == '__main__':
 
     users['email'] = users['user_id'].replace(['-', '--', 'DNA', 'Profile not Active', 0, np.nan], '').apply(lambda x: x + "@datagamz.com" if len(str(x)) > 0 else '')
 
-    users = users.rename(columns={'Supervisor': 'team'}).assign(team=lambda x: "Teamlead " + x["team"])
+    users = users.rename(columns={'Supervisor': 'team'}).assign(team=lambda x: x["team"] + " Team")
+
     users['team'] = users['team'].str.replace('[^a-zA-Z0-9\s]+', '')
     
     users = users.rename(columns={'Designation': 'role'})
@@ -178,7 +179,6 @@ if __name__ == '__main__':
             WHERE NOT EXISTS (SELECT 1 FROM mongoUsers MU WHERE LOWER(MU.user_id) = LOWER(U.user_id))
                   AND TRIM(email) NOT IN ('-@teleperformancedibs.com', '@teleperformancedibs.com', 'Not Received@teleperformancedibs.com')
                   AND U.LOB IN ('R1', 'R2', 'CE')
-                ORDER BY date_format(U.user_start_date, 'dd-MM-yyyy') DESC
     """)
     
     
