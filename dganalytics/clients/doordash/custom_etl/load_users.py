@@ -26,6 +26,12 @@ schema = StructType([StructField("user_id", StringType(), True),
                     
                     ])
 
+def get_lobs(lob: str = ""):
+    lob = lob.strip()
+    if lob == "Doordash":
+        return ','.join(lobs["Campaign"])
+    return lobs.where(lobs['LOB']==lob).dropna().iloc[0]['Campaign']
+
 def GetLastName(row):
     last_name = ''
     if((row['name1'] is None) and (row['name2'] is None) and (row['name3'] is None) and (row['name4'] is None)):
@@ -72,6 +78,12 @@ if __name__ == "__main__":
             sheetDf = pd.read_excel(xls, sheet)
             frames = [users, sheetDf]
             users = pd.concat(frames)
+    
+    global lobs
+    lobs = pd.read_csv(os.path.join(tenant_path, "data", 'config', paths="campaign_lob_mapping.csv"))
+    spark.conf.set("spark.sql.legacy.timeParserPolicy", "LEGACY")
+    spark.udf.register("get_lob_udf", get_lobs, StringType())
+    
     # Identifying user's first and last name using full name
     users = users.join(
         users['Name'].str.split(' ', expand=True).rename(columns={0:'first_name', 1:'name1', 2: 'name2', 3: 'name3', 4: 'name4'})
@@ -117,7 +129,8 @@ if __name__ == "__main__":
             MU.role_id role,
             '' `license id`,
             MU.name `Full Name`,
-            MU.communication_email `Communication Email`
+            MU.communication_email `Communication Email`,
+            get_lob_udf(U.LOB) campaign
     FROM mongoUsers MU
     INNER JOIN mongoTeams MT
         ON MU.team_id = MT.team_id
@@ -148,7 +161,8 @@ if __name__ == "__main__":
             END role,
             '' `license id`,
             '' `Full Name`,
-            TRIM(U.`Communication Email`)
+            TRIM(U.`Communication Email`) `Communication Email`,
+            get_lob_udf(U.LOB) campaign
             FROM users U
             WHERE NOT EXISTS (SELECT 1 FROM mongoUsers MU WHERE LOWER(MU.user_id) = LOWER(U.user_id))
                   AND (U.LWD IS NULL OR U.LWD > CURRENT_DATE())
@@ -157,11 +171,13 @@ if __name__ == "__main__":
             ORDER BY date_format(U.user_start_date, 'dd-MM-yyyy') DESC
     """)
 
-    upload_gamification_users(createUsersDF.toPandas(), customer.upper())
-    upload_gamification_users(updateUsersDF.toPandas(), customer.upper())
+    if(createUsersDF.count() > 0):
+        upload_gamification_users(createUsersDF.toPandas(), customer.upper())
+    if(updateUsersDF.count() > 0):
+        upload_gamification_users(updateUsersDF.toPandas(), customer.upper())
 
     deactivatedUsersDF = spark.sql(f"""
-        SELECT MU.user_id FROM mongoUsers MU
+        SELECT MU.user_id, '' email FROM mongoUsers MU
         WHERE role_id IN ('Agent', 'Team Lead', 'Team Manager') and (NOT EXISTS (SELECT 1 FROM Users U WHERE LOWER(U.user_id) = LOWER(MU.user_id) AND (U.LWD IS NULL OR U.LWD > CURRENT_DATE())))
         AND user_id NOT IN ('doordashprodmanager', '123445', '12345')
         AND MU.is_active

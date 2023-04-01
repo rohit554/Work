@@ -1,9 +1,7 @@
-import json
 import argparse
 from dganalytics.utils.utils import get_spark_session
 from pyspark.sql.functions import *
 from pyspark.sql.types import StructType, StructField, StringType, BooleanType
-import pymongo
 from dganalytics.clients.breadfinancial.utils import exec_mongo_pipeline, push_gamification_data_for_tenant
 
 timezone = 'US/Eastern'
@@ -168,7 +166,7 @@ if __name__ == "__main__":
 	app_name = "egain_dg_gamification_export"
 	spark = get_spark_session(app_name, tenant, default_db=db_name)
 	try:
-		push_associates_data(spark, tenant, extract_date)
+		#push_associates_data(spark, tenant, extract_date)
 		push_authors_data(spark, tenant, extract_date)
 
 	except Exception as e:
