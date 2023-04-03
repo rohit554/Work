@@ -376,3 +376,20 @@ spark.sql(f"""
             PARTITIONED BY (orgId)
             LOCATION '{db_path}/dg_performance_management/campaign_kpis'
         """)
+
+spark.sql(f"""
+        create table if not exists 
+            dg_performance_management.campaign_activities
+            (
+                
+                campaignId string,
+                activityId string,
+                entityName string,
+                fieldName string,
+                kpi_name string,
+                orgId string
+            )
+            using delta
+            PARTITIONED BY (orgId)
+            LOCATION '{db_path}/dg_performance_management/campaign_activities'
+        """)

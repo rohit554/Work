@@ -19,7 +19,8 @@ pipelines = {
     "trek_data": queries.get_trek_data,
     "data_upload_connections": queries.get_connections,
     "kpi_data": queries.get_kpi_data,
-    "campaign_kpis": queries.get_campaign_kpis
+    "campaign_kpis": queries.get_campaign_kpis,
+    "campaign_activities": queries.get_campaign_activities
 }
 
 if __name__ == "__main__":
