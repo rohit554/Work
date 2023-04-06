@@ -3,8 +3,11 @@ import argparse
 import os
 import pandas as pd
 
-def get_kpi_values_data(spark, orgId):
-    return spark.sql(f"""
+def get_kpi_values_data(spark, orgId, orgIds):
+    if orgIds == []:
+        orgIds = ['-1']
+        
+    query = f"""
                 WITH user_campaign_activities AS 
                 (SELECT
                   d.report_date,
@@ -24,7 +27,7 @@ def get_kpi_values_data(spark, orgId):
                 JOIN dg_performance_management.campaign_outcomes ca
                     ON ca.orgId = uc.orgId AND ca.campaignId = uc.campaignId
                 WHERE
-                  u.RoleId = 'Agent' AND UC.orgId = '{orgId}'
+                  u.RoleId = 'Agent' AND (UC.orgId = '{orgId}' OR UC.orgId IN ({ ','.join(map(repr,orgIds))}))
                 )
 
                 SELECT
@@ -68,8 +71,9 @@ def get_kpi_values_data(spark, orgId):
                     AND uca.fieldName = ap.fieldName 
                     AND ap.activityId = uca.activityId
                 WHERE fieldValue IS NOT NULL OR points is NOT NULL
-                AND uca.orgId = '{orgId}'
-    """)
+                AND (uca.orgId = '{orgId}' OR uca.orgId IN ({ ','.join(map(repr,orgIds))}))
+    """
+    return spark.sql(query)
 
 if __name__ == "__main__":
 
@@ -85,7 +89,7 @@ if __name__ == "__main__":
         app_name=app_name, tenant='datagamz', default_db='dg_performance_management')
     tables = ["activity_wise_points", "badges", "campaign", "challenges", "levels", "logins", "questions",
               "quizzes", "user_campaign", "users", "activity_mapping", "data_upload_audit_log", 
-              "data_upload_connections", "kpi_data", "campaign_kpis", "trek_data"]
+              "data_upload_connections", "kpi_data", "campaign_kpis", "trek_data", "kpi_values"]
     for tenant in tenants:
         print(f"Getting ROI data for {tenant}")
         if 'hellofresh' in tenant['name']:
@@ -96,7 +100,7 @@ if __name__ == "__main__":
 
             print(f"extracting Table - {table}")
             if table == "kpi_values":
-                df = get_kpi_values_data(spark, tenant['name'])
+                df = get_kpi_values_data(spark, tenant['name'], [])
             else:
                 df = spark.sql(
                     f"select * from dg_performance_management.{table} where orgId = '{tenant['name']}'")
@@ -111,10 +115,10 @@ if __name__ == "__main__":
 
     for table in tables:
         if table == "kpi_values":
-            df = get_kpi_values_data(spark, tenant['name'])
+            df = get_kpi_values_data(spark, None, ['hellofreshanz', 'hellofreshus'])
         else:
             df = spark.sql(
-                f"select * from dg_performance_management.{table} where orgId in ('hellofreshanz', 'hellofreshca', 'hellofreshuk', 'hellofreshus')")
+                f"select * from dg_performance_management.{table} where orgId in ('hellofreshanz', 'hellofreshus')")
             df = df.drop("orgId")
         export_powerbi_csv('hellofresh', df, f"pm_{table}")
 
