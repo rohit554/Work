@@ -9,6 +9,7 @@ from pyspark.sql.functions import *
 from datetime import datetime
 from pyspark.sql.functions import unix_timestamp, from_unixtime
 import re
+from datetime import datetime
 
 def get_lobs(lob: str = ""):
   lob = lob.strip()
@@ -79,7 +80,7 @@ if __name__ == '__main__':
     users['CCMS ID'] = users['CCMS ID'].replace(replace_dict)
     users = users.rename(columns={'CCMS ID': 'user_id'})
   
-    users['DOJ'] = users['DOJ'].apply(lambda doj: datetime.now().strftime("%d-%m-%Y") if doj == 'DNA' else pd.to_datetime(doj).strftime('%d-%m-%Y'))
+    users['DOJ'] = pd.to_datetime(users['DOJ']).apply(lambda doj: datetime.now() if doj == pd.to_datetime('DNA') else doj).dt.day.astype(str) + '-' + users['DOJ'].dt.month.astype(str) + '-' + users['DOJ'].dt.year.astype(str)
     users = users.rename(columns={'DOJ': 'user_start_date'})
 
     users['email'] = users['user_id'].replace(['-', '--', 'DNA', 'Profile not Active', 0, np.nan], '').apply(lambda x: x + "@datagamz.com" if len(str(x)) > 0 else '')
