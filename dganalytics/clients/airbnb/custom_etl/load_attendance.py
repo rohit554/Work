@@ -35,13 +35,13 @@ if __name__ == '__main__':
     attendance['orgId'] = 'airbnb'
     
     attendance = attendance.rename(columns={
-        "Emp ID": "EmpId",
+        "Emp ID": "empId",
         "Date": "reportDate",
         "Is_Present": "isPresent"
     }, errors="raise")
     attendance = attendance.drop_duplicates()
     
-    attendance['userId'] = attendance['userId'].astype(np.int64)
+    attendance['empId'] = attendance['empId'].astype(np.int64)
     attendance['reportDate'] = attendance['reportDate'].astype('str').str.strip()
     
     attendance= spark.createDataFrame(attendance)
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     newDF = spark.sql(f"""merge into dg_performance_management.airbnb_attendance DB
                 using airbnb_attendance A
                 on date_format(cast(A.reportDate as date), 'dd-MM-yyyy') = date_format(cast(DB.reportDate as date), 'dd-MM-yyyy')
-                and A.EmpId = DB.EmpId
+                and A.empId = DB.empId
                 WHEN MATCHED THEN
                     UPDATE SET *
                 WHEN NOT MATCHED THEN
@@ -59,9 +59,13 @@ if __name__ == '__main__':
                 """)
         
       
-    attendance = spark.sql(f"""SELECT A.EmpId, A.reportDate, A.isPresent, DB.user_id
+    attendance = spark.sql(f"""
+                         SELECT DISTINCT empId, reportDate, isPresent, user_id
+                         FROM
+                         (SELECT A.empId, A.reportDate, A.isPresent, DB.user_id
                          FROM dg_performance_management.airbnb_attendance AS A
                          JOIN dg_performance_management.airbnb_users_data AS DB
-                         ON A.userid = DB.Emp_code""")
+                         ON A.empId = DB.Emp_code) AS joined_data
+                         """)
     
     export_powerbi_csv(customer, attendance, f"pm_attendance")

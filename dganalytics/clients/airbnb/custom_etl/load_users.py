@@ -19,20 +19,21 @@ schema = StructType([StructField("password", StringType(), True),
                      StructField("first_name", StringType(), True),
                      StructField("middle_name", StringType(), True),
                      StructField("last_name", StringType(), True),
+                     StructField("name", StringType(), True),
+                     StructField("manager", StringType(), True),
                      StructField("gender", StringType(), True),
                      StructField("user_id", StringType(), True),
+                     StructField("Emp_code", StringType(), True),
+                     StructField("LDAP_ID", StringType(), True),
+                     StructField("CCMS_ID", StringType(), True),
                      StructField("user_start_date", StringType(), True),
                      StructField("email", StringType(), True),
-                     StructField("contact_info.address", StringType(), True),
-                     StructField("contact_info.city", StringType(), True),
-                     StructField("contact_info.country", StringType(), True),
                      StructField("dateofbirth", StringType(), True),
                      StructField("team", StringType(), True),
                      StructField("role", StringType(), True),
-                     StructField("license id", StringType(), True),
-                     StructField("Full Name", StringType(), True),
-                     StructField("Communication Email", StringType(), True),
-                     StructField("LOB", StringType(), True)
+                     StructField("Communication_Email", StringType(), True),
+                     StructField("LOB", StringType(), True),
+                     StructField("orgId", StringType(), True)
                     ])
 
 if __name__ == '__main__':
@@ -74,6 +75,12 @@ if __name__ == '__main__':
     
     users = users.rename(columns={'Gender': 'gender'})
     users['gender'].fillna('Other', inplace=True)
+
+    users = users.rename(columns={'Name': 'name'})
+    users = users.rename(columns={'Manager': 'manager'})
+    users = users.rename(columns={'Emp code': 'Emp_code'})
+    users = users.rename(columns={'LDAP ID': 'LDAP_ID'})
+    users = users.rename(columns={'CCMS ID': 'CCMS_ID'})
     
     replace_dict = {0: '', '-': '', '--': '', 'DNA': '','Profile not Active' : ''}
     users = users.fillna('')
@@ -118,8 +125,8 @@ if __name__ == '__main__':
     users.insert(12, 'dateofbirth', '')
     users.insert(15, 'license id', '')
     users.insert(16, 'Full Name', '')
-    users = users[['password', 'first_name', 'middle_name', 'last_name', 'gender', 'user_id', 'user_start_date', 'email','contact_info.address', 'contact_info.city', 'contact_info.country', 'dateofbirth', 'team', 'role', 'license id', 'Full Name', 'Communication Email', 'LOB']]
-    
+    users.insert(17, 'orgId', 'airbnbprod')
+    users = users[['password', 'first_name', 'middle_name', 'last_name', 'name', 'manager', 'gender', 'user_id', 'Emp_code', 'LDAP_ID', 'CCMS_ID', 'user_start_date', 'email', 'dateofbirth', 'team', 'role','Communication_Email', 'LOB', 'orgId']]
     users = users.astype(str) 
     users= spark.createDataFrame(users)
     
@@ -128,6 +135,15 @@ if __name__ == '__main__':
 
     users.createOrReplaceTempView("users")
     
+    newDF = spark.sql(f"""merge into dg_airbnbprod.airbnb_user DB
+                using users A
+                on A.user_start_date = DB.user_start_date
+                and A.user_id = DB.user_id
+                WHEN MATCHED THEN
+                    UPDATE SET *
+                WHEN NOT MATCHED THEN
+                    INSERT *
+                """)
     
     updateUsersDF = spark.sql(f"""
             SELECT  '' password,
