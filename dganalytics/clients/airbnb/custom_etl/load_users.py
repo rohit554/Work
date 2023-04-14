@@ -8,8 +8,6 @@ from pyspark.sql.types import StructType, StructField, StringType
 from pyspark.sql.functions import *
 from datetime import datetime
 from pyspark.sql.functions import unix_timestamp, from_unixtime
-import re
-from datetime import datetime
 
 def get_lobs(lob: str = ""):
   lob = lob.strip()
@@ -48,15 +46,15 @@ if __name__ == '__main__':
     spark = get_spark_session(app_name = app_name, tenant=tenant, default_db='dg_performance_management')
     customer = 'airbnbprod'
     tenant_path, db_path, log_path = get_path_vars(customer)
-    
+
     mongoUsers = get_mongodb_users(customer.upper(), spark)
     mongoTeams = get_mongodb_teams(customer.upper(), spark)
 
     if input_file.endswith(".xlsx"):
-        users = pd.read_excel(os.path.join(tenant_path, "data", "raw", "user_management", input_file), sheet_name="EmpList", skiprows=3, engine='openpyxl', usecols=lambda x: 'Unnamed: 0' not in x)
+        users = pd.read_excel(os.path.join(tenant_path, "data", "raw", "user_management", input_file), sheet_name="EmpList", skiprows=2, engine='openpyxl', usecols=lambda x: 'Unnamed: 0' not in x)
         
     elif input_file.endswith(".csv"):
-        users = pd.read_csv(os.path.join(tenant_path, "data", "raw", "user_management", input_file))
+        users = pd.read_csv(os.path.join(tenant_path, "data", "raw", "user_management", input_file), skiprows=2, usecols=lambda x: 'Unnamed: 0' not in x)
         
     elif input_file.endswith(".xlsb"):
         xls = pd.ExcelFile(os.path.join(tenant_path, "data", "raw", "user_management", input_file))
@@ -65,60 +63,42 @@ if __name__ == '__main__':
             sheetDf = pd.read_excel(xls, sheet)
             frames = [users, sheetDf]
             users = pd.concat(frames)
-     
+    
+    #global lobs 
     lobs = pd.read_csv(os.path.join(tenant_path, "data", "config", "campaing_lob_mapping.csv"))
     spark.conf.set("spark.sql legacy.timeParserPolicy", "LEGACY")
     spark.udf.register("get_lob_udf", get_lobs, StringType())
-        
+
     name_parts = users['Name'].str.split(expand=True)
     users['first_name'], users['middle_name'], users['last_name'] = name_parts[0], '', name_parts[1]
-    
     users = users.rename(columns={'Gender': 'gender'})
     users['gender'].fillna('Other', inplace=True)
-
+    
     users = users.rename(columns={'Name': 'name'})
     users = users.rename(columns={'Manager': 'manager'})
+    
     users = users.rename(columns={'Emp code': 'Emp_code'})
     users = users.rename(columns={'LDAP ID': 'LDAP_ID'})
     users = users.rename(columns={'CCMS ID': 'CCMS_ID'})
     
-    replace_dict = {0: '', '-': '', '--': '', 'DNA': '','Profile not Active' : ''}
-    users = users.fillna('')
-    users['CCMS ID'] = users['CCMS ID'].replace(replace_dict)
-    users = users.rename(columns={'CCMS ID': 'user_id'})
-  
-    users['DOJ'] = pd.to_datetime(users['DOJ']).apply(lambda doj: datetime.now() if doj == pd.to_datetime('DNA') else doj).dt.day.astype(str) + '-' + users['DOJ'].dt.month.astype(str) + '-' + users['DOJ'].dt.year.astype(str)
+    users['DOJ'] = users['DOJ'].fillna(pd.Timestamp('now')).apply(lambda doj: datetime.now().strftime("%d-%m-%Y") if doj == 'DNA' else pd.to_datetime(doj).strftime('%d-%m-%Y'))
+
     users = users.rename(columns={'DOJ': 'user_start_date'})
 
-    users['email'] = users['user_id'].replace(['-', '--', 'DNA', 'Profile not Active', 0, np.nan], '').apply(lambda x: x + "@datagamz.com" if len(str(x)) > 0 else '')
+    users['email'] = users['CCMS_ID'].replace(['-', '--', 'DNA', 'Profile not Active', 0, np.nan], '').apply(lambda x: x + "@teleperformancedibs.com" if len(str(x)) > 0 else '')
 
     users = users.rename(columns={'Supervisor': 'team'}).assign(team=lambda x: x["team"] + " Team")
-
-    users['team'] = users['team'].str.replace('[^a-zA-Z0-9\s]+', '')
     
     users = users.rename(columns={'Designation': 'role'})
     users['role'] = np.where(users['role'] == 'Ambassador', 'Agent', 
                          np.where(users['role'].isin(['Team Leader -  Operations', 'Trainer', 'Team Leader -  MIS']), 'Team Lead', 'Team Manager'))
 
 
-    pattern = r'[\W_]'
-    users['first_name'] = users['first_name'].str.replace(pattern, '', regex=True)
-    users['last_name'] = users['last_name'].str.replace(pattern, '', regex=True)
-    default_email = np.where(
-                          (users['last_name'].isin(['', '.']) | users['last_name'].isna()),
-                           users['first_name'] + '@datagamz.com',
-                           users['first_name'] + '.' + users['last_name'] + '@datagamz.com')
-    users = users.rename(columns={'Email ID': 'Communication Email'})
-    users['Communication Email'] = np.where(
-                                        users['Communication Email'].isin(['-', '--', 'DNA']) | users['Communication Email'].isna(),
-                                        default_email,
-                                        users['Communication Email'])
-    users['Communication Email'] = np.where(
-                                     users['Communication Email'].isin(['-', '--', 'DNA', '']) | users['Communication Email'].isna(),
-                                     default_email,
-                                     users['Communication Email'])
+    users = users.rename(columns={'Email ID': 'Communication_Email'})
+    users['Communication_Email'] = np.where(users['Communication_Email'].isin(['-', '--', 'DNA']) | users['Communication_Email'].isna(), users['first_name'] + '.' + users['last_name'] + '@datagamz.com', users['Communication_Email'])
 
     users.insert(1, 'password', '')
+    users.insert(6, 'user_id', users['CCMS_ID'])
     users.insert(9, 'contact_info.address', '')
     users.insert(10, 'contact_info.city', '')
     users.insert(11, 'contact_info.country', '')
@@ -129,21 +109,22 @@ if __name__ == '__main__':
     users = users[['password', 'first_name', 'middle_name', 'last_name', 'name', 'manager', 'gender', 'user_id', 'Emp_code', 'LDAP_ID', 'CCMS_ID', 'user_start_date', 'email', 'dateofbirth', 'team', 'role','Communication_Email', 'LOB', 'orgId']]
     users = users.astype(str) 
     users= spark.createDataFrame(users)
-    
+
+    users.createOrReplaceTempView("users")
+
     mongoUsers.createOrReplaceTempView("mongoUsers")
     mongoTeams.createOrReplaceTempView("mongoTeams")
 
-    users.createOrReplaceTempView("users")
+    newDF = spark.sql(f"""DELETE FROM dg_airbnbprod.airbnb_user_data""")
     
-    newDF = spark.sql(f"""merge into dg_airbnbprod.airbnb_user DB
-                using users A
-                on A.user_start_date = DB.user_start_date
-                and A.user_id = DB.user_id
-                WHEN MATCHED THEN
-                    UPDATE SET *
-                WHEN NOT MATCHED THEN
-                    INSERT *
-                """)
+    newDF = spark.sql(f"""INSERT INTO TABLE dg_airbnbprod.airbnb_user_data
+                    SELECT A.password, A.first_name, A.middle_name, A.last_name, A.name, A.manager, A.gender, A.user_id, A.Emp_code, A.LDAP_ID, A.CCMS_ID, A.user_start_date, A.email, A.dateofbirth, A.team, A.role, A.Communication_Email, A.LOB, A.orgId
+                    FROM users A
+                    LEFT JOIN dg_airbnbprod.airbnb_user_data DB
+                    ON A.user_start_date = DB.user_start_date
+                    AND A.user_id = DB.user_id
+                    AND A.email = DB.email
+                    """)
     
     updateUsersDF = spark.sql(f"""
             SELECT  '' password,
@@ -190,7 +171,7 @@ if __name__ == '__main__':
             U.role,
             '' `license id`,
             '' `Full Name`,
-            TRIM(U.`Communication Email`) `Communication Email`,
+            TRIM(U.`Communication_Email`) `Communication Email`,
             get_lob_udf(U.LOB) campaign
             FROM users U
             WHERE NOT EXISTS (SELECT 1 FROM mongoUsers MU WHERE LOWER(MU.user_id) = LOWER(U.user_id))
@@ -207,7 +188,7 @@ if __name__ == '__main__':
         
     deactivatedUsersDF = spark.sql(f"""
         SELECT MU.user_id, '' email FROM mongoUsers MU
-        WHERE role IN ('Agent') and (NOT EXISTS (SELECT 1 FROM Users U WHERE LOWER(U.user_id) = LOWER(MU.user_id) ))
+        WHERE MU.role_id IN ('Agent') and (NOT EXISTS (SELECT 1 FROM Users U WHERE LOWER(U.user_id) = LOWER(MU.user_id) ))
     """)
     
     deactivate_gamification_users(deactivatedUsersDF.toPandas(), customer.upper())

@@ -8,7 +8,7 @@ spark = get_spark_session(app_name=app_name, tenant=tenant, default_db=f'dg_{ten
 spark.sql("USE dg_airbnbprod")
 
 spark.sql(f"""
-            CREATE TABLE IF NOT EXISTS airbnb_user
+            CREATE TABLE IF NOT EXISTS airbnb_user_data
             (   password STRING,
                 first_name STRING,
                 middle_name STRING,
@@ -31,5 +31,5 @@ spark.sql(f"""
             )
             USING delta
             PARTITIONED BY (orgId)
-            LOCATION '{db_path}/dg_airbnbprod/airbnb_user'
+            LOCATION '{db_path}/dg_airbnbprod/airbnb_user_data'
         """)
