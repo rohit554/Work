@@ -119,7 +119,6 @@ if __name__ == "__main__":
         else:
             df = spark.sql(
                 f"select * from dg_performance_management.{table} where orgId in ('hellofreshanz', 'hellofreshus')")
-            df = df.drop("orgId")
         export_powerbi_csv('hellofresh', df, f"pm_{table}")
 
     for rec in tenants_df[tenants_df['name'].str.contains('hellofresh')].to_dict('records'):
