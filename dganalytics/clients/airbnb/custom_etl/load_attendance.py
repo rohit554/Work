@@ -41,7 +41,7 @@ if __name__ == '__main__':
     }, errors="raise")
     attendance = attendance.drop_duplicates()
     
-    attendance['empId'] = attendance['empId'].astype(np.int64)
+    attendance['empId'] = pd.to_numeric(attendance['empId'], errors='coerce').fillna(-1).astype(np.int64)
     attendance['reportDate'] = attendance['reportDate'].astype('str').str.strip()
     
     attendance= spark.createDataFrame(attendance)
@@ -51,7 +51,6 @@ if __name__ == '__main__':
     newDF = spark.sql(f"""merge into dg_performance_management.airbnb_attendance DB
                 using airbnb_attendance A
                 on date_format(cast(A.reportDate as date), 'dd-MM-yyyy') = date_format(cast(DB.reportDate as date), 'dd-MM-yyyy')
-                and A.empId = DB.empId
                 WHEN MATCHED THEN
                     UPDATE SET *
                 WHEN NOT MATCHED THEN
