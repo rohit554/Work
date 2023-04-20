@@ -22,6 +22,7 @@ schema = StructType([StructField("password", StringType(), True),
                      StructField("gender", StringType(), True),
                      StructField("user_id", StringType(), True),
                      StructField("Emp_code", StringType(), True),
+                     StructField("airbnb_id", StringType(), True),
                      StructField("LDAP_ID", StringType(), True),
                      StructField("CCMS_ID", StringType(), True),
                      StructField("user_start_date", StringType(), True),
@@ -77,6 +78,7 @@ if __name__ == '__main__':
     users = users.rename(columns={'Name': 'name'})
     users = users.rename(columns={'Manager': 'manager'})
     
+    users = users.rename(columns={'Airbnb ID': 'airbnb_id'})
     users = users.rename(columns={'Emp code': 'Emp_code'})
     users = users.rename(columns={'LDAP ID': 'LDAP_ID'})
     users = users.rename(columns={'CCMS ID': 'CCMS_ID'})
@@ -106,7 +108,7 @@ if __name__ == '__main__':
     users.insert(15, 'license id', '')
     users.insert(16, 'Full Name', '')
     users.insert(17, 'orgId', 'airbnbprod')
-    users = users[['password', 'first_name', 'middle_name', 'last_name', 'name', 'manager', 'gender', 'user_id', 'Emp_code', 'LDAP_ID', 'CCMS_ID', 'user_start_date', 'email', 'dateofbirth', 'team', 'role','Communication_Email', 'LOB', 'orgId']]
+    users = users[['password', 'first_name', 'middle_name', 'last_name', 'name', 'manager', 'gender', 'user_id', 'Emp_code', 'airbnb_id', 'LDAP_ID', 'CCMS_ID', 'user_start_date', 'email', 'dateofbirth', 'team', 'role','Communication_Email', 'LOB', 'orgId']]
     users = users.astype(str) 
     users= spark.createDataFrame(users)
 
@@ -118,12 +120,8 @@ if __name__ == '__main__':
     newDF = spark.sql(f"""DELETE FROM dg_airbnbprod.airbnb_user_data""")
     
     newDF = spark.sql(f"""INSERT INTO TABLE dg_airbnbprod.airbnb_user_data
-                    SELECT A.password, A.first_name, A.middle_name, A.last_name, A.name, A.manager, A.gender, A.user_id, A.Emp_code, A.LDAP_ID, A.CCMS_ID, A.user_start_date, A.email, A.dateofbirth, A.team, A.role, A.Communication_Email, A.LOB, A.orgId
+                    SELECT A.password, A.first_name, A.middle_name, A.last_name, A.name, A.manager, A.gender, A.user_id, A.Emp_code, A.airbnb_id, A.LDAP_ID, A.CCMS_ID, A.user_start_date, A.email, A.dateofbirth, A.team, A.role, A.Communication_Email, A.LOB, A.orgId
                     FROM users A
-                    LEFT JOIN dg_airbnbprod.airbnb_user_data DB
-                    ON A.user_start_date = DB.user_start_date
-                    AND A.user_id = DB.user_id
-                    AND A.email = DB.email
                     """)
     
     updateUsersDF = spark.sql(f"""

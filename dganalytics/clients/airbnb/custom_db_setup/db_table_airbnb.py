@@ -18,6 +18,7 @@ spark.sql(f"""
                 gender STRING,
                 user_id STRING,
                 Emp_code STRING,
+                airbnb_id STRING,
                 LDAP_ID STRING,
                 CCMS_ID STRING,
                 user_start_date STRING,
