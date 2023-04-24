@@ -7,9 +7,22 @@ import os
 def export_users_info(spark: SparkSession, tenant: str, region: str):
 
     df = spark.sql("""
-            select department, division.id as divisionKey, division.id as divisionId, division.name as divisionName, 
-email, id as userKey, id as userId, manager.id as managerKey, manager.id as managerId,
-name, state, title, userName, version from gpc_hellofresh.raw_users 
+            SELECT 
+                  a.department, 
+                  a.division.id AS divisionKey,
+                  COALESCE(a.employerInfo.dateHire, (SELECT MIN(extractDate) FROM gpc_hellofresh.raw_users_details b WHERE a.id = b.userId)) AS hireDate, 
+                  a.division.id AS divisionId, 
+                  a.division.name AS divisionName, 
+                  a.email, id AS userKey, 
+                  a.id AS userId, 
+                  a.manager.id AS managerKey, 
+                  a.manager.id AS managerId,  
+                  a.name, 
+                  a.state, 
+                  a.title, 
+                  a.userName, 
+                  a.version 
+            FROM gpc_hellofresh.raw_users a 
 
     """)
 
