@@ -1,9 +1,6 @@
 from dganalytics.utils.utils import get_spark_session, get_path_vars, push_gamification_data
 
 if __name__ == "__main__":
-    tenant = 'datagamz'
-    run_id = None
-    customer = 'datagamz'
     org_id = 'airbnbprod'
     back_days = 30
 

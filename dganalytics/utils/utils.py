@@ -251,26 +251,25 @@ def push_gamification_data(df: pd.DataFrame, org_id: str, connection_name: str):
     prefix = "# Mandatory fields are Date & UserID (Format must be YYYY-MM-DD)"
     a = tempfile.NamedTemporaryFile()
     print(str(df.shape))
-    a.file.write(bytes(prefix + "\n", 'utf-8'))
-    a.file.write(bytes(df.to_csv(index=False, header=True, mode='a'), 'utf-8'))
-    body = {
-        "connectionName": f"{connection_name}",
-        "user_id": f"{user_Id}"
-    }
-    files = [
-        ('profile', open(a.name, 'rb'))
-    ]
-    print(f"{get_secret('gamificationurl')}/api/connection/uploaDataFile")
-
-    # print(str(body))
-
-    resp = requests.post(
-        f"{get_secret('gamificationurl')}/api/connection/uploaDataFile", headers=headers, files=files, data=body)
-    if resp.status_code != 200:
-        raise Exception("publishing failed")
-    else:
-        print("File data submitted to API")
-    a.close()
+    with tempfile.NamedTemporaryFile(suffix=".csv", mode="ab") as a:
+        a.file.write(bytes(prefix + "\n", 'utf-8'))
+        a.file.write(bytes(df.to_csv(index=False, header=True, mode='a'), 'utf-8'))
+        a.flush()
+        body = {
+            "connectionName": f"{connection_name}",
+            "user_id": f"{user_Id}"
+        }
+        files = [
+            ('profile', open(a.name, 'rb'))
+        ]
+        print(f"{get_secret('gamificationurl')}/api/connection/uploaDataFile")
+        resp = requests.post(
+            f"{get_secret('gamificationurl')}/api/connection/uploaDataFile", headers=headers, files=files, data=body)
+        if resp.status_code != 200:
+            raise Exception("publishing failed")
+        else:
+            print("File data submitted to API")
+        a.close()
 
 
 def upload_gamification_users(df: pd.DataFrame, org_id: str):

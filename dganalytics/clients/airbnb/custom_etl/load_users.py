@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
     users = users.rename(columns={'DOJ': 'user_start_date'})
 
-    users['email'] = users['CCMS_ID'].replace(['-', '--', 'DNA', 'Profile not Active', 0, np.nan], '').apply(lambda x: x + "@teleperformancedibs.com" if len(str(x)) > 0 else '')
+    users['email'] = users['CCMS_ID'].replace(['-', '--', 'DNA', 'Profile not Active', 0, np.nan], '').apply(lambda x: x + "@datagamz.com" if len(str(x)) > 0 else '')
 
     users = users.rename(columns={'Supervisor': 'team'}).assign(team=lambda x: x["team"] + " Team")
     
@@ -119,9 +119,13 @@ if __name__ == '__main__':
 
     newDF = spark.sql(f"""DELETE FROM dg_airbnbprod.airbnb_user_data""")
     
-    newDF = spark.sql(f"""INSERT INTO TABLE dg_airbnbprod.airbnb_user_data
-                    SELECT A.password, A.first_name, A.middle_name, A.last_name, A.name, A.manager, A.gender, A.user_id, A.Emp_code, A.airbnb_id, A.LDAP_ID, A.CCMS_ID, A.user_start_date, A.email, A.dateofbirth, A.team, A.role, A.Communication_Email, A.LOB, A.orgId
-                    FROM users A
+    newDF = spark.sql(f"""MERGE into {db_name}.airbnb_user_data DB
+                    USING users A
+                    ON A.email = DB.email AND A.user_id = DB.user_id
+                    WHEN MATCHED THEN
+                    UPDATE SET *
+                    WHEN NOT MATCHED THEN
+                    INSERT *
                     """)
     
     updateUsersDF = spark.sql(f"""
