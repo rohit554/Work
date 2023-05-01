@@ -70,6 +70,13 @@ if __name__ == '__main__':
     spark.conf.set("spark.sql legacy.timeParserPolicy", "LEGACY")
     spark.udf.register("get_lob_udf", get_lobs, StringType())
 
+    users = users[users['Status'] == 'Active']
+
+    for supervisor in users.loc[users['Supervisor'].isin(users['Name']), 'Supervisor'].unique():
+      matching_names = users[users['Supervisor'] == supervisor]['Name'].unique()
+      if len(matching_names) > 1:
+        users.loc[users['Name'] == supervisor, 'Supervisor'] = supervisor
+
     name_parts = users['Name'].str.split(expand=True)
     users['first_name'], users['middle_name'], users['last_name'] = name_parts[0], '', name_parts[1]
     users = users.rename(columns={'Gender': 'gender'})
@@ -106,7 +113,7 @@ if __name__ == '__main__':
     users.insert(15, 'license id', '')
     users.insert(16, 'Full Name', '')
     users.insert(17, 'orgId', 'airbnbprod')
-    users = users[['password', 'first_name', 'middle_name', 'last_name', 'name', 'manager', 'gender', 'user_id', 'Emp_code', 'airbnb_id', 'LDAP_ID', 'CCMS_ID', 'user_start_date', 'email', 'dateofbirth', 'team', 'role','Communication_Email', 'LOB', 'orgId']]
+    users = users[['password', 'first_name', 'middle_name', 'last_name', 'name', 'manager', 'gender', 'user_id', 'Emp_code', 'airbnb_id', 'LDAP_ID', 'CCMS_ID', 'user_start_date', 'email', 'dateofbirth', 'team', 'role','Communication_Email', 'LOB', 'orgId', 'Status']]
     users = users.astype(str) 
     users= spark.createDataFrame(users)
 
