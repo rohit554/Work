@@ -19,6 +19,7 @@ if __name__ == '__main__':
     tenant = 'datagamz'
     spark = get_spark_session('kpi_data', tenant)
     customer = 'airbnbprod'
+    db_name = f"dg_{customer}"
     tenant_path, db_path, log_path = get_path_vars(customer)
 
     if input_file.endswith(".xlsx"):
@@ -70,7 +71,7 @@ if __name__ == '__main__':
     kpi = spark.createDataFrame(kpi)
     kpi.createOrReplaceTempView("day_wise_behavioural")
 
-    newDF = spark.sql(f"""MERGE INTO dg_airbnbprod.Ambassador_wise_conformance DB
+    newDF = spark.sql(f"""MERGE INTO {db_name}.Ambassador_wise_conformance DB
                     USING day_wise_behavioural A
                     ON A.ECN = DB.ECN
                     AND A.IST_Date = DB.IST_Date

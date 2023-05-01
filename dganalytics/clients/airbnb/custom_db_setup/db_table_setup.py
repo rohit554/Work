@@ -133,3 +133,17 @@ spark.sql(f"""
             PARTITIONED BY (orgId)
             LOCATION '{db_path}/dg_airbnbprod/Ambassador_wise_conformance'
         """)
+
+spark.sql(f"""
+        create table if not exists 
+            dg_{tenant}.airbnb_attendance
+            (empId string, 
+             reportDate string,
+             isPresent string,
+             orgId string,
+             recordInsertDate TIMESTAMP
+            )
+            using delta
+            PARTITIONED BY (orgId)
+            LOCATION '{db_path}/dg_airbnbprod/airbnb_attendance'
+            """)

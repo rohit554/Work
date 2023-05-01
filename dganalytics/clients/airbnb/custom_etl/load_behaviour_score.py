@@ -4,6 +4,7 @@ import pandas as pd
 import datetime
 import os
 import numpy as np
+import re
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

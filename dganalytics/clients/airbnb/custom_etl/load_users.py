@@ -43,9 +43,9 @@ if __name__ == '__main__':
     input_file = args.input_file
 
     tenant = 'datagamz'
-    app_name = 'airbnb_users'
-    spark = get_spark_session(app_name = app_name, tenant=tenant, default_db='dg_performance_management')
+    spark = get_spark_session('attendance_data', tenant)
     customer = 'airbnbprod'
+    db_name = f"dg_{customer}"
     tenant_path, db_path, log_path = get_path_vars(customer)
 
     mongoUsers = get_mongodb_users(customer.upper(), spark)
@@ -113,7 +113,9 @@ if __name__ == '__main__':
     mongoUsers.createOrReplaceTempView("mongoUsers")
     mongoTeams.createOrReplaceTempView("mongoTeams")
 
-    newDF = spark.sql(f"""DELETE FROM dg_airbnbprod.airbnb_user_data""")
+    users.createOrReplaceTempView("users")
+
+    newDF = spark.sql(f"""DELETE FROM {db_name}.airbnb_user_data""")
     
     newDF = spark.sql(f"""MERGE into {db_name}.airbnb_user_data DB
                     USING users A
@@ -131,7 +133,7 @@ if __name__ == '__main__':
             MU.last_name,
             CASE WHEN U.gender = 'NA' THEN 'Other' ELSE U.gender END gender,
             MU.user_id,
-            MU.user_start_date,
+            date_format(MU.user_start_date, 'dd-MM-yyyy') user_start_date,
             MU.email,
             '' `contact_info.address`,
             '' `contact_info.city`,
@@ -159,7 +161,7 @@ if __name__ == '__main__':
             U.last_name,
             CASE WHEN U.gender = 'NA' THEN 'Other' ELSE U.gender END gender,
             U.user_id,
-            U.user_start_date,
+            date_format(U.user_start_date, 'dd-MM-yyyy') user_start_date,
             U.email,
             '' `contact_info.address`,
             '' `contact_info.city`,

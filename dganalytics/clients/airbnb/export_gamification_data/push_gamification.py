@@ -13,15 +13,15 @@ if __name__ == "__main__":
 
     SELECT U.user_id AS `UserID`,
         U.DataDate AS `Date`,
-        coalesce(DW.Escalation_rate, '') As `Escalation Rate`,
+        coalesce(DW.Escalation_rate * 100, '') As `Escalation Rate`,
         coalesce(DW.NPS,''),
-        coalesce(DW.Reopen_Rate,'') AS `Reopen Rate`,
-        coalesce(DW.Resolution_Rate,'') AS `Resolution Rate`,
-        coalesce(DW.Schedule_Adherence,'') AS `Adherence Percent`,
+        coalesce(DW.Reopen_Rate * 100,'') AS `Reopen Rate`,
+        coalesce(DW.Resolution_Rate * 100,'') AS `Resolution Rate`,
+        coalesce(DW.Schedule_Adherence * 100,'') AS `Adherence Percent`,
         coalesce(DW.SPD_logged,'') AS `SPD`,
-        coalesce(DW.Ticket_Occupancy,'') AS `Ticket Occupancy Percent`,
+        coalesce(DW.Ticket_Occupancy * 100,'') AS `Ticket Occupancy Percent`,
         coalesce(DW.Total_Crewbie_Love_Score,'') AS `Love Score`,
-        coalesce(BS.Behavioral_Score,'') AS `Behavior Scores`, 
+        coalesce(BS.Behavioral_Score * 100,'') AS `Behavior Scores`, 
         CASE WHEN coalesce(C.Total_Target,'') IS NOT NULL
             THEN round(coalesce(C.Total_Login_Hrs,'') * 100 /coalesce(C.Total_Target,''), 2) 
         END `Login Percent`,
@@ -70,4 +70,4 @@ if __name__ == "__main__":
     """)
 
     push_gamification_data(
-                kpi.toPandas(), org_id.upper(), 'AirBnBDevConnection')
+                kpi.toPandas(), org_id.upper(), 'AirBnBConnection')

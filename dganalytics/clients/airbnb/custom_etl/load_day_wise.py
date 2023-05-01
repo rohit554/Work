@@ -15,6 +15,7 @@ if __name__ == '__main__':
     tenant = 'datagamz'
     spark = get_spark_session('kpi_data', tenant)
     customer = 'airbnbprod'
+    db_name = f"dg_{customer}"
     tenant_path, db_path, log_path = get_path_vars(customer)
 
     #reading input file either csv or xlsx
@@ -64,7 +65,7 @@ if __name__ == '__main__':
     kpi = spark.createDataFrame(kpi)
     kpi.createOrReplaceTempView("day_wise")
     
-    newDF = spark.sql(f"""merge into dg_airbnbprod.airbnb_day_wise DB
+    newDF = spark.sql(f"""merge into {db_name}.airbnb_day_wise DB
                     USING day_wise A
                     ON A.UserID = DB.UserID
                     AND A.Date = DB.Date
