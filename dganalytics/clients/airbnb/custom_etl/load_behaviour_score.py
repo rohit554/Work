@@ -15,6 +15,7 @@ if __name__ == '__main__':
     tenant = 'datagamz'
     spark = get_spark_session('kpi_data', tenant)
     customer = 'airbnbprod'
+    db_name = f"dg_{customer}"
     tenant_path, db_path, log_path = get_path_vars(customer)
 
     if input_file.endswith(".xlsx"):
@@ -26,7 +27,8 @@ if __name__ == '__main__':
     kpi['Metrics'] = kpi['Metrics'].replace([np.nan], '')
 
     kpi = kpi.rename(columns={'Agent': 'airbnb_agent_id'})
-    kpi['airbnb_agent_id'] = kpi['airbnb_agent_id'].str.replace('[()]', '').str.split().str[2]
+    kpi['airbnb_agent_id'] = kpi['airbnb_agent_id'].apply(lambda x: re.search(r'\((\d+)\)', str(x)).group(1) if (isinstance(x, (str, int, float)) and re.search(r'\((\d+)\)', str(x)) is not None) else x)
+    kpi['airbnb_agent_id'] = kpi['airbnb_agent_id'].astype(str)
 
 
     kpi = kpi.rename(columns={'Recorded Date': 'Recorded_Date'})
@@ -47,7 +49,7 @@ if __name__ == '__main__':
     kpi = spark.createDataFrame(kpi)
     kpi.createOrReplaceTempView("behaviour_score")
 
-    newDF = spark.sql(f"""MERGE INTO dg_airbnbprod.day_wise_behaviour_score DB
+    newDF = spark.sql(f"""MERGE INTO {db_name}.day_wise_behaviour_score DB
                     USING behaviour_score A
                     ON A.Recorded_Date = DB.Recorded_Date
                     AND A.airbnb_agent_id = DB.airbnb_agent_id

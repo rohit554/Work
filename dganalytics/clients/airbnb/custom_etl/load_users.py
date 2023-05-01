@@ -83,8 +83,6 @@ if __name__ == '__main__':
     users = users.rename(columns={'LDAP ID': 'LDAP_ID'})
     users = users.rename(columns={'CCMS ID': 'CCMS_ID'})
     
-    users['DOJ'] = users['DOJ'].fillna(pd.Timestamp('now')).apply(lambda doj: datetime.now().strftime("%d-%m-%Y") if doj == 'DNA' else pd.to_datetime(doj).strftime('%d-%m-%Y'))
-
     users = users.rename(columns={'DOJ': 'user_start_date'})
 
     users['email'] = users['CCMS_ID'].replace(['-', '--', 'DNA', 'Profile not Active', 0, np.nan], '').apply(lambda x: x + "@datagamz.com" if len(str(x)) > 0 else '')
@@ -111,8 +109,6 @@ if __name__ == '__main__':
     users = users[['password', 'first_name', 'middle_name', 'last_name', 'name', 'manager', 'gender', 'user_id', 'Emp_code', 'airbnb_id', 'LDAP_ID', 'CCMS_ID', 'user_start_date', 'email', 'dateofbirth', 'team', 'role','Communication_Email', 'LOB', 'orgId']]
     users = users.astype(str) 
     users= spark.createDataFrame(users)
-
-    users.createOrReplaceTempView("users")
 
     mongoUsers.createOrReplaceTempView("mongoUsers")
     mongoTeams.createOrReplaceTempView("mongoTeams")

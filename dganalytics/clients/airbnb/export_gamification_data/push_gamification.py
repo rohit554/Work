@@ -51,7 +51,7 @@ if __name__ == "__main__":
             GROUP BY A.ECN, A._date
         ) conf
     ON conf.ECN = U.Emp_Code
-        AND conf._date = U.DataDate
+        AND date_format(cast(conf._date as date) = U.DataDate
     WHERE NOT (
     DW.NPS IS NULL
         AND  DW.Reopen_Rate IS NULL
@@ -70,4 +70,4 @@ if __name__ == "__main__":
     """)
 
     push_gamification_data(
-                kpi.toPandas(), org_id.upper(), 'AirBnBConnection')
+                kpi.toPandas(), org_id.upper(), 'AirBnBDevConnection')
