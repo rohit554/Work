@@ -42,8 +42,6 @@ if __name__ == '__main__':
     args, unknown_args = parser.parse_known_args()
     input_file = args.input_file
 
-    tenant = 'datagamz'
-    spark = get_spark_session('attendance_data', tenant)
     customer = 'airbnbprod'
     db_name = f"dg_{customer}"
     tenant_path, db_path, log_path = get_path_vars(customer)
@@ -70,26 +68,36 @@ if __name__ == '__main__':
     spark.conf.set("spark.sql legacy.timeParserPolicy", "LEGACY")
     spark.udf.register("get_lob_udf", get_lobs, StringType())
 
-    users = users[users['Status'] == 'Active']
-
-    for supervisor in users.loc[users['Supervisor'].isin(users['Name']), 'Supervisor'].unique():
+	for supervisor in users.loc[users['Supervisor'].isin(users['Name']), 'Supervisor'].unique():
       matching_names = users[users['Supervisor'] == supervisor]['Name'].unique()
       if len(matching_names) > 1:
         users.loc[users['Name'] == supervisor, 'Supervisor'] = supervisor
 
-    name_parts = users['Name'].str.split(expand=True)
-    users['first_name'], users['middle_name'], users['last_name'] = name_parts[0], '', name_parts[1]
+	pattern = r'[^\w\s]'
+
+    pattern_names = r'(?P<first>\w+)\s+(?P<middle>(\w+ )*)?(?P<last>\w+)'
+    users['Name'] = users['Name'].apply(lambda x: re.sub(pattern, '', x))
+    name_parts = users['Name'].str.strip().str.extract(pattern_names)
+    users['first_name'] = name_parts['first']
+    users['middle_name'] = name_parts['middle'].fillna('')
+    users['last_name'] = name_parts['last']
+	
     users = users.rename(columns={'Gender': 'gender'})
-    users['gender'].fillna('Other', inplace=True)
+    users['gender'].fillna('', inplace=True)
     
     users = users.rename(columns={'Name': 'name'})
+	users['name'] = users['name'].apply(lambda x: re.sub(pattern, '', x))
+
     users = users.rename(columns={'Manager': 'manager'})
     
     users = users.rename(columns={'Airbnb ID': 'airbnb_id'})
     users = users.rename(columns={'Emp code': 'Emp_code'})
     users = users.rename(columns={'LDAP ID': 'LDAP_ID'})
     users = users.rename(columns={'CCMS ID': 'CCMS_ID'})
+	users['CCMS_ID'] = users['CCMS_ID'].apply(lambda x: re.sub(pattern, '', x))
     
+    users['DOJ'] = users['DOJ'].fillna(pd.Timestamp('now')).apply(lambda doj: datetime.now().strftime("%d-%m-%Y") if doj == 'DNA' else pd.to_datetime(doj).strftime('%d-%m-%Y'))
+
     users = users.rename(columns={'DOJ': 'user_start_date'})
 
     users['email'] = users['CCMS_ID'].replace(['-', '--', 'DNA', 'Profile not Active', 0, np.nan], '').apply(lambda x: x + "@datagamz.com" if len(str(x)) > 0 else '')
@@ -113,16 +121,16 @@ if __name__ == '__main__':
     users.insert(15, 'license id', '')
     users.insert(16, 'Full Name', '')
     users.insert(17, 'orgId', 'airbnbprod')
-    users = users[['password', 'first_name', 'middle_name', 'last_name', 'name', 'manager', 'gender', 'user_id', 'Emp_code', 'airbnb_id', 'LDAP_ID', 'CCMS_ID', 'user_start_date', 'email', 'dateofbirth', 'team', 'role','Communication_Email', 'LOB', 'orgId', 'Status']]
+    users = users[['password', 'first_name', 'middle_name', 'last_name', 'name', 'manager', 'gender', 'user_id', 'Emp_code', 'airbnb_id', 'LDAP_ID', 'CCMS_ID', 'user_start_date', 'email', 'dateofbirth', 'team', 'role','Communication_Email', 'LOB', 'orgId']]
     users = users.astype(str) 
     users= spark.createDataFrame(users)
+
+    users.createOrReplaceTempView("users")
 
     mongoUsers.createOrReplaceTempView("mongoUsers")
     mongoTeams.createOrReplaceTempView("mongoTeams")
 
-    users.createOrReplaceTempView("users")
-
-    newDF = spark.sql(f"""DELETE FROM {db_name}.airbnb_user_data""")
+    # newDF = spark.sql(f"""DELETE FROM {db_name}.airbnb_user_data""")
     
     newDF = spark.sql(f"""MERGE into {db_name}.airbnb_user_data DB
                     USING users A
@@ -132,13 +140,13 @@ if __name__ == '__main__':
                     WHEN NOT MATCHED THEN
                     INSERT *
                     """)
-    
+
     updateUsersDF = spark.sql(f"""
             SELECT  '' password,
             MU.first_name,
             '' `middle name`,
             MU.last_name,
-            CASE WHEN U.gender = 'NA' THEN 'Other' ELSE U.gender END gender,
+            CASE WHEN U.gender = 'NA' THEN '' ELSE U.gender END gender,
             MU.user_id,
             date_format(MU.user_start_date, 'dd-MM-yyyy') user_start_date,
             MU.email,
@@ -147,17 +155,17 @@ if __name__ == '__main__':
             '' `contact_info.country`,
             '' `dateofbirth`,
             U.team team,
-            u.role,
+            MU.role_id role,
             '' `license id`,
-            '' `Full Name`,
+            MU.name `Full Name`,
             MU.communication_email `Communication Email`,
             get_lob_udf(U.LOB) campaign
     FROM mongoUsers MU
-    INNER JOIN mongoTeams MT
-        ON MU.team_id = MT.team_id
     INNER JOIN users U
-        ON LOWER(MU.user_id) = LOWER(U.user_id)
-    WHERE U.LOB IN ('R1', 'R2', 'CE')
+        ON MU.user_id = U.user_id
+        AND MU.email = U.email
+    WHERE MU.role_id != 'Team Manager'
+    AND U.LOB IN ('R1', 'CE')
     """)
     
     
@@ -168,7 +176,7 @@ if __name__ == '__main__':
             U.last_name,
             CASE WHEN U.gender = 'NA' THEN 'Other' ELSE U.gender END gender,
             U.user_id,
-            date_format(U.user_start_date, 'dd-MM-yyyy') user_start_date,
+            U.user_start_date,
             U.email,
             '' `contact_info.address`,
             '' `contact_info.city`,
