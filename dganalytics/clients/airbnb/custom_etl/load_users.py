@@ -44,8 +44,8 @@ if __name__ == '__main__':
     args, unknown_args = parser.parse_known_args()
     input_file = args.input_file
 
-    tenant = 'airbnbprod'
-    spark = get_spark_session('user_management', tenant)
+    tenant = 'datagamz'
+    spark = get_spark_session('attendance_data', tenant)
     customer = 'airbnbprod'
     db_name = f"dg_{customer}"
     tenant_path, db_path, log_path = get_path_vars(customer)
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     mongoTeams = get_mongodb_teams(customer.upper(), spark)
 
     if input_file.endswith(".xlsx"):
-        users = pd.read_excel(os.path.join(tenant_path, "data", "raw", "user_management", "user_management_test", input_file), sheet_name="EmpList", skiprows=3, engine='openpyxl', usecols=lambda x: 'Unnamed: 0' not in x)
+        users = pd.read_excel(os.path.join(tenant_path, "data", "raw", "user_management", input_file), sheet_name="EmpList", skiprows=3, engine='openpyxl', usecols=lambda x: 'Unnamed: 0' not in x)
         
     elif input_file.endswith(".csv"):
         users = pd.read_csv(os.path.join(tenant_path, "data", "raw", "user_management", input_file), skiprows=3, usecols=lambda x: 'Unnamed: 0' not in x)
@@ -71,8 +71,6 @@ if __name__ == '__main__':
     lobs = pd.read_csv(os.path.join(tenant_path, "data", "config", "campaing_lob_mapping.csv"))
     spark.conf.set("spark.sql legacy.timeParserPolicy", "LEGACY")
     spark.udf.register("get_lob_udf", get_lobs, StringType())
-
-    users = users[users['Status'] == 'Active']
 
     for supervisor in users.loc[users['Supervisor'].isin(users['Name']), 'Supervisor'].unique():
       matching_names = users[users['Supervisor'] == supervisor]['Name'].unique()
@@ -102,7 +100,7 @@ if __name__ == '__main__':
     users = users.rename(columns={'Emp code': 'Emp_code'})
     users = users.rename(columns={'LDAP ID': 'LDAP_ID'})
     users = users.rename(columns={'CCMS ID': 'CCMS_ID'})
-    # users['CCMS_ID'] = users['CCMS_ID'].apply(lambda x: re.sub(pattern, '', x))
+    users['CCMS_ID'] = users['CCMS_ID'].astype(str).apply(lambda x: re.sub(pattern, '', x) if isinstance(pattern, (str, bytes)) else x)
     
     users['DOJ'] = users['DOJ'].fillna(pd.Timestamp('now')).apply(lambda doj: datetime.now().strftime("%d-%m-%Y") if doj == 'DNA' else pd.to_datetime(doj).strftime('%d-%m-%Y'))
 
@@ -136,14 +134,13 @@ if __name__ == '__main__':
     mongoUsers.createOrReplaceTempView("mongoUsers")
     mongoTeams.createOrReplaceTempView("mongoTeams")
 
-    users = users.astype(str) 
+    users = users.astype(str)
+ 
     users= spark.createDataFrame(users)
 
     users.createOrReplaceTempView("users")
-
-    # newDF = spark.sql(f"""DELETE FROM {db_name}.airbnb_user_data""")
     
-    newDF = spark.sql(f"""MERGE into {db_name}.airbnb_user_data DB
+    spark.sql(f"""MERGE into {db_name}.airbnb_user_data DB
                     USING users A
                     ON A.user_id = DB.user_id
                     AND A.email = DB.email
@@ -177,7 +174,7 @@ if __name__ == '__main__':
         ON MU.user_id = U.user_id
         AND MU.email = U.email
     WHERE MU.role_id != 'Team Manager'
-    AND U.LOB IN ('R1', 'CE')
+    AND U.LOB IN ('R1', 'CE', 'R2')
     """)
     
     
@@ -202,7 +199,7 @@ if __name__ == '__main__':
             get_lob_udf(U.LOB) campaign
             FROM users U
             WHERE NOT EXISTS (SELECT * FROM mongoUsers MU WHERE LOWER(MU.user_id) = LOWER(U.user_id))
-                  AND TRIM(email) NOT IN ('-@teleperformancedibs.com', '@teleperformancedibs.com', 'Not Received@teleperformancedibs.com')
+                  AND TRIM(email) NOT IN ('-@datagamz.com', '@datagamz.com', 'Not Received@datagamz.com')
                   AND U.LOB IN ('R1', 'CE')
     """)
     

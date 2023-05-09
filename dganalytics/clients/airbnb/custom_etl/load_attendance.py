@@ -33,7 +33,7 @@ if __name__ == '__main__':
     attendance = attendance.astype(str)
     
     attendance['recordInsertDate'] = datetime.datetime.now()
-    attendance['orgId'] = 'airbnb'
+    attendance['orgId'] = customer
     
     attendance = attendance.rename(columns={
         "Emp ID": "empId",
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     
     attendance.createOrReplaceTempView("airbnb_attendance")
     
-    newDF = spark.sql(f"""merge into {db_name}.airbnb_attendance DB
+    spark.sql(f"""merge into {db_name}.airbnb_attendance DB
                 using airbnb_attendance A
                 on date_format(cast(A.reportDate as date), 'dd-MM-yyyy') = date_format(cast(DB.reportDate as date), 'dd-MM-yyyy')
                 AND A.empId = DB.empId
@@ -64,8 +64,8 @@ if __name__ == '__main__':
                          SELECT DISTINCT empId, reportDate, isPresent, user_id
                          FROM
                          (SELECT A.empId, A.reportDate, A.isPresent, DB.user_id
-                         FROM dg_performance_management.airbnb_attendance AS A
-                         JOIN dg_performance_management.airbnb_users_data AS DB
+                         FROM {db_name}.airbnb_attendance AS A
+                         JOIN {db_name}.airbnb_users_data AS DB
                          ON A.empId = DB.Emp_code) AS joined_data
                          """)
     

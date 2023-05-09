@@ -7,10 +7,10 @@
 			"metadata": "Environment name",
 			"defaultValue": "dev"
 		},
-        "tenant": {
+		"customer":{
 			"type": "string",
 			"metadata": "Tenant name",
-			"defaultValue": "default"
+			"defaultValue": "Default tenant"
 		}
 	},
 	"variables": {
@@ -71,7 +71,7 @@
 			]
 		},
 		{
-			"name": "[concat(variables('factoryname'), '/tpindiait_sftp_attendance')]",
+			"name": "[concat(variables('factoryname'), '/startek_sftp_attendance')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -89,10 +89,12 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/tpindiait/custom_etl/load_attendance.py",
+							"pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/startek/custom_etl/load_attendance.py",
 							"parameters": [
 								"--input_file",
-								"@pipeline().parameters.input_file"
+								"@pipeline().parameters.input_file",
+								"--customer",
+								"[parameters('customer')]"
 							]
 						},
 						"linkedServiceName": {
@@ -107,7 +109,7 @@
 					}
 				},
 				"folder": {
-					"name": "[parameters('tenant')]"
+					"name": "startek"
 				},
 				"annotations": [],
 				"lastPublishTime": "2023-03-07T10:28:14Z"
@@ -117,7 +119,7 @@
 			]
 		},
 		{
-			"name": "[concat(variables('factoryname'), '/tpindiait_sftp_attendance_trigger')]",
+			"name": "[concat(variables('factoryname'), '/startek_sftp_attendance_trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -126,7 +128,7 @@
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "tpindiait_sftp_attendance",
+							"referenceName": "startek_sftp_attendance",
 							"type": "PipelineReference"
 						},
 						"parameters": {
@@ -136,7 +138,7 @@
 				],
 				"type": "BlobEventsTrigger",
 				"typeProperties": {
-					"blobPathBeginsWith": "/tpindiait/blobs/data/raw/attendance",
+					"blobPathBeginsWith": "/startek/blobs/data/raw/attendance",
 					"blobPathEndsWith": "",
 					"ignoreEmptyBlobs": true,
 					"scope": "[concat('/subscriptions/590f7ac0-b909-4092-adb4-2ad447a5bb19/resourceGroups/dg', parameters('env'), 'analytics/providers/Microsoft.Storage/storageAccounts/dg', parameters('env'), 'lakestorage')]",
@@ -146,7 +148,7 @@
 				}
 			},
 			"dependsOn": [
-				"tpindiait_sftp_attendance"
+				"startek_sftp_attendance"
 			]
 		}
 	]

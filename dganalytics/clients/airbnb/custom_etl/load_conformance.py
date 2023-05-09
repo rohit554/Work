@@ -69,10 +69,10 @@ if __name__ == '__main__':
 
     kpi.insert(45, 'orgId', customer)
     kpi = spark.createDataFrame(kpi)
-    kpi.createOrReplaceTempView("day_wise_behavioural")
+    kpi.createOrReplaceTempView("Ambassador_wise")
 
-    newDF = spark.sql(f"""MERGE INTO {db_name}.Ambassador_wise_conformance DB
-                    USING day_wise_behavioural A
+    spark.sql(f"""MERGE INTO {db_name}.Ambassador_wise_conformance DB
+                    USING Ambassador_wise A
                     ON A.ECN = DB.ECN
                     AND A.IST_Date = DB.IST_Date
                     WHEN MATCHED THEN

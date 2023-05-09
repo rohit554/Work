@@ -37,6 +37,7 @@ if __name__ == '__main__':
     kpi = kpi.rename(columns={'Avg Sentiment Score (Media Set Filtered)': 'Avg_Sentiment_Score_Media_Set_Filtered'})
     kpi = kpi.rename(columns={'Calls Be Empathetic': 'Calls_Be_Empathetic'})
     kpi = kpi.rename(columns={'Behavioral Score': 'Behavioral_Score'})
+    kpi['Behavioral_Score'] = kpi['Behavioral_Score'].replace([np.nan], '')
     kpi = kpi.rename(columns={'Avg Indexed Set Expectations (All Interactions)': 'Avg_Indexed_Set_Expectations_All_Interactions'})
     kpi = kpi.rename(columns={'Avg Indexed Listen Actively (All Interactions)': 'Avg_Indexed_Actively_All_Interactions'})
     kpi = kpi.rename(columns={'Avg Indexed Innappropriate Action (All Interactions)': 'Avg_Indexed_Innappropriate_Action_All_Interactions'})
@@ -50,7 +51,7 @@ if __name__ == '__main__':
     kpi = spark.createDataFrame(kpi)
     kpi.createOrReplaceTempView("behaviour_score")
 
-    newDF = spark.sql(f"""MERGE INTO {db_name}.day_wise_behaviour_score DB
+    spark.sql(f"""MERGE INTO {db_name}.day_wise_behaviour_score DB
                     USING behaviour_score A
                     ON A.Recorded_Date = DB.Recorded_Date
                     AND A.airbnb_agent_id = DB.airbnb_agent_id

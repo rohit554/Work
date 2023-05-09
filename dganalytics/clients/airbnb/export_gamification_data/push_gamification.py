@@ -1,8 +1,8 @@
-from dganalytics.utils.utils import get_spark_session, get_path_vars, push_gamification_data
+from dganalytics.utils.utils import get_spark_session, get_path_vars,push_gamification_data
 
 if __name__ == "__main__":
     org_id = 'airbnbprod'
-    back_days = 30
+    back_days = 60
 
     kpi = spark.sql(f"""
     WITH User_data AS (
@@ -11,21 +11,23 @@ if __name__ == "__main__":
         CROSS JOIN (SELECT explode(sequence(current_date()-{back_days}, current_date(), interval 1 day)) AS Dates) AS D
     )
 
+
+    
     SELECT U.user_id AS `UserID`,
-        U.DataDate AS `Date`,
-        coalesce(DW.Escalation_rate * 100, '') As `Escalation Rate`,
-        coalesce(DW.NPS,''),
-        coalesce(DW.Reopen_Rate * 100,'') AS `Reopen Rate`,
-        coalesce(DW.Resolution_Rate * 100,'') AS `Resolution Rate`,
-        coalesce(DW.Schedule_Adherence * 100,'') AS `Adherence Percent`,
-        coalesce(DW.SPD_logged,'') AS `SPD`,
-        coalesce(DW.Ticket_Occupancy * 100,'') AS `Ticket Occupancy Percent`,
-        coalesce(DW.Total_Crewbie_Love_Score,'') AS `Love Score`,
-        coalesce(BS.Behavioral_Score * 100,'') AS `Behavior Scores`, 
-        CASE WHEN coalesce(C.Total_Target,'') IS NOT NULL
-            THEN round(coalesce(C.Total_Login_Hrs,'') * 100 /coalesce(C.Total_Target,''), 2) 
-        END `Login Percent`,
-        coalesce(Attendance_Absenteesim,'')
+      U.DataDate AS `Date`,
+      coalesce(DW.Escalation_rate * 100, '') As `Escalation Rate`,
+      coalesce(DW.NPS,'') AS `NPS`, 
+      coalesce(DW.Reopen_Rate * 100,'') AS `Reopen Rate`,
+      coalesce(DW.Resolution_Rate * 100,'') AS `Resolution Rate`,
+      coalesce(DW.Schedule_Adherence * 100,'') AS `Adherence Percent`,
+      coalesce(DW.SPD_logged,'') AS `SPD`,
+      coalesce(DW.Ticket_Occupancy * 100,'') AS `Ticket Occupancy Percent`,
+      coalesce(DW.Total_Crewbie_Love_Score,'') AS `Love Score`,
+      coalesce(BS.Behavioral_Score * 100,'') AS `Behavior Scores`, 
+      CASE WHEN coalesce(C.Total_Target,'') IS NOT NULL
+          THEN round(coalesce(C.Total_Login_Hrs,'') * 100 /coalesce(C.Total_Target,''), 2) 
+      END `Login Percent`,
+      coalesce(conf.Attendance_Absenteesim,'') AS `Attendance_Absenteesim`
     FROM User_data U
     LEFT JOIN dg_airbnbprod.airbnb_day_wise DW
     ON U.LDAP_ID  = DW.UserID
@@ -51,7 +53,7 @@ if __name__ == "__main__":
             GROUP BY A.ECN, A._date
         ) conf
     ON conf.ECN = U.Emp_Code
-        AND date_format(cast(conf._date as date) = U.DataDate
+        AND date_format(cast(conf._date as date ),"dd-MM-yyyy") = U.DataDate
     WHERE NOT (
     DW.NPS IS NULL
         AND  DW.Reopen_Rate IS NULL
@@ -66,7 +68,9 @@ if __name__ == "__main__":
             THEN C.Total_Login_Hrs * 100 /C.Total_Target
         END IS NULL
         AND Attendance_Absenteesim IS NULL
+
     )
+    
     """)
 
     push_gamification_data(

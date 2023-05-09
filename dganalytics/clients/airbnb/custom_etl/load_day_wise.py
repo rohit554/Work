@@ -65,7 +65,7 @@ if __name__ == '__main__':
     kpi = spark.createDataFrame(kpi)
     kpi.createOrReplaceTempView("day_wise")
     
-    newDF = spark.sql(f"""merge into {db_name}.airbnb_day_wise DB
+    spark.sql(f"""merge into {db_name}.airbnb_day_wise DB
                     USING day_wise A
                     ON A.UserID = DB.UserID
                     AND A.Date = DB.Date
