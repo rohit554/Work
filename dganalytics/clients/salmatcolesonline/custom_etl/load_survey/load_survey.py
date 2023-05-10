@@ -66,7 +66,7 @@ def merge_fact_conversation_survey(df, extract_start_time, extract_end_time, spa
 
     return True
 
-def get_conversations():
+def get_conversations(extract_start_time, extract_end_time):
 	conversations = spark.sql(f"""  SELECT DISTINCT D.conversationId,
                                                     D.agentId,
                                                     D.conversationStart,
@@ -83,50 +83,49 @@ def get_conversations():
 	    """)
 	return conversations
 
-def transform_conversation_surveys(convs, list, conversation):
-    if convs != None and len(convs) > 0:
-        for conv in convs:
-            if conv != None and conv["participants"] != None and len(conv["participants"]) > 0:
+def transform_conversation_surveys(conv, list, conversation):
+    if conv != None and len(conv) > 0:
+        if conv != None and conv["participants"] != None and len(conv["participants"]) > 0:
                 
-                for participant in conv["participants"]:
-                    has_survey = False
-                    dict = {
-                        "csat": None,
-                        "fcr": None,
-                        "nps": None,
-                        "survey_initiated": None,
-                        "survey_completed": None,
-                        "conversationId": conv["id"],
-                        "conversationStart": conversation["conversationStart"],
-                        "conversationEnd": conversation["conversationEnd"],
-                        "agentId": conversation["agentId"],
-                        "mediaType": conversation["mediaType"]
-                        }
+            for participant in conv["participants"]:
+                has_survey = False
+                dict = {
+                    "csat": None,
+                    "fcr": None,
+                    "nps": None,
+                    "survey_initiated": None,
+                    "survey_completed": None,
+                    "conversationId": conv["id"],
+                    "conversationStart": conversation["conversationStart"],
+                    "conversationEnd": conversation["conversationEnd"],
+                    "agentId": conversation["agentId"],
+                    "mediaType": conversation["mediaType"]
+                    }
 
-                    if participant != None and participant["attributes"] != None and participant["attributes"] != {}:
-                        if "Survey CSAT Agent" in participant["attributes"]:
-                            csat = participant["attributes"]["Survey CSAT Agent"]
-                            dict["csat"] = int(csat) if csat != "" and csat.isnumeric() else None
-                            has_survey = True
-                        if "Survey NPS" in participant["attributes"]:
-                            nps = participant["attributes"]["Survey NPS"]
-                            dict["nps"] = int(nps) if nps != "" and nps.isnumeric() else None
-                            has_survey = True
-                        if "Survey Resolution" in participant["attributes"]:
-                            fcr = participant["attributes"]["Survey Resolution"]
-                            dict["fcr"] = int(fcr) if fcr != "" and fcr.isnumeric() else None
-                            has_survey = True
-                        if "Survey Completed" in participant["attributes"]:
-                            survey_completed = participant["attributes"]["Survey Completed"]
-                            dict["survey_completed"] = True if survey_completed == "Yes" else False
-                            has_survey = True
-                        if "Survey Initiated" in participant["attributes"]:
-                            survey_initiated = participant["attributes"]["Survey Initiated"]
-                            dict["survey_initiated"] = True if survey_initiated == "Yes" else False
-                            has_survey = True
-                    if has_survey:
-                        if dict["fcr"] != None or dict["csat"] != None or dict["nps"] != None or dict["survey_completed"] != None or dict["survey_initiated"] != None:
-                            list.append(dict.copy())
+                if participant != None and participant["attributes"] != None and participant["attributes"] != {}:
+                    if "Survey CSAT Agent" in participant["attributes"]:
+                        csat = participant["attributes"]["Survey CSAT Agent"]
+                        dict["csat"] = int(csat) if csat != "" and csat.isnumeric() else None
+                        has_survey = True
+                    if "Survey NPS" in participant["attributes"]:
+                        nps = participant["attributes"]["Survey NPS"]
+                        dict["nps"] = int(nps) if nps != "" and nps.isnumeric() else None
+                        has_survey = True
+                    if "Survey Resolution" in participant["attributes"]:
+                        fcr = participant["attributes"]["Survey Resolution"]
+                        dict["fcr"] = int(fcr) if fcr != "" and fcr.isnumeric() else None
+                        has_survey = True
+                    if "Survey Completed" in participant["attributes"]:
+                        survey_completed = participant["attributes"]["Survey Completed"]
+                        dict["survey_completed"] = True if survey_completed == "Yes" else False
+                        has_survey = True
+                    if "Survey Initiated" in participant["attributes"]:
+                        survey_initiated = participant["attributes"]["Survey Initiated"]
+                        dict["survey_initiated"] = True if survey_initiated == "Yes" else False
+                        has_survey = True
+                if has_survey:
+                    if dict["fcr"] != None or dict["csat"] != None or dict["nps"] != None or dict["survey_completed"] != None or dict["survey_initiated"] != None:
+                        list.append(dict.copy())
 
     return list
 
@@ -144,7 +143,7 @@ if __name__ == '__main__':
     try:
         create_fact_conversation_survey(spark, db_name)
         
-        conversations = get_conversations()
+        conversations = get_conversations(extract_start_time, extract_end_time)
         
         conv_df = spark.createDataFrame(spark.sparkContext.emptyRDD(), schema)
         list = []
@@ -155,7 +154,7 @@ if __name__ == '__main__':
                 
                 # Extract
                 # Conversation export API
-                conv_export_resp = rq.get(f"{get_api_url(tenant)}/api/v2/conversationexport?ids={conversation['conversationId']}",
+                conv_export_resp = rq.get(f"{get_api_url(tenant)}/api/v2/conversations/calls/{conversation['conversationId']}",
                     headers=api_headers)
                 
                 convs = conv_export_resp.json()

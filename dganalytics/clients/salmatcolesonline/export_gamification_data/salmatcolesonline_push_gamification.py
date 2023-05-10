@@ -4,80 +4,110 @@ from pyspark.sql import SparkSession
 
 
 def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
+    back_days = 7
     df = spark.sql(f"""
-select * from (
-select
-	COALESCE(cqnr.UserID,
-		wfm.UserID) as UserID, COALESCE(cqnr.Date,
-		wfm.Date) as Date, DailyAdherencePercentage, AvgDailyQAScoreVoice, AvgDailyQAScoreMessage, 
-		AvgDailyQAScoreEmail, AvgDailyQAScore, AvgDailyHoldTimeVoice, 
-		AvgDailyHoldTimeMessage, AvgDailyHoldTimeEmail, AvgDailyHoldTime, AvgDailyAcwTimeVoice, AvgDailyAcwTimeMessage, 
-		AvgDailyAcwTimeEmail, AvgDailyAcwTime, SumDailyNotRespondingTime
-from
-	(
-	select
-		COALESCE(cnr.UserID,
-		quality.UserID) as UserID, COALESCE(cnr.Date,
-		quality.Date) as Date, AvgDailyQAScoreVoice, AvgDailyQAScoreMessage, AvgDailyQAScoreEmail, AvgDailyQAScore, AvgDailyHoldTimeVoice, AvgDailyHoldTimeMessage, AvgDailyHoldTimeEmail, AvgDailyHoldTime, AvgDailyAcwTimeVoice, AvgDailyAcwTimeMessage, AvgDailyAcwTimeEmail, AvgDailyAcwTime, SumDailyNotRespondingTime
-	from
-		(
-		select
-			COALESCE(conv.UserID,
-			nr.UserID) as UserID, COALESCE(conv.Date,
-			nr.Date) as Date, AvgDailyHoldTimeVoice, AvgDailyHoldTimeMessage, AvgDailyHoldTimeEmail, AvgDailyHoldTime, AvgDailyAcwTimeVoice, AvgDailyAcwTimeMessage, AvgDailyAcwTimeEmail, AvgDailyAcwTime, SumDailyNotRespondingTime
-		from
-			(
-			SELECT
-				agentId as UserID, cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) as Date, sum(case when lower(mediaType) = 'voice' then coalesce(tHeldComplete, 0) else 0 end)/ sum(case when mediaType = 'voice' then coalesce(nHeldComplete, 0) else 0 end) as AvgDailyHoldTimeVoice, sum(case when lower(mediaType) = 'message' then coalesce(tHeldComplete, 0) else 0 end)/ sum(case when mediaType = 'message' then coalesce(nHeldComplete, 0) else 0 end) as AvgDailyHoldTimeMessage, sum(case when lower(mediaType) = 'email' then coalesce(tHeldComplete, 0) else 0 end)/ sum(case when mediaType = 'email' then coalesce(nHeldComplete , 0) else 0 end) as AvgDailyHoldTimeEmail, sum(coalesce(tHeldComplete, 0))/ sum(coalesce(nHeldComplete, 0)) as AvgDailyHoldTime, sum(case when lower(mediaType) = 'voice' then coalesce(tAcw, 0) else 0 end)/ sum(case when mediaType = 'voice' then coalesce(nAcw , 0) else 0 end) as AvgDailyAcwTimeVoice, sum(case when lower(mediaType) = 'message' then coalesce(tAcw, 0) else 0 end)/ sum(case when mediaType = 'message' then coalesce(nAcw , 0) else 0 end) as AvgDailyAcwTimeMessage, sum(case when lower(mediaType) = 'email' then coalesce(tAcw, 0) else 0 end)/ sum(case when mediaType = 'email' then coalesce(nAcw , 0) else 0 end) as AvgDailyAcwTimeEmail, sum(coalesce(tAcw, 0))/ sum(coalesce(nAcw , 0)) as AvgDailyAcwTime
-			FROM
-				fact_conversation_metrics
-			WHERE
-				cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) <= (cast('{extract_date}' as date))
-                and cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) >= (cast('{extract_date}' as date) -7)
-			group by
-				agentId , cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date) ) conv
-		FULL OUTER JOIN (
-			select
-				userId as UserID, cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) as Date, sum(unix_timestamp(endTime) - unix_timestamp(startTime)) as SumDailyNotRespondingTime
-			from
-				fact_routing_status
-			where
-				routingStatus = 'NOT_RESPONDING'
-				and cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) <= (cast('{extract_date}' as date))
-                and cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) >= (cast('{extract_date}' as date) - 7)
-			group by
-				userId, cast(from_utc_timestamp(startTime , 'Australia/Sydney') as date) ) nr on
-			nr.UserID = conv.UserID
-			and nr.Date = conv.Date ) cnr
-	FULL OUTER JOIN (
-		select
-			b.agentId as UserID, cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) as Date, AVG(case when upper(b.mediaType) = 'CALL' then a.totalScore else NULL end) as AvgDailyQAScoreVoice, AVG(case when upper(b.mediaType) = 'MESSAGE' then a.totalScore else NULL end) as AvgDailyQAScoreMessage, AVG(case when upper(b.mediaType) = 'EMAIL' then a.totalScore else NULL end) as AvgDailyQAScoreEmail, AVG(a.totalScore) as AvgDailyQAScore
-		from
-			fact_evaluation_total_scores a, dim_evaluations b
-		where
-			a.evaluationId = b.evaluationId
-			and cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) <= (cast('{extract_date}' as date))
-            and cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) >= (cast('{extract_date}' as date) - 7)
-		group by
-			b.agentId, cast(from_utc_timestamp(b.releaseDate , 'Australia/Sydney') as date) ) quality on
-		quality.UserID = cnr.UserID
-		and cnr.Date = quality.Date ) cqnr
-	FULL OUTER JOIN
-	(
-		 select a.genesysUserId as UserID, a.Date, a.TimeAdheringToSchedule as DailyAdherencePercentage
-from dg_salmatcolesonline.wfm_verint_export a
- where 
- a.`Date` <= (cast('{extract_date}' as date))
- and a.`Date` >= (cast('{extract_date}' as date) - 7)
-	) wfm		
-	on wfm.UserID = cqnr.UserID
-	and wfm.Date = cqnr.Date
-)		
-where
-	UserID is not NULL and Date is not NULL
-                """)
+        WITH UserDates AS (
+            SELECT
+            u.userId,
+            date_format(D._date, 'dd-MM-yyyy') AS _date
+            FROM
+            gpc_salmatcolesonline.dim_users u
+            CROSS JOIN (
+                SELECT
+                explode(
+                    sequence(
+                    CAST('{extract_date}' AS DATE) - {back_days},
+                    CAST('{extract_date}' AS DATE),
+                    interval 1 day
+                    )
+                ) _date
+            ) AS D
+            WHERE
+            u.state = 'active'
+        ),
+        FC AS (
+            SELECT
+            U.userId,
+            U._date,
+            SUM(E.tHeldComplete) AS tHeldComplete,
+            SUM(E.nHeldComplete) AS nHeld,
+            COUNT(DISTINCT E.conversationId) AS nHandle,
+            SUM(E.tAcw) AS tAcw,
+            SUM(E.nAcw) AS nAcw,
+            COUNT(DISTINCT E.wrapUpCode, E.conversationId) AS wrapUpCodeCount
+            FROM
+            gpc_salmatcolesonline.fact_conversation_metrics E
+            JOIN UserDates U ON U.userId = E.agentId
+            AND date_format(
+                from_utc_timestamp(E.emitDateTime, 'Australia/Sydney'),
+                'dd-MM-yyyy'
+            ) = U._date
+            GROUP BY
+            U.userId,
+            _date
+        ),
+        FW AS (
+            SELECT
+            U.userId,
+            U._date,
+            SUM(D.adherenceScheduleSecs) AS adherenceScheduleSecs,
+            SUM(D.exceptionDurationSecs) AS exceptionDurationSecs
+            FROM
+            gpc_salmatcolesonline.fact_wfm_day_metrics D
+            JOIN UserDates U ON U.userId = D.userId
+            AND date_format(
+                from_utc_timestamp(D.startDate, 'Australia/Sydney'),
+                'dd-MM-yyyy'
+            ) = U._date
+            GROUP BY
+            U.userId,
+            _date
+        )
+        SELECT
+            UD.userId,
+            UD._date AS Date,
+            FC.tHeldComplete AS tHeldComplete,
+            FC.nHeld AS nHeld,
+        FC.nHandle AS nHandle,
+        FC.tAcw AS tAcw,
+        FC.nAcw AS nAcw,
+        FC.wrapUpCodeCount AS wrapUpCodeCount,
+        FW.adherenceScheduleSecs AS adherenceScheduleSecs,
+        FW.exceptionDurationSecs AS exceptionDurationSecs
+        FROM
+            UserDates UD
+            LEFT JOIN FC ON FC.userId = UD.userId
+            AND FC._date = UD._date
+            LEFT JOIN FW ON FW.userId = UD.userId
+            AND FW._date = UD._date
+        WHERE
+            NOT (
+            FC.tHeldComplete IS NULL
+            AND FC.nHandle IS NULL
+            AND FC.tAcw IS NULL
+            AND FC.nHeld IS NULL
+            AND FC.nAcw IS NULL
+            AND COALESCE(FC.wrapUpCodeCount, 0) = 0
+            AND COALESCE(FW.adherenceScheduleSecs, 0) = 0
+            AND COALESCE(FW.exceptionDurationSecs, 0) = 0
+            )
+    """)
     return df
 
+def get_surveys(spark: SparkSession, extract_date: str):
+    back_date = 20
+    return spark.sql(f"""
+        SELECT
+            agentId as userId,
+            date_format(conversationEnd, 'dd-MM-yyyy') Date,
+            csat CSAT
+        FROM
+            gpc_salmatcolesonline.fact_conversation_survey
+        where
+            survey_initiated AND survey_completed
+            AND csat is not NULL
+            AND insertTimestamp > CAST('{extract_date}' AS DATE) - {back_date}
+    """)
 
 if __name__ == "__main__":
     tenant, run_id, extract_date, org_id = dg_metadata_export_parser()
@@ -91,8 +121,11 @@ if __name__ == "__main__":
         df = get_coles_data(spark, extract_date, org_id)
         df = df.drop_duplicates()
         push_gamification_data(
-            df.toPandas(), 'SALMATCOLESONLINE', 'ColesProbe')
-
+            df.toPandas(), 'SALMATCOLESONLINE', 'ProbecolesConnection')
+        surveys = get_surveys(spark, extract_date)
+        surveys = surveys.drop_duplicates()
+        push_gamification_data(
+            surveys.toPandas(), 'SALMATCOLESONLINE', 'ProbeColesSurvey')
     except Exception as e:
         logger.exception(e, stack_info=True, exc_info=True)
         raise
