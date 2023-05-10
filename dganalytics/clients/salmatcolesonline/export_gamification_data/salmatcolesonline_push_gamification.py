@@ -94,6 +94,20 @@ def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
     """)
     return df
 
+def get_surveys(spark: SparkSession, extract_date: str):
+    back_date = 20
+    return spark.sql(f"""
+        SELECT
+            agentId as userId,
+            date_format(conversationEnd, 'dd-MM-yyyy') Date,
+            csat CSAT
+        FROM
+            gpc_salmatcolesonline.fact_conversation_survey
+        where
+            survey_initiated AND survey_completed
+            AND csat is not NULL
+            AND insertTimestamp > CAST('{extract_date}' AS DATE) - {back_date}
+    """)
 
 if __name__ == "__main__":
     tenant, run_id, extract_date, org_id = dg_metadata_export_parser()
@@ -108,7 +122,10 @@ if __name__ == "__main__":
         df = df.drop_duplicates()
         push_gamification_data(
             df.toPandas(), 'SALMATCOLESONLINE', 'ProbecolesConnection')
-
+        surveys = get_surveys(spark, extract_date)
+        surveys = surveys.drop_duplicates()
+        push_gamification_data(
+            surveys.toPandas(), 'SALMATCOLESONLINE', 'ProbeColesSurvey')
     except Exception as e:
         logger.exception(e, stack_info=True, exc_info=True)
         raise
