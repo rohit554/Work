@@ -6,39 +6,91 @@ from pyspark.sql import SparkSession
 def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
     back_days = 7
     df = spark.sql(f"""
-        WITH UserDates AS(
-            SELECT u.userId,
-                    date_format(D._date, 'dd-MM-yyyy') _date
-            FROM gpc_salmatcolesonline.dim_users U
-            CROSS JOIN (SELECT explode(sequence(CAST('{extract_date}' AS Date) - {back_days}, CAST('{extract_date}' AS Date), interval 1 day)) _date) as D
-            WHERE U.state = 'active')
-
-        SELECT * FROM (
-        SELECT  UD.userId,
-                UD.`_date` Date,
-                SUM(tHeldComplete) tHeldComplete,
-                SUM(nHandle) nHandle,
-                SUM(tAcw) tAcw,
-                COUNT(wrapUpCode) wrapUpCodeCount,
-                SUM(FW.adherenceScheduleSecs) adherenceScheduleSecs,
-                SUM(exceptionDurationSecs) exceptionDurationSecs
-        FROM UserDates UD
-        LEFT JOIN gpc_salmatcolesonline.fact_conversation_metrics FC
-            ON  FC.agentId = UD.userId
-                AND date_format(cast(from_utc_timestamp(emitDateTime, 'Australia/Sydney') as date), 'dd-MM-yyyy') = UD.`_date`
-        LEFT JOIN gpc_salmatcolesonline.fact_wfm_day_metrics FW
-            ON FW.userId = UD.userId
-            AND date_format(cast(from_utc_timestamp(startDate, 'Australia/Sydney') as date), 'dd-MM-yyyy') = UD.`_date`
-        GROUP BY UD.userId, UD.`_date`
+        WITH UserDates AS (
+            SELECT
+            u.userId,
+            date_format(D._date, 'dd-MM-yyyy') AS _date
+            FROM
+            gpc_salmatcolesonline.dim_users u
+            CROSS JOIN (
+                SELECT
+                explode(
+                    sequence(
+                    CAST('{extract_date}' AS DATE) - {back_days},
+                    CAST('{extract_date}' AS DATE),
+                    interval 1 day
+                    )
+                ) _date
+            ) AS D
+            WHERE
+            u.state = 'active'
+        ),
+        FC AS (
+            SELECT
+            U.userId,
+            U._date,
+            SUM(E.tHeldComplete) AS tHeldComplete,
+            SUM(E.nHeldComplete) AS nHeld,
+            COUNT(DISTINCT E.conversationId) AS nHandle,
+            SUM(E.tAcw) AS tAcw,
+            SUM(E.nAcw) AS nAcw,
+            COUNT(DISTINCT E.wrapUpCode, E.conversationId) AS wrapUpCodeCount
+            FROM
+            gpc_salmatcolesonline.fact_conversation_metrics E
+            JOIN UserDates U ON U.userId = E.agentId
+            AND date_format(
+                from_utc_timestamp(E.emitDateTime, 'Australia/Sydney'),
+                'dd-MM-yyyy'
+            ) = U._date
+            GROUP BY
+            U.userId,
+            _date
+        ),
+        FW AS (
+            SELECT
+            U.userId,
+            U._date,
+            SUM(D.adherenceScheduleSecs) AS adherenceScheduleSecs,
+            SUM(D.exceptionDurationSecs) AS exceptionDurationSecs
+            FROM
+            gpc_salmatcolesonline.fact_wfm_day_metrics D
+            JOIN UserDates U ON U.userId = D.userId
+            AND date_format(
+                from_utc_timestamp(D.startDate, 'Australia/Sydney'),
+                'dd-MM-yyyy'
+            ) = U._date
+            GROUP BY
+            U.userId,
+            _date
         )
-        WHERE NOT (
-            tHeldComplete IS NULL
-            AND nHandle IS NULL
-            AND tAcw IS NULL
-            AND (wrapUpCodeCount IS NULL OR wrapUpCodeCount = 0)
-            AND (adherenceScheduleSecs IS NULL OR adherenceScheduleSecs = 0)
-            AND (exceptionDurationSecs IS NULL OR exceptionDurationSecs = 0) 
-        )
+        SELECT
+            UD.userId,
+            UD._date AS Date,
+            FC.tHeldComplete AS tHeldComplete,
+            FC.nHeld AS nHeld,
+        FC.nHandle AS nHandle,
+        FC.tAcw AS tAcw,
+        FC.nAcw AS nAcw,
+        FC.wrapUpCodeCount AS wrapUpCodeCount,
+        FW.adherenceScheduleSecs AS adherenceScheduleSecs,
+        FW.exceptionDurationSecs AS exceptionDurationSecs
+        FROM
+            UserDates UD
+            LEFT JOIN FC ON FC.userId = UD.userId
+            AND FC._date = UD._date
+            LEFT JOIN FW ON FW.userId = UD.userId
+            AND FW._date = UD._date
+        WHERE
+            NOT (
+            FC.tHeldComplete IS NULL
+            AND FC.nHandle IS NULL
+            AND FC.tAcw IS NULL
+            AND FC.nHeld IS NULL
+            AND FC.nAcw IS NULL
+            AND COALESCE(FC.wrapUpCodeCount, 0) = 0
+            AND COALESCE(FW.adherenceScheduleSecs, 0) = 0
+            AND COALESCE(FW.exceptionDurationSecs, 0) = 0
+            )
     """)
     return df
 
