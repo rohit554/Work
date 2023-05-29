@@ -34,6 +34,8 @@ if __name__ == '__main__':
     
     attendance['recordInsertDate'] = datetime.datetime.now()
     attendance['orgId'] = customer
+    attendance['Login_Time'] = ''
+    attendance['Logout_Time'] = ''
     
     attendance = attendance.rename(columns={
         "Emp ID": "empId",

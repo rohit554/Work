@@ -13,9 +13,9 @@ if __name__ == '__main__':
     args, unknown_args = parser.parse_known_args()
     input_file = args.input_file
 
-    tenant = 'startek'
+    tenant = 'startekflipkartcx'
     spark = get_spark_session('kpi_data', tenant)
-    customer = 'startek'
+    customer = 'startekflipkartcx'
     db_name = f"dg_{customer}"
     tenant_path, db_path, log_path = get_path_vars(tenant)
 
@@ -29,7 +29,9 @@ if __name__ == '__main__':
     attendance['IsPresent'] = np.where(attendance['IsPresent'] == 'Yes', True, False)
 
     attendance['recordInsertDate'] = datetime.datetime.now()
-    attendance['orgId'] = 'startek'
+    attendance['orgId'] = customer
+    attendance['Login_Time'] = ''
+    attendance['Logout_Time'] = ''
     
     attendance = attendance.rename(columns={
         "UserId": "userId",
@@ -62,7 +64,7 @@ if __name__ == '__main__':
                                             isPresent 
                                             FROM 
                                             dg_perfoarmance_management.attendance
-                                            where orgId = 'startek'
+                                            where orgId = 'startekflipkartcx'
                                             """)
 
     export_powerbi_csv(customer, attendance, f"pm_attendance")

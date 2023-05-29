@@ -31,14 +31,15 @@ if __name__ == '__main__':
     attendance['recordInsertDate'] = datetime.datetime.now()
     attendance['orgId'] = customer
     
+    
     attendance = attendance.rename(columns={
-        "User ID": "empId",
+        "User ID": "userId",
         "Date": "reportDate",
-        "IsPresent": "isPresent"
+        "IsPresent": "isPresent",
+        "Login Time":"Login_Time",
+        "Logout Time":"Logout_Time"
     }, errors="raise")
-    #attendance = attendance.drop_duplicates()
-
-    attendance = attendance[['empId', 'reportDate', 'isPresent', 'recordInsertDate', 'orgId']]
+    attendance = attendance.drop_duplicates()
 
     attendance= spark.createDataFrame(attendance)
 
