@@ -30,26 +30,24 @@ if __name__ == '__main__':
 
     attendance['recordInsertDate'] = datetime.datetime.now()
     attendance['orgId'] = customer
-    attendance['Login_Time'] = ''
-    attendance['Logout_Time'] = ''
+    attendance['loginTime'] = None
+    attendance['logoutTime'] = None
     
     attendance = attendance.rename(columns={
         "UserId": "userId",
         "Date": "reportDate",
         "IsPresent": "isPresent"
     }, errors="raise")
-    #attendance = attendance.drop_duplicates()
+    attendance = attendance.drop_duplicates()
 
-    attendance = attendance[['userId', 'reportDate', 'isPresent', 'recordInsertDate', 'orgId']]
+   attendance = attendance[['userId', 'reportDate', 'isPresent', 'recordInsertDate', 'orgId', 'loginTime', 'logoutTime']]
 
     attendance= spark.createDataFrame(attendance)
 
-    attendance.createOrReplaceTempView("startek_attendance")
+    attendance.createOrReplaceTempView("attendance")
 
-    # newDF = spark.sql(f"""DELETE FROM {db_name}.startek_attendance""")
-
-    newDF = spark.sql(f"""merge into dg_perfoarmance_management.attendance DB
-                using startek_attendance A
+    spark.sql(f"""merge into dg_performance_management.attendance DB
+                using attendance A
                 on date_format(cast(A.reportDate as date), 'dd-MM-yyyy') = date_format(cast(DB.reportDate as date), 'dd-MM-yyyy')
                 and A.userId = DB.userId
                 and A.orgId = DB.orgId
@@ -63,7 +61,7 @@ if __name__ == '__main__':
                                             reportDate,
                                             isPresent 
                                             FROM 
-                                            dg_perfoarmance_management.attendance
+                                            dg_performance_management.attendance
                                             where orgId = 'startekflipkartcx'
                                             """)
 

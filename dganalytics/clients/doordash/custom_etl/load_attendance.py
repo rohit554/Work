@@ -42,8 +42,8 @@ if __name__ == '__main__':
 
     melted_df['orgId'] = customer
     melted_df['recordInsertDate'] = datetime.datetime.now()
-    attendance['Login_Time'] = ''
-    attendance['Logout_Time'] = ''
+    attendance['loginTime'] = None
+    attendance['logoutTime'] = None
 
 
     df = melted_df.rename(columns={

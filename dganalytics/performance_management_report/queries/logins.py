@@ -101,7 +101,7 @@ pipeline = [
                 "login_attempt" : 1.0, 
                 "date" : { 
                     "$dateToString" : { 
-                        "format" : "%Y-%m-%d", 
+                        "format" : "%Y-%m-%dT%H:%M:%SZ", 
                         "date" : { 
                             "$toDate" : { 
                                 "$dateToString" : { 
@@ -127,12 +127,25 @@ def get_logins(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'Audit_Log', schema)
     df.createOrReplaceTempView("logins")
     df = spark.sql("""
-                    select  distinct cast(date as date) date,
-                            login_attempt loginAttempt,
-                            user_id userId,
-                            lower(org_id) orgId
-                    from logins
-                """)
+                      select  distinct cast(date as date) date,
+                              login_attempt loginAttempt,
+                              user_id userId,
+                              lower(org_id) orgId
+                      from logins
+                      WHERE org_id NOT IN ('TPINDIAIT')
+                      UNION ALL
+                      SELECT DISTINCT (case when A.reportDate IS NULL then cast(L.date as date) else
+                              A.reportDate end) as date,
+                              login_attempt AS loginAttempt,
+                              user_id AS userId,
+                              LOWER(org_id) AS orgId
+                        FROM logins L
+                        LEFT JOIN dg_performance_management.attendance A
+                            on L.user_id = A.userId
+                            and lower(L.org_id) = A.orgId
+                            AND CAST(L.date AS TIMESTAMP) BETWEEN A.loginTime and A.logoutTime
+                        WHERE org_id IN ('TPINDIAIT')
+                    """)
     '''
     df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
         'orgId').saveAsTable("dg_performance_management.logins")
