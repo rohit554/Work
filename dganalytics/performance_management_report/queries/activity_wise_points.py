@@ -199,7 +199,8 @@ def get_activity_wise_points(spark):
     df.createOrReplaceTempView("activity_wise_points")
 
     df = spark.sql("""
-                    select  a.campaign_id.oid as campaignId,
+                    select  distinct
+                            a.campaign_id.oid as campaignId,
                             a.activityId as activityId,
                             a.user_id as userId,
                             a.points as points,

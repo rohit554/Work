@@ -44,10 +44,11 @@ if __name__ == '__main__':
 
     attendance.createOrReplaceTempView("tpit_attendance")
 
-    newDF = spark.sql(f"""merge into dg_tpindiait.tpindiait_attendance DB
+    newDF = spark.sql(f"""merge into dg_performance_management.attendance DB
                 using tpit_attendance A
                 on date_format(cast(A.reportDate as date), 'dd-MM-yyyy') = date_format(cast(DB.reportDate as date), 'dd-MM-yyyy')
                 and A.empId = DB.empId
+                and A.orgId = DB.orgId
                 WHEN MATCHED THEN
                     UPDATE SET *
                 WHEN NOT MATCHED THEN
@@ -60,7 +61,8 @@ if __name__ == '__main__':
                                DB.reportDate,
                                DB.isPresent 
                               FROM 
-                               dg_tpindiait.tpindiait_attendance DB
+                               dg_performance_management.attendance DB
+                               where orgId = 'tpindiait'
                   """)
 
     export_powerbi_csv(customer, attendance, f"pm_attendance") 

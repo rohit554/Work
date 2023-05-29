@@ -42,14 +42,15 @@ if __name__ == '__main__':
 
     attendance= spark.createDataFrame(attendance)
 
-    # attendance.createOrReplaceTempView("startek_attendance")
+    attendance.createOrReplaceTempView("startek_attendance")
 
-    newDF = spark.sql(f"""DELETE FROM {db_name}.startek_attendance""")
+    # newDF = spark.sql(f"""DELETE FROM {db_name}.startek_attendance""")
 
-    newDF = spark.sql(f"""merge into {db_name}.startek_attendance DB
+    newDF = spark.sql(f"""merge into dg_perfoarmance_management.attendance DB
                 using startek_attendance A
                 on date_format(cast(A.reportDate as date), 'dd-MM-yyyy') = date_format(cast(DB.reportDate as date), 'dd-MM-yyyy')
                 and A.userId = DB.userId
+                and A.orgId = DB.orgId
                 WHEN MATCHED THEN
                     UPDATE SET *
                 WHEN NOT MATCHED THEN
@@ -60,7 +61,8 @@ if __name__ == '__main__':
                                             reportDate,
                                             isPresent 
                                             FROM 
-                                            dg_startek.startek_attendance
+                                            dg_perfoarmance_management.attendance
+                                            where orgId = 'startek'
                                             """)
 
     export_powerbi_csv(customer, attendance, f"pm_attendance")

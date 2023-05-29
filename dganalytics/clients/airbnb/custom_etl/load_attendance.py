@@ -49,10 +49,11 @@ if __name__ == '__main__':
     
     attendance.createOrReplaceTempView("airbnb_attendance")
     
-    spark.sql(f"""merge into {db_name}.airbnb_attendance DB
+    spark.sql(f"""merge into dg_perfoarmance_management.attendance DB
                 using airbnb_attendance A
                 on date_format(cast(A.reportDate as date), 'dd-MM-yyyy') = date_format(cast(DB.reportDate as date), 'dd-MM-yyyy')
                 AND A.empId = DB.empId
+                AND A.orgId = DB.orgId
                 WHEN MATCHED THEN
                     UPDATE SET *
                 WHEN NOT MATCHED THEN
@@ -61,12 +62,19 @@ if __name__ == '__main__':
         
       
     attendance = spark.sql(f"""
-                         SELECT DISTINCT empId, reportDate, isPresent, user_id
+                         SELECT DISTINCT  
+                         reportDate, 
+                         isPresent, 
+                         userId
                          FROM
-                         (SELECT A.empId, A.reportDate, A.isPresent, DB.user_id
-                         FROM {db_name}.airbnb_attendance AS A
-                         JOIN {db_name}.airbnb_users_data AS DB
-                         ON A.empId = DB.Emp_code) AS joined_data
+                         (SELECT A.reportDate, 
+                         A.isPresent, 
+                         DB.user_id as userId
+                         FROM dg_performance_management.attendance AS A
+                         JOIN dg_airbnbprod.airbnb_user_data AS DB
+                         ON A.userId = DB.Emp_code
+                         WHERE DB.orgId = 'airbnbprod'
+                         )
                          """)
     
     export_powerbi_csv(customer, attendance, f"pm_attendance")
