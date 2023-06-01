@@ -30,11 +30,9 @@ def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
             U.userId,
             U._date,
             SUM( CASE WHEN E.mediaType = "voice" THEN E.tHeldComplete else null end) AS tHeldCompleteVoice,
-            SUM(E.nHeldComplete) AS nHeld,
             COUNT(DISTINCT E.conversationId) AS nHandle,
             COUNT(DISTINCT CASE WHEN E.mediaType = "voice" THEN E.conversationId else null end) AS nHandleVoice,
             SUM( CASE WHEN E.mediaType = "voice" THEN E.tAcw else null end) AS tAcwVoice,
-            SUM(E.nAcw) AS nAcw,
             COUNT(DISTINCT E.wrapUpCode, E.conversationId) AS wrapUpCodeCount
             FROM
             gpc_salmatcolesonline.fact_conversation_metrics E
@@ -65,14 +63,12 @@ def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
             _date
         )
         SELECT
-            UD.userId,
-            UD._date AS Date,
-            FC.tHeldCompleteVoice AS tHeldCompleteVoice,
-            FC.nHandleVoice AS nHandleVoice,
-            FC.nHeld AS nHeld,
+        UD.userId,
+        UD._date AS Date,
+        FC.tHeldCompleteVoice AS tHeldCompleteVoice,
+        FC.nHandleVoice AS nHandleVoice,
         FC.nHandle AS nHandle,
         FC.tAcwVoice AS tAcwVoice,
-        FC.nAcw AS nAcw,
         FC.wrapUpCodeCount AS wrapUpCodeCount,
         FW.adherenceScheduleSecs AS adherenceScheduleSecs,
         FW.exceptionDurationSecs AS exceptionDurationSecs
@@ -88,8 +84,6 @@ def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
             AND FC.tHeldCompleteVoice IS NULL 
             AND FC.nHandleVoice IS NULL
             AND FC.tAcwVoice IS NULL
-            AND FC.nHeld IS NULL
-            AND FC.nAcw IS NULL
             AND COALESCE(FC.wrapUpCodeCount, 0) = 0
             AND COALESCE(FW.adherenceScheduleSecs, 0) = 0
             AND COALESCE(FW.exceptionDurationSecs, 0) = 0
