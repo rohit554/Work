@@ -29,10 +29,11 @@ def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
             SELECT
             U.userId,
             U._date,
-            SUM(E.tHeldComplete) AS tHeldComplete,
+            SUM( CASE WHEN E.mediaType = "voice" THEN E.tHeldComplete else null end) AS tHeldCompleteVoice,
             SUM(E.nHeldComplete) AS nHeld,
             COUNT(DISTINCT E.conversationId) AS nHandle,
-            SUM(E.tAcw) AS tAcw,
+            COUNT(DISTINCT CASE WHEN E.mediaType = "voice" THEN E.conversationId else null end) AS nHandleVoice,
+            SUM( CASE WHEN E.mediaType = "voice" THEN E.tAcw else null end) AS tAcwVoice,
             SUM(E.nAcw) AS nAcw,
             COUNT(DISTINCT E.wrapUpCode, E.conversationId) AS wrapUpCodeCount
             FROM
@@ -66,10 +67,11 @@ def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
         SELECT
             UD.userId,
             UD._date AS Date,
-            FC.tHeldComplete AS tHeldComplete,
+            FC.tHeldCompleteVoice AS tHeldCompleteVoice,
+            FC.nHandleVoice AS nHandleVoice,
             FC.nHeld AS nHeld,
         FC.nHandle AS nHandle,
-        FC.tAcw AS tAcw,
+        FC.tAcwVoice AS tAcwVoice,
         FC.nAcw AS nAcw,
         FC.wrapUpCodeCount AS wrapUpCodeCount,
         FW.adherenceScheduleSecs AS adherenceScheduleSecs,
@@ -82,9 +84,10 @@ def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
             AND FW._date = UD._date
         WHERE
             NOT (
-            FC.tHeldComplete IS NULL
-            AND FC.nHandle IS NULL
-            AND FC.tAcw IS NULL
+            FC.nHandle IS NULL
+            AND FC.tHeldCompleteVoice IS NULL 
+            AND FC.nHandleVoice IS NULL
+            AND FC.tAcwVoice IS NULL
             AND FC.nHeld IS NULL
             AND FC.nAcw IS NULL
             AND COALESCE(FC.wrapUpCodeCount, 0) = 0
