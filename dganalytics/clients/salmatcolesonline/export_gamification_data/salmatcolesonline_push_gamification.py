@@ -29,10 +29,10 @@ def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
             SELECT
             U.userId,
             U._date,
-            SUM( CASE WHEN E.mediaType = "voice" THEN E.tHeldComplete else null end) AS tHeldCompleteVoice,
+            SUM( CASE WHEN E.mediaType = "voice" THEN E.tHeldComplete else 0 end) AS tHeldCompleteVoice,
             COUNT(DISTINCT E.conversationId) AS nHandle,
-            COUNT(DISTINCT CASE WHEN E.mediaType = "voice" THEN E.conversationId else null end) AS nHandleVoice,
-            SUM( CASE WHEN E.mediaType = "voice" THEN E.tAcw else null end) AS tAcwVoice,
+            COUNT(DISTINCT CASE WHEN E.mediaType = "voice" THEN E.conversationId else 0 end) AS nHandleVoice,
+            SUM( CASE WHEN E.mediaType = "voice" THEN E.tAcw else 0 end) AS tAcwVoice,
             COUNT(DISTINCT E.wrapUpCode, E.conversationId) AS wrapUpCodeCount
             FROM
             gpc_salmatcolesonline.fact_conversation_metrics E
