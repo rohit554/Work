@@ -28,7 +28,8 @@ def mongo_users(spark):
   
 
 def spark_users(spark):
-    users = get_active_users(spark)
+    users = mongo_users(spark)
+    # print("get_active_users", users)
     current_date = datetime.now().replace(day=1) - relativedelta(months=1)
     previous_month_start = current_date.replace(day=1)
     previous_month_end = current_date.replace(day=1) + relativedelta(days=-1)
