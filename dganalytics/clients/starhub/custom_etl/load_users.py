@@ -9,6 +9,8 @@ from pyspark.sql.functions import *
 from datetime import datetime
 from pyspark.sql.functions import unix_timestamp, from_unixtime
 import re
+from pyspark.sql.functions import to_date, date_format
+from pyspark.sql.functions import expr
 
 def get_lobs(lob: str = ""):
     if lobs is None or lob is None:
@@ -39,7 +41,8 @@ if __name__ == '__main__':
     elif input_file.endswith(".csv"):
         users = pd.read_csv(os.path.join(tenant_path, "data", "raw", "user_management", "user_management_test", input_file), skiprows=6, usecols=lambda x: 'Unnamed: 0' not in x)
 
-    lobs = pd.read_csv(os.path.join(tenant_path, "data", "config", "campaing_lob_mapping_starthub.csv"))
+    global lobs
+    lobs = pd.read_csv(os.path.join(tenant_path, "data", "config", "campaing_lob_mapping.csv"))
     spark.conf.set("spark.sql legacy.timeParserPolicy", "LEGACY")
     spark.udf.register("get_lob_udf", get_lobs, StringType())
 
@@ -63,14 +66,18 @@ if __name__ == '__main__':
 
     mongoUsers.createOrReplaceTempView("mongoUsers")
     mongoTeams.createOrReplaceTempView("mongoTeams")
-
-    # users = users.astype(str)
  
     users= spark.createDataFrame(users)
+    users = users.withColumn('user_start_date',
+                         when(to_date('user_start_date', 'MM-dd-yyyy').isNotNull(),
+                              date_format(to_date('user_start_date', 'MM-dd-yyyy'), 'dd-MM-yyyy')
+                         ).otherwise(
+                              when(to_date('user_start_date', 'dd-MM-yyyy').isNotNull(),
+                                   date_format(to_date('user_start_date', 'dd-MM-yyyy'), 'dd-MM-yyyy')
+                              ).otherwise('')
+                         ).alias('user_start_date'))
 
     users.createOrReplaceTempView("users")
-
-    # spark.sql(f""" delete from {db_name}.starthub_user""")
 
     spark.sql(f"""MERGE into {db_name}.starthub_user DB
                     USING users A
@@ -100,8 +107,7 @@ if __name__ == '__main__':
             '' `license id`,
             MU.name `Full Name`,
             MU.communication_email `Communication Email`,
-            get_lob_udf(U.LOB) campaign,
-            U.last_working_date
+            get_lob_udf(U.LOB) campaign
     FROM mongoUsers MU
     INNER JOIN users U
         ON MU.user_id = U.user_id
@@ -111,7 +117,7 @@ if __name__ == '__main__':
     """)
     
     createUsersDF = spark.sql(f"""
-        SELECT  'Welcome@1234567' AS password,
+        SELECT  '' AS password,
             U.first_name,
             '' `middle name`,
             U.last_name,
@@ -128,15 +134,26 @@ if __name__ == '__main__':
             '' `license id`,
             '' `Full Name`,
             TRIM(U.`Communication_Email`) `Communication Email`,
-            get_lob_udf(U.LOB) campaign,
-            U.last_working_date
+            get_lob_udf(U.LOB) campaign
             FROM users U
             WHERE NOT EXISTS (SELECT * FROM mongoUsers MU WHERE LOWER(MU.user_id) = LOWER(U.user_id))
                   AND TRIM(email) NOT IN ('-@datagamz.com', '@datagamz.com', 'Not Received@datagamz.com')
-                  AND (U.LOB IN ('Mobile GE') OR U.LOB IS NULL)
     """)
     
     if(createUsersDF.count() > 0):
         upload_gamification_users(createUsersDF.toPandas(), customer.upper())
     if(updateUsersDF.count() > 0):
         upload_gamification_users(updateUsersDF.toPandas(), customer.upper())
+
+    deactivatedUsersDF = spark.sql(f"""
+        SELECT
+          user_id,
+          email
+        FROM
+          {db_name}.starthub_user
+        WHERE
+          to_date(last_working_date, 'dd-MM-yyyy') < current_date()
+    """)
+
+    if deactivatedUsersDF.count() > 0:
+        deactivate_gamification_users(deactivatedUsersDF.toPandas(), customer.upper())

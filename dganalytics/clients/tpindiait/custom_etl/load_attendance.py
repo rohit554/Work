@@ -5,6 +5,7 @@ import datetime
 import os
 import numpy as np
 import re
+from pyspark.sql.functions import to_timestamp, to_date
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -54,10 +55,9 @@ if __name__ == '__main__':
     attendance = attendance.drop_duplicates()
 
     attendance= spark.createDataFrame(attendance)
-
-    attendance= spark.createDataFrame(attendance)
     attendance = attendance.withColumn("loginTime",to_timestamp("Login_Time"))
     attendance = attendance.withColumn("logoutTime",to_timestamp("Logout_Time"))
+    attendance = attendance.withColumn('reportDate', to_date('reportDate', 'dd-MM-yyyy'))
 
     attendance = attendance[['userId', 'reportDate', 'loginTime', 'logoutTime', 'isPresent', 'recordInsertDate', 'orgId']]
 

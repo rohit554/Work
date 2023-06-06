@@ -42,8 +42,8 @@ if __name__ == '__main__':
 
     melted_df['orgId'] = customer
     melted_df['recordInsertDate'] = datetime.datetime.now()
-    attendance['loginTime'] = None
-    attendance['logoutTime'] = None
+    melted_df['loginTime'] = None
+    melted_df['logoutTime'] = None
 
 
     df = melted_df.rename(columns={
@@ -55,6 +55,8 @@ if __name__ == '__main__':
     df['userId'] = df['userId'].astype(np.int64)
 
     df = spark.createDataFrame(df)
+    df = df.withColumn('reportDate', to_date('reportDate', 'dd-MM-yyyy'))
+
     df.createOrReplaceTempView("attendance")
 
     spark.sql(f"""merge into dg_performance_management.attendance DB
