@@ -114,9 +114,6 @@
 						"pipelineReference": {
 							"referenceName": "salmatcolesonline_active_users",
 							"type": "PipelineReference"
-						},
-						"parameters": {
-							"StartTime": "@{formatDateTime(trigger().startTime,'yyyy-MM-ddTHH:mm:ssZ')}"
 						}
 					}
                     
