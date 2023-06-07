@@ -519,7 +519,6 @@ def fact_surveys(extract_start_time: str, extract_end_time: str):
             )
         )
     """
- 
 
 def fact_conversation_attributes(extract_start_time: str, extract_end_time: str):
     return f"""
@@ -566,31 +565,32 @@ def fact_speechandtextanalytics(extract_start_time: str, extract_end_time: str):
 
 def fact_conversation_transcript_topics(extract_start_time: str, extract_end_time: str):
     return f"""
-        WITH ranked_topics AS (
-        SELECT DISTINCT
-            conversationId,
-            communicationId,
-            mediaType,
-            topics.participant participant,
-            topics.topicId topicId,
-            topics.topicName topicName,
-            topics.topicPhrase topicPhrase,
-            topics.transcriptPhrase transcriptPhrase,
-            topics.confidence,
-            RANK() OVER (PARTITION BY conversationId ORDER BY conversationId) AS conversation_rank
-        FROM (
-            SELECT
+            WITH ranked_topics AS (
+            SELECT DISTINCT
                 conversationId,
                 communicationId,
                 mediaType,
-                EXPLODE(transcripts.analytics.topics) topics
+                topics.participant AS participant,
+                topics.topicId AS topicId,
+                topics.topicName AS topicName,
+                topics.topicPhrase AS topicPhrase,
+                topics.transcriptPhrase AS transcriptPhrase,
+                topics.confidence,
+                RANK() OVER (PARTITION BY conversationId ORDER BY conversationId) AS conversation_rank
             FROM (
                 SELECT
                     conversationId,
                     communicationId,
                     mediaType,
-                    EXPLODE(transcripts) transcripts
-                FROM gpc_simplyenergy.raw_speechandtextanalytics_transcript
+                    EXPLODE(transcripts.analytics.topics) AS topics
+                FROM (
+                    SELECT
+                        conversationId,
+                        communicationId,
+                        mediaType,
+                        EXPLODE(transcripts) AS transcripts
+                    FROM gpc_simplyenergy.raw_speechandtextanalytics_transcript
+                )
             )
         )
         )
@@ -605,9 +605,9 @@ def fact_conversation_transcript_topics(extract_start_time: str, extract_end_tim
             transcriptPhrase,
             confidence
         FROM ranked_topics
-        ORDER BY conversation_rank, conversationId
-        WHERE   recordInsertTime >= '{extract_start_time}'
-                    AND recordInsertTime < '{extract_end_time}'))
+        WHERE recordInsertTime >= '{extract_start_time}'
+            AND recordInsertTime < '{extract_end_time}'
+        ORDER BY conversation_rank, conversationId;
     """
 
 
