@@ -111,21 +111,21 @@ dim_evaluation_forms = """
 """
 
 dim_user_group = """
-                        SELECT DISTINCT
-                            users.userId,
-                            raw_groups.id AS groupId,
-                            raw_groups.name AS groupName,
-                            raw_groups.description AS groupDescription,
-                            raw_groups.state AS groupState
-                            FROM
-                            (
-                                SELECT
-                                    id AS userId,
-                                    explode(groups) AS user_groups
-                                FROM raw_users
-                            ) users, raw_groups
-                            WHERE users.user_groups.id = raw_groups.id
-                    """
+	SELECT DISTINCT
+		users.userId,
+		raw_groups.id AS groupId,
+		raw_groups.name AS groupName,
+		raw_groups.description AS groupDescription,
+		raw_groups.state AS groupState
+		FROM
+		(
+			SELECT
+				id AS userId,
+				explode(groups) AS user_groups
+			FROM raw_users
+		) users, raw_groups
+		WHERE users.user_groups.id = raw_groups.id
+"""
 
 def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
     return f"""
@@ -389,7 +389,8 @@ def fact_conversation_evaluations(extract_start_time: str, extract_end_time: str
           )
         )
     """
-    
+
+
 def fact_conversation_surveys(extract_start_time: str, extract_end_time: str):
     return f"""
         SELECT 
@@ -499,7 +500,7 @@ def fact_surveys(extract_start_time: str, extract_end_time: str):
                 questionGroupScore.markedNA AS questionGroupMarkedNA,
                 explode(questionGroupScore.questionScores) AS questionScore
             FROM (
-                SELECT DISTINCT 
+                SELECT DISTINCT
                     id AS surveyId,
                     surveyForm.id AS surveyFormId,
                     surveyForm.name AS surveyFormName,
@@ -522,41 +523,141 @@ def fact_surveys(extract_start_time: str, extract_end_time: str):
 
 def fact_conversation_attributes(extract_start_time: str, extract_end_time: str):
     return f"""
-        SELECT 
-            ca.conversationId,
-            ca.purpose,
-            key AS attribute_key,
-            value AS attribute_value
-        FROM (
-            SELECT 
-                cd.conversationId,
-                cd.participant.purpose AS purpose,
-                EXPLODE(cd.participant.attributes)
-            FROM (
-                SELECT 
-                    conversationId, 
-                    EXPLODE(participants) AS participant 
-                FROM raw_conversation_details 
-                
-                WHERE
-                recordInsertTime >= '{extract_start_time}' AND recordInsertTime < '{extract_end_time}'
-                
-                ) AS cd
-            
-            ) AS ca
-    """
+        SELECT 
+            ca.conversationId,
+            ca.purpose,
+            key AS attribute_key,
+            value AS attribute_value
+        FROM (
+            SELECT 
+                cd.conversationId,
+                cd.participant.purpose AS purpose,
+                EXPLODE(cd.participant.attributes)
+            FROM (
+                SELECT 
+                    conversationId, 
+                    EXPLODE(participants) AS participant 
+                FROM raw_conversation_details 
+                
+                WHERE
+                recordInsertTime >= '{extract_start_time}' AND recordInsertTime < '{extract_end_time}'
+                
+                ) AS cd
+            
+            ) AS ca
+    """
 
+def fact_speechandtextanalytics(extract_start_time: str, extract_end_time: str):
+    return f"""
+        SELECT  DISTINCT conversation.id AS conversationId,
+                    sentimentScore,
+                    sentimentTrend,
+                    participantMetrics.agentDurationPercentage,
+                    participantMetrics.customerDurationPercentage,
+                    participantMetrics.silenceDurationPercentage,
+                    participantMetrics.ivrDurationPercentage,
+                    participantMetrics.acdDurationPercentage,
+                    participantMetrics.otherDurationPercentage,
+                    participantMetrics.overtalkCount
+            FROM raw_speechandtextanalytics
+            WHERE   recordInsertTime >= '{extract_start_time}'
+                    AND recordInsertTime < '{extract_end_time}'
+"""
+
+def fact_conversation_transcript_topics(extract_start_time: str, extract_end_time: str):
+    return f"""
+        WITH ranked_topics AS (
+        SELECT DISTINCT
+            conversationId,
+            communicationId,
+            mediaType,
+            topics.participant participant,
+            topics.topicId topicId,
+            topics.topicName topicName,
+            topics.topicPhrase topicPhrase,
+            topics.transcriptPhrase transcriptPhrase,
+            topics.confidence,
+            RANK() OVER (PARTITION BY conversationId ORDER BY conversationId) AS conversation_rank
+        FROM (
+            SELECT
+                conversationId,
+                communicationId,
+                mediaType,
+                EXPLODE(transcripts.analytics.topics) topics
+            FROM (
+                SELECT
+                    conversationId,
+                    communicationId,
+                    mediaType,
+                    EXPLODE(transcripts) transcripts
+                FROM gpc_simplyenergy.raw_speechandtextanalytics_transcript
+            )
+        )
+        )
+        SELECT
+            conversationId,
+            communicationId,
+            mediaType,
+            participant,
+            topicId,
+            topicName,
+            topicPhrase,
+            transcriptPhrase,
+            confidence
+        FROM ranked_topics
+        ORDER BY conversation_rank, conversationId
+        WHERE   recordInsertTime >= '{extract_start_time}'
+                    AND recordInsertTime < '{extract_end_time}'))
+    """
+
+
+def fact_conversation_transcript_sentiments(extract_start_time: str, extract_end_time: str):
+    return f"""
+            SELECT DISTINCT conversationId,
+                        communicationId,
+                        mediaType,
+                        sentiment.participant participant,
+                        sentiment.phrase phrase,
+                        sentiment.sentiment sentiment,
+                        sentiment.phraseIndex phraseIndex
+            FROM (SELECT    conversationId,
+                        communicationId,
+                        mediaType,
+                        EXPLODE(transcripts.analytics.sentiment) sentiment
+                FROM (
+                    SELECT  conversationId,
+                            communicationId,
+                            mediaType,
+                            EXPLODE(transcripts) transcripts
+            FROM raw_speechandtextanalytics_transcript
+            WHERE   recordInsertTime >= '{extract_start_time}'
+                    AND recordInsertTime < '{extract_end_time}'))
+    """
+
+dim_speechandtextanalytics_topics = """
+        SELECT  DISTINCT id topicId,
+                name,
+                description,
+                published,
+                strictness,
+                programsCount,
+                dialect,
+                participants,
+                phrasesCount
+        FROM raw_speechandtextanalytics_topics
+    """
+
+dim_speechandtextanalytics_topics_tags = """
+        SELECT  DISTINCT    id topicId,
+                            explode(tags) tags
+        FROM raw_speechandtextanalytics_topics
+    """
 def fact_evaluation_total_scores(extract_start_time: str, extract_end_time: str):
     return f"""
-        SELECT 
-            evaluationId,
-            totalCriticalScore,
-            totalNonCriticalScore,
-            totalScore
-
-        FROM 
-            fact_evaluation_total_scores
-        WHERE
-            recordInsertTime >= '{extract_start_time}' and recordInsertTime < '{extract_end_time}'
-
+        SELECT DISTINCT id AS evaluationId, 
+                answers.totalCriticalScore,
+                answers.totalNonCriticalScore, 
+                answers.totalScore
+        FROM raw_evaluations  
+        WHERE recordInsertTime >= '{extract_start_time}' AND recordInsertTime < '{extract_end_time}'
     """
