@@ -26,11 +26,9 @@ if __name__ == '__main__':
     args, unknown_args = parser.parse_known_args()
     input_file = args.input_file
 
-    tenant = 'datagamz'
-    spark = get_spark_session('attendance_data', tenant)
     customer = 'altice'
-    connection_name = 'Connectionuploadchangesorg'
-    db_name = f"dg_{customer}"
+    spark = get_spark_session('attendance_data', customer)
+    db_name = 'dg_performance_management'
     tenant_path, db_path, log_path = get_path_vars(customer)
 
     mongoUsers = get_mongodb_users(customer.upper(), spark)
@@ -71,7 +69,7 @@ if __name__ == '__main__':
     
     users.createOrReplaceTempView("users")
 
-    spark.sql(f"""MERGE into {db_name}.altice_user DB
+    spark.sql(f"""MERGE into {db_name}.user_management DB
                     USING users A
                     ON A.user_id = DB.user_id
                     and A.email = DB.email
@@ -105,8 +103,9 @@ if __name__ == '__main__':
     INNER JOIN users U
         ON MU.user_id = U.user_id
         AND MU.email = U.email
-    WHERE MU.role_id NOT IN ('Team Manager', 'Team Leader')
+    WHERE MU.role_id NOT IN ('Team Manager', 'Team Lead')
     AND (U.LOB IN ('Mobile GE') OR U.LOB IS NULL)
+    AND orgId = 'altice'
     """)
     
     createUsersDF = spark.sql(f"""
@@ -131,22 +130,24 @@ if __name__ == '__main__':
             FROM users U
             WHERE NOT EXISTS (SELECT * FROM mongoUsers MU WHERE LOWER(MU.user_id) = LOWER(U.user_id))
                   AND TRIM(email) NOT IN ('-@datagamz.com', '@datagamz.com', 'Not Received@datagamz.com')
+                  AND orgId = 'altice'
     """)
     
     if(createUsersDF.count() > 0):
-        upload_gamification_users(createUsersDF.toPandas(), connection_name.upper())
+        upload_gamification_users(createUsersDF.toPandas(), customer.upper())
     if(updateUsersDF.count() > 0):
-        upload_gamification_users(updateUsersDF.toPandas(), connection_name.upper())
+        upload_gamification_users(updateUsersDF.toPandas(), customer.upper())
 
     deactivatedUsersDF = spark.sql(f"""
         SELECT
           user_id,
           email
         FROM
-          {db_name}.altice_user
+          {db_name}.user_management
         WHERE
           to_date(last_working_date, 'dd-MM-yyyy') < current_date()
+          AND orgId = 'altice'
     """)
 
     if deactivatedUsersDF.count() > 0:
-        deactivate_gamification_users(deactivatedUsersDF.toPandas(), connection_name.upper())
+        deactivate_gamification_users(deactivatedUsersDF.toPandas(), customer.upper())
