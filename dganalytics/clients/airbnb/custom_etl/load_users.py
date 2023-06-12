@@ -67,7 +67,7 @@ if __name__ == '__main__':
             frames = [users, sheetDf]
             users = pd.concat(frames)
     
-    #global lobs 
+    global lobs 
     lobs = pd.read_csv(os.path.join(tenant_path, "data", "config", "campaing_lob_mapping.csv"))
     spark.conf.set("spark.sql legacy.timeParserPolicy", "LEGACY")
     spark.udf.register("get_lob_udf", get_lobs, StringType())

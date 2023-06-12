@@ -4,6 +4,7 @@ import pandas as pd
 import datetime
 import os
 import numpy as np
+from spark.sql.functions import to_date
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -34,25 +35,29 @@ if __name__ == '__main__':
     
     attendance['recordInsertDate'] = datetime.datetime.now()
     attendance['orgId'] = customer
+    attendance['loginTime'] = None
+    attendance['logoutTime'] = None
     
     attendance = attendance.rename(columns={
-        "Emp ID": "empId",
+        "Emp ID": "userId",
         "Date": "reportDate",
         "Is_Present": "isPresent"
     }, errors="raise")
     attendance = attendance.drop_duplicates()
     
-    attendance['empId'] = pd.to_numeric(attendance['empId'], errors='coerce').fillna(-1).astype(np.int64)
+    attendance['userId'] = pd.to_numeric(attendance['userId'], errors='coerce').fillna(-1).astype(np.int64)
     attendance['reportDate'] = attendance['reportDate'].astype('str').str.strip()
     
     attendance= spark.createDataFrame(attendance)
+    attendance = attendance.withColumn('reportDate', to_date('reportDate', 'dd-MM-yyyy'))
     
-    attendance.createOrReplaceTempView("airbnb_attendance")
+    attendance.createOrReplaceTempView("attendance")
     
-    spark.sql(f"""merge into {db_name}.airbnb_attendance DB
-                using airbnb_attendance A
+    spark.sql(f"""merge into dg_performance_management.attendance DB
+                using attendance A
                 on date_format(cast(A.reportDate as date), 'dd-MM-yyyy') = date_format(cast(DB.reportDate as date), 'dd-MM-yyyy')
-                AND A.empId = DB.empId
+                AND A.userId = DB.userId
+                AND A.orgId = DB.orgId
                 WHEN MATCHED THEN
                     UPDATE SET *
                 WHEN NOT MATCHED THEN
@@ -61,12 +66,19 @@ if __name__ == '__main__':
         
       
     attendance = spark.sql(f"""
-                         SELECT DISTINCT empId, reportDate, isPresent, user_id
+                         SELECT DISTINCT  
+                         reportDate, 
+                         isPresent, 
+                         userId
                          FROM
-                         (SELECT A.empId, A.reportDate, A.isPresent, DB.user_id
-                         FROM {db_name}.airbnb_attendance AS A
-                         JOIN {db_name}.airbnb_users_data AS DB
-                         ON A.empId = DB.Emp_code) AS joined_data
+                         (SELECT A.reportDate, 
+                         A.isPresent, 
+                         DB.user_id as userId
+                         FROM dg_performance_management.attendance AS A
+                         JOIN dg_airbnbprod.airbnb_user_data AS DB
+                         ON A.userId = DB.Emp_code
+                         WHERE DB.orgId = 'airbnbprod'
+                         )
                          """)
     
     export_powerbi_csv(customer, attendance, f"pm_attendance")

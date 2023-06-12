@@ -5,6 +5,7 @@ import datetime
 import os
 import numpy as np
 import re
+from pyspark.sql.functions import to_date
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -13,9 +14,9 @@ if __name__ == '__main__':
     args, unknown_args = parser.parse_known_args()
     input_file = args.input_file
 
-    tenant = 'startek'
+    tenant = 'startekflipkartcx'
     spark = get_spark_session('kpi_data', tenant)
-    customer = 'startek'
+    customer = 'startekflipkartcx'
     db_name = f"dg_{customer}"
     tenant_path, db_path, log_path = get_path_vars(tenant)
 
@@ -29,27 +30,29 @@ if __name__ == '__main__':
     attendance['IsPresent'] = np.where(attendance['IsPresent'] == 'Yes', True, False)
 
     attendance['recordInsertDate'] = datetime.datetime.now()
-    attendance['orgId'] = 'startek'
+    attendance['orgId'] = customer
+    attendance['loginTime'] = None
+    attendance['logoutTime'] = None
     
     attendance = attendance.rename(columns={
         "UserId": "userId",
         "Date": "reportDate",
         "IsPresent": "isPresent"
     }, errors="raise")
-    #attendance = attendance.drop_duplicates()
+    attendance = attendance.drop_duplicates()
 
-    attendance = attendance[['userId', 'reportDate', 'isPresent', 'recordInsertDate', 'orgId']]
+    attendance = attendance[['userId', 'reportDate', 'isPresent', 'recordInsertDate', 'orgId', 'loginTime', 'logoutTime']]
 
     attendance= spark.createDataFrame(attendance)
+    attendance = attendance.withColumn('reportDate', to_date('reportDate', 'dd-MM-yyyy'))
 
-    # attendance.createOrReplaceTempView("startek_attendance")
+    attendance.createOrReplaceTempView("attendance")
 
-    newDF = spark.sql(f"""DELETE FROM {db_name}.startek_attendance""")
-
-    newDF = spark.sql(f"""merge into {db_name}.startek_attendance DB
-                using startek_attendance A
+    spark.sql(f"""merge into dg_performance_management.attendance DB
+                using attendance A
                 on date_format(cast(A.reportDate as date), 'dd-MM-yyyy') = date_format(cast(DB.reportDate as date), 'dd-MM-yyyy')
                 and A.userId = DB.userId
+                and A.orgId = DB.orgId
                 WHEN MATCHED THEN
                     UPDATE SET *
                 WHEN NOT MATCHED THEN
@@ -60,7 +63,8 @@ if __name__ == '__main__':
                                             reportDate,
                                             isPresent 
                                             FROM 
-                                            dg_startek.startek_attendance
+                                            dg_performance_management.attendance
+                                            where orgId = 'startekflipkartcx'
                                             """)
 
     export_powerbi_csv(customer, attendance, f"pm_attendance")

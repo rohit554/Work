@@ -5,6 +5,7 @@ import datetime
 import os
 import numpy as np
 import re
+from pyspark.sql.functions import to_timestamp, to_date
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -24,30 +25,49 @@ if __name__ == '__main__':
     elif input_file.endswith(".csv"):
         attendance = pd.read_csv(os.path.join(tenant_path, "data", "raw", "attendance", input_file))
 
-    attendance['Date'] = pd.to_datetime(attendance['Date'], format='%Y-%m-%d').dt.strftime('%d-%m-%Y')
+    attendance['Original Date'] = pd.to_datetime(attendance['Date'], format="%d-%m-%Y")
+    attendance['Login Time'] = pd.to_datetime(attendance['Login Time'], format="%I:%M %p")
+    attendance['Logout Time'] = pd.to_datetime(attendance['Logout Time'], format="%I:%M %p")
+
+    attendance['Date'] = attendance['Original Date'].dt.strftime('%Y-%m-%d')
+    attendance['Login Time'] = attendance['Login Time'].dt.strftime('%H:%M')
+    attendance['Logout Time'] = attendance['Logout Time'].dt.strftime('%H:%M')
+
+    attendance['Login Time'] = attendance['Date'] + 'T' + attendance['Login Time'] + ':00.000+0000'
+
+    next_day_indices = attendance['Logout Time'] < attendance['Login Time']
+    attendance.loc[next_day_indices, 'Original Date'] += pd.DateOffset(days=1)
+    attendance['Logout Time'] = attendance['Original Date'].dt.strftime('%Y-%m-%d') + 'T' + attendance['Logout Time'] + ':00.000+0000'
 
     attendance['IsPresent'] = np.where(attendance['IsPresent'] == 'Yes', True, False)
 
     attendance['recordInsertDate'] = datetime.datetime.now()
     attendance['orgId'] = customer
     
+    
     attendance = attendance.rename(columns={
-        "User ID": "empId",
+        "User ID": "userId",
         "Date": "reportDate",
-        "IsPresent": "isPresent"
+        "IsPresent": "isPresent",
+        "Login Time":"Login_Time",
+        "Logout Time":"Logout_Time"
     }, errors="raise")
-    #attendance = attendance.drop_duplicates()
-
-    attendance = attendance[['empId', 'reportDate', 'isPresent', 'recordInsertDate', 'orgId']]
+    attendance = attendance.drop_duplicates()
 
     attendance= spark.createDataFrame(attendance)
+    attendance = attendance.withColumn("loginTime",to_timestamp("Login_Time"))
+    attendance = attendance.withColumn("logoutTime",to_timestamp("Logout_Time"))
+    attendance = attendance.withColumn('reportDate', to_date('reportDate', 'dd-MM-yyyy'))
 
-    attendance.createOrReplaceTempView("tpit_attendance")
+    attendance = attendance[['userId', 'reportDate', 'loginTime', 'logoutTime', 'isPresent', 'recordInsertDate', 'orgId']]
 
-    newDF = spark.sql(f"""merge into dg_tpindiait.tpindiait_attendance DB
-                using tpit_attendance A
+    attendance.createOrReplaceTempView("attendance")
+
+    spark.sql(f"""merge into dg_performance_management.attendance DB
+                using attendance A
                 on date_format(cast(A.reportDate as date), 'dd-MM-yyyy') = date_format(cast(DB.reportDate as date), 'dd-MM-yyyy')
-                and A.empId = DB.empId
+                and A.userId = DB.userId
+                and A.orgId = DB.orgId
                 WHEN MATCHED THEN
                     UPDATE SET *
                 WHEN NOT MATCHED THEN
@@ -56,11 +76,12 @@ if __name__ == '__main__':
     
     attendance = spark.sql("""SELECT
                               DISTINCT 
-                               DB.empId,
+                               DB.userId,
                                DB.reportDate,
                                DB.isPresent 
                               FROM 
-                               dg_tpindiait.tpindiait_attendance DB
+                               dg_performance_management.attendance DB
+                               where orgId = 'tpindiait'
                   """)
 
     export_powerbi_csv(customer, attendance, f"pm_attendance") 
