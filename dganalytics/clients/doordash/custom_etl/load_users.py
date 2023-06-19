@@ -93,6 +93,7 @@ if __name__ == "__main__":
     users["last_name"] = users.apply(lambda row: GetLastName(row), axis =1)
     users = users.drop(['name1', 'name2', 'name3', 'name4'], axis=1)
 
+    # Handling the nan values
     users['LWD'] = users['LWD'].replace({np.nan: None})
 
     # Renaming columns based on the API template
