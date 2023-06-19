@@ -29,7 +29,6 @@ if __name__ == '__main__':
     customer = 'altice'
     spark = get_spark_session('attendance_data', customer)
     db_name = 'dg_performance_management'
-    connection_name = 'AlticeConnection'
     tenant_path, db_path, log_path = get_path_vars(customer)
 
     mongoUsers = get_mongodb_users(customer.upper(), spark)
@@ -124,7 +123,7 @@ if __name__ == '__main__':
         ON MU.user_id = U.user_id
         AND MU.email = U.email
     WHERE MU.role_id NOT IN ('Team Manager', 'Team Lead')
-    AND (U.LOB IN ('Mobile GE') OR U.LOB IS NULL)
+    AND (U.LOB IN ('CSR', 'TSR') OR U.LOB IS NULL)
     AND orgId = 'altice'
     """)
     
@@ -154,9 +153,9 @@ if __name__ == '__main__':
     """)
     
     if(createUsersDF.count() > 0):
-        upload_gamification_users(createUsersDF.toPandas(), connection_name.upper())
+        upload_gamification_users(createUsersDF.toPandas(), customer.upper())
     if(updateUsersDF.count() > 0):
-        upload_gamification_users(updateUsersDF.toPandas(), connection_name.upper())
+        upload_gamification_users(updateUsersDF.toPandas(), customer.upper())
 
     deactivatedUsersDF = spark.sql(f"""
         SELECT
@@ -170,4 +169,4 @@ if __name__ == '__main__':
     """)
 
     if deactivatedUsersDF.count() > 0:
-        deactivate_gamification_users(deactivatedUsersDF.toPandas(), connection_name.upper())
+        deactivate_gamification_users(deactivatedUsersDF.toPandas(), customer.upper())
