@@ -75,6 +75,22 @@ def get_kpi_values_data(spark, orgId, orgIds):
     """
     return spark.sql(query)
 
+def get_attendance_data(spark, orgId, orgIds):
+  if orgIds == []:
+    orgIds = ['-1']
+  
+  query = f"""
+  SELECT 
+  report_date reportDate,
+  userId,
+  COALESCE((COUNT(attr_value) > 0), FALSE) isPresent 
+  FROM 
+  dg_performance_management.kpi_data
+  WHERE orgId = '{orgId}' OR orgId IN ({','.join(map(repr,orgIds))})
+  GROUP BY userId,report_date,orgId  
+  """
+  return spark.sql(query)  
+
 if __name__ == "__main__":
 
     app_name = "performance_management_powerbi_export"
@@ -107,6 +123,7 @@ if __name__ == "__main__":
                 df = df.drop("orgId")
             print(f"table row count - {df.count()}")
             export_powerbi_csv(tenant['name'], df, f"pm_{table}")
+            export_powerbi_csv(tenant['name'], get_attendance_data(spark, tenant['name'], []), f"pm_attendance")
 
         exec_powerbi_refresh(
             tenant['pb_workspace'], tenant['pb_roi_dataset'])
