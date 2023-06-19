@@ -10,7 +10,7 @@ from datetime import datetime
 from pyspark.sql.functions import unix_timestamp, from_unixtime
 import re
 from pyspark.sql.functions import to_date, date_format
-from pyspark.sql.functions import expr
+from pyspark.sql.functions import expr, regexp_replace
 
 def get_lobs(lob: str = ""):
     if lobs is None or lob is None:
@@ -29,6 +29,7 @@ if __name__ == '__main__':
     customer = 'altice'
     spark = get_spark_session('attendance_data', customer)
     db_name = 'dg_performance_management'
+    connection_name = 'AlticeConnection'
     tenant_path, db_path, log_path = get_path_vars(customer)
 
     mongoUsers = get_mongodb_users(customer.upper(), spark)
@@ -66,7 +67,26 @@ if __name__ == '__main__':
     mongoTeams.createOrReplaceTempView("mongoTeams")
 
     users= spark.createDataFrame(users)
+    users = users.withColumn("email", regexp_replace("email", "@datagamz.com", "@startek.com"))
+    users = users.withColumn('user_start_date',
+                         when(to_date('user_start_date', 'MM-dd-yyyy').isNotNull(),
+                              date_format(to_date('user_start_date', 'MM-dd-yyyy'), 'dd-MM-yyyy')
+                         ).otherwise(
+                              when(to_date('user_start_date', 'dd-MM-yyyy').isNotNull(),
+                                   date_format(to_date('user_start_date', 'dd-MM-yyyy'), 'dd-MM-yyyy')
+                              ).otherwise('')
+                         ).alias('user_start_date'))
     
+    users = users.withColumn('last_working_date',
+                         when(to_date('last_working_date', 'MM-dd-yyyy').isNotNull(),
+                              date_format(to_date('last_working_date', 'MM-dd-yyyy'), 'dd-MM-yyyy')
+                         ).otherwise(
+                              when(to_date('last_working_date', 'dd-MM-yyyy').isNotNull(),
+                                   date_format(to_date('last_working_date', 'dd-MM-yyyy'), 'dd-MM-yyyy')
+                              ).otherwise('')
+                         ).alias('last_working_date'))
+
+
     users.createOrReplaceTempView("users")
 
     spark.sql(f"""MERGE into {db_name}.user_management DB
@@ -134,9 +154,9 @@ if __name__ == '__main__':
     """)
     
     if(createUsersDF.count() > 0):
-        upload_gamification_users(createUsersDF.toPandas(), customer.upper())
+        upload_gamification_users(createUsersDF.toPandas(), connection_name.upper())
     if(updateUsersDF.count() > 0):
-        upload_gamification_users(updateUsersDF.toPandas(), customer.upper())
+        upload_gamification_users(updateUsersDF.toPandas(), connection_name.upper())
 
     deactivatedUsersDF = spark.sql(f"""
         SELECT
@@ -150,4 +170,4 @@ if __name__ == '__main__':
     """)
 
     if deactivatedUsersDF.count() > 0:
-        deactivate_gamification_users(deactivatedUsersDF.toPandas(), customer.upper())
+        deactivate_gamification_users(deactivatedUsersDF.toPandas(), connection_name.upper())

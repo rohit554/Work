@@ -22,7 +22,8 @@ schema = StructType([StructField("user_id", StringType(), True),
                      StructField("first_name", StringType(), True),
                      StructField("last_name", StringType(), True),
                      StructField("email", StringType(), True),
-                     StructField("team", StringType(), True)
+                     StructField("team", StringType(), True),
+                     StructField("campaign", StringType(), True)
                     
                     ])
 
@@ -91,6 +92,8 @@ if __name__ == "__main__":
 
     users["last_name"] = users.apply(lambda row: GetLastName(row), axis =1)
     users = users.drop(['name1', 'name2', 'name3', 'name4'], axis=1)
+
+    users['LWD'] = users['LWD'].replace({np.nan: None})
 
     # Renaming columns based on the API template
     users.rename(columns = {'New Emp ID':'user_id', 'DOJ': 'user_start_date', 'Gender': 'gender', 'Email Id': 'Communication Email' }, inplace = True)
