@@ -10,7 +10,7 @@ from datetime import datetime
 from pyspark.sql.functions import unix_timestamp, from_unixtime
 import re
 from pyspark.sql.functions import to_date, date_format
-from pyspark.sql.functions import expr
+from pyspark.sql.functions import expr, regexp_replace
 
 def get_lobs(lob: str = ""):
     if lobs is None or lob is None:
@@ -66,7 +66,26 @@ if __name__ == '__main__':
     mongoTeams.createOrReplaceTempView("mongoTeams")
 
     users= spark.createDataFrame(users)
+    users = users.withColumn("email", regexp_replace("email", "@datagamz.com", "@startek.com"))
+    users = users.withColumn('user_start_date',
+                         when(to_date('user_start_date', 'MM-dd-yyyy').isNotNull(),
+                              date_format(to_date('user_start_date', 'MM-dd-yyyy'), 'dd-MM-yyyy')
+                         ).otherwise(
+                              when(to_date('user_start_date', 'dd-MM-yyyy').isNotNull(),
+                                   date_format(to_date('user_start_date', 'dd-MM-yyyy'), 'dd-MM-yyyy')
+                              ).otherwise('')
+                         ).alias('user_start_date'))
     
+    users = users.withColumn('last_working_date',
+                         when(to_date('last_working_date', 'MM-dd-yyyy').isNotNull(),
+                              date_format(to_date('last_working_date', 'MM-dd-yyyy'), 'dd-MM-yyyy')
+                         ).otherwise(
+                              when(to_date('last_working_date', 'dd-MM-yyyy').isNotNull(),
+                                   date_format(to_date('last_working_date', 'dd-MM-yyyy'), 'dd-MM-yyyy')
+                              ).otherwise('')
+                         ).alias('last_working_date'))
+
+
     users.createOrReplaceTempView("users")
 
     spark.sql(f"""MERGE into {db_name}.user_management DB
@@ -104,7 +123,7 @@ if __name__ == '__main__':
         ON MU.user_id = U.user_id
         AND MU.email = U.email
     WHERE MU.role_id NOT IN ('Team Manager', 'Team Lead')
-    AND (U.LOB IN ('Mobile GE') OR U.LOB IS NULL)
+    AND (U.LOB IN ('CSR', 'TSR') OR U.LOB IS NULL)
     AND orgId = 'altice'
     """)
     
