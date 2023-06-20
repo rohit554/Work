@@ -137,6 +137,7 @@ if __name__ == "__main__":
             df = spark.sql(
                 f"select * from dg_performance_management.{table} where orgId in ('hellofreshanz', 'hellofreshus')")
         export_powerbi_csv('hellofresh', df, f"pm_{table}")
+        export_powerbi_csv('hellofresh', get_attendance_data(spark, 'hellofresh', []), f"pm_attendance")
 
     for rec in tenants_df[tenants_df['name'].str.contains('hellofresh')].to_dict('records'):
         exec_powerbi_refresh(rec['pb_workspace'], rec['pb_roi_dataset'])
