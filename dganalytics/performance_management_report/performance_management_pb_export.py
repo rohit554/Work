@@ -135,7 +135,7 @@ if __name__ == "__main__":
         if table == "kpi_values":
             df = get_kpi_values_data(spark, None, ['hellofreshanz', 'hellofreshus'])
         if table == "attendance":
-                df = get_attendance_data(spark, None, ['hellofreshanz', 'hellofreshus'])
+            df = get_attendance_data(spark, None, ['hellofreshanz', 'hellofreshus'])
         else:
             df = spark.sql(
                 f"select * from dg_performance_management.{table} where orgId in ('hellofreshanz', 'hellofreshus')")
