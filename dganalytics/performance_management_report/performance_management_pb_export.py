@@ -105,7 +105,7 @@ if __name__ == "__main__":
         app_name=app_name, tenant='datagamz', default_db='dg_performance_management')
     tables = ["activity_wise_points", "badges", "campaign", "challenges", "levels", "logins", "questions",
               "quizzes", "user_campaign", "users", "activity_mapping", "data_upload_audit_log", 
-              "data_upload_connections", "kpi_data", "campaign_kpis", "trek_data", "kpi_values"]
+              "data_upload_connections", "kpi_data", "campaign_kpis", "trek_data", "kpi_values", "attendance"]
     for tenant in tenants:
         print(f"Getting ROI data for {tenant}")
         if 'hellofresh' in tenant['name']:
@@ -117,13 +117,14 @@ if __name__ == "__main__":
             print(f"extracting Table - {table}")
             if table == "kpi_values":
                 df = get_kpi_values_data(spark, tenant['name'], [])
+            if table == "attendance":
+                df = get_attendance_data(spark, tenant['name'], [])
             else:
                 df = spark.sql(
                     f"select * from dg_performance_management.{table} where orgId = '{tenant['name']}'")
                 df = df.drop("orgId")
             print(f"table row count - {df.count()}")
             export_powerbi_csv(tenant['name'], df, f"pm_{table}")
-            export_powerbi_csv(tenant['name'], get_attendance_data(spark, tenant['name'], []), f"pm_attendance")
 
         exec_powerbi_refresh(
             tenant['pb_workspace'], tenant['pb_roi_dataset'])
@@ -133,11 +134,12 @@ if __name__ == "__main__":
     for table in tables:
         if table == "kpi_values":
             df = get_kpi_values_data(spark, None, ['hellofreshanz', 'hellofreshus'])
+        if table == "attendance":
+                df = get_attendance_data(spark, None, ['hellofreshanz', 'hellofreshus'])
         else:
             df = spark.sql(
                 f"select * from dg_performance_management.{table} where orgId in ('hellofreshanz', 'hellofreshus')")
         export_powerbi_csv('hellofresh', df, f"pm_{table}")
-        export_powerbi_csv('hellofresh', get_attendance_data(spark, 'hellofresh', []), f"pm_attendance")
 
     for rec in tenants_df[tenants_df['name'].str.contains('hellofresh')].to_dict('records'):
         exec_powerbi_refresh(rec['pb_workspace'], rec['pb_roi_dataset'])
