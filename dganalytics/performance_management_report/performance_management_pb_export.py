@@ -75,6 +75,22 @@ def get_kpi_values_data(spark, orgId, orgIds):
     """
     return spark.sql(query)
 
+def get_attendance_data(spark, orgId, orgIds):
+  if orgIds == []:
+    orgIds = ['-1']
+  
+  query = f"""
+  SELECT 
+  report_date reportDate,
+  userId,
+  COALESCE((COUNT(attr_value) > 0), FALSE) isPresent 
+  FROM 
+  dg_performance_management.kpi_data
+  WHERE orgId = '{orgId}' OR orgId IN ({','.join(map(repr,orgIds))})
+  GROUP BY userId,report_date,orgId  
+  """
+  return spark.sql(query)  
+
 if __name__ == "__main__":
 
     app_name = "performance_management_powerbi_export"
@@ -89,7 +105,7 @@ if __name__ == "__main__":
         app_name=app_name, tenant='datagamz', default_db='dg_performance_management')
     tables = ["activity_wise_points", "badges", "campaign", "challenges", "levels", "logins", "questions",
               "quizzes", "user_campaign", "users", "activity_mapping", "data_upload_audit_log", 
-              "data_upload_connections", "kpi_data", "campaign_kpis", "trek_data", "kpi_values"]
+              "data_upload_connections", "kpi_data", "campaign_kpis", "trek_data", "kpi_values", "attendance"]
     for tenant in tenants:
         print(f"Getting ROI data for {tenant}")
         if 'hellofresh' in tenant['name']:
@@ -101,6 +117,8 @@ if __name__ == "__main__":
             print(f"extracting Table - {table}")
             if table == "kpi_values":
                 df = get_kpi_values_data(spark, tenant['name'], [])
+            if table == "attendance":
+                df = get_attendance_data(spark, tenant['name'], [])
             else:
                 df = spark.sql(
                     f"select * from dg_performance_management.{table} where orgId = '{tenant['name']}'")
@@ -116,6 +134,8 @@ if __name__ == "__main__":
     for table in tables:
         if table == "kpi_values":
             df = get_kpi_values_data(spark, None, ['hellofreshanz', 'hellofreshus'])
+        if table == "attendance":
+            df = get_attendance_data(spark, None, ['hellofreshanz', 'hellofreshus'])
         else:
             df = spark.sql(
                 f"select * from dg_performance_management.{table} where orgId in ('hellofreshanz', 'hellofreshus')")
