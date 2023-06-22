@@ -117,7 +117,7 @@ if __name__ == "__main__":
             print(f"extracting Table - {table}")
             if table == "kpi_values":
                 df = get_kpi_values_data(spark, tenant['name'], [])
-            if table == "attendance":
+            if table == "attendance" and tenant['name'] not in ['doordashprod','startekflipkartcx','tpindiait','airbnbprod']:
                 df = get_attendance_data(spark, tenant['name'], [])
             else:
                 df = spark.sql(
