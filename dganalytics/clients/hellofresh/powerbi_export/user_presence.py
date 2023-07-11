@@ -39,7 +39,8 @@ def export_user_presence(spark: SparkSession, tenant: str, region: str):
         FROM 
             fact_user_presence fp, user_timezone ut
         WHERE fp.userId = ut.userId
-              AND ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
+            AND ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
+            AND CAST(from_utc_timestamp(fp.startTime, trim(ut.timeZone)) AS date) >= date_sub(current_date, 365)
     """)
 
     pp.createOrReplaceTempView("presence")

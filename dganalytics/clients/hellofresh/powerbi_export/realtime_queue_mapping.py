@@ -48,9 +48,8 @@ def export_realtime_queue_mapping(spark: SparkSession, tenant: str, region: str)
 		FROM queue_timezones qt
 		INNER JOIN gpc_hellofresh.dim_routing_queues rq 
 			ON qt.queueName = rq.queueName
-		INNER JOIN idle_queue iq
+		LEFT JOIN idle_queue iq
 			ON iq.country_brand_language = qt.country_brand_language
-		WHERE qt.country_brand_language IS NOT NULL
 	""")
 
 	realtime_queues.toPandas().to_csv(os.path.join(tenant_path, 'data', 'config', "realtime_queueMapping_v2.csv"), index=False)

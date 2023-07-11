@@ -16,16 +16,20 @@ def export_evaluation_question_scores(spark: SparkSession, tenant: str, region: 
     queue_mapping.createOrReplaceTempView("queue_mapping")
 
     df = spark.sql(f"""
-            select /*+ BROADCAST(b) */ a.evaluationId evaluationKey,
-b.conversationId conversationKey,
-a.questionGroupId questionGroupKey,
-a.answerId answerKey,
-a.markedNA,
-a.questionId questionKey,
-a.score
-from gpc_hellofresh.fact_evaluation_question_scores a, gpc_hellofresh.dim_evaluations b
-where a.evaluationId = b.evaluationId
-and a.conversationDatePart = b.conversationDatePart
+        SELECT /*+ BROADCAST(b) */
+            a.evaluationId AS evaluationKey,
+            b.conversationId AS conversationKey,
+            a.questionGroupId AS questionGroupKey,
+            a.answerId AS answerKey,
+            a.markedNA,
+            a.questionId AS questionKey,
+            a.score
+        FROM
+            gpc_hellofresh.fact_evaluation_question_scores a,
+            gpc_hellofresh.dim_evaluations b
+        WHERE
+            a.evaluationId = b.evaluationId
+            AND a.conversationDatePart = b.conversationDatePart
     """)
 
     return df

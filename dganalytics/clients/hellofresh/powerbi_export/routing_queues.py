@@ -18,9 +18,15 @@ def export_routing_queues(spark: SparkSession, tenant: str, region: str):
 
     df = spark.sql("""
             SELECT 
-a.queueId queueKey, a.queueName as name, b.region, b.country
-FROM gpc_hellofresh.dim_routing_queues a, queue_mapping b 
-where a.queueName = b.queueName
+                a.queueId queueKey, 
+                a.queueName as name, 
+                b.region, 
+                b.country
+            FROM 
+                gpc_hellofresh.dim_routing_queues a, 
+                queue_mapping b 
+            WHERE 
+                a.queueName = b.queueName
 
     """)
 
