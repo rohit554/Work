@@ -16,9 +16,12 @@ def get_lobs(lob: str = ""):
     if lobs is None or lob is None:
         return ""
     lob = lob.strip()
-    return lobs.where(lobs['LOB'] == lob).dropna().iloc[0]['Campaign']
-
-  
+    matching_rows = lobs.loc[lobs['LOB'] == lob]
+    if len(matching_rows) > 0:
+        return matching_rows.iloc[0]['Campaign']
+    else:
+        return ""
+ 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_file', required=True)
@@ -123,7 +126,7 @@ if __name__ == '__main__':
         ON MU.user_id = U.user_id
         AND MU.email = U.email
     WHERE MU.role_id NOT IN ('Team Manager', 'Team Lead')
-    AND (U.LOB IN ('CSR', 'TSR') OR U.LOB IS NULL)
+    AND (U.LOB IN ('JCSR', 'JTSR', 'USCSR', 'USTSR') OR U.LOB IS NULL)
     AND orgId = 'altice'
     """)
     
