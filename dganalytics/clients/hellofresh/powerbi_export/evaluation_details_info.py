@@ -4,7 +4,7 @@ import os
 import pandas as pd
 
 
-def export_evaluation_details_info(sapark: SparkSession, tenant: str, region: str):
+def export_evaluation_details_info(spark: SparkSession, tenant: str, region: str):
     tenant_path, db_path, log_path = get_path_vars(tenant)
     queue_timezones = pd.read_json(os.path.join(tenant_path, 'data',
                                                 'config', 'Queue_TimeZone_Mapping_v2.json'))
@@ -47,7 +47,7 @@ def export_evaluation_details_info(sapark: SparkSession, tenant: str, region: st
             queue_mapping e
         WHERE 
             a.evaluationFormId = b.evaluationFormId
-            AND CAST(from_utc_timestamp(a.conversationDate, trim(e.timeZone)) AS date) >= date_sub(current_date, 365)
+            AND CAST(from_utc_timestamp(a.conversationDate, trim(e.timeZone)) AS date) >= add_months(current_date(), -12)
             AND a.evaluationId = c.evaluationId
             AND a.conversationDatePart = c.conversationDatePart
             AND a.queueId = d.queueId

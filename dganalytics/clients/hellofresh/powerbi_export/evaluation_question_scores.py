@@ -30,6 +30,7 @@ def export_evaluation_question_scores(spark: SparkSession, tenant: str, region: 
         WHERE
             a.evaluationId = b.evaluationId
             AND a.conversationDatePart = b.conversationDatePart
+            AND CAST(b.conversationDate AS DATE) >= add_months(current_date(), -12)
     """)
 
     return df

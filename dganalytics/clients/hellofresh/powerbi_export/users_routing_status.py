@@ -17,10 +17,13 @@ def export_users_routing_status(spark: SparkSession, tenant: str):
                 from_utc_timestamp(fp.endTime, trim(ut.timeZone)) endTime,
                 fp.routingStatus 
             FROM 
-                fact_routing_status fp, 
+                gpc_hellofresh.fact_routing_status fp, 
                 user_timezone ut
             WHERE 
                 fp.userId = ut.userId
+                AND ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
+                AND CAST(from_utc_timestamp(fp.startTime, trim(ut.timeZone)) AS date) >= add_months(current_date(), -12)
+
     """)
 
     return df

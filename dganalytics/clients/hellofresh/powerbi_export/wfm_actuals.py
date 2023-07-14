@@ -22,6 +22,6 @@ def export_wfm_actuals(spark: SparkSession, tenant: str, region: str):
             FROM gpc_hellofresh.fact_wfm_actuals fw, user_timezone ut
             WHERE fw.userId = ut.userId
             AND ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
-            AND CAST(from_utc_timestamp(fw.startTime, trim(ut.timeZone)) AS date) >= date_sub(current_date, 365)
+            AND CAST(from_utc_timestamp(fw.startTime, trim(ut.timeZone)) AS date) >= add_months(current_date(), -12)
     """)
     return df

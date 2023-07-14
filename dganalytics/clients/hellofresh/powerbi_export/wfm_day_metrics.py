@@ -34,7 +34,7 @@ def export_wfm_day_metrics(spark: SparkSession, tenant: str, region: str):
             WHERE 
                 fw.userId = ut.userId
                 AND ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
-                AND CAST(from_utc_timestamp(fw.startTime, trim(ut.timeZone)) AS date) >= date_sub(current_date, 365)
+                AND CAST(from_utc_timestamp(fw.startTime, trim(ut.timeZone)) AS date) >= add_months(current_date(), -12)
     """)
 
     return df

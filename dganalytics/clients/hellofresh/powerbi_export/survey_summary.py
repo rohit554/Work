@@ -66,7 +66,7 @@ def export_survey_summary(spark: SparkSession, tenant: str, region: str):
                 sdx_hellofresh.dim_hellofresh_interactions a 
                 LEFT JOIN queue_mapping e ON trim(lower(a.callType)) = trim(lower(e.queueName))
             WHERE
-               CAST(from_utc_timestamp(a.createdAt, trim(e.timeZone)) AS date) >= date_sub(current_date, 365)
+               CAST(from_utc_timestamp(a.createdAt, trim(e.timeZone)) AS date) >= add_months(current_date(), -12)
                AND e.region {" = 'US'" if region == 'US' else " <> 'US'"}
         ),
         GPC_conversation AS (

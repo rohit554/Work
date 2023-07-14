@@ -46,7 +46,7 @@ def export_users_routing_status_sliced(spark: SparkSession, tenant: str, region:
         WHERE
             frs.startDate >= cast('2020-02-01' AS date)
             AND ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
-            AND CAST(from_utc_timestamp(frs.startTime, trim(ut.timeZone)) AS date) >= date_sub(current_date, 365)
+            AND CAST(from_utc_timestamp(frs.startTime, trim(ut.timeZone)) AS date) >= add_months(current_date(), -12)
     """)
 
     routing.createOrReplaceTempView("routing")

@@ -18,15 +18,19 @@ def export_routing_queues(spark: SparkSession, tenant: str, region: str):
 
     df = spark.sql("""
             SELECT 
-                a.queueId queueKey, 
-                a.queueName as name, 
-                b.region, 
-                b.country
-            FROM 
-                gpc_hellofresh.dim_routing_queues a, 
-                queue_mapping b 
-            WHERE 
-                a.queueName = b.queueName
+              a.queueId queueKey, 
+              a.queueName as name, 
+              b.region, 
+              b.country
+          FROM 
+              gpc_hellofresh.dim_routing_queues a, 
+              queue_mapping b,
+              gpc_hellofresh.dim_conversations c
+          WHERE 
+              a.queueName = b.queueName
+              AND a.queueId = c.queueId
+              AND CAST(from_utc_timestamp(c.conversationStart, trim(b.timeZone)) AS date) >= add_months(current_date(), -12)
+              AND b.region {" = 'US'" if region == 'US' else " <> 'US'" }
 
     """)
 
