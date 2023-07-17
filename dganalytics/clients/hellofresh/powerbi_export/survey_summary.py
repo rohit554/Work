@@ -86,6 +86,7 @@ def export_survey_summary(spark: SparkSession, tenant: str, region: str):
                         ROW_NUMBER() OVER (PARTITION BY conversationId ORDER BY recordInsertTime DESC) AS rn
                     FROM 
                         gpc_hellofresh.raw_conversation_details
+                    WHERE CAST(a.conversationStart, AS date) >= add_months(current_date(), -12)
                 )
                 WHERE rn = 1
             )
