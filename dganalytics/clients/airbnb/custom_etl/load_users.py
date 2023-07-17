@@ -174,7 +174,7 @@ if __name__ == '__main__':
         ON MU.user_id = U.user_id
         AND MU.email = U.email
     WHERE MU.role_id != 'Team Manager'
-    AND U.LOB IN ('R1', 'CE', 'R2')
+    AND U.LOB IN ('R1', 'CE', 'R2', 'DSS')
     """)
     
     
@@ -200,7 +200,7 @@ if __name__ == '__main__':
             FROM users U
             WHERE NOT EXISTS (SELECT * FROM mongoUsers MU WHERE LOWER(MU.user_id) = LOWER(U.user_id))
                   AND TRIM(email) NOT IN ('-@datagamz.com', '@datagamz.com', 'Not Received@datagamz.com')
-                  AND U.LOB IN ('R1', 'CE')
+                  AND U.LOB IN ('R1', 'CE', 'R2', 'DSS')
     """)
     
     
@@ -210,9 +210,9 @@ if __name__ == '__main__':
         upload_gamification_users(updateUsersDF.toPandas(), customer.upper())
         
         
-    deactivatedUsersDF = spark.sql(f"""
-        SELECT MU.user_id, '' email FROM mongoUsers MU
-        WHERE MU.role_id IN ('Agent') and (NOT EXISTS (SELECT 1 FROM Users U WHERE LOWER(U.user_id) = LOWER(MU.user_id) ))
-    """)
+    # deactivatedUsersDF = spark.sql(f"""
+    #     SELECT MU.user_id, '' email FROM mongoUsers MU
+    #     WHERE MU.role_id IN ('Agent') and (NOT EXISTS (SELECT 1 FROM Users U WHERE LOWER(U.user_id) = LOWER(MU.user_id) ))
+    # """)
     
-    deactivate_gamification_users(deactivatedUsersDF.toPandas(), customer.upper())
+    # deactivate_gamification_users(deactivatedUsersDF.toPandas(), customer.upper())
