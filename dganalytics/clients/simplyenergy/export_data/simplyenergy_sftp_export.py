@@ -89,7 +89,7 @@ if __name__ == "__main__":
                       upload_name = f"./{sftp_folder_path}/{export_name_normalised}.csv"
 
                 logger.info(f"uploading {file_path} to {upload_name}...")
-                sftp_conn.put(file_path, upload_name)
+                sftp_conn.put(file_path, upload_name, confirm=False)
                 logger.info(f"deleting {file_path}...")
                 os.remove(file_path)
 
