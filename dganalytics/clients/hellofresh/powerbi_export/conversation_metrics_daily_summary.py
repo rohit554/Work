@@ -7,10 +7,6 @@ import pandas as pd
 def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str, region: str):
 
     tenant_path, db_path, log_path = get_path_vars(tenant)
-    '''
-    queue_timezones = pd.read_csv(os.path.join(tenant_path, 'data',
-                                               'config', 'Queue_TimeZone_Mapping.csv'), header=0)
-        '''
     queue_timezones = pd.read_json(os.path.join(tenant_path, 'data',
                                                 'config', 'Queue_TimeZone_Mapping.json'))
     queue_timezones = pd.DataFrame(queue_timezones['values'].tolist())

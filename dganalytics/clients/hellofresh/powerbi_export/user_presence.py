@@ -37,7 +37,7 @@ def export_user_presence(spark: SparkSession, tenant: str, region: str):
             fp.presenceDefinitionLabel,
             'user_presence' pTableFlag
         FROM 
-            fact_user_presence fp, user_timezone ut
+            gpc_hellofresh.fact_user_presence fp, user_timezone ut
         WHERE fp.userId = ut.userId
             AND ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
             AND CAST(from_utc_timestamp(fp.startTime, trim(ut.timeZone)) AS date) >= add_months(current_date(), -12)
@@ -62,6 +62,7 @@ def export_user_presence(spark: SparkSession, tenant: str, region: str):
         FROM
             presence pp, dates d 
         WHERE d.date BETWEEN cast(pp.startTime as date) AND cast(pp.endTime as date)
+        AND CAST(pp.startTime AS date) >= add_months(current_date(), -12)
     """)
 
     return df
