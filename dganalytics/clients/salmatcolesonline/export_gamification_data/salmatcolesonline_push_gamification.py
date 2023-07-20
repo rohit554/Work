@@ -1,6 +1,9 @@
 from dganalytics.utils.utils import get_spark_session, push_gamification_data, export_powerbi_csv
 from dganalytics.connectors.gpc.gpc_utils import dg_metadata_export_parser, get_dbname, gpc_utils_logger
+from pyspark.sql.functions import from_utc_timestamp, col
+from pyspark.sql.types import DateType
 from pyspark.sql import SparkSession
+from datetime import datetime, timedelta
 
 
 def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
@@ -29,11 +32,7 @@ def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
             SELECT
             U.userId,
             U._date,
-            SUM(E.tHeldComplete) AS tHeldComplete,
-            SUM(E.nHeldComplete) AS nHeld,
             COUNT(DISTINCT E.conversationId) AS nHandle,
-            SUM(E.tAcw) AS tAcw,
-            SUM(E.nAcw) AS nAcw,
             COUNT(DISTINCT E.wrapUpCode, E.conversationId) AS wrapUpCodeCount
             FROM
             gpc_salmatcolesonline.fact_conversation_metrics E
@@ -42,6 +41,25 @@ def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
                 from_utc_timestamp(E.emitDateTime, 'Australia/Sydney'),
                 'dd-MM-yyyy'
             ) = U._date
+            GROUP BY
+            U.userId,
+            _date
+        ),
+        FC_Voice AS (
+            SELECT
+            U.userId,
+            U._date,
+            (CASE WHEN COUNT(E.tHeldComplete) = 0 THEN null ELSE SUM(E.tHeldComplete) END) AS tHeldCompeleVoice,
+            COUNT(DISTINCT E.conversationId) AS nHandleVoice,
+            (CASE WHEN COUNT(E.tAcw) = 0 THEN null ELSE SUM(E.tAcw) END) AS tAcwVoice
+            FROM
+            gpc_salmatcolesonline.fact_conversation_metrics E
+            JOIN UserDates U ON U.userId = E.agentId
+            AND date_format(
+                from_utc_timestamp(E.emitDateTime, 'Australia/Sydney'),
+                'dd-MM-yyyy'
+            ) = U._date
+            WHERE E.mediaType = "voice"
             GROUP BY
             U.userId,
             _date
@@ -64,13 +82,13 @@ def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
             _date
         )
         SELECT
-            UD.userId,
-            UD._date AS Date,
-            FC.tHeldComplete AS tHeldComplete,
-            FC.nHeld AS nHeld,
+        UD.userId,
+        UD._date AS Date,
+        FC_Voice.tHeldCompeleVoice AS tHeldCompeleVoice,
+        FC_Voice.nHandleVoice AS nHandleVoice,
+        FC_Voice.tAcwVoice AS tAcwVoice,
         FC.nHandle AS nHandle,
-        FC.tAcw AS tAcw,
-        FC.nAcw AS nAcw,
+        FC.tAcwVoice AS tAcwVoice,
         FC.wrapUpCodeCount AS wrapUpCodeCount,
         FW.adherenceScheduleSecs AS adherenceScheduleSecs,
         FW.exceptionDurationSecs AS exceptionDurationSecs
@@ -78,15 +96,16 @@ def get_coles_data(spark: SparkSession, extract_date: str, org_id: str):
             UserDates UD
             LEFT JOIN FC ON FC.userId = UD.userId
             AND FC._date = UD._date
+            LEFT JOIN FC_Voice ON FC_Voice.userId = UD.userId
+            AND FC_Voice._date = UD._date
             LEFT JOIN FW ON FW.userId = UD.userId
             AND FW._date = UD._date
         WHERE
             NOT (
-            FC.tHeldComplete IS NULL
-            AND FC.nHandle IS NULL
-            AND FC.tAcw IS NULL
-            AND FC.nHeld IS NULL
-            AND FC.nAcw IS NULL
+            FC.nHandle IS NULL
+            AND FC_Voice.tHeldCompeleVoice IS NULL 
+            AND FC_Voice.nHandleVoice IS NULL
+            AND FC_Voice.tAcwVoice IS NULL
             AND COALESCE(FC.wrapUpCodeCount, 0) = 0
             AND COALESCE(FW.adherenceScheduleSecs, 0) = 0
             AND COALESCE(FW.exceptionDurationSecs, 0) = 0
