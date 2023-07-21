@@ -15,6 +15,7 @@ def get_kpi_values_data(spark, orgId, orgIds):
                   uc.campaignId,
                   ca.activityId activityId,
                   ca.entityName,
+                  ca.kpi_name,
                   ca.fieldName,
                   u.orgId
                 FROM (SELECT EXPLODE(SEQUENCE(CAST("2022-10-01" AS DATE), CURRENT_DATE(), INTERVAL 1 day)) report_date) as d, dg_performance_management.users u
@@ -36,6 +37,7 @@ def get_kpi_values_data(spark, orgId, orgIds):
                   uca.campaignId,
                   uca.activityId,
                   uca.entityName,
+                  uca.kpi_name,
                   uca.fieldName,
                   uca.orgId,
                   ap.points,
