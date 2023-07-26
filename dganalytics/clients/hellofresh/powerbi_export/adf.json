@@ -1,770 +1,735 @@
 {
-    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "env": {
-            "type": "string",
-            "metadata": "Environment name",
-            "defaultValue": "dev"
-        },
-        "tenant": {
-            "type": "string",
-            "metadata": "Tenant Name",
-            "defaultValue": "hellofresh"
-        },
-        "baseTime": {
-            "type": "string",
-            "defaultValue": "[utcNow('u')]",
-            "metadata": {
-                "description": "Schedule will start one hour from this time."
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "env": {
+      "type": "string",
+      "metadata": "Environment name",
+      "defaultValue": "dev"
+    },
+    "tenant": {
+      "type": "string",
+      "metadata": "Tenant Name",
+      "defaultValue": "hellofresh"
+    },
+    "baseTime": {
+      "type": "string",
+      "defaultValue": "[utcNow('u')]",
+      "metadata": {
+        "description": "Schedule will start one hour from this time."
+      }
+    }
+  },
+  "variables": {
+    "factoryId": "[concat('Microsoft.DataFactory/factories/dg', parameters('env'), 'adf')]",
+    "factoryname": "[concat('dg', parameters('env'), 'adf')]",
+    "AzureKeyVault_baseUrl": "[concat('https://dg', parameters('env') ,'secrets.vault.azure.net/')]",
+    "dailyDay1TriggerStart": "[dateTimeAdd(parameters('baseTime'), 'P0D', 'yyyy-MM-ddT00:30:00Z')]"
+  },
+  "resources": [
+    {
+      "name": "[concat(variables('factoryname'), '/AzureKeyVault')]",
+      "type": "Microsoft.DataFactory/factories/linkedServices",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "annotations": [],
+        "type": "AzureKeyVault",
+        "typeProperties": {
+          "baseUrl": "[variables('AzureKeyVault_baseUrl')]"
+        }
+      },
+      "dependsOn": []
+    },
+    {
+      "name": "[concat(variables('factoryname'), '/AzureDatabricks')]",
+      "type": "Microsoft.DataFactory/factories/linkedServices",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "annotations": [],
+        "type": "AzureDatabricks",
+        "typeProperties": {
+          "domain": {
+            "type": "AzureKeyVaultSecret",
+            "store": {
+              "referenceName": "AzureKeyVault",
+              "type": "LinkedServiceReference"
+            },
+            "secretName": "databricksinstanceurl"
+          },
+          "accessToken": {
+            "type": "AzureKeyVaultSecret",
+            "store": {
+              "referenceName": "AzureKeyVault",
+              "type": "LinkedServiceReference"
+            },
+            "secretName": "databricksaccesstoken"
+          },
+          "existingClusterId": {
+            "type": "AzureKeyVaultSecret",
+            "store": {
+              "referenceName": "AzureKeyVault",
+              "type": "LinkedServiceReference"
+            },
+            "secretName": "databricksclusterid"
+          }
+        }
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/linkedServices/AzureKeyVault')]"
+      ]
+    },
+    {
+      "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_gpc_custom_powerbi_export')]",
+      "type": "Microsoft.DataFactory/factories/pipelines",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "activities": [
+          {
+            "name": "user_groups_region_sites",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "user_groups_region_sites"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
             }
-        }
+          },
+          {
+            "name": "wrapup_codes",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "wrapup_codes"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "routing_queues",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "routing_queues"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "evaluation_forms_answer_options",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "evaluation_forms_answer_options"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "evaluation_forms_questions",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "evaluation_forms_questions"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "evaluation_details_info",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "evaluation_details_info"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "evaluation_question_scores",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "evaluation_question_scores"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "wait-1",
+            "type": "Wait",
+            "dependsOn": [
+              {
+                "activity": "evaluation_question_scores",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "evaluation_details_info",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "evaluation_forms_questions",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "evaluation_forms_answer_options",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "routing_queues",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "wrapup_codes",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "user_groups_region_sites",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "userProperties": [],
+            "typeProperties": {
+              "waitTimeInSeconds": 5
+            }
+          },
+          {
+            "name": "users_routing_status_sliced",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [
+              {
+                "activity": "wait-1",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "users_routing_status_sliced"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "user_roles",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [
+              {
+                "activity": "wait-1",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "user_roles"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "users_info",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [
+              {
+                "activity": "wait-1",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "users_info"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "users_primary_presence",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [
+              {
+                "activity": "wait-1",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "users_primary_presence"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "wait-2",
+            "type": "Wait",
+            "dependsOn": [
+              {
+                "activity": "users_primary_presence",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "users_info",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "user_roles",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "users_routing_status_sliced",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "userProperties": [],
+            "typeProperties": {
+              "waitTimeInSeconds": 5
+            }
+          },
+          {
+            "name": "conversation_metrics_daily_summary",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [
+              {
+                "activity": "wait-2",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "conversation_metrics_daily_summary"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "wfm_day_metrics",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [
+              {
+                "activity": "wait-2",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "wfm_day_metrics"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "wfm_actuals",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [
+              {
+                "activity": "wait-2",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "wfm_actuals"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "survey_summary",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [
+              {
+                "activity": "wait-2",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
+              "parameters": [
+                "--tenant",
+                "hellofresh",
+                "--run_id",
+                "@pipeline().RunId",
+                "--export_name",
+                "survey_summary"
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          },
+          {
+            "name": "powerbi_refresh",
+            "type": "DatabricksSparkPython",
+            "dependsOn": [
+              {
+                "activity": "survey_summary",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "wfm_actuals",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "wfm_day_metrics",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              },
+              {
+                "activity": "conversation_metrics_daily_summary",
+                "dependencyConditions": [
+                  "Succeeded"
+                ]
+              }
+            ],
+            "policy": {
+              "timeout": "00:30:00",
+              "retry": 1,
+              "retryIntervalInSeconds": 1800,
+              "secureOutput": false,
+              "secureInput": false
+            },
+            "userProperties": [],
+            "typeProperties": {
+              "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/powerbi_refresh.py",
+              "parameters": [
+              ]
+            },
+            "linkedServiceName": {
+              "referenceName": "AzureDatabricks",
+              "type": "LinkedServiceReference"
+            }
+          }
+        ],
+        "concurrency": 1,
+        "folder": {
+          "name": "[parameters('tenant')]"
+        },
+        "annotations": []
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/linkedServices/AzureDatabricks')]"
+      ]
     },
-    "variables": {
-        "factoryId": "[concat('Microsoft.DataFactory/factories/dg', parameters('env'), 'adf')]",
-        "factoryname": "[concat('dg', parameters('env'), 'adf')]",
-        "AzureKeyVault_baseUrl": "[concat('https://dg', parameters('env') ,'secrets.vault.azure.net/')]",
-        "dailyDay1TriggerStart": "[dateTimeAdd(parameters('baseTime'), 'P0D', 'yyyy-MM-ddT00:30:00Z')]"
-    },
-    "resources": [
-        {
-            "name": "[concat(variables('factoryname'), '/AzureKeyVault')]",
-            "type": "Microsoft.DataFactory/factories/linkedServices",
-            "apiVersion": "2018-06-01",
-            "properties": {
-                "annotations": [],
-                "type": "AzureKeyVault",
-                "typeProperties": {
-                    "baseUrl": "[variables('AzureKeyVault_baseUrl')]"
-                }
-            },
-            "dependsOn": []
-        },
-        {
-            "name": "[concat(variables('factoryname'), '/AzureDatabricks')]",
-            "type": "Microsoft.DataFactory/factories/linkedServices",
-            "apiVersion": "2018-06-01",
-            "properties": {
-                "annotations": [],
-                "type": "AzureDatabricks",
-                "typeProperties": {
-                    "domain": {
-                        "type": "AzureKeyVaultSecret",
-                        "store": {
-                            "referenceName": "AzureKeyVault",
-                            "type": "LinkedServiceReference"
-                        },
-                        "secretName": "databricksinstanceurl"
-                    },
-                    "accessToken": {
-                        "type": "AzureKeyVaultSecret",
-                        "store": {
-                            "referenceName": "AzureKeyVault",
-                            "type": "LinkedServiceReference"
-                        },
-                        "secretName": "databricksaccesstoken"
-                    },
-                    "existingClusterId": {
-                        "type": "AzureKeyVaultSecret",
-                        "store": {
-                            "referenceName": "AzureKeyVault",
-                            "type": "LinkedServiceReference"
-                        },
-                        "secretName": "databricksclusterid"
-                    }
-                }
-            },
-            "dependsOn": [
-                "[concat(variables('factoryId'), '/linkedServices/AzureKeyVault')]"
-            ]
-        },
-        {
-            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_gpc_custom_powerbi_export')]",
-            "type": "Microsoft.DataFactory/factories/pipelines",
-            "apiVersion": "2018-06-01",
-            "properties": {
-                "activities": [
-                    {
-                        "name": "user_groups_region_sites",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "user_groups_region_sites"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "wrapup_codes",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "wrapup_codes"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "routing_queues",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "routing_queues"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "evaluation_forms_answer_options",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "evaluation_forms_answer_options"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "evaluation_forms_questions",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "evaluation_forms_questions"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "evaluation_details_info",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "evaluation_details_info"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "evaluation_question_scores",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "evaluation_question_scores"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "wait-1",
-                        "type": "Wait",
-                        "dependsOn": [
-                            {
-                                "activity": "evaluation_question_scores",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            },
-                            {
-                                "activity": "evaluation_details_info",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            },
-                            {
-                                "activity": "evaluation_forms_questions",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            },
-                            {
-                                "activity": "evaluation_forms_answer_options",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            },
-                            {
-                                "activity": "routing_queues",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            },
-                            {
-                                "activity": "wrapup_codes",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            },
-                            {
-                                "activity": "user_groups_region_sites",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "userProperties": [],
-                        "typeProperties": {
-                            "waitTimeInSeconds": 5
-                        }
-                    },
-                    {
-                        "name": "users_routing_status_sliced",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "wait-1",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "users_routing_status_sliced"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "user_roles",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "wait-1",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "user_roles"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "users_info",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "wait-1",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "users_info"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "users_primary_presence",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "wait-1",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "users_primary_presence"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "user_presence",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "wait-1",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "user_presence"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "wait-2",
-                        "type": "Wait",
-                        "dependsOn": [
-                            {
-                                "activity": "users_primary_presence",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            },
-                            {
-                                "activity": "users_info",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            },
-                            {
-                                "activity": "user_roles",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            },
-                            {
-                                "activity": "users_routing_status_sliced",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "userProperties": [],
-                        "typeProperties": {
-                            "waitTimeInSeconds": 5
-                        }
-                    },
-                    {
-                        "name": "conversation_metrics_daily_summary",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "wait-2",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "conversation_metrics_daily_summary"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "wfm_day_metrics",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "wait-2",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "wfm_day_metrics"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "wfm_actuals",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "wait-2",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "wfm_actuals"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "survey_summary",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "wait-2",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/main.py",
-                            "parameters": [
-                                "--tenant",
-                                "hellofresh",
-                                "--run_id",
-                                "@pipeline().RunId",
-                                "--export_name",
-                                "survey_summary"
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    },
-                    {
-                        "name": "powerbi_refresh",
-                        "type": "DatabricksSparkPython",
-                        "dependsOn": [
-                            {
-                                "activity": "survey_summary",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            },
-                            {
-                                "activity": "wfm_actuals",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            },
-                            {
-                                "activity": "wfm_day_metrics",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            },
-                            {
-                                "activity": "conversation_metrics_daily_summary",
-                                "dependencyConditions": [
-                                    "Succeeded"
-                                ]
-                            }
-                        ],
-                        "policy": {
-                            "timeout": "00:30:00",
-                            "retry": 1,
-                            "retryIntervalInSeconds": 1800,
-                            "secureOutput": false,
-                            "secureInput": false
-                        },
-                        "userProperties": [],
-                        "typeProperties": {
-                            "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/hellofresh/powerbi_export/powerbi_refresh.py",
-                            "parameters": [
-                            ]
-                        },
-                        "linkedServiceName": {
-                            "referenceName": "AzureDatabricks",
-                            "type": "LinkedServiceReference"
-                        }
-                    }
-                ],
-                "concurrency": 1,
-                "folder": {
-                    "name": "[parameters('tenant')]"
-                },
-                "annotations": []
-            },
-            "dependsOn": [
-                "[concat(variables('factoryId'), '/linkedServices/AzureDatabricks')]"
-            ]
-        },
-        {
-            "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_gpc_custom_powerbi_export_trigger')]",
-            "type": "Microsoft.DataFactory/factories/triggers",
-            "apiVersion": "2018-06-01",
-            "properties": {
-                "annotations": [],
-                "runtimeState": "Stopped",
-                "pipelines": [
-                    {
-                        "pipelineReference": {
-                            "referenceName": "[concat(parameters('tenant'), '_gpc_custom_powerbi_export')]",
-                            "type": "PipelineReference"
-                        }
-                    }
-                ],
-                "type": "TumblingWindowTrigger",
-                "typeProperties": {
-                    "frequency": "Hour",
-                    "interval": 6,
-                    "startTime": "[variables('dailyDay1TriggerStart')]",
-                    "maxConcurrency": 1
-                }
-            },
-            "dependsOn": [
-                "[concat(variables('factoryId'), '/pipelines/', parameters('tenant'), '_gpc_custom_powerbi_export')]"
-            ]
+    {
+      "name": "[concat(variables('factoryname'), '/', parameters('tenant') ,'_gpc_custom_powerbi_export_trigger')]",
+      "type": "Microsoft.DataFactory/factories/triggers",
+      "apiVersion": "2018-06-01",
+      "properties": {
+        "annotations": [],
+        "runtimeState": "Stopped",
+        "pipelines": [
+          {
+            "pipelineReference": {
+              "referenceName": "[concat(parameters('tenant'), '_gpc_custom_powerbi_export')]",
+              "type": "PipelineReference"
+            }
+          }
+        ],
+        "type": "TumblingWindowTrigger",
+        "typeProperties": {
+          "frequency": "Hour",
+          "interval": 6,
+          "startTime": "[variables('dailyDay1TriggerStart')]",
+          "maxConcurrency": 1
         }
-    ]
+      },
+      "dependsOn": [
+        "[concat(variables('factoryId'), '/pipelines/', parameters('tenant'), '_gpc_custom_powerbi_export')]"
+      ]
+    }
+  ]
 }

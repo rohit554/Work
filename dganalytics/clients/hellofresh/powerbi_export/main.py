@@ -20,7 +20,8 @@ pipelines = {
     "wfm_day_metrics": powerbi_export.export_wfm_day_metrics,
     "wfm_actuals": powerbi_export.export_wfm_actuals,
     "survey_summary": powerbi_export.export_survey_summary,
-    "realtime_queue_mapping": powerbi_export.export_realtime_queue_mapping
+    "realtime_queue_mapping": powerbi_export.export_realtime_queue_mapping,
+    "conversation_summary": powerbi_export.export_conversation_summary
 }
 
 

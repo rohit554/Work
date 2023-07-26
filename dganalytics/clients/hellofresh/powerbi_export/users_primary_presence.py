@@ -21,20 +21,24 @@ def export_users_primary_presence(spark: SparkSession, tenant: str, region: str)
     dates.createOrReplaceTempView("dates")
 
     pp = spark.sql(f"""
-            select  /*+ BROADCAST(user_timezone) */ 
-                fp.userId as UserKey, fp.userId, 
-                    from_utc_timestamp(fp.startTime, trim(ut.timeZone)) startTime,
-                    from_utc_timestamp(fp.endTime, trim(ut.timeZone)) endTime,
-                    fp.systemPresence,
-                    'users_primary_presence' pTableFlag
-                from fact_primary_presence fp, user_timezone ut
-                where fp.userId = ut.userId
-                    and ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
+            SELECT  /*+ BROADCAST(user_timezone) */ 
+                fp.userId AS UserKey, 
+                fp.userId, 
+                from_utc_timestamp(fp.startTime, trim(ut.timeZone)) startTime,
+                from_utc_timestamp(fp.endTime, trim(ut.timeZone)) endTime,
+                fp.systemPresence,
+                'users_primary_presence' pTableFlag
+            FROM 
+                fact_primary_presence fp, 
+                user_timezone ut
+            WHERE fp.userId = ut.userId
+                AND ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
+                AND CAST(from_utc_timestamp(fp.startTime, trim(ut.timeZone)) AS date) >= add_months(current_date(), -12)
     """)
     pp.createOrReplaceTempView("primary_presence")
 
     df = spark.sql("""
-                select /*+ BROADCAST(dates) */  pp.UserKey, pp.userId, 
+                SELECT /*+ BROADCAST(dates) */  pp.UserKey, pp.userId, 
                     (case when cast(pp.startTime as date) < d.date then cast(d.date as timestamp) else pp.startTime end) startTime,
                     (case when cast(pp.endTime as date) > d.date then (cast((d.date + 1) as timestamp) - interval 1 second) else pp.endTime end) endTime,
                     systemPresence, 'users_primary_presence' pTableFlag

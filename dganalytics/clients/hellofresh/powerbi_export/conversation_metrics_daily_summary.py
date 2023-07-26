@@ -7,10 +7,6 @@ import pandas as pd
 def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str, region: str):
 
     tenant_path, db_path, log_path = get_path_vars(tenant)
-    '''
-    queue_timezones = pd.read_csv(os.path.join(tenant_path, 'data',
-                                               'config', 'Queue_TimeZone_Mapping.csv'), header=0)
-        '''
     queue_timezones = pd.read_json(os.path.join(tenant_path, 'data',
                                                 'config', 'Queue_TimeZone_Mapping.json'))
     queue_timezones = pd.DataFrame(queue_timezones['values'].tolist())
@@ -86,6 +82,7 @@ def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str, re
 		WHERE
 			a.queueId = b.queueId
 			AND b.queueName = c.queueName
+			AND CAST(from_utc_timestamp(a.intervalStart, trim(c.timeZone)) AS date) >= add_months(current_date(), -12)
 			AND c.region {" = 'US'" if region == 'US' else " <> 'US'" }
 		GROUP BY
 			c.timeZone,
