@@ -13,18 +13,23 @@ if __name__ == "__main__":
     customer = 'airbnbprod'
     tenant_path, db_path, log_path = get_path_vars(customer)
 
-    xls = pd.ExcelFile(os.path.join(tenant_path, "data", "raw", "agent_performance", input_file))
+    xls = pd.ExcelFile(os.path.join(tenant_path, "data", "raw", "agent_performance_gurgaon", input_file))
     df = pd.read_excel(xls, 'Emp List')
     df = spark.createDataFrame(df)
-    df.createOrReplaceTempView("agent_performance")
+    df.createOrReplaceTempView("agent_performance_gurgaon")
 
-    data = spark.sql(f"""
-      SELECT CASE WHEN U.CCMS_ID = 'DNA' OR U.CCMS_ID IS NULL THEN U.Emp_code ELSE U.CCMS_ID end UserId,
-            P.* FROM agent_performance P
-      LEFT JOIN dg_airbnbprod.airbnb_user_data U
-        ON P.`Emp ID` = U.Emp_code
-    """)
+    data = spark.sql("""
+    SELECT 
+        CASE WHEN U.CCMS_ID = 'DNA' OR U.CCMS_ID IS NULL THEN U.Emp_code ELSE U.CCMS_ID END AS UserId,
+        P.* 
+    FROM 
+        agent_performance_gurgaon P
+    LEFT JOIN 
+        dg_airbnbprod.airbnb_user_data U
+    ON 
+        P.`Emp ID` = U.Emp_code
+""")
 
-    data.toPandas().to_csv(os.path.join(tenant_path, 'data', 'pbdatasets', 'pm_agent_performance', 'agent_performance.csv'),
-                                       header=True, index=False)
+    data.toPandas().to_csv(os.path.join(tenant_path, 'data', 'pbdatasets', 'pm_agent_performance_gurgaon', 'agent_performance_gurgaon.csv'),header=True, index=False)
+
     exec_powerbi_refresh(get_secret('pb-airbnb-agent-performance-workspace'), get_secret('pb-airbnb-agent-performance-dataset'))
