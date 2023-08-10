@@ -34,13 +34,12 @@ if __name__ == '__main__':
 
     kpi['Chat Handled Time (Hours)'] = np.where(kpi['Chat Handled'] == 0, np.nan, kpi['Chat Handled Time (Hours)'])
     kpi['CSAT Count'] = np.where(kpi['Total Survery'] == 0, np.nan, kpi['CSAT Count'])
-    kpi['Total FCR Count'] = np.where(kpi['Total Count'] == 0, np.nan, kpi['Total FCR Count'])
+    kpi['Total TX FCR Count'] = np.where(kpi['Total TX FCR Count'] == 0, np.nan, kpi['Total TX FCR Count'])
     kpi['Chat Handled'] = np.where(kpi['Chat Handled'] == 0, np.nan, kpi['Chat Handled'])
     kpi['Total Survery'] = np.where(kpi['Total Survery'] == 0, np.nan, kpi['Total Survery'])
-    kpi['Total Count'] = np.where(kpi['Total Count'] == 0, np.nan, kpi['Total Count'])
+    kpi['TX FCR Count'] = np.where(kpi['TX FCR Count'] == 0, np.nan, kpi['TX FCR Count'])
     kpi['Total Survery'] = np.where(kpi['Total Survery'] == 0, np.nan, kpi['Total Survery'])
-    kpi['Quality - Soft Skills'] = np.where(kpi['Quality - Soft Skills'] == 0, np.nan, kpi['Quality - Soft Skills']*100)
-    kpi['Quality - Execution'] = np.where(kpi['Quality - Execution'] == 0, np.nan, kpi['Quality - Execution']*100)
+    kpi['Quality Score'] = np.where(kpi['Quality Score'] == 0, np.nan, kpi['Quality Score']*100)
     kpi['PKT Score'] = np.where(kpi['PKT Score'] == 0, np.nan, kpi['PKT Score']*100)
 
     kpi = spark.createDataFrame(kpi)
@@ -56,16 +55,15 @@ if __name__ == '__main__':
                 `PKT Score` `Process Knowledge Test`,
                 `Scheduled Count`,
                 `Present Count`,
-                `Total FCR Count`,
-                `Total Count`,
+                `Total TX FCR Count` AS `Total FCR Count`,
+                `TX FCR Count` AS `Total Count`,
                 `Total Staff Time (Hours)` AS `Total Staff Time Hours`,
                 `Net Staff Time (Hours)` AS `Net Staff Time Hours`,
                 `TP_Downtime (Hours)` AS `TP Downtime Hours`,
                 `Client_Downtime (Hours)` AS `Client Downtime Hours`,
-                `Quality - Soft Skills` AS `Soft Skills`,
-                `Quality - Execution` AS `Chat Execution`
+                `Quality Score` AS `Quality Score`
         FROM kpi
-        WHERE Date > (current_date() - 5)
+        WHERE Date > (current_date() - 20)
     """)
 
     push_gamification_data(
