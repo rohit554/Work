@@ -153,7 +153,9 @@ spark.sql(f"""
                 userId string,
                 userMongoId string,
                 orgId string,
-                quizStartDate date
+                quizStartDate date,
+				quizAttemptStartTime timestamp,
+				quizAttemptEndTime timestamp
 
             )
             using delta
@@ -254,65 +256,6 @@ spark.sql(f"""
             LOCATION '{db_path}/dg_performance_management/data_upload_audit_log'
         """)
 
-
-spark.sql(f"""
-        create table if not exists 
-            dg_performance_management.attendance
-            (userId string, 
-             reportDate string,
-             isPresent string,
-             orgId string,
-             recordInsertDate TIMESTAMP
-            )
-            using delta
-            PARTITIONED BY (orgId)
-            LOCATION '{db_path}/dg_performance_management/attendance'
-            """)
-
-
-spark.sql(f"""
-        create table if not exists 
-            dg_performance_management.trek_data
-            (   team_id string,
-                agent_id string,
-                team_leader_id string,
-                kpi_name string,
-                kpi_id string,
-                campaign_id string,
-                trek_global_state int,
-                trek_date string,
-                discoveryStart string,
-                discoveryEnd string,
-                actionLMSStart string,
-                actionLMSEnd string,
-                actionLMSLink string,
-                actionArticleStart string,
-                actionArticleEnd string,
-                actionArticleLink string,
-                actionRecordedCallStart string,
-                actionRecordedCallEnd string,
-                actionRecordedCallLink string,
-                actionOneOnOneStart string,
-                actionOneOnOneEnd string,
-                actionOneOnOneLink string,
-                actionState string,
-                scoreLMS int,
-                scoreArticle int,
-                scoreRecordedCall int,
-                scoreOneOnOne int,
-                action_complete string,
-                feedback_given string,
-                action_start string,
-                discovery_complete string,
-                discovery_start string,
-                action_completed string,
-                orgId string
-             )
-            using delta
-            PARTITIONED BY (orgId)
-            LOCATION '{db_path}/dg_performance_management/trek_data'
-        """)
-
 spark.sql(f"""
         CREATE TABLE IF NOT EXISTS
             dg_performance_management.data_upload_connections
@@ -379,6 +322,49 @@ spark.sql(f"""
 
 spark.sql(f"""
         create table if not exists 
+            dg_performance_management.trek_data
+            (   team_id string,
+                agent_id string,
+                team_leader_id string,
+                kpi_name string,
+                kpi_id string,
+                campaign_id string,
+                trek_global_state int,
+                trek_date string,
+                discoveryStart string,
+                discoveryEnd string,
+                actionLMSStart string,
+                actionLMSEnd string,
+                actionLMSLink string,
+                actionArticleStart string,
+                actionArticleEnd string,
+                actionArticleLink string,
+                actionRecordedCallStart string,
+                actionRecordedCallEnd string,
+                actionRecordedCallLink string,
+                actionOneOnOneStart string,
+                actionOneOnOneEnd string,
+                actionOneOnOneLink string,
+                actionState string,
+                scoreLMS int,
+                scoreArticle int,
+                scoreRecordedCall int,
+                scoreOneOnOne int,
+                action_complete string,
+                feedback_given string,
+                action_start string,
+                discovery_complete string,
+                discovery_start string,
+                action_completed string,
+                orgId string
+             )
+            using delta
+            PARTITIONED BY (orgId)
+            LOCATION '{db_path}/dg_performance_management/trek_data'
+        """)
+
+spark.sql(f"""
+        create table if not exists 
             dg_performance_management.campaign_activities
             (
                 
@@ -393,3 +379,25 @@ spark.sql(f"""
             PARTITIONED BY (orgId)
             LOCATION '{db_path}/dg_performance_management/campaign_activities'
         """)
+
+spark.sql(f"""
+		create table if not exists 
+			dg_performance_management.announcement
+			(
+				
+				is_future_announcement BOOLEAN,
+				is_custom_subject      BOOLEAN,
+				is_deleted             BOOLEAN,
+				org_id                 STRING,
+				creation_date          STRING,
+				priority               STRING,
+				title                  STRING,
+				description            STRING,
+				sender                 STRING,
+				campaign_id            STRING,
+				recipient              STRING
+			)
+			using delta
+			PARTITIONED BY (orgId)
+			LOCATION '{db_path}/dg_performance_management/announcement'
+		""")

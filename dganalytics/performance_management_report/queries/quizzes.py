@@ -1,5 +1,5 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
-from pyspark.sql.types import StructType, StructField, StringType, DoubleType
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_spark_session
+from pyspark.sql.types import StructType, StructField, StringType, DoubleType, TimestampType
 
 pipeline = [
     {
@@ -278,6 +278,22 @@ pipeline = [
                     }
                 }
             },
+            'quiz_attempt_start_time': {
+                '$toDate': {
+                            '$dateToString': {
+                                'date': '$quiz_data.attempt_start', 
+                                'timezone': '$timezone'
+                            }
+                        } 
+            }, 
+            'quiz_attempt_end_time': {
+                        '$toDate': {
+                            '$dateToString': {
+                                'date': '$quiz_data.answered_date', 
+                                'timezone': '$timezone'
+                            }
+                        } 
+            },
             "total_questions": {
                 "$ifNull": [
                     "$quiz_data.total_questions",
@@ -292,8 +308,7 @@ pipeline = [
             },
             "org_id": "$org_id"
         }
-    },
-
+    }
 ]
 
 schema = StructType([StructField('answered_date', StringType(), True),
@@ -313,7 +328,9 @@ schema = StructType([StructField('answered_date', StringType(), True),
                      StructField('user_id', StringType(), True),
                      StructField('user_mongo_id', StructType(
                          [StructField('oid', StringType(), True)]), True),
-                     StructField('quiz_start_date', StringType(), True)])
+                     StructField('quiz_start_date', StringType(), True),
+                     StructField('quiz_attempt_start_time', TimestampType(), True),
+                     StructField('quiz_attempt_end_time', TimestampType(), True)])
 
 
 def get_quizzes(spark):
@@ -332,12 +349,10 @@ def get_quizzes(spark):
                             user_id userId,
                             user_mongo_id.oid userMongoId,
                             lower(org_id) orgId,
-                            cast(quiz_start_date as date) quizStartDate
+                            cast(quiz_start_date as date) quizStartDate,
+                            quiz_attempt_start_time quizAttemptStartTime,
+                            quiz_attempt_end_time quizAttemptEndTime
                     from quizzes
                 """)
-    '''
-    df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
-        'orgId').saveAsTable("dg_performance_management.quizzes")
-    '''
     delta_table_partition_ovrewrite(
         df, "dg_performance_management.quizzes", ['orgId'])
