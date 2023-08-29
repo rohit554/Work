@@ -47,10 +47,14 @@ if __name__ == '__main__':
 
     inbound.createOrReplaceTempView("inbound_data")
 
-    spark.sql(f"""INSERT INTO {db_name}.inbound_quality_data
-                    SELECT *
-                    FROM inbound_data
-                    WHERE Timestamp NOT IN (SELECT Timestamp FROM {db_name}.inbound_quality_data)
+    spark.sql(f"""MERGE into {db_name}.inbound_quality_data DB
+                    USING inbound_data A
+                    ON A.EID = DB.EID
+                    and A.Timestamp = DB.Timestamp
+                    WHEN MATCHED THEN
+                    UPDATE SET *
+                    WHEN NOT MATCHED THEN
+                    INSERT *
                     """)
 
     df = spark.sql("""

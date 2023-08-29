@@ -31,6 +31,8 @@ if __name__ == '__main__':
 
     outbound = spark.createDataFrame(outbound)
 
+    outbound = outbound.dropDuplicates(['Timestamp'])
+
     outbound = outbound.withColumn('Overall_Score', regexp_replace('Overall_Score', '%', ''))
     outbound = outbound.withColumn('Overall_Score', col('Overall_Score').cast(DoubleType()))
     outbound = outbound.withColumn('Overall_Score', coalesce(col('Overall_Score'), lit('')))
@@ -46,10 +48,14 @@ if __name__ == '__main__':
     outbound = outbound.withColumn('Timestamp', date_format(to_timestamp('Timestamp', 'M/d/yyyy H:mm:ss'), 'MM-dd-yyyy HH:mm:ss'))
     outbound.createOrReplaceTempView("outbound_data")
 
-    spark.sql(f"""INSERT INTO {db_name}.outbound_quality_data
-                    SELECT *
-                    FROM outbound_data
-                    WHERE Timestamp NOT IN (SELECT Timestamp FROM {db_name}.outbound_quality_data)
+    spark.sql(f"""MERGE into {db_name}.outbound_quality_data DB
+                    USING outbound_data A
+                    ON A.EID = DB.EID
+                    and A.Timestamp = DB.Timestamp
+                    WHEN MATCHED THEN
+                    UPDATE SET *
+                    WHEN NOT MATCHED THEN
+                    INSERT *
                     """)
 
     df = spark.sql("""
