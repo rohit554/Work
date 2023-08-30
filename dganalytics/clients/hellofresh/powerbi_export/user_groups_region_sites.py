@@ -38,7 +38,8 @@ def export_user_groups_region_sites(spark: SparkSession, tenant: str, region: st
         "groupName", 
         "region", 
         "site", 
-        "timeZone as time_zone")
+        "timeZone as time_zone",
+        "provider")
     
     realtime_config = spark.sql("""
         SELECT 
