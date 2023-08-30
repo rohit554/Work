@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import get_spark_session, exec_mongo_pipeline, export_powerbi_csv, get_path_vars
+from dganalytics.utils.utils import get_spark_session, exec_mongo_pipeline, export_powerbi_csv, get_path_vars, exec_powerbi_refresh, get_secret
 from dganalytics.connectors.gpc.gpc_utils import get_dbname, gpc_utils_logger
 from pyspark.sql.types import StructType, StructField, StringType, BooleanType
 from datetime import datetime, timedelta
@@ -88,5 +88,6 @@ if __name__ == "__main__":
     file_path = os.path.join(tenant_path, "data", "pbdatasets", "billing_users", file_name)
 
     pandas_df.to_csv(file_path, index=False)
+    exec_powerbi_refresh("73667350-ee9d-4e55-8d18-e1954b40c7a0", "97f7c57e-c7b0-444b-9bd7-7bd7e5fdd5b4")
 
     print("CSV file saved successfully.")

@@ -19,10 +19,10 @@ def export_user_groups_region_sites(spark: SparkSession, tenant: str, region: st
 
     user_group_sites = spark.sql("""
         SELECT 
-            userId, groupName, region, site, timeZone
+            userId, groupName, region, site, timeZone, provider
         FROM (
             SELECT 
-                a.userId, a.groupName AS groupName, b.region, b.site, b.timeZone,
+                a.userId, a.groupName AS groupName, b.region, b.site, b.timeZone, b.Provider as provider,
                 row_number() OVER (PARTITION BY a.userId ORDER BY a.groupName) AS rn
             FROM 
                 gpc_hellofresh.dim_user_groups a
@@ -38,7 +38,8 @@ def export_user_groups_region_sites(spark: SparkSession, tenant: str, region: st
         "groupName", 
         "region", 
         "site", 
-        "timeZone as time_zone")
+        "timeZone as time_zone",
+        "provider")
     
     realtime_config = spark.sql("""
         SELECT 
