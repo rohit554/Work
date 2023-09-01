@@ -4,6 +4,7 @@ from pyspark.sql import SparkSession
 import os
 from pyspark.sql.functions import col, date_format, to_date
 from pyspark.sql.types import DateType
+import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -33,8 +34,10 @@ if __name__ == '__main__':
         "Sky Name": "Sky_Name",
         "Sky email": "Sky_email"
     }, errors="raise")
+
     users = users.drop_duplicates()
 
+    users = users[['Probe_ID', 'Sky_ID', 'Employee_Name', 'Sky_Name', 'Sky_email', 'orgId']]
     users = spark.createDataFrame(users)
     users.createOrReplaceTempView("users_data")
 
@@ -43,6 +46,7 @@ if __name__ == '__main__':
                 on A.Probe_ID = DB.Probe_ID
                 and A.Sky_ID = DB.Sky_ID
                 and A.Sky_email = DB.Sky_email
+                and A.Sky_ID is not null
                 WHEN MATCHED THEN
                     UPDATE SET *
                 WHEN NOT MATCHED THEN

@@ -6,7 +6,8 @@ from pyspark.sql import SparkSession
 from datetime import datetime, timedelta
 
 
-def get_sky_adherence_IB_data(spark: SparkSession, extract_date: str, org_id: str):
+if __name__ == "__main__":
+    org_id = 'skynzib'
     back_days = 3
     df = spark.sql(f"""
         WITH UserDates AS (
@@ -19,8 +20,8 @@ def get_sky_adherence_IB_data(spark: SparkSession, extract_date: str, org_id: st
                 SELECT
                 explode(
                     sequence(
-                    CAST('{extract_date}' AS DATE) - {back_days},
-                    CAST('{extract_date}' AS DATE),
+                    CAST(current_date() AS DATE) - {back_days},
+                    CAST(current_date() AS DATE),
                     interval 1 day
                     )
                 ) _date
@@ -38,7 +39,7 @@ def get_sky_adherence_IB_data(spark: SparkSession, extract_date: str, org_id: st
             gpc_skynz.fact_wfm_day_metrics D
             JOIN UserDates U ON U.userId = D.userId
             AND date_format(
-                from_utc_timestamp(D.startDate, 'Australia/Sydney'),
+                from_utc_timestamp(D.startDate, 'Pacific/Auckland'),
                 'dd-MM-yyyy'
             ) = U._date
             GROUP BY
@@ -60,21 +61,6 @@ def get_sky_adherence_IB_data(spark: SparkSession, extract_date: str, org_id: st
             AND COALESCE(FW.exceptionDurationSecs, 0) = 0
             )
     """)
-    return df
 
-
-if __name__ == "__main__":
-    tenant, run_id, extract_date, org_id = dg_metadata_export_parser()
-    db_name = get_dbname(tenant)
-    app_name = "gpc_dg_metadata_adherence_export"
-    spark = get_spark_session(app_name, tenant, default_db=db_name)
-    logger = gpc_utils_logger(tenant, app_name)
-    try:
-        logger.info("gpc_dg_metadata_adherence_export")
-        df = get_sky_adherence_IB_data(spark, extract_date)
-        df = df.drop_duplicates()
-        push_gamification_data(
-            df.toPandas(), 'SKYNZIB', 'SKYIB_Adherence_Connection')
-    except Exception as e:
-        logger.exception(e, stack_info=True, exc_info=True)
-        raise
+    push_gamification_data(
+                df.toPandas(), org_id.upper(), 'SKYIB_Adherence_Connection')

@@ -2,7 +2,9 @@ from dganalytics.utils.utils import get_spark_session, get_path_vars, export_pow
 import os
 from pyspark.sql.functions import col, date_format, to_timestamp, regexp_replace, coalesce, lit
 from pyspark.sql.types import DoubleType
-import pandas as pd 
+import pandas as pd
+from datetime import datetime
+import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -13,8 +15,8 @@ if __name__ == '__main__':
 
     tenant = 'datagamz'
     spark = get_spark_session('outbound_data', tenant)
-    customer = 'skynz'
-    db_name = f"dg_{customer}"
+    customer = 'skynzob'
+    db_name = "dg_skynz"
     tenant_path, db_path, log_path = get_path_vars(customer)
     
     if input_file.endswith(".json"):
@@ -31,7 +33,8 @@ if __name__ == '__main__':
 
     outbound = spark.createDataFrame(outbound)
 
-    outbound = outbound.dropDuplicates(['Timestamp'])
+    outbound = outbound.filter(col('EID') != '#REF!')
+    outbound = outbound.dropDuplicates(['Timestamp', 'EID'])
 
     outbound = outbound.withColumn('Overall_Score', regexp_replace('Overall_Score', '%', ''))
     outbound = outbound.withColumn('Overall_Score', col('Overall_Score').cast(DoubleType()))
@@ -60,6 +63,7 @@ if __name__ == '__main__':
 
     df = spark.sql("""
                     SELECT
+                    DISTINCT
                         b.Sky_ID as `userId`,
                         a.`Timestamp` AS `Date`,
                         coalesce(a.`Overall_Score`, '') AS `QA Score`,

@@ -3,6 +3,8 @@ import os
 from pyspark.sql.functions import col, date_format, to_timestamp, regexp_replace, coalesce, lit
 from pyspark.sql.types import DoubleType
 import pandas as pd 
+from datetime import datetime
+import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -13,8 +15,8 @@ if __name__ == '__main__':
 
     tenant = 'datagamz'
     spark = get_spark_session('inbound_data', tenant)
-    customer = 'skynz'
-    db_name = f"dg_{customer}"
+    customer = 'skynzib'
+    db_name = "dg_skynz"
     tenant_path, db_path, log_path = get_path_vars(customer)
     
     if input_file.endswith(".json"):
@@ -59,6 +61,7 @@ if __name__ == '__main__':
 
     df = spark.sql("""
                       SELECT
+                          DISTINCT
                           b.Sky_ID as `userId`,
                           a.`Timestamp` AS `Date`,
                           a.`Overall_Score` AS `QA Score`,
