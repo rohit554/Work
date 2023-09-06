@@ -112,7 +112,7 @@
 			]
 		},
 		{
-			"name": "[concat(variables('factoryname'), '/skynz_users_data_trigger')]",
+			"name": "[concat(variables('factoryname'), '/skynz_users_trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {

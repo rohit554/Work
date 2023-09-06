@@ -66,13 +66,13 @@
 			]
 		},
 		{
-			"name": "[concat(variables('factoryname'), '/skynz_outbound_data')]",
+			"name": "[concat(variables('factoryname'), '/outbound_evaluations')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "load_outbound_data",
+						"name": "outbound_evaluations",
 						"type": "DatabricksSparkPython",
 						"dependsOn": [],
 						"policy": {
@@ -84,7 +84,7 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/skynz/custom_etl/load_outbound_data.py",
+							"pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/skynz/custom_etl/outbound_evaluations.py",
 							"parameters": [
 								"--input_file",
 								"@pipeline().parameters.input_file"
@@ -112,7 +112,7 @@
 			]
 		},
 		{
-			"name": "[concat(variables('factoryname'), '/skynz_outbound_data_trigger')]",
+			"name": "[concat(variables('factoryname'), '/outbound_evaluations_trigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -121,7 +121,7 @@
 				"pipelines": [
 					{
 						"pipelineReference": {
-							"referenceName": "skynz_outbound_data",
+							"referenceName": "outbound_evaluations",
 							"type": "PipelineReference"
 						},
 						"parameters": {
@@ -131,7 +131,7 @@
 				],
 				"type": "BlobEventsTrigger",
 				"typeProperties": {
-					"blobPathBeginsWith": "/skynz/blobs/data/raw/outbound_evaluations",
+					"blobPathBeginsWith": "/skynzob/blobs/data/raw/outbound_evaluations",
 					"blobPathEndsWith": "",
 					"ignoreEmptyBlobs": true,
 					"scope": "[concat('/subscriptions/590f7ac0-b909-4092-adb4-2ad447a5bb19/resourceGroups/dg', parameters('env'), 'analytics/providers/Microsoft.Storage/storageAccounts/dg', parameters('env'), 'lakestorage')]",
@@ -141,7 +141,7 @@
 				}
 			},
 			"dependsOn": [
-				"skynz_outbound_data"
+				"outbound_evaluations"
 			]
 		}
 	]
