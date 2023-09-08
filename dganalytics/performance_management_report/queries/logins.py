@@ -130,22 +130,23 @@ def get_hf_attendance(spark):
   user_timezone = spark.createDataFrame(user_timezone)
   user_timezone.createOrReplaceTempView("user_timezone")
   hf_attendance_df = spark.sql("""
-                             SELECT 
-                              fp.userId, 
-                              from_utc_timestamp(lag(fp.endTime, 1) OVER (PARTITION BY fp.userId ORDER BY fp.startTime),trim(ut.timeZone)) StartTime,
-                              CASE WHEN StartTime is NULL AND CAST(((unix_timestamp(fp.endTime) - unix_timestamp(fp.startTime))/3600) AS INT) > 12 THEN 
-                                    from_utc_timestamp(fp.startTime-INTERVAL 12 HOURS,trim(ut.timeZone)) 
-                              ELSE StartTime
-                              END actualStartTime,
-                              from_utc_timestamp(fp.startTime,trim(ut.timeZone)) as actualEndTime,
-                              CAST(((unix_timestamp(fp.endTime) - unix_timestamp(fp.startTime))/3600) AS INT) offline_time_difference
-                              FROM 
-                                  gpc_hellofresh.fact_user_presence fp, user_timezone ut
-                              WHERE 
-                                  fp.userId = ut.userId
-                                  AND fp.systemPresence IN ('OFFLINE')
-                                  AND CAST(((unix_timestamp(fp.endTime) - unix_timestamp(fp.startTime))/3600) AS INT) > 4
-                                  
+                            SELECT 
+                            fp.userId, 
+                            from_utc_timestamp(lag(fp.endTime, 1) OVER (PARTITION BY fp.userId ORDER BY fp.startTime),trim(ut.timeZone)) tZStartTime,
+                            CASE WHEN tZStartTime is NULL AND CAST(((unix_timestamp(fp.endTime) - unix_timestamp(fp.startTime))/3600) AS INT) > 12 THEN 
+                                from_utc_timestamp(fp.startTime-INTERVAL 12 HOURS,trim(ut.timeZone)) 
+                            ELSE from_utc_timestamp(lag(fp.endTime, 1) OVER (PARTITION BY fp.userId ORDER BY fp.startTime),trim(ut.timeZone))
+                            END actualStartTime,
+                            from_utc_timestamp(fp.startTime,trim(ut.timeZone)) as actualEndTime,
+                            CAST(((unix_timestamp(fp.endTime) - unix_timestamp(fp.startTime))/3600) AS INT) offline_time_difference
+                            FROM 
+                                gpc_hellofresh.fact_user_presence fp, user_timezone ut
+                            JOIN dg_performance_management.users pmu
+                            ON fp.userId=pmu.userId
+                            WHERE 
+                                fp.userId = ut.userId
+                                AND fp.systemPresence IN ('OFFLINE')
+                                AND CAST(((unix_timestamp(fp.endTime) - unix_timestamp(fp.startTime))/3600) AS INT) > 4
                             """)
   return hf_attendance_df
 
@@ -188,7 +189,4 @@ def get_logins(spark):
     
     df = df.withColumn("date", col("date").cast(DateType()))
     
-    partition_columns = ['orgId']
-    df.display()
-
-    delta_table_partition_ovrewrite(df, "dg_performance_management.logins", partition_columns)
+    delta_table_partition_ovrewrite(df, "dg_performance_management.logins", ['orgId'])
