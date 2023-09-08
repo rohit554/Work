@@ -1,6 +1,7 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
-
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType, DateType
+from pyspark.sql.functions import col
+import pandas as pd
 pipeline = [
         { 
             "$lookup" : { 
@@ -122,32 +123,72 @@ schema = StructType([StructField('date', StringType(), True),
                      StructField('login_attempt', IntegerType(), True),
                      StructField('user_id', StringType(), True)])
 
+def get_hf_attendance(spark):
+  
+  tenant_path, db_path, log_path = get_path_vars('hellofresh')
+  user_timezone = pd.read_csv(os.path.join(tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'), header=0)
+  user_timezone = spark.createDataFrame(user_timezone)
+  user_timezone.createOrReplaceTempView("user_timezone")
+  hf_attendance_df = spark.sql("""
+                             SELECT 
+                              fp.userId, 
+                              from_utc_timestamp(lag(fp.endTime, 1) OVER (PARTITION BY fp.userId ORDER BY fp.startTime),trim(ut.timeZone)) StartTime,
+                              CASE WHEN StartTime is NULL AND CAST(((unix_timestamp(fp.endTime) - unix_timestamp(fp.startTime))/3600) AS INT) > 12 THEN 
+                                    from_utc_timestamp(fp.startTime-INTERVAL 12 HOURS,trim(ut.timeZone)) 
+                              ELSE StartTime
+                              END actualStartTime,
+                              from_utc_timestamp(fp.startTime,trim(ut.timeZone)) as actualEndTime,
+                              CAST(((unix_timestamp(fp.endTime) - unix_timestamp(fp.startTime))/3600) AS INT) offline_time_difference
+                              FROM 
+                                  gpc_hellofresh.fact_user_presence fp, user_timezone ut
+                              WHERE 
+                                  fp.userId = ut.userId
+                                  AND fp.systemPresence IN ('OFFLINE')
+                                  AND CAST(((unix_timestamp(fp.endTime) - unix_timestamp(fp.startTime))/3600) AS INT) > 4
+                                  
+                            """)
+  return hf_attendance_df
+
 
 def get_logins(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'Audit_Log', schema)
     df.createOrReplaceTempView("logins")
+    get_hf_attendance(spark).createOrReplaceTempView("hf_attendance")
     df = spark.sql("""
                       select  distinct cast(date as date) date,
                               login_attempt loginAttempt,
                               user_id userId,
                               lower(org_id) orgId
                       from logins
-                      WHERE org_id NOT IN ('TPINDIAIT')
+                      WHERE org_id NOT IN ('TPINDIAIT','HELLOFRESHANZ')
                       UNION ALL
                       SELECT DISTINCT (case when A.reportDate IS NULL then cast(L.date as date) else
-                              A.reportDate end) as date,
+                              to_date(A.reportDate, 'dd-MM-yyyy') end) as date,
                               login_attempt AS loginAttempt,
                               user_id AS userId,
                               LOWER(org_id) AS orgId
-                        FROM logins L
-                        LEFT JOIN dg_performance_management.attendance A
-                            on L.user_id = A.userId
-                            and lower(L.org_id) = A.orgId
-                            AND CAST(L.date AS TIMESTAMP) BETWEEN A.loginTime and A.logoutTime
-                        WHERE org_id IN ('TPINDIAIT')
-                    """)
-    '''
-    df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
-        'orgId').saveAsTable("dg_performance_management.logins")
-    '''
-    delta_table_partition_ovrewrite(df, "dg_performance_management.logins", ['orgId'])
+                      FROM logins L
+                      LEFT JOIN dg_performance_management.attendance A
+                          on L.user_id = A.userId
+                          and lower(L.org_id) = A.orgId
+                          AND CAST(L.date AS TIMESTAMP) BETWEEN A.loginTime and A.logoutTime
+                      WHERE org_id IN ('TPINDIAIT')
+                      UNION ALL
+                      SELECT DISTINCT (case when A.actualStartTime IS NULL then cast(L.date as date) else
+                              to_date(A.actualStartTime, 'dd-MM-yyyy') end) as date,
+                              login_attempt AS loginAttempt,
+                              user_id AS userId,
+                              LOWER(org_id) AS orgId
+                      FROM logins L
+                      LEFT JOIN hf_attendance A
+                          on L.user_id = A.userId
+                          AND CAST(L.date AS TIMESTAMP) BETWEEN A.actualStartTime and A.actualEndTime
+                      WHERE org_id IN ('HELLOFRESHANZ')
+                  """)
+    
+    df = df.withColumn("date", col("date").cast(DateType()))
+    
+    partition_columns = ['orgId']
+    df.display()
+
+    delta_table_partition_ovrewrite(df, "dg_performance_management.logins", partition_columns)
