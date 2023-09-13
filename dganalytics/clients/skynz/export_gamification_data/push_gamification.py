@@ -7,10 +7,12 @@ from datetime import datetime, timedelta
 
 
 #inbound quality data
-def inbound(org_id):
+def inbound_quality(org_id):
     tenant = 'skynzib'
     app_name = f"{tenant}_evaluations"
     spark = get_spark_session(app_name=app_name, tenant = tenant)
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=7)
     inbound_evaluations = spark.sql(f"""
                             WITH maxScore AS (
                             SELECT
@@ -66,6 +68,7 @@ def inbound(org_id):
                         JOIN gpc_skynz.dim_evaluations e 
                           ON e.evaluationId = eqs.evaluationId
                         WHERE NOT eqs.markedNA
+                        AND e.assignedDate >= '{start_date}' AND e.assignedDate <= '{end_date}'
                         GROUP BY e.agentId, e.assignedDate, e.evaluationId, ms.questionGroupId, ms.questionGroupName
                     ) AS m
                     JOIN gpc_skynz.fact_evaluation_total_scores ts 
@@ -96,16 +99,16 @@ def inbound(org_id):
         col("Date").cast("string")
     )
 
-    inbound_evaluations.display()
-
     push_gamification_data(inbound_evaluations.toPandas(), org_id.upper(), 'SKYIB_QA_Connection')
 
 
 #outbound quality data 
-def outbound(org_id):
+def outbound_quality(org_id):
     tenant = 'skynzob'
     app_name = f"{tenant}_evaluations"
     spark = get_spark_session(app_name=app_name, tenant = tenant)
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=7)
     outbound_evaluations = spark.sql(f"""
                             WITH maxScore AS (
                             SELECT
@@ -160,6 +163,7 @@ def outbound(org_id):
                         JOIN gpc_skynz.dim_evaluations e 
                           ON e.evaluationId = eqs.evaluationId
                         WHERE NOT eqs.markedNA
+                        AND e.assignedDate >= '{start_date}' AND e.assignedDate <= '{end_date}'
                         GROUP BY e.agentId, e.assignedDate, e.evaluationId, ms.questionGroupId, ms.questionGroupName
                     ) AS m
                     JOIN gpc_skynz.fact_evaluation_total_scores ts 
@@ -193,7 +197,7 @@ def outbound(org_id):
     push_gamification_data(outbound_evaluations.toPandas(), org_id.upper(), 'SKYOB_QA_Connection')
 
 
-#adherence
+#adherence_data
 def adherence_metrics(org_id, back_days):
     tenant = "skynzib"
     app_name = f"{tenant}_adherence_metrics"
@@ -259,6 +263,6 @@ if __name__ == "__main__":
     org_id_outbound = 'skynzob'
     back_days = 3
     
-    inbound(org_id_inbound)
-    outbound(org_id_outbound)
+    inbound_quality(org_id_inbound)
+    outbound_quality(org_id_outbound)
     adherence_metrics(org_id_inbound, back_days)
