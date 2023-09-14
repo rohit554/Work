@@ -28,7 +28,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(variables('factoryname'), '/AzureDatabricks')]",
+			"name": "[concat(variables('factoryname'), '/BronzeDatabrickCluster')]",
 			"type": "Microsoft.DataFactory/factories/linkedServices",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -57,7 +57,7 @@
 							"referenceName": "AzureKeyVault",
 							"type": "LinkedServiceReference"
 						},
-						"secretName": "databricksclusterid"
+						"secretName": "bronzeDatabricksClusterId"
 					}
 				}
 			},
@@ -66,13 +66,13 @@
 			]
 		},
 		{
-			"name": "[concat(variables('factoryname'), '/push_gamification')]",
+			"name": "[concat(variables('factoryname'), '/export_gamification')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "load_adherance_data",
+						"name": "export_gamification",
 						"type": "DatabricksSparkPython",
 						"dependsOn": [],
 						"policy": {
@@ -84,7 +84,7 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/skynz/custom_etl/push_gamification.py"
+							"pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/clients/skynz/export_gamification_data/push_gamification.py"
 						},
 						"linkedServiceName": {
 							"referenceName": "AzureDatabricks",
