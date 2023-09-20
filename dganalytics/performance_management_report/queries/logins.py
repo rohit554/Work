@@ -123,12 +123,14 @@ schema = StructType([StructField('date', StringType(), True),
                     StructField('org_id', StringType(), True),
                      StructField('login_attempt', IntegerType(), True),
                      StructField('user_id', StringType(), True)])
-
+def get_hf_timezones(spark):
+  tenant_path, db_path, log_path = get_path_vars("hellofresh")  
+  user_timezone = pd.read_csv(os.path.join(tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'), header=0)
+  user_timezone = spark.createDataFrame(user_timezone)
+  return user_timezone
 def get_genesys_clients_attendance(spark,tenant):  
   if tenant == 'hellofreshanz' :
-    tenant_path, db_path, log_path = get_path_vars("hellofresh")  
-    user_timezone = pd.read_csv(os.path.join(tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'), header=0)
-    user_timezone = spark.createDataFrame(user_timezone)
+    user_timezone = get_hf_timezones(spark)
     user_timezone.createOrReplaceTempView("user_timezone")
     attendance_df = spark.sql(f"""
                               SELECT 
@@ -187,11 +189,20 @@ def get_logins(spark):
     StructField("actualEndTime", TimestampType(), True)
 ])
   genesys_logins = spark.createDataFrame([], schema=genesys_attendance_schema)
-
+  
   for tenant in genesys_tenants:
     genesys_logins = genesys_logins.union(get_genesys_clients_attendance(spark,tenant))
    
   genesys_logins.createOrReplaceTempView("genesys_attendance")
+
+  user_timezone = get_hf_timezones(spark)
+  user_timezone.createOrReplaceTempView("user_timezone")
+
+  hf_df=df.filter(col("org_id") == "HELLOFRESHANZ")
+  hf_df = hf_df.withColumnRenamed("user_id", "userId")
+  hf_df = hf_df.join(user_timezone, on="userId", how="left")
+  hf_df.createOrReplaceTempView("hf_logins")
+
   df = spark.sql("""
                     select  distinct cast(date as date) date,
                             login_attempt loginAttempt,
@@ -221,9 +232,21 @@ def get_logins(spark):
                     LEFT JOIN genesys_attendance A
                         on L.user_id = A.userId
                         AND CAST(L.date AS TIMESTAMP) BETWEEN A.actualStartTime and A.actualEndTime
-                    WHERE org_id IN ('HELLOFRESHANZ','SALMATCOLESONLINE','SKYNZIB','SKYNZOB')
+                    WHERE org_id IN ('SALMATCOLESONLINE','SKYNZIB','SKYNZOB')
+                    UNION ALL
+                    SELECT DISTINCT (case when A.actualStartTime IS NULL then cast(from_utc_timestamp(to_utc_timestamp(L.date, "Asia/Manila"),trim(timeZone)) as date) else
+                            to_date(A.actualStartTime, 'dd-MM-yyyy') end) as date,
+                            login_attempt AS loginAttempt,
+                            L.userId AS userId,
+                            LOWER(org_id) AS orgId
+                    FROM hf_logins L
+                    LEFT JOIN genesys_attendance A
+                        on L.userId = A.userId
+                        AND CAST(from_utc_timestamp(to_utc_timestamp(L.date, "Asia/Manila"),trim(timeZone)) AS TIMESTAMP) BETWEEN A.actualStartTime and A.actualEndTime
+                    WHERE org_id IN ('HELLOFRESHANZ')
                 """)
     
   df = df.withColumn("date", col("date").cast(DateType()))
+  
     
   delta_table_partition_ovrewrite(df, "dg_performance_management.logins", ['orgId'])
