@@ -1,4 +1,3 @@
-%python
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType, DateType
 from pyspark.sql.functions import col
