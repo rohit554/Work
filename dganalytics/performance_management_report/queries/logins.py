@@ -140,7 +140,7 @@ def get_genesys_clients_attendance(spark,tenant):
                               END actualStartTime,
                               from_utc_timestamp(fp.startTime,trim(ut.timeZone)) as actualEndTime
                               FROM 
-                                  gpc_hellofresh.fact_user_presence fp, user_timezone ut
+                                  gpc_hellofresh.fact_primary_presence fp, user_timezone ut
                               JOIN (select * from dg_performance_management.users where orgId="hellofreshanz") pmu
                               ON fp.userId=pmu.userId
                               WHERE 
@@ -172,7 +172,6 @@ def get_genesys_clients_attendance(spark,tenant):
                                   AND CAST(((unix_timestamp(fp.endTime) - unix_timestamp(fp.startTime))/3600) AS INT) > 4
                               
                               """)
-    #attendance_df.display()
     return attendance_df
 
 
