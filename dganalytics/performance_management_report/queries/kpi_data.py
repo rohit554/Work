@@ -1,10 +1,11 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars, get_active_organization_timezones
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 import os
 import pandas as pd
+from datetime import datetime, timedelta
 
 kpi_data_schema = StructType([
-    StructField("id", StructType([StructField('oid', StringType(), True)]), True),
+    StructField("id", StringType(), True),
     StructField("userId", StringType(), True),
     StructField("attr_dict_key", StringType(), True),
     StructField("attr_value", DoubleType(), True),
@@ -15,22 +16,21 @@ kpi_data_schema = StructType([
     StructField("connection_name", StringType(), True)])
 
 def get_kpi_data(spark):
-    tenant_path, db_path, log_path = get_path_vars('datagamz')
-    tenants_df = pd.read_csv(os.path.join(
-        tenant_path, 'data', 'config', 'PowerBI_ROI_DataSets_AutoRefresh_Config.csv'))
-    tenants_df = tenants_df[tenants_df['platform'] == 'new']
-    tenants = tenants_df.to_dict('records')
-
-    orgs = []
-    for tenant in tenants:
-        orgs.append(tenant['name'])
+    
+  Current_Date = datetime.now()
+  extract_end_time = Current_Date.strftime('%Y-%m-%dT%H:%M:%S.%fZ') 
+  extract_start_time = (Current_Date - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  for org_timezone in get_active_organization_timezones().rdd.collect():
+    org_id = org_timezone['org_id'].lower()
+    org_timezone = org_timezone['timezone']
 
     connection_df = spark.sql(f"""
         SELECT  DISTINCT connection_name,
                 orgId
         FROM dg_performance_management.data_upload_connections
-        where orgId in ({", ".join(f"'{org}'" for org in orgs)})
+        where orgId="{org_id}"
     """)
+    
 
     for connection in connection_df.collect():
         connectiondf = spark.sql(f"""
@@ -41,7 +41,6 @@ def get_kpi_data(spark):
                     AND orgId = '{connection['orgId']}'
                     AND attr_dict_key NOT IN ('user_id', "report_date")
         """)
-
         data = {}
         for field in connectiondf.collect():
             data[f"{field['attr_dict_key']}"] = f"${field['attr_dict_key']}"
@@ -49,73 +48,22 @@ def get_kpi_data(spark):
         pipeline = [
             {
                 "$match": {
-                    "$expr": {
-                            "$and": [
-                            {
-                                "$eq": ["$org_id", connection['orgId'].upper()]
-                            }]
-                        }
+                      "org_id" : connection['orgId'].upper(),
+                      "$or":[
+                          {
+                            'creation_date': {
+                              '$gte': { '$date': extract_start_time },
+                              '$lte': { '$date': extract_end_time }
+                            }
+                          },
+                          {
+                            'report_date': {
+                              '$gte': { '$date': extract_start_time },
+                              '$lte': { '$date': extract_end_time }
+                            }
+                          }
+                      ]
                     }
-            },
-            {
-                "$lookup": {
-                    "from": "Organization",
-                    "let": {
-                        "orgId": "$org_id"
-                    },
-                    "pipeline": [
-                        {
-                            "$match": {
-                                "$expr": {
-                                    "$and": [
-                                        {
-                                            "$eq": [
-                                                "$org_id",
-                                                "$$orgId"
-                                            ]
-                                        },
-                                        {
-                                            "$eq": [
-                                                "$type",
-                                                "Organisation"
-                                            ]
-                                        },
-                                        {
-                                            "$eq": [
-                                                "$is_active",
-                                                True
-                                            ]
-                                        },
-                                        {
-                                            "$eq": [
-                                                "$is_deleted",
-                                                False
-                                            ]
-                                        }
-                                    ]
-                                }
-                            }
-                        },
-                        {
-                            "$project": {
-                                "_id": 0.0,
-                                "timezone": {
-                                    "$ifNull": [
-                                        "$timezone",
-                                        "Australia/Melbourne"
-                                    ]
-                                }
-                            }
-                        }
-                    ],
-                    "as": "Org"
-                }
-            }, 
-            {
-                "$unwind": {
-                    "path": "$Org",
-                    "preserveNullAndEmptyArrays": False
-                }
             },
             {
                 "$addFields": {
@@ -166,18 +114,13 @@ def get_kpi_data(spark):
                             "else": {
                                 "$dateToString": {
                                     "format": "%Y-%m-%d",
-                                    "date": {
-                                        "$toDate": {
-                                            "$dateToString": {
-                                                "date": "$report_date",
-                                                "timezone": "Australia/Melbourne"
-                                            }
-                                        }
-                                    }
+                                    "date": "$report_date",
+                                    "timezone": org_timezone
+                                  }
+                                    
                                 }
                             }
-                        }
-                    },
+                        },
                     "connection_name": 1,
                     "attr_dict_key": "$dimensions.k",
                     "attr_value": "$dimensions.v",
@@ -233,21 +176,17 @@ def get_kpi_data(spark):
         ]
 
         kpi_data = exec_mongo_pipeline(spark, pipeline, connection['connection_name'], kpi_data_schema)
-
+        kpi_data = kpi_data.withColumn("orgId", lower(kpi_data["orgId"]))
+        #kpi_data.display()
         kpi_data.createOrReplaceTempView("kpi_data")
-
-        kpi_data = spark.sql(f"""
-                    select  distinct id.oid as id,
-                            connection_name,
-                            userId,
-                            report_date,
-                            attr_dict_key,
-                            attr_value,
-                            num,
-                            denom,
-                            lower(orgId) as orgId
-                    from kpi_data
-                """)
-
-        delta_table_partition_ovrewrite(
-            kpi_data, "dg_performance_management.kpi_data", ['orgId'])
+        spark.sql("""
+            MERGE INTO dg_performance_management.kpi_data AS target
+            USING kpi_data AS source
+            ON target.orgId = source.orgId
+            AND target.userId = source.userId
+            AND target.report_date = source.report_date
+            AND target.connection_name = source.connection_name
+            AND target.attr_dict_key= source.attr_dict_key
+            WHEN NOT MATCHED THEN
+             INSERT *        
+          """)
