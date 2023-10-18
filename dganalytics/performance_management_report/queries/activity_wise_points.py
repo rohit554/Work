@@ -171,7 +171,7 @@ def get_activity_wise_points(spark):
     activity_points_df = exec_mongo_pipeline(spark,activity_points_pipeline,'User_Outcome', schema)
     badge_bonus_points_df = exec_mongo_pipeline(spark,badge_bonus_points_pipeline,'User_Outcome', schema)
     points_df = activity_points_df.union(badge_bonus_points_df)
-    #points_df.display()
+    points_df = points_df.withColumn("orgId", lower(points_df["orgId"]))
 
     points_df.createOrReplaceTempView("activity_wise_points")
     spark.sql("""

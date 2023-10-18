@@ -136,6 +136,7 @@ def get_challenges(spark):
 
         challenges_df = exec_mongo_pipeline(spark, pipeline, 'User_Challenges', schema)
         #challenges_df.display()
+        challenges_df = challenges_df.withColumn("orgId", lower(challenges_df["orgId"]))
         challenges_df.createOrReplaceTempView("challenges")
         spark.sql("""
             MERGE INTO dg_performance_management.challenges AS target

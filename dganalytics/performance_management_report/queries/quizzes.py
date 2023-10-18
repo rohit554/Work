@@ -279,8 +279,9 @@ def get_quizzes(spark):
           }
       }]
       df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
+      df = df.withColumn("orgId", lower(df["orgId"]))
       df.createOrReplaceTempView("quizzes")
-
+      
       spark.sql("""
           MERGE INTO dg_performance_management.quizzes AS target
           USING quizzes AS source
