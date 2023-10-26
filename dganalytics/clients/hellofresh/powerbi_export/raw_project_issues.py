@@ -13,7 +13,6 @@ def raw_project_issues(spark: SparkSession, tenant: str, region: str):
                     a.projectKey,
                     a.projectName,
                     a.customFieldId,
-                    a.customFieldName,
                     a.priority,
                     a.market,
                     a.brand,
