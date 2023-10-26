@@ -57,6 +57,82 @@ dim_users = """
             from dim_users
             """
 
+dim_queue_state = """
+            WITH CTE AS (
+              SELECT distinct
+            conversationId,
+            segment.queueId,
+            segment.segmentStart,
+            segment.segmentEnd
+            FROM(
+                  SELECT
+                    conversationId,
+                    explode(session.segments) segment
+                  FROM
+                    (
+                      SELECT
+                        conversationId,
+                        explode(participant.sessions) AS session
+                      FROM
+                        (
+                          SELECT
+                            conversationId,
+                            explode(participants) participant
+                          FROM
+                            (
+                              SELECT
+                                conversationId,
+                                participants,
+                                row_number() OVER (
+                                  PARTITION BY conversationId
+                                  ORDER BY
+                                    recordInsertTime DESC
+                                ) rnk
+                              FROM
+                                gpc_simplyenergy.raw_conversation_details 
+                            )
+                          WHERE
+                            rnk = 1
+                        )
+                    )
+              ) 
+            )
+
+            SELECT conversationId, 
+                    MAX(case when start_rank = 1 then queueId END) originatingQueue,
+                    MAX(case when end_rank = 1 then queueId END) finalQueue
+            FROM
+            (SELECT *,
+                    row_number() OVER(PARTITION BY conversationId Order BY segmentStart) start_rank,
+                    row_number() OVER(PARTITION BY conversationId Order BY segmentEnd DESC) end_rank
+            FROM CTE)
+            GROUP BY conversationId
+            """
+                
+
+dim_division = """
+                SELECT a.conversationId,
+                        explode(a.divisionIds) as divisionId,
+                        b.name
+                FROM gpc_simplyenergy.raw_conversation_details a 
+                JOIN gpc_simplyenergy.raw_divisions b ON array_contains(a.divisionIds, b.id)
+
+               """
+
+
+fact_conversation_attribute = """
+                SELECT  conversationId,
+                    participant.attributes["CRN"] As CRN,
+                    participant.attributes["AuthenticationStatus"] As Authentication
+                FROM
+                (SELECT 
+                            conversationId,
+                            explode(participants) AS participant
+                
+                        FROM gpc_simplyenergy.raw_conversation_details
+                        WHERE conversationStart >= date_add(CURRENT_DATE() , -190))
+            """
+
 fact_conversation_metrics = """
                 select
                     agentId , mediaType, messageType , originatingDirection , queueId ,
