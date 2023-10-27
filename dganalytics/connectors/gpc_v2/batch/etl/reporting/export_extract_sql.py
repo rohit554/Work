@@ -57,7 +57,7 @@ dim_users = """
             from dim_users
             """
 
-dim_queue_state = """
+fact_queue_state = """
             WITH CTE AS (
               SELECT distinct
             conversationId,
@@ -90,6 +90,8 @@ dim_queue_state = """
                                 ) rnk
                               FROM
                                 gpc_simplyenergy.raw_conversation_details 
+                             WHERE 
+                                conversationStart >= date_add(CURRENT_DATE() , -190) 
                             )
                           WHERE
                             rnk = 1
@@ -110,13 +112,13 @@ dim_queue_state = """
             """
                 
 
-dim_division = """
+fact_division = """
                 SELECT a.conversationId,
                         explode(a.divisionIds) as divisionId,
                         b.name
                 FROM gpc_simplyenergy.raw_conversation_details a 
                 JOIN gpc_simplyenergy.raw_divisions b ON array_contains(a.divisionIds, b.id)
-
+                WHERE conversationStart >= date_add(CURRENT_DATE() , -190)
                """
 
 

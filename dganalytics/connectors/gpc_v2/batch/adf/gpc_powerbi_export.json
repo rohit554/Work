@@ -115,66 +115,6 @@
                   }
                 },
                 {
-                  "name": "dim_division",
-                  "type": "DatabricksSparkPython",
-                  "dependsOn": [],
-                  "policy": {
-                    "timeout": "00:30:00",
-                    "retry": 1,
-                    "retryIntervalInSeconds": 1800,
-                    "secureOutput": false,
-                    "secureInput": false
-                  },
-                  "userProperties": [],
-                  "typeProperties": {
-                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc_v2/batch/etl/reporting/gpc_pb_standard_export.py",
-                    "parameters": [
-                      "--tenant",
-                      "@pipeline().parameters.tenant",
-                      "--run_id",
-                      "@pipeline().RunId",
-                      "--extract_name",
-                      "dim_division",
-                      "--output_file_name",
-                      "gDimDivision"
-                    ]
-                  },
-                  "linkedServiceName": {
-                    "referenceName": "AzureDatabricks",
-                    "type": "LinkedServiceReference"
-                  }
-                },
-                {
-                  "name": "dim_queue_state",
-                  "type": "DatabricksSparkPython",
-                  "dependsOn": [],
-                  "policy": {
-                    "timeout": "00:30:00",
-                    "retry": 1,
-                    "retryIntervalInSeconds": 1800,
-                    "secureOutput": false,
-                    "secureInput": false
-                  },
-                  "userProperties": [],
-                  "typeProperties": {
-                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc_v2/batch/etl/reporting/gpc_pb_standard_export.py",
-                    "parameters": [
-                      "--tenant",
-                      "@pipeline().parameters.tenant",
-                      "--run_id",
-                      "@pipeline().RunId",
-                      "--extract_name",
-                      "dim_queue_state",
-                      "--output_file_name",
-                      "gDimQueueState"
-                    ]
-                  },
-                  "linkedServiceName": {
-                    "referenceName": "AzureDatabricks",
-                    "type": "LinkedServiceReference"
-                  }
-                },
-                {
                   "name": "dimBuMuMapping",
                   "type": "DatabricksSparkPython",
                   "dependsOn": [],
@@ -1008,6 +948,66 @@
                       "fact_conversation_transcript_topics",
                       "--output_file_name",
                       "gFactConversationTranscriptTopics"
+                    ]
+                  },
+                  "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                  }
+                },
+                {
+                  "name": "fact_queue_state",
+                  "type": "DatabricksSparkPython",
+                  "dependsOn": [],
+                  "policy": {
+                    "timeout": "00:30:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 1800,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "userProperties": [],
+                  "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc_v2/batch/etl/reporting/gpc_pb_standard_export.py",
+                    "parameters": [
+                      "--tenant",
+                      "@pipeline().parameters.tenant",
+                      "--run_id",
+                      "@pipeline().RunId",
+                      "--extract_name",
+                      "fact_queue_state",
+                      "--output_file_name",
+                      "gFactQueueState"
+                    ]
+                  },
+                  "linkedServiceName": {
+                    "referenceName": "AzureDatabricks",
+                    "type": "LinkedServiceReference"
+                  }
+                },
+                {
+                  "name": "fact_division",
+                  "type": "DatabricksSparkPython",
+                  "dependsOn": [],
+                  "policy": {
+                    "timeout": "00:30:00",
+                    "retry": 1,
+                    "retryIntervalInSeconds": 1800,
+                    "secureOutput": false,
+                    "secureInput": false
+                  },
+                  "userProperties": [],
+                  "typeProperties": {
+                    "pythonFile": "dbfs:/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc_v2/batch/etl/reporting/gpc_pb_standard_export.py",
+                    "parameters": [
+                      "--tenant",
+                      "@pipeline().parameters.tenant",
+                      "--run_id",
+                      "@pipeline().RunId",
+                      "--extract_name",
+                      "fact_division",
+                      "--output_file_name",
+                      "gFactDivision"
                     ]
                   },
                   "linkedServiceName": {
