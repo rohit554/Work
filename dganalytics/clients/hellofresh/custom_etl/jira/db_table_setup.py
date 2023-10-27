@@ -36,14 +36,15 @@ spark.sql(f"""
             issueTypeDescription string,
             issueTypeName string,
             callbackReason string,
-            createdDate date,
+            createdDate timestamp,
             updatedDate timestamp,
             resolutionDate timestamp,
             genesysInteractionURL string,
             recordInsertDate timestamp,
-            orgId string
+            orgId string,
+            created date
             )
             using delta
-            PARTITIONED BY (createdDate)
+            PARTITIONED BY (created)
             LOCATION '{db_path}/dg_{tenant}/raw_project_issues'
             """)

@@ -1,10 +1,11 @@
+from dganalytics.utils.utils import get_spark_session, get_path_vars
 from typing import List
 import requests
 from pyspark.sql import SparkSession
 from requests.auth import HTTPBasicAuth
 import datetime
 from pyspark.sql.types import StructType, StructField, StringType, TimestampType, BooleanType, DateType
-from pyspark.sql.functions import to_timestamp, from_utc_timestamp, expr, col, unix_timestamp, date_format
+from pyspark.sql.functions import to_timestamp, from_utc_timestamp, expr, col, unix_timestamp, date_format, to_date
 from datetime import datetime
 import re
 from pyspark.sql import functions as F
@@ -12,17 +13,21 @@ from dateutil import parser
 from pyspark.sql import Column
 
 def jira_request(spark: SparkSession):
-    tenant = 'hellofresh'
+    app_name = "jira_project_issues"
+    tenant = "hellofresh"
+    db_name = f"dg_{tenant}"
+    tenant_path, db_path, log_path = get_path_vars(tenant)
+    spark = get_spark_session(app_name=app_name, tenant=tenant)
     email = "sg_jira_ccmcbesc_dgz@hellofresh.com"
     api_key = "ATATT3xFfGF0fUVLRy5Eugv3enAghGQqPXI7U3u8veQF_PBZJKm1egXBRGC1A1y5no7TRQ3Pa7fwCNwzEvyb33KUsmrpRUnR2LViONjuEFU9MqgWaSjYwZaafpVtglHIhCrGdb9wDnMIQauI3KnqbRJzFQcx7NboH8Y7V1QwA55o-7bSeIgkziQ=1021DB3D"
     auth = HTTPBasicAuth(email, api_key)
     entity = "issues"
-    url = "https://hellofresh.atlassian.net/rest/api/3/search?jql=project%20%3D%20'CCMCBESC'"
+    url = "https://hellofresh.atlassian.net/rest/api/3/search?jql=project%20%3D%20'CCMCBESC'%20AND%20updated%20>=%20-2d%20order%20by%20updated%20"
 
-    resp_list = []
+    combined_data = []
     startAt = 0
     maxResults = 100
-    params = {'maxResults': maxResults, 'startAt': startAt}
+
     req_type = "GET"
     paging = True
     schema = StructType([
@@ -50,16 +55,18 @@ def jira_request(spark: SparkSession):
                 StructField("issueTypeDescription", StringType(), True),
                 StructField("issueTypeName", StringType(), True),
                 StructField("callbackReason", StringType(), True),
-                StructField("createdDate", DateType(), True),
+                StructField("createdDate", TimestampType(), True),
                 StructField("updatedDate", TimestampType(), True), 
                 StructField("resolutionDate", TimestampType(), True),
                 StructField("genesysInteractionURL", StringType(), True),
                 StructField("recordInsertDate", TimestampType(), True),
-                StructField("orgId", StringType(), True)    
+                StructField("orgId", StringType(), True)
             ])
-
+    record_insert_date = datetime.now()
     while True:
+        resp_list = []
         print("startAt:", startAt)
+        params = {'maxResults': maxResults, 'startAt': startAt}
         if req_type == "GET":
             resp = requests.request(method='GET', url=url, auth=auth, params=params)
         else:
@@ -69,7 +76,7 @@ def jira_request(spark: SparkSession):
         print(resp_json['total'])
         startAt = startAt + maxResults
         resp_list.extend(resp_json[entity])
-        combined_data = []
+
         for item in resp_list:
             if 'fields' in item:
                 fields = item['fields']
@@ -149,9 +156,7 @@ def jira_request(spark: SparkSession):
                     priority_name = fields['priority']['name']
 
                 customfield_14355_value = fields.get('customfield_14355')
-                record_insert_date = datetime.now()
                 orgId = tenant
-
                 key_value = item.get('key')
                 id_value = item.get('id')
 
@@ -165,27 +170,24 @@ def jira_request(spark: SparkSession):
                 values = customfield_13697_value.split() if customfield_13697_value else []
                 market = values[0] if values else None
                 brand = values[1] if len(values) > 1 else None
-                    
 
                 combined_data.append({'issueId': id_value, 'issueKey': key_value, 'customFieldId': id, 'priority': priority_name, 'customFieldId': customfield_13697_id,'market': market, 'brand': brand, 'assigneeName': assignee_display_name, 'assigneeEmail': assignee_email_address, 'assigneeIsactive': isactive_assignee, 'reporterEmail': reporter_email_address, 'reporterName':reporter_display_name, 'reporterIsactive': isactive_reporter, 'status': status_name, 'statusDescription': status_description, 'statusCategoryName': status_category_name, 'projectId': project_id,'projectKey': project_key, 'projectName': project_name, 'issueTypeDescription': issue_type_description, 'issueTypeName': issue_type_name, 'callbackReason': customfield_15946_value, 'resolutionDate': resolutiondate, 'createdDate': created, 'updatedDate': updated, 'creatorName': creator_name, 'creatorEmail':creator_email, 'creatorIsactive':isactive_creator, 'recordInsertDate': record_insert_date, "genesysInteractionURL": customfield_14355_value, 'orgId': orgId})
 
-
         combined_df = spark.createDataFrame(combined_data, schema=schema)
-        combined_df = combined_df.dropDuplicates(["createdDate"])
-
+        combined_df = combined_df.withColumn('created', to_date('createdDate'))
+        combined_df = combined_df.dropDuplicates()
         combined_df = combined_df.createOrReplaceTempView("combined_data")
-        spark.sql(f"""merge into dg_hellofresh.raw_project_issues DB
-                using combined_data A
-                on A.createdDate = DB.createdDate
-                WHEN MATCHED THEN
-                    UPDATE SET *
-                WHEN NOT MATCHED THEN
-                    INSERT *
-                """)
 
-        # combined_df.display()
-        break
-    
+        spark.sql(f"""merge into {db_name}.raw_project_issues DB
+                    using combined_data A
+                    on A.issueId = DB.issueId
+                    WHEN MATCHED THEN
+                        UPDATE SET *
+                    WHEN NOT MATCHED THEN
+                        INSERT *
+                    """)
+        if startAt >= resp_json['total']:
+            break
     return combined_df
 
 jira_request(spark)

@@ -36,7 +36,8 @@ def raw_project_issues(spark: SparkSession, tenant: str, region: str):
                     date_format(a.resolutionDate, "yyyy-MM-dd'T'HH:mm:ss'Z'") AS resolutionDate,
                     a.genesysInteractionURL,
                     a.recordInsertDate,
-                    a.orgId
+                    a.orgId,
+                    a.created
                   FROM
                     dg_hellofresh.raw_project_issues a
                     """)
