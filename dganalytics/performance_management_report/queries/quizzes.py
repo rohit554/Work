@@ -1,11 +1,7 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars, get_active_org, get_active_organization_timezones
-from pyspark.sql import SparkSession,Row
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars, get_active_organization_timezones
 from pyspark.sql.functions import col, to_timestamp, lower
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType, DoubleType
 from datetime import datetime, timedelta
-import pandas as pd
-import os
-from dateutil.parser import isoparse
 
 schema = StructType([StructField('answeredDate', StringType(), True),
                      StructField('campaign_id', StringType(), True),
@@ -26,12 +22,9 @@ schema = StructType([StructField('answeredDate', StringType(), True),
 
 
 def get_quizzes(spark):
-    org_timezone = get_active_organization_timezones()
-    Current_Date = datetime.now()
-    extract_end_time = Current_Date.strftime('%Y-%m-%dT%H:%M:%S.%fZ') 
-    extract_start_time = (Current_Date - timedelta(days=5)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    extract_start_time = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
   
-    for org_timezone in org_timezone.rdd.collect():
+    for org_timezone in get_active_organization_timezones().rdd.collect():
       pipeline = [
       {
           '$match': {
@@ -210,8 +203,7 @@ def get_quizzes(spark):
       {
           '$match':{
               'quiz_data.answered_date': {
-                  '$gte': { '$date': extract_start_time },
-                  '$lte': { '$date': extract_end_time }
+                  '$gte': { '$date': extract_start_time }
               }
           }
       }, 

@@ -1,5 +1,5 @@
 from pyspark.sql.types import StructType, StructField, StringType, BooleanType
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_active_organization_timezones
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite,get_active_organization_timezones
 from datetime import datetime, timedelta
 
 schema = StructType([StructField('campaignId', StringType(), True),
@@ -10,33 +10,28 @@ schema = StructType([StructField('campaignId', StringType(), True),
                     StructField('orgId', StringType(), True)])
 
 def get_activity_mapping(spark):
-    Current_Date = datetime.now()
-    extract_end_time = Current_Date.strftime('%Y-%m-%dT%H:%M:%S.%fZ') 
-    extract_start_time = (Current_Date - timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-
+    extract_start_time = (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
     for org_timezone in get_active_organization_timezones().rdd.collect():
       org_id = org_timezone['org_id']
       org_timezone = org_timezone['timezone']
-      print(org_id," : ",org_timezone)
       pipeline = [
         {
           '$match': {
             "org_id" :  org_id,
-            "$or":[
-                {
-                  'creation_date': {
-                    '$gte': { '$date': extract_start_time },
-                    '$lte': { '$date': extract_end_time }
-                  }
-                },
-                {
-                  'modified_date': {
-                    '$gte': { '$date': extract_start_time },
-                    '$lte': { '$date': extract_end_time }
-                      }
+            '$expr': {
+                '$or': [
+                    {
+                        '$gte': [
+                            '$creation_date', { '$date': extract_start_time }
+                        ]
+                    }, {
+                        '$gte': [
+                            '$modified_date', { '$date': extract_start_time }
+                        ]
                     }
-              ]
+                ]
             }
+          }
         },
         {
             '$lookup': {
@@ -65,7 +60,7 @@ def get_activity_mapping(spark):
       df = exec_mongo_pipeline(spark, pipeline, 'Outcomes', schema)
       df = df.withColumn("orgId", lower(df["orgId"]))
       df.createOrReplaceTempView("activity_mapping")
-      #df.display()
+      
       spark.sql("""
             MERGE INTO dg_performance_management.activity_mapping AS target
             USING activity_mapping AS source

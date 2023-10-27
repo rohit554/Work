@@ -1,7 +1,5 @@
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars, get_active_organization_timezones
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
-import os
-import pandas as pd
 from datetime import datetime, timedelta
 
 kpi_data_schema = StructType([
@@ -16,10 +14,7 @@ kpi_data_schema = StructType([
     StructField("connection_name", StringType(), True)])
 
 def get_kpi_data(spark):
-    
-  Current_Date = datetime.now()
-  extract_end_time = Current_Date.strftime('%Y-%m-%dT%H:%M:%S.%fZ') 
-  extract_start_time = (Current_Date - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  extract_start_time = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
   for org_timezone in get_active_organization_timezones().rdd.collect():
     org_id = org_timezone['org_id'].lower()
     org_timezone = org_timezone['timezone']
@@ -49,21 +44,20 @@ def get_kpi_data(spark):
             {
                 "$match": {
                       "org_id" : connection['orgId'].upper(),
-                      "$or":[
-                          {
-                            'creation_date': {
-                              '$gte': { '$date': extract_start_time },
-                              '$lte': { '$date': extract_end_time }
-                            }
-                          },
-                          {
-                            'report_date': {
-                              '$gte': { '$date': extract_start_time },
-                              '$lte': { '$date': extract_end_time }
-                            }
-                          }
-                      ]
-                    }
+                      '$expr': {
+                          '$or': [
+                              {
+                                  '$gte': [
+                                      '$creation_date', { '$date': extract_start_time }
+                                  ]
+                              }, {
+                                  '$gte': [
+                                      '$report_date', { '$date': extract_start_time }
+                                  ]
+                              }
+                          ]
+                        }
+                }
             },
             {
                 "$addFields": {
@@ -99,28 +93,13 @@ def get_kpi_data(spark):
                     "id": "$_id",
                     "userId": "$user_id",
                     "report_date": {
-                        "$cond": {
-                            "if": {
-                                "$and": [
-                                    {
-                                        "$eq": [
-                                            "$report_date",
-                                            None
-                                        ]
-                                    }
-                                ]
-                            },
-                            "then": None,
-                            "else": {
-                                "$dateToString": {
-                                    "format": "%Y-%m-%d",
-                                    "date": "$report_date",
-                                    "timezone": org_timezone
-                                  }
-                                    
-                                }
-                            }
-                        },
+                        "$dateToString": {
+                            "format": "%Y-%m-%d",
+                            "date": "$report_date",
+                            "timezone": org_timezone
+                          }
+                            
+                      },
                     "connection_name": 1,
                     "attr_dict_key": "$dimensions.k",
                     "attr_value": "$dimensions.v",
@@ -177,7 +156,7 @@ def get_kpi_data(spark):
 
         kpi_data = exec_mongo_pipeline(spark, pipeline, connection['connection_name'], kpi_data_schema)
         kpi_data = kpi_data.withColumn("orgId", lower(kpi_data["orgId"]))
-        #kpi_data.display()
+        
         kpi_data.createOrReplaceTempView("kpi_data")
         spark.sql("""
             MERGE INTO dg_performance_management.kpi_data AS target

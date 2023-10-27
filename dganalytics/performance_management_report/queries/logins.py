@@ -1,134 +1,18 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType, DateType
-from pyspark.sql.functions import col
-import pandas as pd
-import os
-pipeline = [
-        { 
-            "$lookup" : { 
-                "from" : "User", 
-                "let" : { 
-                    "user_id" : "$user_id"
-                }, 
-                "pipeline" : [
-                    { 
-                        "$match" : { 
-                            "$expr" : { 
-                                "$and" : [
-                                    { 
-                                        "$eq" : [
-                                            "$user_id", 
-                                            "$$user_id"
-                                        ]
-                                    }
-                                ]
-                            }
-                        }
-                    }, 
-                    { 
-                        "$project" : { 
-                            "org_id" : 1.0
-                        }
-                    }
-                ], 
-                "as" : "users"
-            }
-        }, 
-        { 
-            "$unwind" : { 
-                "path" : "$users", 
-                "preserveNullAndEmptyArrays" : False
-            }
-        }, 
-        { 
-            "$project" : { 
-                "_id" : 0.0, 
-                "user_id" : 1.0, 
-                "login_attempt" : 1.0, 
-                "date" : "$timestamp", 
-                "org_id" : "$users.org_id"
-            }
-        }, 
-        { 
-            "$lookup" : { 
-                "from" : "Organization", 
-                "let" : { 
-                    "oid" : "$org_id"
-                }, 
-                "pipeline" : [
-                    { 
-                        "$match" : { 
-                            "$expr" : { 
-                                "$and" : [
-                                    { 
-                                        "$eq" : [
-                                            "$org_id", 
-                                            "$$oid"
-                                        ]
-                                    }, 
-                                    { 
-                                        "$eq" : [
-                                            "$type", 
-                                            "Organisation"
-                                        ]
-                                    }
-                                ]
-                            }
-                        }
-                    }, 
-                    { 
-                        "$project" : { 
-                            "timezone" : { 
-                                "$ifNull" : [
-                                    "$timezone", 
-                                    "Australia/Melbourne"
-                                ]
-                            }
-                        }
-                    }
-                ], 
-                "as" : "org"
-            }
-        }, 
-        { 
-            "$unwind" : { 
-                "path" : "$org", 
-                "preserveNullAndEmptyArrays" : False
-            }
-        }, 
-        { 
-            "$project" : { 
-                "_id" : 0.0, 
-                "user_id" : 1.0, 
-                "login_attempt" : 1.0, 
-                "date" : { 
-                    "$dateToString" : { 
-                        "format" : "%Y-%m-%dT%H:%M:%SZ", 
-                        "date" : { 
-                            "$toDate" : { 
-                                "$dateToString" : { 
-                                    "date" : "$date", 
-                                    "timezone" : "$org.timezone"
-                                }
-                            }
-                        }
-                    }
-                }, 
-                "org_id" : 1.0
-            }
-        }
-    ]
 
-schema = StructType([StructField('date', StringType(), True),
-                    StructField('org_id', StringType(), True),
-                     StructField('login_attempt', IntegerType(), True),
-                     StructField('user_id', StringType(), True)])
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars, get_active_organization_timezones
+from pyspark.sql import SparkSession,Row
+from pyspark.sql.functions import col, to_timestamp, lower
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
+from datetime import datetime, timedelta
+
 def get_hf_timezones(spark):
   tenant_path, db_path, log_path = get_path_vars("hellofresh")  
   user_timezone = pd.read_csv(os.path.join(tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'), header=0)
   user_timezone = spark.createDataFrame(user_timezone)
   return user_timezone
-def get_genesys_clients_attendance(spark,tenant):  
+
+
+def get_genesys_clients_attendance(spark,tenant,extractStartTime):  
   if tenant == 'hellofreshanz' :
     user_timezone = get_hf_timezones(spark)
     user_timezone.createOrReplaceTempView("user_timezone")
@@ -149,6 +33,7 @@ def get_genesys_clients_attendance(spark,tenant):
                                   fp.userId = ut.userId
                                   AND fp.systemPresence IN ('OFFLINE')
                                   AND CAST(((unix_timestamp(fp.endTime) - unix_timestamp(fp.startTime))/3600) AS INT) > 4
+                                  AND from_utc_timestamp(startTime,trim(timeZone)) >= TIMESTAMP('{extractStartTime}')
                               """)
     return attendance_df
   else:
@@ -172,80 +57,129 @@ def get_genesys_clients_attendance(spark,tenant):
                               WHERE 
                                   fp.systemPresence IN ('OFFLINE')
                                   AND CAST(((unix_timestamp(fp.endTime) - unix_timestamp(fp.startTime))/3600) AS INT) > 4
-                              
+                                  AND from_utc_timestamp(startTime,"{tenant_timezones[tenant]}") >= TIMESTAMP('{extractStartTime}')
                               """)
     return attendance_df
 
 
 def get_logins(spark):
-  df = exec_mongo_pipeline(spark, pipeline, 'Audit_Log', schema)
-  df.createOrReplaceTempView("logins")
-  genesys_tenants = ['hellofreshanz','salmatcolesonline','skynzib','skynzob']
-  genesys_attendance_schema = StructType([
-    StructField("userId", StringType(), True),
-    StructField("tZStartTime", TimestampType(), True),
-    StructField("actualStartTime", TimestampType(), True),
-    StructField("actualEndTime", TimestampType(), True)
-])
-  genesys_logins = spark.createDataFrame([], schema=genesys_attendance_schema)
-  
-  for tenant in genesys_tenants:
-    genesys_logins = genesys_logins.union(get_genesys_clients_attendance(spark,tenant))
+  extract_start_time = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  logins_schema = StructType([
+      StructField('date', StringType(), True),
+      StructField('org_id', StringType(), True),
+      StructField('login_attempt', IntegerType(), True),
+      StructField('user_id', StringType(), True)
+  ])
+
+  for tenant in get_active_organization_timezones().rdd.collect():
+      logins_pipeline = [
+          {
+              '$match': {
+                  'org_id': tenant['org_id'],
+                  'timestamp': {
+                      "$gte": {"$date":extract_start_time}
+                  }
+              }  
+          },
+          {
+              '$project': {
+                  '_id': 0,
+                  'user_id': 1,
+                  'login_attempt': 1,
+                  "date": {
+                      "$dateToString" : { 
+                        "format" : "%Y-%m-%dT%H:%M:%SZ", 
+                        "date" : "$timestamp", 
+                        "timezone" : tenant['timezone']
+                      }
+                  },
+                  'org_id': 1
+              }
+          }
+      ]
+      login_df = exec_mongo_pipeline(spark, logins_pipeline, 'Audit_Log', logins_schema)
    
-  genesys_logins.createOrReplaceTempView("genesys_attendance")
+      login_df=login_df.drop_duplicates()
+      
+      login_df.createOrReplaceTempView("logins")
 
-  user_timezone = get_hf_timezones(spark)
-  user_timezone.createOrReplaceTempView("user_timezone")
+      genesys_tenants = ['hellofreshanz','salmatcolesonline','skynzib','skynzob']
+      genesys_attendance_schema = StructType([
+        StructField("userId", StringType(), True),
+        StructField("tZStartTime", TimestampType(), True),
+        StructField("actualStartTime", TimestampType(), True),
+        StructField("actualEndTime", TimestampType(), True)
+      ])
+      genesys_logins = spark.createDataFrame([], schema=genesys_attendance_schema)
+      
+      if tenant['org_id'] in genesys_tenants:
+        genesys_logins = genesys_logins.union(get_genesys_clients_attendance(spark,tenant['org_id'], extract_start_time))
+      
+      genesys_logins.createOrReplaceTempView("genesys_attendance")
 
-  hf_df=df.filter(col("org_id") == "HELLOFRESHANZ")
-  hf_df = hf_df.withColumnRenamed("user_id", "userId")
-  hf_df = hf_df.join(user_timezone, on="userId", how="left")
-  hf_df.createOrReplaceTempView("hf_logins")
+      if tenant['org_id'] == 'HELLOFRESHANZ':
+        user_timezone = get_hf_timezones(spark)
+        user_timezone.createOrReplaceTempView("user_timezone")
 
-  df = spark.sql("""
-                    select  distinct cast(date as date) date,
-                            login_attempt loginAttempt,
-                            user_id userId,
-                            lower(org_id) orgId
-                    from logins
-                    WHERE org_id NOT IN ('TPINDIAIT','HELLOFRESHANZ','SALMATCOLESONLINE','SKYNZIB','SKYNZOB')
-                    UNION ALL
-                    SELECT DISTINCT (case when A.reportDate IS NULL then cast(L.date as date) else
-                            to_date(A.reportDate, 'dd-MM-yyyy') end) as date,
-                            login_attempt AS loginAttempt,
-                            user_id AS userId,
-                            LOWER(org_id) AS orgId
-                    FROM logins L
-                    LEFT JOIN dg_performance_management.attendance A
-                        on L.user_id = A.userId
-                        and lower(L.org_id) = A.orgId
-                        AND CAST(L.date AS TIMESTAMP) BETWEEN A.loginTime and A.logoutTime
-                    WHERE org_id IN ('TPINDIAIT')
-                    UNION ALL
-                    SELECT DISTINCT (case when A.actualStartTime IS NULL then cast(L.date as date) else
-                            to_date(A.actualStartTime, 'dd-MM-yyyy') end) as date,
-                            login_attempt AS loginAttempt,
-                            user_id AS userId,
-                            LOWER(org_id) AS orgId
-                    FROM logins L
-                    LEFT JOIN genesys_attendance A
-                        on L.user_id = A.userId
-                        AND CAST(L.date AS TIMESTAMP) BETWEEN A.actualStartTime and A.actualEndTime
-                    WHERE org_id IN ('SALMATCOLESONLINE','SKYNZIB','SKYNZOB')
-                    UNION ALL
-                    SELECT DISTINCT (case when A.actualStartTime IS NULL then cast(from_utc_timestamp(to_utc_timestamp(L.date, "Asia/Manila"),trim(timeZone)) as date) else
-                            to_date(A.actualStartTime, 'dd-MM-yyyy') end) as date,
-                            login_attempt AS loginAttempt,
-                            L.userId AS userId,
-                            LOWER(org_id) AS orgId
-                    FROM hf_logins L
-                    LEFT JOIN genesys_attendance A
-                        on L.userId = A.userId
-                        AND CAST(from_utc_timestamp(to_utc_timestamp(L.date, "Asia/Manila"),trim(timeZone)) AS TIMESTAMP) BETWEEN A.actualStartTime and A.actualEndTime
-                    WHERE org_id IN ('HELLOFRESHANZ')
-                """)
-    
-  df = df.withColumn("date", col("date").cast(DateType()))
-  
-    
-  delta_table_partition_ovrewrite(df, "dg_performance_management.logins", ['orgId'])
+        hf_df=login_df.filter(col("org_id") == "HELLOFRESHANZ")
+        hf_df = hf_df.withColumnRenamed("user_id", "userId")
+        hf_df = hf_df.join(user_timezone, on="userId", how="left")
+        hf_df.createOrReplaceTempView("hf_logins")
+        updated_logins_df = spark.sql("""
+                                      SELECT DISTINCT (case when A.actualStartTime IS NULL then cast(from_utc_timestamp(to_utc_timestamp(L.date, "Asia/Manila"),trim(timeZone)) as date) else
+                                              to_date(A.actualStartTime, 'dd-MM-yyyy') end) as date,
+                                      login_attempt AS loginAttempt,
+                                      L.userId AS userId,
+                                      LOWER(org_id) AS orgId
+                                      FROM hf_logins L
+                                      LEFT JOIN genesys_attendance A
+                                          on L.userId = A.userId
+                                          AND CAST(from_utc_timestamp(to_utc_timestamp(L.date, "Asia/Manila"),trim(timeZone)) AS TIMESTAMP) BETWEEN A.actualStartTime and A.actualEndTime
+                                      WHERE org_id IN ('HELLOFRESHANZ')
+        """)
+      else:
+        updated_logins_df = spark.sql("""
+                                      select  distinct cast(date as date) date,
+                                      login_attempt loginAttempt,
+                                      user_id userId,
+                                      lower(org_id) orgId
+                                      from logins
+                                      WHERE org_id NOT IN ('TPINDIAIT','HELLOFRESHANZ','SALMATCOLESONLINE','SKYNZIB','SKYNZOB')
+                                      UNION ALL
+                                      SELECT DISTINCT (case when A.reportDate IS NULL then cast(L.date as date) else
+                                              to_date(A.reportDate, 'dd-MM-yyyy') end) as date,
+                                              login_attempt AS loginAttempt,
+                                              user_id AS userId,
+                                              LOWER(org_id) AS orgId
+                                      FROM logins L
+                                      LEFT JOIN dg_performance_management.attendance A
+                                          on L.user_id = A.userId
+                                          and lower(L.org_id) = A.orgId
+                                          AND CAST(L.date AS TIMESTAMP) BETWEEN A.loginTime and A.logoutTime
+                                      WHERE org_id IN ('TPINDIAIT')
+                                      UNION ALL
+                                      SELECT DISTINCT (case when A.actualStartTime IS NULL then cast(L.date as date) else
+                                              to_date(A.actualStartTime, 'dd-MM-yyyy') end) as date,
+                                              login_attempt AS loginAttempt,
+                                              user_id AS userId,
+                                              LOWER(org_id) AS orgId
+                                      FROM logins L
+                                      LEFT JOIN genesys_attendance A
+                                          on L.user_id = A.userId
+                                          AND CAST(L.date AS TIMESTAMP) BETWEEN A.actualStartTime and A.actualEndTime
+                                      WHERE org_id IN ('SALMATCOLESONLINE','SKYNZIB','SKYNZOB')
+
+                                      """)
+      
+      updated_logins_df.createOrReplaceTempView("updated_logins")
+      
+      spark.sql("""
+        MERGE INTO dg_performance_management.logins AS target
+        USING updated_logins AS source
+        ON target.orgId = source.orgId
+        AND target.userId = source.userId
+        AND target.date = source.date
+        WHEN NOT MATCHED THEN
+         INSERT *        
+      """)
+      

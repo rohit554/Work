@@ -2,16 +2,13 @@ from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_o
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from datetime import datetime, timedelta
 def build_pipeline(org_id: str, org_timezone: str):  
-    Current_Date = datetime.now()
-    extract_end_time = Current_Date.strftime('%Y-%m-%dT%H:%M:%S.%fZ') 
-    extract_start_time = (Current_Date - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    extract_start_time = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
     pipeline = [
         {
             "$match": {
                 "org_id": org_id,
                 'start_date': {
-                  '$gte': { '$date': extract_start_time },
-                  '$lte': { '$date': extract_end_time }
+                  '$gte': { '$date': extract_start_time }
                  }
             }
         }, 
@@ -135,8 +132,8 @@ def get_challenges(spark):
         pipeline = build_pipeline(org_id, org_timezone)
 
         challenges_df = exec_mongo_pipeline(spark, pipeline, 'User_Challenges', schema)
-        #challenges_df.display()
         challenges_df = challenges_df.withColumn("orgId", lower(challenges_df["orgId"]))
+        
         challenges_df.createOrReplaceTempView("challenges")
         spark.sql("""
             MERGE INTO dg_performance_management.challenges AS target

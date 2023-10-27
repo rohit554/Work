@@ -1,5 +1,5 @@
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_active_organization_timezones
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite,get_active_organization_timezones
 from datetime import datetime, timedelta
 from bson import json_util
 import json
@@ -25,9 +25,7 @@ schema = StructType([
     StructField('awardedBy', StringType(), True)
 ])
 def get_activity_wise_points(spark):
-  Current_Date = datetime.now()
-  extract_end_time = Current_Date.strftime('%Y-%m-%dT%H:%M:%S.%fZ') 
-  extract_start_time = (Current_Date - timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  extract_start_time = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
   for org_timezone in get_active_organization_timezones().rdd.collect():
     org_id = org_timezone['org_id']
     org_timezone = org_timezone['timezone']
@@ -37,20 +35,19 @@ def get_activity_wise_points(spark):
         "$match": {
             "org_id": org_id,
             "outcome_type": "points",
-            "$or":[
-              {
-                'creation_date': {
-                  '$gte': { '$date': extract_start_time },
-                  '$lte': { '$date': extract_end_time }
-                 }
-              },
-              {
-                'last_updated': {
-                  '$gte': { '$date': extract_start_time },
-                  '$lte': { '$date': extract_end_time }
-                 }
-              }
-            ]
+            '$expr': {
+                '$or': [
+                    {
+                        '$gte': [
+                            '$creation_date', { '$date': extract_start_time }
+                        ]
+                    }, {
+                        '$gte': [
+                            '$last_updated', { '$date': extract_start_time }
+                        ]
+                    }
+                ]
+            }
             
         }
       }, 
@@ -72,23 +69,13 @@ def get_activity_wise_points(spark):
             "activityName": "$outcome_name",
             "target": "$quartile_target",
             "date": {
-                "$cond": {
-                    "if": {
-                        "$and": [{
-                            "$eq": ["$creation_date", None]
-                        }]
-                    },
-                    "then": None,
-                    "else": {
-                        "$dateToString": {
-                            "format": "%Y-%m-%d",
-                            "date": "$creation_date",
-                            "timezone": org_timezone
-                          }
-                      }
-                }
-           }
-       }
+                "$dateToString": {
+                    "format": "%Y-%m-%d",
+                    "date": "$creation_date",
+                    "timezone": org_timezone
+                  }
+             }
+        }     
       }  
     ]
     badge_bonus_points_pipeline = [
@@ -97,8 +84,7 @@ def get_activity_wise_points(spark):
             "org_id": org_id,
             "outcome_type": "badge",
             'creation_date': {
-                  '$gte': { '$date': extract_start_time },
-                  '$lte': { '$date': extract_end_time }
+                  '$gte': { '$date': extract_start_time }
                  }
         }
       }, { 
@@ -172,7 +158,7 @@ def get_activity_wise_points(spark):
     badge_bonus_points_df = exec_mongo_pipeline(spark,badge_bonus_points_pipeline,'User_Outcome', schema)
     points_df = activity_points_df.union(badge_bonus_points_df)
     points_df = points_df.withColumn("orgId", lower(points_df["orgId"]))
-
+    
     points_df.createOrReplaceTempView("activity_wise_points")
     spark.sql("""
         MERGE INTO dg_performance_management.activity_wise_points AS target
