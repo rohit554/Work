@@ -660,3 +660,40 @@ dbutils = None
 secrets = None
 env = get_env()
 
+def get_active_org():
+    tenant_path, db_path, log_path = get_path_vars('datagamz')
+    tenants_df = pd.read_csv(os.path.join(
+        tenant_path,'data', 'config', 'PowerBI_ROI_DataSets_AutoRefresh_Config.csv'))
+    tenants_df = tenants_df[tenants_df['platform'] == 'new']
+    tenants = tenants_df.to_dict('records')
+    return [tenant['name'].upper() for tenant in tenants]
+    
+
+def get_active_organization_timezones():
+  tenants = get_active_org()
+  org_timezone_schema = StructType([
+      StructField('org_id', StringType(), True),
+      StructField('timezone', StringType(), True)
+  ])
+
+  org_timezone_pipeline = [
+      {
+          '$match': {
+              'type': 'Organisation',
+              "org_id": {"$in": tenants}
+          }
+      }, 
+      {
+          '$project': {
+              'timezone': {
+                  '$ifNull': [
+                      '$timezone', 'Australia/Melbourne'
+                  ]
+              }, 
+              'org_id': 1
+          }
+      }
+  ]
+
+  org_timezone_df = exec_mongo_pipeline(spark, org_timezone_pipeline, 'Organization', org_timezone_schema)
+  return org_timezone_df
