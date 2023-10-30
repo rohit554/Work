@@ -12,24 +12,33 @@ from pyspark.sql import functions as F
 from dateutil import parser
 from pyspark.sql import Column
 
-def jira_request(spark: SparkSession):
+
+def get_emailId(tenant: str):
+    email = get_secret(f'{tenant}jirauserid')
+    return email
+
+def get_accesskey(tenant: str):
+    api_key = get_secret(f'{tenant}jiraaccesskey')
+    return api_key
+
+def get_api_url(tenant: str):
+    url = get_secret(f'{tenant}jiraurl')
+    url = "https://"+url+"/rest/api/3/search?jql=project%20%3D%20'CCMCBESC'%20AND%20updated%20>=%20-1d%20order%20by%20updated%20"
+    return url
+
+def jira_request(spark: SparkSession, url: str, email : str, api_key : str):
     app_name = "jira_project_issues"
     tenant = "hellofresh"
     db_name = f"dg_{tenant}"
     tenant_path, db_path, log_path = get_path_vars(tenant)
     spark = get_spark_session(app_name=app_name, tenant=tenant)
-    email = "sg_jira_ccmcbesc_dgz@hellofresh.com"
-    api_key = "ATATT3xFfGF0fUVLRy5Eugv3enAghGQqPXI7U3u8veQF_PBZJKm1egXBRGC1A1y5no7TRQ3Pa7fwCNwzEvyb33KUsmrpRUnR2LViONjuEFU9MqgWaSjYwZaafpVtglHIhCrGdb9wDnMIQauI3KnqbRJzFQcx7NboH8Y7V1QwA55o-7bSeIgkziQ=1021DB3D"
     auth = HTTPBasicAuth(email, api_key)
     entity = "issues"
-    url = "https://hellofresh.atlassian.net/rest/api/3/search?jql=project%20%3D%20'CCMCBESC'%20AND%20updated%20>=%20-2d%20order%20by%20updated%20"
-
     combined_data = []
     startAt = 0
     maxResults = 100
-
     req_type = "GET"
-    paging = True
+
     schema = StructType([
                 StructField("issueId", StringType(), True),
                 StructField("issueKey", StringType(), True),
@@ -190,4 +199,8 @@ def jira_request(spark: SparkSession):
             break
     return combined_df
 
-jira_request(spark)
+if __name__ == '__main__':
+    api_url = get_api_url(tenant)
+    userid = get_emailId(tenant)
+    accesskey = get_accesskey(tenant)
+    jira_request(spark, api_url, userid, accesskey)
