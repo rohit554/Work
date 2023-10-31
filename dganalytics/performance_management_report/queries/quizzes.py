@@ -22,9 +22,9 @@ schema = StructType([StructField('answeredDate', StringType(), True),
 
 
 def get_quizzes(spark):
-    extract_start_time = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
   
-    for org_timezone in get_active_organization_timezones().rdd.collect():
+    for org_timezone in get_active_organization_timezones(spark).rdd.collect():
       pipeline = [
       {
           '$match': {

@@ -1,63 +1,14 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_active_org
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, DateType
+from datetime import datetime, timedelta
 
-pipeline = [
-    {
-        "$match": {
-            "is_active": True,
-            "is_deleted": False
-        }
-    }, 
-    {
-        "$unwind": {
-            "path": "$kpi"
-        }
-    }, 
-    {
-        "$unwind": {
-            "path": "$quartile"
-        }
-    }, 
-    {
-        "$match": {
-            "$expr": {
-                "$and": [
-                    {
-                        "$eq": [
-                            "$kpi.kpi_name",
-                            "$quartile.kpi_name"
-                        ]
-                    }
-                ]
-            }
-        }
-    }, 
-    {
-        "$project": {
-#             "id": 0,
-            "campaign_id": "$_id",
-            "kpi_id": "$kpi._id",
-            "name": "$kpi.kpi_name",
-            "overall_aggr": "$kpi.agg_function",
-            "entity_name": "$kpi.entity_name",
-            "field_name": "$kpi.entity_col",
-            "display_name": "$kpi.kpi_display_name",
-            "unit": "$kpi.unit",
-            "quartile": "$quartile.quartile",
-            "target": "$quartile.quartile_target",
-            "operator": "$quartile.quartile_operator",
-            "orgId": "$org_id"
-        }
-    }
-]
-
-schema = StructType([StructField('campaign_id', StructType([StructField('oid', StringType(), True)]), True),
-                     StructField('kpi_id', StructType([StructField('oid', StringType(), True)]), True),
+schema = StructType([StructField('campaignId', StringType(), True),
+                     StructField('kpiId', StringType(), True),
                      StructField('name', StringType(), True),
-                     StructField('overall_aggr', StringType(), True),
-                     StructField('entity_name', StringType(), True),
-                     StructField('field_name', StringType(), True),
-                     StructField('display_name', StringType(), True),
+                     StructField('overallAggr', StringType(), True),
+                     StructField('entityName', StringType(), True),
+                     StructField('fieldName', StringType(), True),
+                     StructField('displayName', StringType(), True),
                      StructField('unit', StringType(), True),
                      StructField('quartile', StringType(), True),
                      StructField('target', DoubleType(), True),
@@ -66,24 +17,82 @@ schema = StructType([StructField('campaign_id', StructType([StructField('oid', S
 
 
 def get_campaign_kpis(spark):
+  extract_start_time = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  for tenant in get_active_org():
+    pipeline = [
+      {
+        "$match": {
+            "org_id": tenant,
+            '$expr': {
+                '$or': [
+                    {
+                        '$gte': [
+                            '$creation_date', { '$date': extract_start_time }
+                        ]
+                    }, {
+                        '$gte': [
+                            '$modified_date', { '$date': extract_start_time }
+                        ]
+                    }
+                ]
+            },
+            "is_active": True,
+            "is_deleted": False
+        }
+      }, 
+      {
+          "$unwind": {
+              "path": "$kpi"
+          }
+      }, 
+      {
+          "$unwind": {
+              "path": "$quartile"
+          }
+      }, 
+      {
+          "$match": {
+              "$expr": {
+                  "$and": [
+                      {
+                          "$eq": [
+                              "$kpi.kpi_name",
+                              "$quartile.kpi_name"
+                          ]
+                      }
+                  ]
+              }
+          }
+      }, 
+      {
+          "$project": {
+              "campaignId": "$_id",
+              "kpiId": "$kpi._id",
+              "name": "$kpi.kpi_name",
+              "overallAggr": "$kpi.agg_function",
+              "entityName": "$kpi.entity_name",
+              "fieldName": "$kpi.entity_col",
+              "displayName": "$kpi.kpi_display_name",
+              "unit": "$kpi.unit",
+              "quartile": "$quartile.quartile",
+              "target": "$quartile.quartile_target",
+              "operator": "$quartile.quartile_operator",
+              "orgId": "$org_id"
+          }
+      }
+    ]
+
     df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
+    df = df.withColumn("orgId", lower(df["orgId"]))
     df.createOrReplaceTempView("campaign_kpis")
-    df = spark.sql("""
-                    select  distinct campaign_id.oid campaignId,
-                            kpi_id.oid kpiId,
-                            name name,
-                            overall_aggr overallAggr,
-                            entity_name entityName,
-                            field_name fieldName,
-                            display_name displayName,
-                            unit unit,
-                            quartile quartile,
-                            target target,
-                            operator operator,
-                            lower(OrgId) orgId
-                    from campaign_kpis
-                """)
     
-    delta_table_partition_ovrewrite(
-        df, "dg_performance_management.campaign_kpis", ['orgId'])
+    spark.sql("""
+      MERGE INTO dg_performance_management.campaign_kpis AS target
+      USING campaign_kpis AS source
+      ON target.orgId = source.orgId
+      AND target.campaignId = source.campaignId
+      AND target.kpiId = source.kpiId
+      WHEN NOT MATCHED THEN
+        INSERT *        
+    """)
     

@@ -669,7 +669,7 @@ def get_active_org():
     return [tenant['name'].upper() for tenant in tenants]
     
 
-def get_active_organization_timezones():
+def get_active_organization_timezones(spark):
   tenants = get_active_org()
   org_timezone_schema = StructType([
       StructField('org_id', StringType(), True),

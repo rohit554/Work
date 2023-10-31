@@ -1,6 +1,7 @@
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars, get_active_organization_timezones
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 from datetime import datetime, timedelta
+from pyspark.sql.functions import lower
 
 kpi_data_schema = StructType([
     StructField("id", StringType(), True),
@@ -14,8 +15,8 @@ kpi_data_schema = StructType([
     StructField("connection_name", StringType(), True)])
 
 def get_kpi_data(spark):
-  extract_start_time = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-  for org_timezone in get_active_organization_timezones().rdd.collect():
+  extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  for org_timezone in get_active_organization_timezones(spark).rdd.collect():
     org_id = org_timezone['org_id'].lower()
     org_timezone = org_timezone['timezone']
 

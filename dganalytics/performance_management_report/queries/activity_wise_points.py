@@ -3,6 +3,7 @@ from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_o
 from datetime import datetime, timedelta
 from bson import json_util
 import json
+from pyspark.sql.functions import lower
 
 schema = StructType([
     StructField('campaignId',StringType(), True),
@@ -25,8 +26,8 @@ schema = StructType([
     StructField('awardedBy', StringType(), True)
 ])
 def get_activity_wise_points(spark):
-  extract_start_time = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-  for org_timezone in get_active_organization_timezones().rdd.collect():
+  extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  for org_timezone in get_active_organization_timezones(spark).rdd.collect():
     org_id = org_timezone['org_id']
     org_timezone = org_timezone['timezone']
 
@@ -165,7 +166,7 @@ def get_activity_wise_points(spark):
         USING activity_wise_points AS source
         ON target.orgId = source.orgId
         AND target.userId = source.userId
-        AND target.campainId = source.campainId
+        AND target.campaignId = source.campaignId
         AND target.activityId = source.activityId
         AND target.date= source.date
         WHEN NOT MATCHED THEN
