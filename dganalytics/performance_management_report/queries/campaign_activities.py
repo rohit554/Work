@@ -1,7 +1,7 @@
 from pyspark.sql.types import StructType, StructField, StringType, BooleanType
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_active_org
 from datetime import datetime, timedelta
-
+from pyspark.sql.functions import lower
 
 schema = StructType([StructField('campaignId', StringType(), True),
                     StructField('activityId', StringType(), True),
@@ -11,7 +11,7 @@ schema = StructType([StructField('campaignId', StringType(), True),
                     StructField('orgId', StringType(), True)])
 
 def get_campaign_activities(spark):
-  extract_start_time = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
   for tenant in get_active_org():
     pipeline = [
       {

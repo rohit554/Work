@@ -4,6 +4,8 @@ from pyspark.sql import SparkSession,Row
 from pyspark.sql.functions import col, to_timestamp, lower
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
 from datetime import datetime, timedelta
+import pandas as pd
+import os
 
 def get_hf_timezones(spark):
   tenant_path, db_path, log_path = get_path_vars("hellofresh")  
@@ -71,7 +73,7 @@ def get_logins(spark):
       StructField('user_id', StringType(), True)
   ])
 
-  for tenant in get_active_organization_timezones().rdd.collect():
+  for tenant in get_active_organization_timezones(spark).rdd.collect():
       logins_pipeline = [
           {
               '$match': {
