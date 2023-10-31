@@ -1,8 +1,10 @@
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_active_organization_timezones
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from datetime import datetime, timedelta
+from pyspark.sql.functions import lower
+
 def build_pipeline(org_id: str, org_timezone: str):  
-    extract_start_time = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
     pipeline = [
         {
             "$match": {
@@ -125,7 +127,7 @@ schema = StructType([StructField('action', StringType(), True),
 
 def get_challenges(spark):
     # Get campaign & challenges for each org
-    for org_timezone in get_active_organization_timezones().rdd.collect():
+    for org_timezone in get_active_organization_timezones(spark).rdd.collect():
         org_id = org_timezone['org_id']
         org_timezone = org_timezone['timezone']
 
@@ -140,7 +142,7 @@ def get_challenges(spark):
             USING challenges AS source
             ON target.orgId = source.orgId
             AND target.challengeeMongoId = source.challengeeMongoId
-            AND target.campainId = source.campainId
+            AND target.campaignId = source.campaignId
             AND target.challengerMongoId = source.challengerMongoId
             AND target.challengeThrownDate = source.challengeThrownDate
             WHEN NOT MATCHED THEN

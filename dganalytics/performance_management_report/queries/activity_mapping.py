@@ -1,6 +1,7 @@
 from pyspark.sql.types import StructType, StructField, StringType, BooleanType
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite,get_active_organization_timezones
 from datetime import datetime, timedelta
+from pyspark.sql.functions import lower
 
 schema = StructType([StructField('campaignId', StringType(), True),
                     StructField('campaignName', StringType(), True),
@@ -10,8 +11,8 @@ schema = StructType([StructField('campaignId', StringType(), True),
                     StructField('orgId', StringType(), True)])
 
 def get_activity_mapping(spark):
-    extract_start_time = (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-    for org_timezone in get_active_organization_timezones().rdd.collect():
+    extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    for org_timezone in get_active_organization_timezones(spark).rdd.collect():
       org_id = org_timezone['org_id']
       org_timezone = org_timezone['timezone']
       pipeline = [
