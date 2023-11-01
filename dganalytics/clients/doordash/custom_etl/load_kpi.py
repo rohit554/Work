@@ -3,6 +3,7 @@ import argparse
 import pandas as pd
 import os
 import numpy as np
+from pyspark.sql.types import StructType, StructField, StringType, TimestampType, BooleanType, DateType, DoubleType, IntegerType, DateType
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -15,39 +16,73 @@ if __name__ == '__main__':
     customer = 'doordashprod'
     spark = get_spark_session(f'{tenant}_load_kpi', tenant)
     tenant_path, db_path, log_path = get_path_vars(customer)
+
+    schema = StructType([
+                StructField("HRMS ID", IntegerType(), True),
+                StructField("Date", DateType(), True),
+                StructField("Chat Handled", DoubleType(), True),
+                StructField("Chat Handled Time (Hours)", DoubleType(), True),
+                StructField("Total Survery", DoubleType(), True),
+                StructField("CSAT Count", DoubleType(), True),
+                StructField("PKT Score", DoubleType(), True),
+                StructField("Scheduled Count", IntegerType(), True),
+                StructField("Present Count", DoubleType(), True),
+                StructField("Total TX FCR Count", DoubleType(), True),
+                StructField("TX FCR Count", DoubleType(), True),
+                StructField("Total Staff Time (Hours)", DoubleType(), True),
+                StructField("Net Staff Time (Hours)", DoubleType(), True),
+                StructField("TP_Downtime (Hours)", DoubleType(), True),
+                StructField("Client_Downtime (Hours)", DoubleType(), True),
+                StructField("Quality Score", DoubleType(), True)
+            ])
+
     kpi = pd.DataFrame()
     if input_file.endswith(".xlsx"):
-        kpi = pd.read_excel(os.path.join(tenant_path, "data", "raw", "kpi", input_file), engine='openpyxl')
+        kpi = pd.read_excel(os.path.join(tenant_path, "data", "raw", "kpi", input_file), engine='openpyxl', sheet_name = "Sep'23")
     elif input_file.endswith(".csv"):
         kpi = pd.read_csv(os.path.join(tenant_path, "data", "raw", "kpi", input_file))
     elif input_file.endswith(".xlsb"):
         xls = pd.ExcelFile(os.path.join(tenant_path, "data", "raw", "kpi", input_file))
+        frames = []
         
         for sheet in xls.sheet_names:
             if sheet == "Calculation":
                 continue
             sheetDf = pd.read_excel(xls, sheet)
             sheetDf['Date'] = pd.to_datetime(sheetDf['Date'], unit='d', origin='1899-12-30')
-            frames = [kpi, sheetDf]
+            frames.append(sheetDf)
 
-            kpi = pd.concat(frames)
+        kpi = pd.concat(frames) 
 
-    kpi['Chat Handled Time (Hours)'] = np.where(kpi['Chat Handled'] == 0, np.nan, kpi['Chat Handled Time (Hours)'])
-    kpi['CSAT Count'] = np.where(kpi['Total Survery'] == 0, np.nan, kpi['CSAT Count'])
-    kpi['Total TX FCR Count'] = np.where(kpi['Total TX FCR Count'] == 0, np.nan, kpi['Total TX FCR Count'])
-    kpi['Chat Handled'] = np.where(kpi['Chat Handled'] == 0, np.nan, kpi['Chat Handled'])
-    kpi['Total Survery'] = np.where(kpi['Total Survery'] == 0, np.nan, kpi['Total Survery'])
-    kpi['TX FCR Count'] = np.where(kpi['TX FCR Count'] == 0, np.nan, kpi['TX FCR Count'])
-    kpi['Total Survery'] = np.where(kpi['Total Survery'] == 0, np.nan, kpi['Total Survery'])
-    kpi['Quality Score'] = np.where(kpi['Quality Score'] == 0, np.nan, kpi['Quality Score']*100)
-    kpi['PKT Score'] = np.where(kpi['PKT Score'] == 0, np.nan, kpi['PKT Score']*100)
+    def try_convert_to_float(x):
+        try:
+            return float(x)
+        except (ValueError, TypeError):
+            return x
 
+    kpi['Chat Handled'] = kpi['Chat Handled'].astype(float)
+    kpi['Chat Handled Time (Hours)'] = kpi['Chat Handled Time (Hours)'].astype(float)
+    kpi['Total Survery'] = kpi['Total Survery'].astype(float)
+    kpi['CSAT Count'] = kpi['CSAT Count'].astype(float)
+    kpi['PKT Score'] = kpi['PKT Score'].astype(float)
+    kpi['Scheduled Count'] = kpi['Scheduled Count'].astype(int)
+    kpi['Present Count'] = kpi['Present Count'].astype(float)
+    kpi['Total TX FCR Count'] = kpi['Total TX FCR Count'].apply(try_convert_to_float)
+    kpi['TX FCR Count'] = kpi['TX FCR Count'].apply(try_convert_to_float)
+    kpi['Total Staff Time (Hours)'] = kpi['Total Staff Time (Hours)'].apply(try_convert_to_float)
+    kpi['Net Staff Time (Hours)'] = kpi['Net Staff Time (Hours)'].apply(try_convert_to_float)
+    kpi['TP_Downtime (Hours)'] = kpi['TP_Downtime (Hours)'].astype(float)
+    kpi['Client_Downtime (Hours)'] = kpi['Client_Downtime (Hours)'].astype(float)
+    kpi['Quality Score'] = np.where(kpi['Quality Score'] == 0, np.nan, kpi['Quality Score'] * 100)
+    kpi['PKT Score'] = np.where(kpi['PKT Score'] == 0, np.nan, kpi['PKT Score'] * 100)
+
+    kpi = kpi.fillna('')
     kpi = spark.createDataFrame(kpi)
     kpi.createOrReplaceTempView("kpi")
 
     kpi = spark.sql(f"""
-        SELECT  `HRMS ID` UserID,,
-                date_format(`Date`, 'dd-MMM-yyyy') AS Date,
+        SELECT  `HRMS ID` UserID,
+				date_format(`Date`, 'dd-MMM-yyyy') AS Date,
                 `Chat Handled`,
                 `Chat Handled Time (Hours)` `Chat Handled Time Hour`,
                 `Total Survery`,
