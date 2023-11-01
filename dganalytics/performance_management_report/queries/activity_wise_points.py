@@ -169,6 +169,8 @@ def get_activity_wise_points(spark):
         AND target.campaignId = source.campaignId
         AND target.activityId = source.activityId
         AND target.date= source.date
+        WHEN MATCHED THEN
+                UPDATE SET *
         WHEN NOT MATCHED THEN
          INSERT *        
       """)

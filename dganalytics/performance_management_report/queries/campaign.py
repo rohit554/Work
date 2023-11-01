@@ -71,6 +71,8 @@ def get_campaign(spark):
       USING campaign AS source
       ON target.orgId = source.orgId
       AND target.campaignId = source.campaignId
+      WHEN MATCHED THEN
+                UPDATE SET *
       WHEN NOT MATCHED THEN
         INSERT *        
       """)

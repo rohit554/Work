@@ -72,6 +72,8 @@ def get_connections(spark):
             USING data_upload_connections AS source
             ON target.orgId = source.orgId
             AND target.connectionId = source.connectionId
+            WHEN MATCHED THEN
+                UPDATE SET *
             WHEN NOT MATCHED THEN
                 INSERT *        
             """)

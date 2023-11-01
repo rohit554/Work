@@ -135,6 +135,8 @@ def get_levels(spark):
             AND target.campaignId = source.campaignId
             AND target.levelId = source.levelId
             AND target.userId = source.userId
+            WHEN MATCHED THEN
+                UPDATE SET *
             WHEN NOT MATCHED THEN
                 INSERT *        
             """)

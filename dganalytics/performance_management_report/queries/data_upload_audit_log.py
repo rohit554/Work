@@ -68,6 +68,8 @@ def get_data_upload_audit_log(spark):
       ON target.orgId = source.orgId
       AND target.userId = source.userId
       AND target.runID = source.runID
+      WHEN MATCHED THEN
+                UPDATE SET *
       WHEN NOT MATCHED THEN
         INSERT *        
       """)
