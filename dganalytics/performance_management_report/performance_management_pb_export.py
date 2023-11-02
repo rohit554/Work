@@ -2,6 +2,9 @@ from dganalytics.utils.utils import get_spark_session, get_path_vars, export_pow
 import argparse
 import os
 import pandas as pd
+import datetime
+from datetime import datetime, timedelta
+from dganalytics.performance_management_report.queries.logins import get_genesys_clients_attendance
 
 def get_kpi_values_data(spark, orgId, orgIds):
     if orgIds == []:
@@ -15,7 +18,7 @@ def get_kpi_values_data(spark, orgId, orgIds):
                   uc.campaignId,
                   ca.activityId activityId,
                   ca.entityName,
-                  ca.kpi_name,
+									ca.kpi_name,
                   ca.fieldName,
                   u.orgId
                 FROM (SELECT EXPLODE(SEQUENCE(CAST("2022-10-01" AS DATE), CURRENT_DATE(), INTERVAL 1 day)) report_date) as d, dg_performance_management.users u
@@ -37,7 +40,7 @@ def get_kpi_values_data(spark, orgId, orgIds):
                   uca.campaignId,
                   uca.activityId,
                   uca.entityName,
-                  uca.kpi_name,
+									uca.kpi_name,
                   uca.fieldName,
                   uca.orgId,
                   ap.points,
@@ -80,7 +83,6 @@ def get_kpi_values_data(spark, orgId, orgIds):
 def get_attendance_data(spark, orgId, orgIds):
   if orgIds == []:
     orgIds = ['-1']
-  
   query = f"""
   SELECT 
   report_date reportDate,
@@ -92,6 +94,34 @@ def get_attendance_data(spark, orgId, orgIds):
   GROUP BY userId,report_date,orgId  
   """
   return spark.sql(query)  
+
+def store_genesys_clients_attendance(spark):
+  extract_start_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  for tenant in ['salmatcolesonline', 'skynzib', 'skynzob', 'hellofreshanz']:
+    get_genesys_clients_attendance(spark,tenant, extract_start_time).createOrReplaceTempView("genesys_attendance")
+    df=spark.sql(f"""
+                SELECT to_date(actualStartTime, 'dd-MM-yyyy') AS reportDate,
+                userId,
+                actualStartTime loginTime,
+                actualEndTime logoutTime,
+                true as isPresent,
+                '{tenant}' AS orgId,
+                '{datetime.datetime.now()}' AS recordInsertDate
+                FROM genesys_attendance
+                WHERE actualStartTime IS NOT NULL
+                """)
+
+    df.createOrReplaceTempView("attendance")
+    spark.sql(f"""MERGE INTO dg_performance_management.attendance target
+                    USING attendance source
+                    ON date_format(cast(source.reportDate AS date), 'dd-MM-yyyy') = date_format(cast(target.reportDate AS date), 'dd-MM-yyyy')
+                    AND source.userId = target.userId
+                    AND source.orgId = target.orgId
+                    WHEN MATCHED THEN
+                        UPDATE SET *
+                    WHEN NOT MATCHED THEN
+                        INSERT *
+                    """)
 
 if __name__ == "__main__":
 
@@ -107,7 +137,7 @@ if __name__ == "__main__":
         app_name=app_name, tenant='datagamz', default_db='dg_performance_management')
     tables = ["activity_wise_points", "badges", "campaign", "challenges", "levels", "logins", "questions",
               "quizzes", "user_campaign", "users", "activity_mapping", "data_upload_audit_log", 
-              "data_upload_connections", "kpi_data", "campaign_kpis", "trek_data", "kpi_values", "attendance"]
+              "data_upload_connections", "kpi_data", "campaign_kpis", "trek_data", "kpi_values", "attendance", "announcement"]
     for tenant in tenants:
         print(f"Getting ROI data for {tenant}")
         if 'hellofresh' in tenant['name']:
@@ -119,8 +149,10 @@ if __name__ == "__main__":
             print(f"extracting Table - {table}")
             if table == "kpi_values":
                 df = get_kpi_values_data(spark, tenant['name'], [])
-            elif table == "attendance" and tenant['name'] not in ['doordashprod','startekflipkartcx','tpindiait','airbnbprod']:
+            elif table == "attendance" and tenant['name'] not in ['doordashprod','startekflipkartcx','tpindiait','airbnbprod', 'salmatcolesonline', 'skynzib', 'skynzob']:
                 df = get_attendance_data(spark, tenant['name'], [])
+            elif table == "attendance" and tenant['name'] in ['doordashprod','startekflipkartcx','tpindiait','airbnbprod']:
+              continue
             else:
                 df = spark.sql(
                     f"select * from dg_performance_management.{table} where orgId = '{tenant['name']}'")
@@ -136,8 +168,6 @@ if __name__ == "__main__":
     for table in tables:
         if table == "kpi_values":
             df = get_kpi_values_data(spark, None, ['hellofreshanz', 'hellofreshus'])
-        elif table == "attendance":
-            df = get_attendance_data(spark, None, ['hellofreshanz', 'hellofreshus'])
         else:
             df = spark.sql(
                 f"select * from dg_performance_management.{table} where orgId in ('hellofreshanz', 'hellofreshus')")
