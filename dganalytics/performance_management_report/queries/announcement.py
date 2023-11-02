@@ -175,6 +175,8 @@ def get_announcement(spark):
         AND target.Announcement_sent_By = source.Announcement_sent_By
         AND target.Announcement_received_By = source.Announcement_received_By
         AND target.creation_date = source.creation_date
+        WHEN MATCHED THEN
+                UPDATE SET *
         WHEN NOT MATCHED THEN
          INSERT *        
       """)

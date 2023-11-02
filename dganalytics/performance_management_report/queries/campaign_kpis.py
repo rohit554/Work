@@ -1,6 +1,7 @@
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_active_org
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType, DateType
 from datetime import datetime, timedelta
+from pyspark.sql.functions import lower
 
 schema = StructType([StructField('campaignId', StringType(), True),
                      StructField('kpiId', StringType(), True),
@@ -92,6 +93,8 @@ def get_campaign_kpis(spark):
       ON target.orgId = source.orgId
       AND target.campaignId = source.campaignId
       AND target.kpiId = source.kpiId
+      WHEN MATCHED THEN
+                UPDATE SET *
       WHEN NOT MATCHED THEN
         INSERT *        
     """)

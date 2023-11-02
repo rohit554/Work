@@ -167,6 +167,8 @@ def get_kpi_data(spark):
             AND target.report_date = source.report_date
             AND target.connection_name = source.connection_name
             AND target.attr_dict_key= source.attr_dict_key
+            WHEN MATCHED THEN
+                UPDATE SET *
             WHEN NOT MATCHED THEN
              INSERT *        
           """)

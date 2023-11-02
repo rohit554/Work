@@ -54,6 +54,8 @@ def get_campaign_activities(spark):
       ON target.orgId = source.orgId
       AND target.campaignId = source.campaignId
       AND target.activityId = source.activityId
+      WHEN MATCHED THEN
+                UPDATE SET *
       WHEN NOT MATCHED THEN
         INSERT *        
     """)

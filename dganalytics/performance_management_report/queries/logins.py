@@ -181,6 +181,8 @@ def get_logins(spark):
         ON target.orgId = source.orgId
         AND target.userId = source.userId
         AND target.date = source.date
+        WHEN MATCHED THEN
+                UPDATE SET *
         WHEN NOT MATCHED THEN
          INSERT *        
       """)

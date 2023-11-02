@@ -1,54 +1,79 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
+from dganalytics.utils.utils import exec_mongo_pipeline, get_active_org
 from pyspark.sql.types import StructType, StructField, StringType, BooleanType
+from datetime import datetime, timedelta
+from pyspark.sql.functions import lower
 
-pipeline = [
-    {
-        "$project": {
-            "_id": 0.0,
-            "campaign_id": "$_id",
-            "name": 1.0,
-            "start_date": {
-                "$dateToString": {
-                    "format": "%Y-%m-%d",
-                    "date": "$start_date"
-                }
-            },
-            "end_date": {
-                "$dateToString": {
-                    "format": "%Y-%m-%d",
-                    "date": "$end_date"
-                }
-            },
-            "org_id": 1.0,
-            "is_active": 1.0,
-            "is_deleted": 1.0
-        }
-    }
-]
 
-schema = StructType([StructField('campaign_id', StructType([StructField('oid', StringType(), True)]), True),
-                     StructField('end_date', StringType(), True), StructField(
-                         'is_active', BooleanType(), True),
-                     StructField('is_deleted', BooleanType(), True), StructField(
-                         'name', StringType(), True),
-                     StructField('org_id', StringType(), True), StructField('start_date', StringType(), True)])
+schema = StructType([StructField('campaignId', StringType(), True),
+                     StructField('endDate', StringType(), True), 
+                     StructField('isActive', BooleanType(), True),
+                     StructField('isDeleted', BooleanType(), True), 
+                     StructField('name', StringType(), True),
+                     StructField('orgId', StringType(), True), 
+                     StructField('start_date', StringType(), True)])
 
 
 def get_campaign(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
-    df.createOrReplaceTempView("campaign")
-    df = spark.sql("""
-                    select  distinct campaign_id.oid campaignId,
-                            cast(start_date as date) start_date,
-                            cast(end_date as date) endDate,
-                            is_active isActive,
-                            is_deleted isDeleted,
-                            name name,
-                            lower(org_id) orgId
-                    from campaign
-                """)
-    '''
-    df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
-        'orgId').saveAsTable("dg_performance_management.campaign")
-    '''
-    delta_table_partition_ovrewrite(df, "dg_performance_management.campaign", ['orgId'])
+    extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    for tenant in get_active_org():
+      pipeline = [
+        {
+          "$match": {
+            "org_id": tenant,
+            '$expr': {
+                '$or': [
+                    {
+                        '$gte': [
+                            '$creation_date', { '$date': extract_start_time }
+                        ]
+                    }, {
+                        '$gte': [
+                            '$modified_date', { '$date': extract_start_time }
+                        ]
+                    }
+                ]
+            },
+            "is_active": True,
+            "is_deleted": False
+          } 
+        },
+        {
+            "$project": {
+                "_id": 0.0,
+                "campaignId": "$_id",
+                "name": 1.0,
+                "start_date": {
+                    "$dateToString": {
+                        "format": "%Y-%m-%d",
+                        "date": "$start_date"
+                    }
+                },
+                "endDate": {
+                    "$dateToString": {
+                        "format": "%Y-%m-%d",
+                        "date": "$end_date"
+                    }
+                },
+                "orgId" : "$org_id",
+                "isActive" : "$is_active",
+                "isDeleted":"$is_deleted"
+            }
+        }
+      ]
+
+      df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
+      df = df.withColumn("orgId", lower(df["orgId"]))
+      
+      df.createOrReplaceTempView("campaign")
+
+      spark.sql("""
+      MERGE INTO dg_performance_management.campaign AS target
+      USING campaign AS source
+      ON target.orgId = source.orgId
+      AND target.campaignId = source.campaignId
+      WHEN MATCHED THEN
+                UPDATE SET *
+      WHEN NOT MATCHED THEN
+        INSERT *        
+      """)
+    

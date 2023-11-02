@@ -1,117 +1,75 @@
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
+from dganalytics.utils.utils import exec_mongo_pipeline, get_active_org
 from datetime import datetime, timedelta
-from bson import json_util
-import json
+from pyspark.sql.functions import lower
 
 schema = StructType([
-    StructField('user_id', StructType([StructField('oid', StringType(), True)]), True),
-    StructField('job_name', StringType(), True), 
-    StructField('audit_file', StringType(), True), 
-    StructField('start_date', StringType(), True),
+    StructField('userId', StringType(), True),
+    StructField('jobName', StringType(), True), 
+    StructField('auditFile', StringType(), True), 
+    StructField('startDate', StringType(), True),
     StructField('runID', StringType(), True), 
-    StructField('file_name', StringType(), True), 
+    StructField('fileName', StringType(), True), 
     StructField('status', StringType(), True), 
-    StructField('entity_name', StringType(), True), 
-    StructField('end_date', StringType(), True), 
+    StructField('entityName', StringType(), True), 
+    StructField('endDate', StringType(), True), 
     StructField('message', StringType(), True),
-    StructField('record_inserted', IntegerType(), True),
-    StructField('org_id', StringType(), True),
+    StructField('recordInserted', IntegerType(), True),
+    StructField('orgId', StringType(), True),
 ])
-
-org_timezone_schema = StructType([
-    StructField('org_id', StringType(), True),
-    StructField('timezone', StringType(), False)])
 
 
 def get_data_upload_audit_log(spark):
-    org_timezone_pipeline = [{
-        "$match": {
-            "$expr": {
-                "$and": [
-                {
-                    "$eq": ["$type", "Organisation"]
-                }, {
-                    "$eq": ["$is_active", True]
-                }, {
-                    "$eq": ["$is_deleted", False]
-                }]
-            }
-        }
-    }, {
-        "$project": {
-            "org_id": 1,
-            "timezone": {
-                "$ifNull": ["$timezone", "Australia/Melbourne"]
-            }
-        }
-    }]
-
-    org_id_rows = exec_mongo_pipeline(
-        spark, org_timezone_pipeline, 'Organization',
-        org_timezone_schema).select("*").collect()
-
-    df = None
-
-    for org_id_row in org_id_rows:
-        org_id = org_id_row.asDict()['org_id']
-
-        data_upload_audit_pipeline = [{
+  extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  for tenant in get_active_org():
+    data_upload_audit_pipeline = [
+          {
             "$match": {
-                "org_id": org_id
+                "org_id": tenant,
+                "start_date":{
+                        '$gte': { '$date': extract_start_time }
+                    }
             }
-        }, {
+          }, 
+          {
             "$project": {
-                "user_id" : 1,
-                "job_name" : 1, 
-                "audit_file" : 1, 
-                "start_date" : {
+                "userId" : "$user_id",
+                "jobName" : "$job_name", 
+                "auditFile" : "$audit_file", 
+                "startDate" : {
                     "$dateToString": {
                         "format": "%Y-%m-%dT%H:%M:%SZ",
                         "date": "$start_date"
                     }
                 },
-                "end_date" : {
+                "endDate" : {
                     "$dateToString": {
                         "format": "%Y-%m-%dT%H:%M:%SZ",
                         "date": "$end_date"
                     }
                 }, 
                 "runID" : 1, 
-                "file_name" : 1, 
+                "fileName" : "$file_name", 
                 "status" : 1, 
-                "entity_name" : 1,
+                "entityName" : "$entity_name",
                 "message":1,
-                "record_inserted" : 1,
-                "org_id": 1 
+                "recordInserted" : "$record_inserted",
+                "orgId": "$org_id"
             }
         }]
 
-        data_upload_logs = exec_mongo_pipeline(spark, data_upload_audit_pipeline, 'ETL_Audit_Log', schema)
-
-        if df is None:
-            df = data_upload_logs
-        else:
-            df = df.union(data_upload_logs)
-
-    df.createOrReplaceTempView("data_upload_audit_log")
-
-
-    df = spark.sql("""
-                    select  distinct user_id.oid as userId,
-                            job_name as jobName,
-                            audit_file as auditFile,
-                            runID as runID,
-                            file_name as fileName,
-                            status as status,
-                            entity_name as entityName,
-                            cast(start_date as date) as startDate,
-                            cast(end_date as date) as endDate,
-                            message as message,
-                            record_inserted as recordInserted,
-                            lower(org_id) as orgId
-                    from data_upload_audit_log
-                """)
-
-    delta_table_partition_ovrewrite(
-        df, "dg_performance_management.data_upload_audit_log", ['orgId'])
+    data_upload_logs = exec_mongo_pipeline(spark, data_upload_audit_pipeline, 'ETL_Audit_Log', schema)
+    data_upload_logs = data_upload_logs.withColumn("orgId", lower(data_upload_logs["orgId"]))
+    
+    data_upload_logs.createOrReplaceTempView("data_upload_audit_log")
+    spark.sql("""
+      MERGE INTO dg_performance_management.data_upload_audit_log AS target
+      USING data_upload_audit_log AS source
+      ON target.orgId = source.orgId
+      AND target.userId = source.userId
+      AND target.runID = source.runID
+      WHEN MATCHED THEN
+                UPDATE SET *
+      WHEN NOT MATCHED THEN
+        INSERT *        
+      """)

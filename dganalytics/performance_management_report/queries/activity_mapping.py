@@ -68,6 +68,8 @@ def get_activity_mapping(spark):
             ON target.orgId = source.orgId
             AND target.campaignId = source.campaignId
             AND target.activityId = source.activityId
+            WHEN MATCHED THEN
+                UPDATE SET *
             WHEN NOT MATCHED THEN
              INSERT *        
           """)
