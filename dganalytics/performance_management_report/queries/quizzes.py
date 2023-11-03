@@ -280,6 +280,7 @@ def get_quizzes(spark):
           ON target.orgId = source.orgId
           AND target.userId = source.userId
           AND target.quizId = source.quizId
+          AND target.userMongoId = source.userMongoId
           WHEN MATCHED THEN
                 UPDATE SET *
           WHEN NOT MATCHED THEN

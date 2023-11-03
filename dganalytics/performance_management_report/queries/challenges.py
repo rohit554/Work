@@ -145,6 +145,8 @@ def get_challenges(spark):
             AND target.campaignId = source.campaignId
             AND target.challengerMongoId = source.challengerMongoId
             AND target.challengeThrownDate = source.challengeThrownDate
+            AND target.challengeName = source.challengeName
+            AND target.challengeAcceptanceDate = source.challengeAcceptanceDate
             WHEN MATCHED THEN
                 UPDATE SET *
             WHEN NOT MATCHED THEN

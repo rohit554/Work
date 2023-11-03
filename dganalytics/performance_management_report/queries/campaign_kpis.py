@@ -93,6 +93,8 @@ def get_campaign_kpis(spark):
       ON target.orgId = source.orgId
       AND target.campaignId = source.campaignId
       AND target.kpiId = source.kpiId
+      AND target.entityName = source.entityName
+      AND target.quartile = source.quartile
       WHEN MATCHED THEN
                 UPDATE SET *
       WHEN NOT MATCHED THEN

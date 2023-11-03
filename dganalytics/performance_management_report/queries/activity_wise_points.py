@@ -1,5 +1,5 @@
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite,get_active_organization_timezones
+from dganalytics.utils.utils import exec_mongo_pipeline, get_active_organization_timezones
 from datetime import datetime, timedelta
 from bson import json_util
 import json
@@ -159,7 +159,7 @@ def get_activity_wise_points(spark):
     badge_bonus_points_df = exec_mongo_pipeline(spark,badge_bonus_points_pipeline,'User_Outcome', schema)
     points_df = activity_points_df.union(badge_bonus_points_df)
     points_df = points_df.withColumn("orgId", lower(points_df["orgId"]))
-    
+    points_df = points_df.dropDuplicates()
     points_df.createOrReplaceTempView("activity_wise_points")
     spark.sql("""
         MERGE INTO dg_performance_management.activity_wise_points AS target
@@ -169,6 +169,7 @@ def get_activity_wise_points(spark):
         AND target.campaignId = source.campaignId
         AND target.activityId = source.activityId
         AND target.date= source.date
+        AND target.awardedBy = source.awardedBy
         WHEN MATCHED THEN
                 UPDATE SET *
         WHEN NOT MATCHED THEN

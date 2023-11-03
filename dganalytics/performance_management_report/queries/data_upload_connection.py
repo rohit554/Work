@@ -64,7 +64,7 @@ def get_connections(spark):
         ]
         df = exec_mongo_pipeline(spark, connectionPipeline, 'Data_Upload_Connection', data_upload_connection_schema)
         df = df.withColumn("orgId", lower(df["orgId"]))
-        
+        df = df.dropDuplicates()
         df.createOrReplaceTempView("data_upload_connections")
 
         spark.sql("""
@@ -72,6 +72,7 @@ def get_connections(spark):
             USING data_upload_connections AS source
             ON target.orgId = source.orgId
             AND target.connectionId = source.connectionId
+            AND target.attr_dict_key = source.attr_dict_key
             WHEN MATCHED THEN
                 UPDATE SET *
             WHEN NOT MATCHED THEN

@@ -157,13 +157,14 @@ def get_kpi_data(spark):
 
         kpi_data = exec_mongo_pipeline(spark, pipeline, connection['connection_name'], kpi_data_schema)
         kpi_data = kpi_data.withColumn("orgId", lower(kpi_data["orgId"]))
-        
+        kpi_data = kpi_data.dropDuplicates()
         kpi_data.createOrReplaceTempView("kpi_data")
         spark.sql("""
             MERGE INTO dg_performance_management.kpi_data AS target
             USING kpi_data AS source
             ON target.orgId = source.orgId
             AND target.userId = source.userId
+            AND target.id = source.id
             AND target.report_date = source.report_date
             AND target.connection_name = source.connection_name
             AND target.attr_dict_key= source.attr_dict_key
