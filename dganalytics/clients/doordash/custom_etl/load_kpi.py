@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     kpi = pd.DataFrame()
     if input_file.endswith(".xlsx"):
-        kpi = pd.read_excel(os.path.join(tenant_path, "data", "raw", "kpi", input_file), engine='openpyxl', sheet_name = "Sep'23")
+        kpi = pd.read_excel(os.path.join(tenant_path, "data", "raw", "kpi", input_file), engine='openpyxl')
     elif input_file.endswith(".csv"):
         kpi = pd.read_csv(os.path.join(tenant_path, "data", "raw", "kpi", input_file))
     elif input_file.endswith(".xlsb"):
