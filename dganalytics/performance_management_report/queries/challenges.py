@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_active_organization_timezones
+from dganalytics.utils.utils import exec_mongo_pipeline, get_active_organization_timezones
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from datetime import datetime, timedelta
 from pyspark.sql.functions import lower

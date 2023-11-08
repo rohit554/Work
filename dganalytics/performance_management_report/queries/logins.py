@@ -1,5 +1,4 @@
-
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars, get_active_organization_timezones
+from dganalytics.utils.utils import exec_mongo_pipeline, get_path_vars, get_active_organization_timezones
 from pyspark.sql import SparkSession,Row
 from pyspark.sql.functions import col, to_timestamp, lower
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType
@@ -181,8 +180,6 @@ def get_logins(spark):
         ON target.orgId = source.orgId
         AND target.userId = source.userId
         AND target.date = source.date
-        WHEN MATCHED THEN
-                UPDATE SET *
         WHEN NOT MATCHED THEN
          INSERT *        
       """)

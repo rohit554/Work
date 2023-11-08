@@ -1,8 +1,6 @@
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType
 from dganalytics.utils.utils import exec_mongo_pipeline, get_active_organization_timezones
 from datetime import datetime, timedelta
-from bson import json_util
-import json
 from pyspark.sql.functions import lower
 
 schema = StructType([
@@ -94,7 +92,7 @@ def get_activity_wise_points(spark):
             "user_id": 1,
             "campaign_id": 1,
             "awarded_by": 1,
-            "activity_name": "Badges Bonus Points",
+            "activityName": "Badges Bonus Points",
             "creation_date": 1,
             "outcome_type": 1,
             "org_id": 1
@@ -155,9 +153,9 @@ def get_activity_wise_points(spark):
       }
     ]
   
-    activity_points_df = exec_mongo_pipeline(spark,activity_points_pipeline,'User_Outcome', schema)
+    points_df = exec_mongo_pipeline(spark,activity_points_pipeline,'User_Outcome', schema)
     badge_bonus_points_df = exec_mongo_pipeline(spark,badge_bonus_points_pipeline,'User_Outcome', schema)
-    points_df = activity_points_df.union(badge_bonus_points_df)
+    points_df = points_df.union(badge_bonus_points_df)
     points_df = points_df.withColumn("orgId", lower(points_df["orgId"]))
     points_df = points_df.dropDuplicates()
     points_df.createOrReplaceTempView("activity_wise_points")
@@ -167,12 +165,14 @@ def get_activity_wise_points(spark):
         ON target.orgId = source.orgId
         AND target.userId = source.userId
         AND target.campaignId = source.campaignId
-        AND target.activityId = source.activityId
-        AND target.date= source.date
-        AND target.awardedBy = source.awardedBy
+        AND (target.activityId = source.activityId OR (target.activityId IS NULL AND source.activityId IS NULL))        
+        AND (target.awardedBy = source.awardedBy OR (target.awardedBy IS NULL AND source.awardedBy IS NULL))
+        AND (target.mongoUserId = source.mongoUserId OR (target.mongoUserId IS NULL AND source.mongoUserId IS NULL))
+        AND target.date = source.date
+        AND target.outcomeType = source.outcomeType
         WHEN MATCHED THEN
-                UPDATE SET *
+            UPDATE SET *
         WHEN NOT MATCHED THEN
-         INSERT *        
-      """)
+            INSERT *
+    """)
 
