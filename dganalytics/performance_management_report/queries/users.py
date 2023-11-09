@@ -1,160 +1,185 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
+from dganalytics.utils.utils import exec_mongo_pipeline, get_active_organization_timezones, get_active_org
+from pyspark.sql.functions import col, to_timestamp, expr, lower
 from pyspark.sql.types import StructType, StructField, StringType, BooleanType
+from datetime import datetime, timedelta
 
-pipeline = [
-    {
-        "$project": {
-            "user_id": 1.0,
-            "email": 1.0,
-            "first_name": 1.0,
-            "last_name": 1.0,
-            "name": 1.0,
-            "quartile": 1.0,
-            "works_for": 1.0,
-            "role_id": 1.0,
-            "org_id": 1.0,
-            "is_active": 1.0,
-            "is_deleted": 1.0
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$works_for",
-            "preserveNullAndEmptyArrays": True
-        }
-    },
-    {
-        "$lookup": {
-            "from": "Organization",
-            "localField": "works_for.team_id",
-            "foreignField": "_id",
-            "as": "Team"
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$Team",
-            "preserveNullAndEmptyArrays": True
-        }
-    },
-    {
-        "$lookup": {
-            "from": "User",
-            "let": {
-                    "team_id": "$works_for.team_id"
-            },
-            "pipeline": [
-                {
-                    "$project": {
-                        "name": 1.0,
-                        "user_id": 1.0,
-                        "works_for": 1.0
-                    }
-                },
-                {
-                    "$unwind": {
-                        "path": "$works_for"
-                    }
-                },
-                {
-                    "$match": {
-                        "$expr": {
-                            "$and": [
-                                {
-                                    "$eq": [
-                                        "$works_for.role_id",
-                                        "Team Lead"
-                                    ]
-                                },
-                                {
-                                    "$eq": [
-                                        "$works_for.team_id",
-                                        "$$team_id"
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "$project": {
-                        "name": "$name"
-                    }
-                }
-            ],
-            "as": "tl_data"
-        }
-    },
-    {
-        "$unwind": {
-            "path": "$tl_data",
-            "preserveNullAndEmptyArrays": True
-        }
-    },
-    {
-        "$project": {
-            "_id": 0.0,
-            "MongoUserId": "$_id",
-            "UserId": "$user_id",
-            "Email": "$email",
-            "FirstName": "$first_name",
-            "LastName": "$last_name",
-            "Name": "$name",
-            "Quartile": "$quartile",
-            "RoleId": {
-                    "$ifNull": [
-                        "$works_for.role_id",
-                        "$role_id"
-                    ]
-            },
-            "TeamName": "$Team.name",
-            "TeamLeadName": "$tl_data.name",
-            "OrgId": "$org_id",
-            "isActive": "$is_active",
-            "isDeleted": "$is_deleted"
-        }
-    }
-]
-
-schema = StructType([StructField('Email', StringType(), True),
-                     StructField('FirstName', StringType(), True),
-                     StructField('LastName', StringType(), True),
-                     StructField('MongoUserId', StructType(
-                         [StructField('oid', StringType(), True)]), True),
-                     StructField('Name', StringType(), True),
-                     StructField('OrgId', StringType(), True),
-                     StructField('Quartile', StringType(), True),
-                     StructField('RoleId', StringType(), True),
-                     StructField('TeamLeadName', StringType(), True),
-                     StructField('TeamName', StringType(), True),
-                     StructField('UserId', StringType(), True),
-                     StructField('isActive', BooleanType(), True),
-                     StructField('isDeleted', BooleanType(), True)])
-
+schema = StructType([
+    StructField('email', StringType(), True),
+    StructField('firstName', StringType(), True),
+    StructField('lastName', StringType(), True),
+    StructField('mongoUserId', StringType(), True),
+    StructField('name', StringType(), True),
+    StructField('orgId', StringType(), True),
+    StructField('quartile', StringType(), True),
+    StructField('roleId', StringType(), True),
+    StructField('teamLeadName', StringType(), True),
+    StructField('teamName', StringType(), True),
+    StructField('userId', StringType(), True),
+    StructField('state', StringType(), True)
+])
 
 def get_users(spark):
-    df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
-    df.createOrReplaceTempView("users")
-    df = spark.sql("""
-                    select  distinct UserId userId,
-                            Email email,
-                            FirstName firstName,
-                            LastName lastName,
-                            MongoUserId.oid mongoUserId,
-                            Name name,
-                            Quartile quartile,
-                            RoleId roleId,
-                            TeamLeadName teamLeadName,
-                            TeamName teamName,
-                            (case when isDeleted then 'deleted'
-                                when not isDeleted and not isActive then 'inactive'
-                                    else 'active' end) state,
-                            lower(OrgId) orgId
-                    from users
+    extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    org_timezones_df = get_active_organization_timezones(spark)
+    for org_timezone in get_active_organization_timezones(spark).rdd.collect():
+        pipeline = [
+            {"$match": {
+                'org_id': org_timezone['org_id'],
+                'is_deleted': False,
+                '$expr': {
+                    '$or': [
+                        {
+                            '$gte': [
+                                '$creation_date', {'$date': extract_start_time}
+                            ]
+                        }, {
+                            '$gte': [
+                                '$modified_date', {'$date': extract_start_time}
+                            ]
+                        }
+                    ]
+                }
+            }},
+            {
+                "$project": {
+                    "user_id": 1.0,
+                    "email": 1.0,
+                    "first_name": 1.0,
+                    "last_name": 1.0,
+                    "name": 1.0,
+                    "quartile": 1.0,
+                    "works_for": 1.0,
+                    "role_id": 1.0,
+                    "org_id": 1.0,
+                    "is_active": 1.0,
+                    "is_deleted": 1.0
+                }
+            },
+            {
+                "$unwind": {
+                    "path": "$works_for",
+                    "preserveNullAndEmptyArrays": True
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "Organization",
+                    "localField": "works_for.team_id",
+                    "foreignField": "_id",
+                    "as": "Team"
+                }
+            },
+            {
+                "$unwind": {
+                    "path": "$Team",
+                    "preserveNullAndEmptyArrays": True
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "User",
+                    "let": {
+                        "team_id": "$works_for.team_id"
+                    },
+                    "pipeline": [
+                        {
+                            '$match': {
+                                'works_for.role_id': 'Team Lead',
+                                'is_deleted': False,
+                                'is_active': True
+                            }
+                        },
+                        {
+                            "$project": {
+                                "name": 1.0,
+                                "user_id": 1.0,
+                                "works_for": 1.0
+                            }
+                        },
+                        {
+                            "$unwind": {
+                                "path": "$works_for"
+                            }
+                        },
+                        {
+                            "$match": {
+                                "$expr": {
+                                    "$and": [
+                                        {
+                                            "$eq": [
+                                                "$works_for.role_id",
+                                                "Team Lead"
+                                            ]
+                                        },
+                                        {
+                                            "$eq": [
+                                                "$works_for.team_id",
+                                                "$$team_id"
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "$project": {
+                                "name": "$name"
+                            }
+                        }
+                    ],
+                    "as": "tl_data"
+                }
+            },
+            {
+                "$unwind": {
+                    "path": "$tl_data",
+                    "preserveNullAndEmptyArrays": True
+                }
+            },
+            {
+                "$project": {
+                    "_id": 0.0,
+                    "mongoUserId": "$_id",
+                    "userId": "$user_id",
+                    "email": "$email",
+                    "firstName": "$first_name",
+                    "lastName": "$last_name",
+                    "name": "$name",
+                    "quartile": "$quartile",
+                    "roleId": {
+                        "$ifNull": [
+                            "$works_for.role_id",
+                            "$role_id"
+                        ]
+                    },
+                    "teamName": "$Team.name",
+                    "teamLeadName": "$tl_data.name",
+                    "orgId": "$org_id",
+                    "state": {
+                        "$cond": {
+                            "if": {"$eq": ["$is_active", True]},
+                            "then": "active",
+                            "else": "inactive"
+                        }
+                    }
+                }
+            }
+        ]
+        df = exec_mongo_pipeline(spark, pipeline, 'User', schema)
+        df = df.withColumn("orgId", lower(df["orgId"]))
+        df.createOrReplaceTempView("users")
+        df.dropDuplicates()
+        spark.sql("""delete from dg_performance_management.users 
+                where userId IN (SELECT userId FROM users)
+                and email IN (SELECT email FROM users)
                 """)
-    '''
-    df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
-        'orgId').saveAsTable("dg_performance_management.users")
-    '''
-    delta_table_partition_ovrewrite(
-        df, "dg_performance_management.users", ['orgId'])
+        
+        spark.sql("""
+            MERGE INTO dg_performance_management.users AS target
+            USING users AS source
+            ON target.orgId = source.orgId
+            AND target.email = source.email
+            AND target.userId = source.userId
+            WHEN NOT MATCHED THEN
+            INSERT *  
+        """)
