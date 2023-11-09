@@ -169,17 +169,20 @@ def get_users(spark):
         df = df.withColumn("orgId", lower(df["orgId"]))
         df.createOrReplaceTempView("users")
         df.dropDuplicates()
-        spark.sql("""delete from dg_performance_management.users 
-                where userId IN (SELECT userId FROM users)
-                and email IN (SELECT email FROM users)
-                """)
-        
+
+        spark.sql(f"""
+                DELETE FROM dg_performance_management.users
+                WHERE orgId = lower('{org_timezone['org_id']}')
+                AND
+                EXISTS (
+                SELECT 1
+                FROM users
+                WHERE users.userId = dg_performance_management.users.userId
+                AND users.email = dg_performance_management.users.email
+                )
+        """)
+
         spark.sql("""
-            MERGE INTO dg_performance_management.users AS target
-            USING users AS source
-            ON target.orgId = source.orgId
-            AND target.email = source.email
-            AND target.userId = source.userId
-            WHEN NOT MATCHED THEN
-            INSERT *  
+                    INSERT INTO dg_performance_management.users 
+                    SELECT * FROM users 
         """)
