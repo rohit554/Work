@@ -16,7 +16,7 @@ if __name__ == '__main__':
     input_file = args.input_file
 
     tenant = 'datagamz'
-    customer = 'comcast'
+    customer = 'comcastprod'
     db_name = f"dg_{customer}"
     spark = get_spark_session('mtd_metrics_data', tenant)
     tenant_path, db_path, log_path = get_path_vars(customer)
@@ -47,7 +47,7 @@ if __name__ == '__main__':
     kpi = kpi.iloc[:grand_total_index]
     kpi['Tier'] = 'T1'
 
-    percentage_columns = ["Sentiment", "Composite", "NTT", "XSR", "CPR", "Showrate", "Xfer", "SC%", "OB"]
+    percentage_columns = ["Sentiment", "Composite", "NTT", "XSR", "CPR", "Showrate", "Xfer", "SC%", "OB", "AICR"]
     for column in percentage_columns:
         kpi[column] = (kpi[column] * 100).astype(float)
     
@@ -66,20 +66,27 @@ if __name__ == '__main__':
     merged_data["MTD_DT"] = merged_data["MTD_DT"].dt.date
     kpi_spark = spark.createDataFrame(merged_data)
     kpi_spark = kpi_spark.withColumn("Emp_ID", col("Emp_ID").cast("integer"))
-    kpi_spark = kpi_spark.dropDuplicates(['Emp_ID'])
+    kpi_spark = kpi_spark.dropDuplicates()
     kpi_spark = kpi_spark.filter(~(isnan(col("Name")) | (col("Name").isNull())))
-    double_columns = ["Sentiment", "Composite", "NTT", "XSR", "CPR", "Showrate", "Xfer", "SC%", "OB"]
+    double_columns = ["Sentiment", "Composite", "NTT", "XSR", "CPR", "Showrate", "Xfer", "SC%", "OB", "AICR"]
     for column in percentage_columns:
         kpi_spark = kpi_spark.withColumn(column, col(column).cast("double"))
     kpi_spark = kpi_spark.createOrReplaceTempView("mtd_metrics")
     mtd_metrics_data = spark.sql(f"""
-                            SELECT
-                            Name,Emp_ID as `User Id`,Sentiment,Composite,NTT,XSR,AICR,tNPS,CPR,Hold,ACW,Calls,AHT,Talk,Showrate,Xfer,`SC%`,CPC,OB,MTD_DT,Tier
-                            from mtd_metrics
+                                select
+                                    Emp_ID as `User Id`,
+                                    date_format(MTD_DT, 'dd-MM-yyyy') as `Date`,
+                                    coalesce(tNPS, "") as tNPS,
+                                    coalesce(AICR, "") as `AICR Seven Days`,
+                                    coalesce(XSR, "") as XSR,
+                                    coalesce(AHT, "") as AHT,
+                                    coalesce(Showrate, "") as `SHOWRATE`,
+                                    coalesce(CPR, "") as CPR
+                                from mtd_metrics
                             """)
     
-    # push_gamification_data(
-    #         mtd_metrics_data.toPandas(), 'DATAGAMZPROD', 'asg')
+    push_gamification_data(
+            mtd_metrics_data.toPandas(), customer.upper(), 'Comcast_MTD_Connection')
 
     pm_mtd_metrics = spark.sql(f"""
                                 INSERT INTO {db_name}.mtd_metrics
@@ -89,7 +96,7 @@ if __name__ == '__main__':
                             """)
     
     pm_mtd_metrics_data = spark.sql(f"""
-                                    SELECT DISTINCT *
+                                    select DISTINCT *
                                     from {db_name}.mtd_metrics
                                     """)
 

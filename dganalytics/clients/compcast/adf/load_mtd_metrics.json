@@ -131,7 +131,7 @@
 				],
 				"type": "BlobEventsTrigger",
 				"typeProperties": {
-					"blobPathBeginsWith": "/comcast/blobs/data/raw/mtd_metrics",
+					"blobPathBeginsWith": "/comcastprod/blobs/data/raw/mtd_metrics",
 					"blobPathEndsWith": "",
 					"ignoreEmptyBlobs": true,
 					"scope": "[concat('/subscriptions/590f7ac0-b909-4092-adb4-2ad447a5bb19/resourceGroups/dg', parameters('env'), 'analytics/providers/Microsoft.Storage/storageAccounts/dg', parameters('env'), 'lakestorage')]",
