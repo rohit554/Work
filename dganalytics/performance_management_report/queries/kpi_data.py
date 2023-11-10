@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars, get_active_organization_timezones
+from dganalytics.utils.utils import exec_mongo_pipeline, get_path_vars, get_active_organization_timezones
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 from datetime import datetime, timedelta
 from pyspark.sql.functions import lower
@@ -157,7 +157,7 @@ def get_kpi_data(spark):
 
         kpi_data = exec_mongo_pipeline(spark, pipeline, connection['connection_name'], kpi_data_schema)
         kpi_data = kpi_data.withColumn("orgId", lower(kpi_data["orgId"]))
-        kpi_data = kpi_data.dropDuplicates()
+        
         kpi_data.createOrReplaceTempView("kpi_data")
         spark.sql("""
             MERGE INTO dg_performance_management.kpi_data AS target

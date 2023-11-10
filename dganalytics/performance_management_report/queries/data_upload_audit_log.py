@@ -63,12 +63,19 @@ def get_data_upload_audit_log(spark):
   data_upload_logs = data_upload_logs.withColumn("orgId", lower(data_upload_logs["orgId"]))
   
   data_upload_logs.createOrReplaceTempView("data_upload_audit_log")
+  
   spark.sql("""
-    MERGE INTO dg_performance_management.data_upload_audit_log AS target
-    USING data_upload_audit_log AS source
-    ON target.orgId = source.orgId
-    AND target.userId = source.userId
-    AND target.runID = source.runID
-    WHEN NOT MATCHED THEN
-      INSERT *        
+                DELETE FROM dg_performance_management.data_upload_audit_log
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM data_upload_audit_log b
+                    WHERE b.userId = dg_performance_management.data_upload_audit_log.userId
+                    AND b.runID = dg_performance_management.data_upload_audit_log.runID
+                    AND b.orgId = dg_performance_management.data_upload_audit_log.orgId
+                    AND b.startDate = dg_performance_management.data_upload_audit_log.startDate
+                )
+  """)
+  spark.sql("""
+            INSERT INTO dg_performance_management.data_upload_audit_log
+                SELECT * FROM data_upload_audit_log
     """)

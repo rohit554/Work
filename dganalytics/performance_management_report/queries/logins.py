@@ -174,13 +174,20 @@ def get_logins(spark):
       
       updated_logins_df.createOrReplaceTempView("updated_logins")
       
+      spark.sql(f"""
+                DELETE FROM dg_performance_management.logins a
+                WHERE a.orgId = lower('{tenant['org_id']}')
+                AND
+                EXISTS (
+                    SELECT 1
+                    FROM updated_logins b
+                    WHERE b.userId = a.userId
+                    AND b.date = a.date
+                )
+         """)     
+            
       spark.sql("""
-        MERGE INTO dg_performance_management.logins AS target
-        USING updated_logins AS source
-        ON target.orgId = source.orgId
-        AND target.userId = source.userId
-        AND target.date = source.date
-        WHEN NOT MATCHED THEN
-         INSERT *        
+                INSERT INTO dg_performance_management.logins
+                SELECT * FROM updated_logins
       """)
       

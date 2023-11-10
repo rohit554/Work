@@ -24,7 +24,7 @@ schema = StructType([
     StructField('awardedBy', StringType(), True)
 ])
 def get_activity_wise_points(spark):
-  extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  extract_start_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
   for org_timezone in get_active_organization_timezones(spark).rdd.collect():
     org_id = org_timezone['org_id']
     org_timezone = org_timezone['timezone']
@@ -157,7 +157,7 @@ def get_activity_wise_points(spark):
     badge_bonus_points_df = exec_mongo_pipeline(spark,badge_bonus_points_pipeline,'User_Outcome', schema)
     points_df = points_df.union(badge_bonus_points_df)
     points_df = points_df.withColumn("orgId", lower(points_df["orgId"]))
-    points_df = points_df.dropDuplicates()
+    
     points_df.createOrReplaceTempView("activity_wise_points")
     spark.sql("""
         MERGE INTO dg_performance_management.activity_wise_points AS target

@@ -66,7 +66,7 @@ def get_connections(spark):
     ]
     df = exec_mongo_pipeline(spark, connectionPipeline, 'Data_Upload_Connection', data_upload_connection_schema)
     df = df.withColumn("orgId", lower(df["orgId"]))
-    df = df.dropDuplicates()
+    
     df.createOrReplaceTempView("data_upload_connections")
 
     spark.sql("""
