@@ -106,7 +106,7 @@ def store_genesys_clients_attendance(spark):
                 actualEndTime logoutTime,
                 true as isPresent,
                 '{tenant}' AS orgId,
-                '{datetime.datetime.now()}' AS recordInsertDate
+                "{datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ')}" AS recordInsertDate
                 FROM genesys_attendance
                 WHERE actualStartTime IS NOT NULL
                 """)
@@ -117,6 +117,8 @@ def store_genesys_clients_attendance(spark):
                     ON date_format(cast(source.reportDate AS date), 'dd-MM-yyyy') = date_format(cast(target.reportDate AS date), 'dd-MM-yyyy')
                     AND source.userId = target.userId
                     AND source.orgId = target.orgId
+                    AND source.loginTime = target.loginTime
+                    AND source.logoutTime = target.logoutTime
                     WHEN MATCHED THEN
                         UPDATE SET *
                     WHEN NOT MATCHED THEN
@@ -135,6 +137,7 @@ if __name__ == "__main__":
 
     spark = get_spark_session(
         app_name=app_name, tenant='datagamz', default_db='dg_performance_management')
+    store_genesys_clients_attendance(spark)
     tables = ["activity_wise_points", "badges", "campaign", "challenges", "levels", "logins", "questions",
               "quizzes", "user_campaign", "users", "activity_mapping", "data_upload_audit_log", 
               "data_upload_connections", "kpi_data", "campaign_kpis", "trek_data", "kpi_values", "attendance", "announcement"]
