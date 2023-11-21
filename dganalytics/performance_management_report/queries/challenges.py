@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_active_organization_timezones
+from dganalytics.utils.utils import exec_mongo_pipeline, get_active_organization_timezones
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from datetime import datetime, timedelta
 from pyspark.sql.functions import lower
@@ -137,17 +137,40 @@ def get_challenges(spark):
         challenges_df = challenges_df.withColumn("orgId", lower(challenges_df["orgId"]))
         
         challenges_df.createOrReplaceTempView("challenges")
+        
+        spark.sql(f"""
+                DELETE FROM dg_performance_management.challenges target
+                WHERE target.orgId = lower('{org_id}')
+                AND
+                EXISTS (
+                    SELECT 1
+                    FROM challenges source
+                    WHERE source.challengeeMongoId = target.challengeeMongoId
+                    AND source.campaignId = target.campaignId
+                    AND source.challengerMongoId = target.challengerMongoId
+                    AND source.challengeThrownDate = target.challengeThrownDate
+                    AND source.challengeName = target.challengeName
+                    AND source.challengeAcceptanceDate = target.challengeAcceptanceDate
+                )
+         """)     
+            
+
         spark.sql("""
-            MERGE INTO dg_performance_management.challenges AS target
-            USING challenges AS source
-            ON target.orgId = source.orgId
-            AND target.challengeeMongoId = source.challengeeMongoId
-            AND target.campaignId = source.campaignId
-            AND target.challengerMongoId = source.challengerMongoId
-            AND target.challengeThrownDate = source.challengeThrownDate
-            WHEN MATCHED THEN
-                UPDATE SET *
-            WHEN NOT MATCHED THEN
-            INSERT *        
-          """)
+            INSERT INTO dg_performance_management.challenges (action,campaignId,challengeThrownDate,challengeAcceptanceDate,challengeCompletionDate,challengeEndDate,challengeFrequency,challengeName,challengeeMongoId,challengerMongoId,noOfDays,orgId,status)
+            SELECT
+                action,
+                campaignId,
+                CAST(challengeThrownDate AS DATE) AS challengeThrownDate,
+                CAST(challengeAcceptanceDate AS DATE) AS challengeAcceptanceDate,
+                CAST(challengeCompletionDate AS DATE) AS challengeCompletionDate,
+                challengeEndDate,
+                challengeFrequency,
+                challengeName,
+                challengeeMongoId,
+                challengerMongoId,
+                noOfDays,
+                orgId,
+                status
+            FROM challenges
+        """)
       

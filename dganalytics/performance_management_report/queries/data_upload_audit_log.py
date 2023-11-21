@@ -21,55 +21,61 @@ schema = StructType([
 
 def get_data_upload_audit_log(spark):
   extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-  for tenant in get_active_org():
-    data_upload_audit_pipeline = [
-          {
-            "$match": {
-                "org_id": tenant,
-                "start_date":{
-                        '$gte': { '$date': extract_start_time }
-                    }
-            }
-          }, 
-          {
-            "$project": {
-                "userId" : "$user_id",
-                "jobName" : "$job_name", 
-                "auditFile" : "$audit_file", 
-                "startDate" : {
-                    "$dateToString": {
-                        "format": "%Y-%m-%dT%H:%M:%SZ",
-                        "date": "$start_date"
-                    }
-                },
-                "endDate" : {
-                    "$dateToString": {
-                        "format": "%Y-%m-%dT%H:%M:%SZ",
-                        "date": "$end_date"
-                    }
-                }, 
-                "runID" : 1, 
-                "fileName" : "$file_name", 
-                "status" : 1, 
-                "entityName" : "$entity_name",
-                "message":1,
-                "recordInserted" : "$record_inserted",
-                "orgId": "$org_id"
-            }
-        }]
+  data_upload_audit_pipeline = [
+        {
+          "$match": {
+              "org_id" :  {
+                '$in' : get_active_org()
+              }, 
+              "start_date":{
+                      '$gte': { '$date': extract_start_time }
+                  }
+          }
+        }, 
+        {
+          "$project": {
+              "userId" : "$user_id",
+              "jobName" : "$job_name", 
+              "auditFile" : "$audit_file", 
+              "startDate" : {
+                  "$dateToString": {
+                      "format": "%Y-%m-%dT%H:%M:%SZ",
+                      "date": "$start_date"
+                  }
+              },
+              "endDate" : {
+                  "$dateToString": {
+                      "format": "%Y-%m-%dT%H:%M:%SZ",
+                      "date": "$end_date"
+                  }
+              }, 
+              "runID" : 1, 
+              "fileName" : "$file_name", 
+              "status" : 1, 
+              "entityName" : "$entity_name",
+              "message":1,
+              "recordInserted" : "$record_inserted",
+              "orgId": "$org_id"
+          }
+      }]
 
-    data_upload_logs = exec_mongo_pipeline(spark, data_upload_audit_pipeline, 'ETL_Audit_Log', schema)
-    data_upload_logs = data_upload_logs.withColumn("orgId", lower(data_upload_logs["orgId"]))
-    
-    data_upload_logs.createOrReplaceTempView("data_upload_audit_log")
-    spark.sql("""
-      MERGE INTO dg_performance_management.data_upload_audit_log AS target
-      USING data_upload_audit_log AS source
-      ON target.orgId = source.orgId
-      AND target.userId = source.userId
-      AND target.runID = source.runID
-      WHEN MATCHED THEN
-                UPDATE SET *
-      WHEN NOT MATCHED THEN
-        INSERT *        
-      """)
+  data_upload_logs = exec_mongo_pipeline(spark, data_upload_audit_pipeline, 'ETL_Audit_Log', schema)
+  data_upload_logs = data_upload_logs.withColumn("orgId", lower(data_upload_logs["orgId"]))
+  
+  data_upload_logs.createOrReplaceTempView("data_upload_audit_log")
+  
+  spark.sql("""
+                DELETE FROM dg_performance_management.data_upload_audit_log
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM data_upload_audit_log b
+                    WHERE b.userId = dg_performance_management.data_upload_audit_log.userId
+                    AND b.runID = dg_performance_management.data_upload_audit_log.runID
+                    AND b.orgId = dg_performance_management.data_upload_audit_log.orgId
+                    AND b.startDate = dg_performance_management.data_upload_audit_log.startDate
+                )
+  """)
+  spark.sql("""
+            INSERT INTO dg_performance_management.data_upload_audit_log
+                SELECT * FROM data_upload_audit_log
+    """)

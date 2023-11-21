@@ -1,6 +1,7 @@
 from pyspark.sql.types import StructType, StructField, StringType, BooleanType
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_active_organization_timezones
+from dganalytics.utils.utils import exec_mongo_pipeline, get_active_organization_timezones
 from datetime import datetime, timedelta
+from pyspark.sql.functions import lower
 
 schema = StructType([
                      StructField('is_deleted', BooleanType(), True),
@@ -18,7 +19,7 @@ schema = StructType([
 def get_announcement(spark):
     extract_start_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
-    for org_timezone in get_active_organization_timezones().rdd.collect():
+    for org_timezone in get_active_organization_timezones(spark).rdd.collect():
       org_id = org_timezone['org_id']
       org_timezone = org_timezone['timezone']
       pipeline = [
@@ -64,42 +65,7 @@ def get_announcement(spark):
                         'path': '$sender_userId'
                     }
                 },
-                {
-                    '$lookup': {
-                        'from': 'Campaign', 
-                        'let': {
-                            'oid': '$campaign_id'
-                        }, 
-                        'pipeline': [
-                            {
-                                '$match': {
-                                    '$expr': {
-                                        '$and': [
-                                            {
-                                                '$eq': [
-                                                    '$_id', '$$oid'
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                }
-                            }, {
-                                '$project': {
-                                    '_id': 0, 
-                                    'name': 1
-                                }
-                            }
-                        ], 
-                        'as': 'Campaign_Name'
-                    }
-                }, 
-                {
-                    '$unwind': {
-                        'path': '$Campaign_Name', 
-                        'preserveNullAndEmptyArrays': True
-                    }
-                }, 
-                {
+               {
                     '$unwind': {
                         'path': '$recipient', 
                         'preserveNullAndEmptyArrays': True
@@ -149,9 +115,9 @@ def get_announcement(spark):
                             '$dateToString': {
                                 'format': '%Y-%m-%dT%H:%M:%SZ', 
                                 'date': '$creation_date', 
-                                'timezone': '$org.timezone'
+                                'timezone': org_timezone
                             }
-                        },
+                        }, 
                         'priority': 1, 
                         'title': 1, 
                         'description': 1, 
@@ -159,14 +125,13 @@ def get_announcement(spark):
                         'Announcement_received_By': '$receiver_userId.user_id', 
                         'audience': 1, 
                         'campaign_id': 1, 
-                        'Campaign_Name': '$Campaign_Name.name'
+                        'Campaign_Name': 1
                     }
                 }
             ]
 
       df = exec_mongo_pipeline(spark, pipeline, 'Announcement', schema)
       df = df.withColumn("orgId", lower(df["orgId"]))
-      
       df.createOrReplaceTempView("announcement")
       spark.sql("""
         MERGE INTO dg_performance_management.announcement AS target

@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars, get_active_organization_timezones
+from dganalytics.utils.utils import exec_mongo_pipeline, get_path_vars, get_active_organization_timezones
 from pyspark.sql.functions import col, to_timestamp, lower
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, TimestampType, DoubleType
 from datetime import datetime, timedelta
@@ -280,6 +280,7 @@ def get_quizzes(spark):
           ON target.orgId = source.orgId
           AND target.userId = source.userId
           AND target.quizId = source.quizId
+          AND target.userMongoId = source.userMongoId
           WHEN MATCHED THEN
                 UPDATE SET *
           WHEN NOT MATCHED THEN

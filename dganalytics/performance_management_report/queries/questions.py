@@ -129,6 +129,8 @@ def get_questions(spark):
             AND target.campaignId = source.campaignId
             AND target.quiz_id = source.quiz_id
             AND target.userId = source.userId
+            AND target.question = source.question
+            AND target.subject_area = source.subject_area
             WHEN MATCHED THEN
                 UPDATE SET *
             WHEN NOT MATCHED THEN

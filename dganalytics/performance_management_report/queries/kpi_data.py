@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_path_vars, get_active_organization_timezones
+from dganalytics.utils.utils import exec_mongo_pipeline, get_path_vars, get_active_organization_timezones
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 from datetime import datetime, timedelta
 from pyspark.sql.functions import lower
@@ -164,6 +164,7 @@ def get_kpi_data(spark):
             USING kpi_data AS source
             ON target.orgId = source.orgId
             AND target.userId = source.userId
+            AND target.id = source.id
             AND target.report_date = source.report_date
             AND target.connection_name = source.connection_name
             AND target.attr_dict_key= source.attr_dict_key
