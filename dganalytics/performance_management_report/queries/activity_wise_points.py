@@ -24,7 +24,7 @@ schema = StructType([
     StructField('awardedBy', StringType(), True)
 ])
 def get_activity_wise_points(spark):
-  extract_start_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
   for org_timezone in get_active_organization_timezones(spark).rdd.collect():
     org_id = org_timezone['org_id']
     org_timezone = org_timezone['timezone']
@@ -160,19 +160,38 @@ def get_activity_wise_points(spark):
     
     points_df.createOrReplaceTempView("activity_wise_points")
     spark.sql("""
-        MERGE INTO dg_performance_management.activity_wise_points AS target
-        USING activity_wise_points AS source
-        ON target.orgId = source.orgId
-        AND target.userId = source.userId
-        AND target.campaignId = source.campaignId
-        AND (target.activityId = source.activityId OR (target.activityId IS NULL AND source.activityId IS NULL))        
-        AND (target.awardedBy = source.awardedBy OR (target.awardedBy IS NULL AND source.awardedBy IS NULL))
-        AND (target.mongoUserId = source.mongoUserId OR (target.mongoUserId IS NULL AND source.mongoUserId IS NULL))
-        AND target.date = source.date
-        AND target.outcomeType = source.outcomeType
-        WHEN MATCHED THEN
-            UPDATE SET *
-        WHEN NOT MATCHED THEN
-            INSERT *
-    """)
+                DELETE FROM dg_performance_management.activity_wise_points a
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM activity_wise_points source
+                    WHERE source.orgId = a.orgId
+                    AND source.userId = a.userId
+                    AND source.campaignId = a.campaignId
+                    AND source.date = a.date
+                    AND source.outcomeType = a.outcomeType
+                    AND (source.activityId = a.activityId OR (a.activityId IS NULL AND source.activityId IS NULL))        
+                   
+                )
+         """)     
+    spark.sql("""
+                INSERT INTO dg_performance_management.activity_wise_points
+                SELECT campaignId,
+                       activityId,
+                       userId,
+                       points,
+                       outcomeType,
+                       teamId,
+                       kpiName,
+                       fieldName,
+                       fieldValue,
+                       frequency,
+                       entityName,
+                       noOfTimesPerformed,
+                       activityName,
+                       target,
+                       cast(date as date) as date,
+                       mongoUserId,
+                       awardedBy,
+                       orgId FROM activity_wise_points
+      """)
 
