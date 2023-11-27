@@ -167,7 +167,7 @@ def get_activity_wise_points(spark):
                     WHERE source.orgId = a.orgId
                     AND source.userId = a.userId
                     AND source.campaignId = a.campaignId
-                    AND source.date = a.date
+                    AND cast(source.date as date) = a.date
                     AND source.outcomeType = a.outcomeType
                     AND (source.activityId = a.activityId OR (a.activityId IS NULL AND source.activityId IS NULL))        
                    

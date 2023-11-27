@@ -47,6 +47,23 @@ def get_quizzes(spark):
           }
       }, 
       {
+        "$match" : {
+          '$expr': {
+                '$or': [
+                    {
+                        '$gte': [
+                            '$questionnaire.start_date', { '$date': extract_start_time }
+                        ]
+                    }, {
+                        '$lte': [
+                            '$questionnaire.end_date', { '$date': extract_start_time }
+                        ]
+                    }
+                ]
+            }
+        }
+    }, 
+      {
           '$project': {
               'campaign_id': '$_id', 
               'quiz_id': '$questionnaire._id', 
@@ -201,13 +218,6 @@ def get_quizzes(spark):
           }
       },
       {
-          '$match':{
-              'quiz_data.answered_date': {
-                  '$gte': { '$date': extract_start_time }
-              }
-          }
-      }, 
-      {
           '$project': {
               '_id': 0.0, 
               'campaign_id': 1.0, 
@@ -273,7 +283,20 @@ def get_quizzes(spark):
       df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema)
       df = df.withColumn("orgId", lower(df["orgId"]))
       df.createOrReplaceTempView("quizzes")
-      
+      spark.sql("""
+                DELETE FROM dg_performance_management.quizzes a
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM quizzes source
+                    WHERE source.orgId = a.orgId
+                    AND source.userId = a.userId
+                    AND source.campaign_id = a.campaign_id
+                    AND source.quizId = a.quizId
+                    AND source.teamLeadMongoId = a.teamLeadMongoId
+                    AND source.teamLeadMongoId = a.teamLeadMongoId        
+                   
+                )
+         """)     
       spark.sql("""
           MERGE INTO dg_performance_management.quizzes AS target
           USING quizzes AS source
@@ -281,8 +304,7 @@ def get_quizzes(spark):
           AND target.userId = source.userId
           AND target.quizId = source.quizId
           AND target.userMongoId = source.userMongoId
-          WHEN MATCHED THEN
-                UPDATE SET *
+          AND target.teamLeadMongoId = source.teamLeadMongoId 
           WHEN NOT MATCHED THEN
           INSERT *        
         """)
