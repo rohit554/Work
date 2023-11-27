@@ -45,7 +45,7 @@ if __name__ == "__main__":
     tenant = "comcastprod"
     db_name = f"dg_{tenant}"
     tenant_path, db_path, log_path = get_path_vars(tenant)
-    spark = get_spark_session(app_name="comcastprod_mtd_metrics_table_setup",
+    spark = get_spark_session(app_name="comcastprod_mtd_metrics_data_table_setup",
                               tenant=tenant, default_db=db_name)
     create_database(spark, db_path, db_name)
     create_jira_project_issues_table(spark, db_name, db_path)

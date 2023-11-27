@@ -76,6 +76,7 @@ if __name__ == '__main__':
                                 select
                                     Emp_ID as `User Id`,
                                     date_format(MTD_DT, 'dd-MM-yyyy') as `Date`,
+                                    coalesce(NTT, "") as NTT,
                                     coalesce(tNPS, "") as tNPS,
                                     coalesce(AICR, "") as `AICR Seven Days`,
                                     coalesce(XSR, "") as XSR,
@@ -88,12 +89,12 @@ if __name__ == '__main__':
     push_gamification_data(
             mtd_metrics_data.toPandas(), customer.upper(), 'Comcast_MTD_Connection')
 
-    pm_mtd_metrics = spark.sql(f"""
-                                INSERT INTO {db_name}.mtd_metrics
-                                SELECT
-                                Name,Emp_ID,Sentiment,Composite,NTT,XSR,AICR,tNPS,CPR,Hold,ACW,Calls,AHT,Talk,Showrate,Xfer,`SC%`,CPC,OB,MTD_DT,Tier,orgId
-                                FROM mtd_metrics A
-                            """)
+    spark.sql(f"""
+                INSERT INTO {db_name}.mtd_metrics
+                SELECT
+                Name,Emp_ID,Sentiment,Composite,NTT,XSR,AICR,tNPS,CPR,Hold,ACW,Calls,AHT,Talk,Showrate,Xfer,`SC%`,CPC,OB,MTD_DT,Tier,orgId
+                FROM mtd_metrics A
+            """)
     
     pm_mtd_metrics_data = spark.sql(f"""
                                     select DISTINCT *
