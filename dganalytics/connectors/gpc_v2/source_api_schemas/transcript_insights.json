@@ -1,0 +1,148 @@
+{
+	"fields": [
+		{
+			"metadata": {},
+			"name": "conversation_id",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "additional_service",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "process_knowledge",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "system_knowledge",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "satisfaction",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "resolved",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "contact",
+			"nullable": true,
+			"type": {
+				"containsNull": true,
+				"elementType": {
+					"fields": [
+						{
+							"metadata": {},
+							"name": "contact_reason",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "inquiries",
+							"nullable": true,
+							"type": {
+								"containsNull": true,
+								"elementType": {
+									"fields": [
+										{
+											"metadata": {},
+											"name": "inquiry_type",
+											"nullable": true,
+											"type": "string"
+										},
+										{
+											"metadata": {},
+											"name": "main_inquiry",
+											"nullable": true,
+											"type": "string"
+										},
+										{
+											"metadata": {},
+											"name": "root_cause",
+											"nullable": true,
+											"type": "string"
+										}
+									],
+									"type": "struct"
+								},
+								"type": "array"
+							}
+						}
+					],
+					"type": "struct"
+				},
+				"type": "array"
+			}
+		},
+		{
+			"metadata": {},
+			"name": "process_map",
+			"nullable": true,
+			"type": {
+				"containsNull": true,
+				"elementType": {
+					"fields": [
+						{
+							"metadata": {},
+							"name": "call_status",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "emotion",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "line",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "action",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "category",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "action_label",
+							"nullable": true,
+							"type": "string"
+						},
+						{
+							"metadata": {},
+							"name": "status",
+							"nullable": true,
+							"type": "string"
+						}
+					],
+					"type": "struct"
+				},
+				"type": "array"
+			}
+		}
+	]
+}
