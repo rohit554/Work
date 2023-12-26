@@ -2,7 +2,7 @@ import requests
 import json
 from pyspark.sql import SparkSession
 import datetime
-from dganalytics.helios import helios_utils_logger
+from dganalytics.helios.helios_utils import helios_utils_logger
 from concurrent.futures import ThreadPoolExecutor
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType, IntegerType, TimestampType, DateType
 import concurrent.futures
