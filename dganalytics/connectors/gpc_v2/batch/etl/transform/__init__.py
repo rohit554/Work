@@ -22,3 +22,4 @@ from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_wfm_forecast import 
 from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_speechandtextanalytics import fact_speechandtextanalytics
 from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_conversation_transcript_topics import fact_conversation_transcript_topics
 from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_conversation_transcript_sentiments import fact_conversation_transcript_sentiments
+from dganalytics.connectors.gpc_v2.batch.etl.transform.fact_conversation_transcript_phrases import fact_conversation_transcript_phrases

@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 
-def fact_conversation_transcript_sentiments(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
+def fact_conversation_transcript_phrases(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     transcript_sentiments = spark.sql(f"""
         SELECT conversationId,
                 communicationId,

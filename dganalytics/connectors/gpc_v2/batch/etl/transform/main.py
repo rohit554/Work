@@ -26,7 +26,8 @@ transform_to_method = {
     "fact_speechandtextanalytics": transform.fact_speechandtextanalytics,
     "fact_wfm_forecast": transform.fact_wfm_forecast,
     "fact_conversation_transcript_topics": transform.fact_conversation_transcript_topics,
-    "fact_conversation_transcript_sentiments": transform.fact_conversation_transcript_sentiments
+    "fact_conversation_transcript_sentiments": transform.fact_conversation_transcript_sentiments,
+    "fact_conversation_transcript_phrases": transform.fact_conversation_transcript_phrases
 }
 
 
