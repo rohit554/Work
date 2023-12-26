@@ -1,5 +1,5 @@
 from dganalytics.utils.utils import get_spark_session, flush_utils
-from dganalytics.helios import helios_utils_logger
+from dganalytics.helios.helios_utils import helios_utils_logger
 from dganalytics.helios.extract.transcript_insights import get_transcript_insights
 import argparse
 
