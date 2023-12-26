@@ -79,7 +79,7 @@ def get_conversation_transcript(spark: SparkSession, tenant: str, extract_start_
     """)
 
 def process_conversation(spark, conv, url, tenant, extract_start_time, extract_end_time):
-    logger = gpc_utils_logger(tenant, "transcript_insights")
+    logger = helios_utils_logger(tenant, "transcript_insights")
     schema = get_api_schema()
     token = getAccessToken()
 
