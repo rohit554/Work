@@ -55,7 +55,7 @@ def getAccessToken():
     url = get_secret("awsLambdaAuthURL")
 
     payload = json.dumps({
-        "user_id": get_secret("awsLambdaAuthUserId")
+        "user_id": get_secret("awsLambdaAuthUserId"),
         "user_password": get_secret("awsLambdaAuthPassword")
     })
     headers = {
