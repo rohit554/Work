@@ -42,4 +42,4 @@ def fact_conversation_transcript_phrases(spark: SparkSession, extract_date, extr
                 """)
 
     spark.sql("""   INSERT INTO fact_conversation_transcript_phrases
-                    SELECT * FROM transcript_sentiments""")
+                    SELECT * FROM transcript_phrases""")

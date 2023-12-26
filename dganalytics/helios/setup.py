@@ -341,6 +341,25 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         LOCATION '{db_name}/fact_transcript_contact_reasons'
     """)
 
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS dgdm_simplyenergy.mv_transcript_results (
+            noOfInteractions INT,
+            conversationStartDateId INT,
+            dateVal DATE,
+            mediaTypeId INT,
+            contactReason STRING,
+            mainInquiry STRING,
+            rootCause STRING,
+            inquiry_type STRING,
+            resolved STRING,
+            satisfaction STRING,
+            queueIds ARRAY<STRING>
+            )
+        USING DELTA
+        PARTITIONED BY (conversationStartDateId)
+        LOCATION 'dgdm_simplyenergy/mv_transcript_results'
+    """)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--tenant", required=True)
