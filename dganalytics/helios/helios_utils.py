@@ -9,9 +9,9 @@ def helios_utils_logger(tenant, app_name):
  
 def read_helios_transform_sql_query(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time, interaction_type):
   if interaction_type == "insert" :
-    sql_file_path = os.path.join(os.getcwd(),'/scripts/'+interaction_type+"_query.sql")
+    sql_file_path = os.path.join('dganalytics/helios/transform','/scripts/'+interaction_type+"_query.sql")
   else:
-    sql_file_path = os.path.join(os.getcwd(),'/scripts/'+transformation+"_"+interaction_type+".sql")
+    sql_file_path = os.path.join('dganalytics/helios/transform','/scripts/'+transformation+"_"+interaction_type+".sql")
   try:
     # Read SQL query from file
     with open(sql_file_path, 'r') as file:
