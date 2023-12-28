@@ -8,10 +8,12 @@ def helios_utils_logger(tenant, app_name):
   return logger
  
 def read_helios_transform_sql_query(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time, interaction_type):
+  logger = helios_utils_logger(tenant,"helios")
   if interaction_type == "insert" :
-    sql_file_path = os.path.join("scripts",interaction_type+"_query.sql")
+    sql_file_path = os.path.join(os.path.abspath(os.path.dirname('__file__')),"transform","scripts",interaction_type+"_query.sql")
   else:
-    sql_file_path = os.path.join("scripts",transformation+"_"+interaction_type+".sql")
+    sql_file_path = os.path.join(os.path.abspath(os.path.dirname('__file__')),"transform","scripts",transformation+"_"+interaction_type+".sql")
+  
   try:
     # Read SQL query from file
     with open(sql_file_path, 'r') as file:
