@@ -8,6 +8,10 @@ from pyspark.sql.types import StructType, StructField, StringType, ArrayType, In
 import concurrent.futures
 import threading
 from dganalytics.utils.utils import get_secret
+import pandas as pd
+from dganalytics.utils.utils import get_path_vars
+from datetime import datetime
+import os
 
 #TODO: remove this function later and read schema using from dganalytics.connectors.gpc_v2.gpc_utils import get_schema
 def get_api_schema():
@@ -156,3 +160,10 @@ def get_transcript_insights(spark: SparkSession, tenant: str, run_id: str, extra
     # Wait for both threads to complete
     thread1.join()
     thread2.join()
+
+    result = results1 + results2
+
+    df = pd.DataFrame(result)
+    tenant_path, db_path, log_path = get_path_vars(tenant)
+    df.to_csv(os.path.join(tenant_path, 'data', 'raw', 'audit', 'audit_{datetime.now()}.csv'),
+                                       header=True, index=False)
