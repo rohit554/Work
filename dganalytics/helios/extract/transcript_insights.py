@@ -3,11 +3,13 @@ import json
 from pyspark.sql import SparkSession
 import datetime
 from dganalytics.helios.helios_utils import helios_utils_logger
-from concurrent.futures import ThreadPoolExecutor
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType, IntegerType, TimestampType, DateType
 import concurrent.futures
 import threading
-from dganalytics.utils.utils import get_secret
+from dganalytics.utils.utils import get_secret, get_path_vars
+import pandas as pd
+from datetime import datetime
+import os
 
 #TODO: remove this function later and read schema using from dganalytics.connectors.gpc_v2.gpc_utils import get_schema
 def get_api_schema():
@@ -94,32 +96,43 @@ def process_conversation(spark, conv, url, tenant, extract_start_time, extract_e
         "tenant_id": tenant
     })
 
-    # Get Lambda Function Response
-    response = requests.request("POST", url, headers=headers, data=payload)
+    retry = 0
+    while retry < 3:    
+        # Get Lambda Function Response
+        response = requests.request("POST", url, headers=headers, data=payload)
+        retry = retry + 1
 
-    if response.status_code != 200:
-        logger.exception(F"Error occurred with conversation: {conv.conversationId}, STATUS_CODE: {response.status_code}")
-        return {'status': False, "conversationId": conv.conversationId }
-    
+        if response.status_code != 502:
+            break
+
     if response.status_code == 200:
         data = response.json()['data']
 
         resp = [data]
         insights = spark.createDataFrame(resp, schema=schema)
-        insights.display()
         insights.createOrReplaceTempView('insights')
-        spark.sql(f"""
+        try:
+            spark.sql(f"""
                     INSERT INTO gpc_{tenant}.raw_transcript_insights (additional_service, process_knowledge, conversation_id, contact, system_knowledge, process_map, satisfaction, resolved, extractDate, extractIntervalStartTime, extractIntervalEndTime, recordInsertTime, recordIdentifier)
-                    SELECT additional_service, process_knowledge, conversation_id, contact, system_knowledge, process_map, satisfaction, resolved,CAST('{extract_start_time}' AS DATE) extractDate, '{extract_start_time}' extractIntervalStartTime, '{extract_end_time}' extractIntervalEndTime, '{datetime.datetime.now()}' recordInsertTime,
+                    SELECT additional_service, process_knowledge, conversation_id, contact, system_knowledge, process_map, satisfaction, resolved,CAST('{extract_start_time}' AS DATE) extractDate, '{extract_start_time}' extractIntervalStartTime, '{extract_end_time}' extractIntervalEndTime, '{datetime.now()}' recordInsertTime,
                     1 recordIdentifier  FROM insights
                     """)
-    return {'status': True, "conversationId":conv.conversationId }
+            return {'status': True, "conversationId":conv.conversationId, "error_or_status_code": response.status_code }
+        except Exception as e:
+            logger.exception(
+            f"Error Occurred in insights insertion for conversation: {conv.conversationId}")
+            logger.exception(e, stack_info=True, exc_info=True)
+            return {'status': False, "conversationId":conv.conversationId, "error_or_status_code": e }
+        
+    if response.status_code != 200:
+        logger.exception(F"Error occurred with conversation: {conv.conversationId}, STATUS_CODE: {response.status_code}")
+        return {'status': False, "conversationId": conv.conversationId, "error_or_status_code": response.status_code }
+    
 
 def pool_executor(spark, conversations, url, tenant, extract_start_time, extract_end_time, results):
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
         futures = [executor.submit(process_conversation, spark, conv, url, tenant, extract_start_time, extract_end_time) for conv in conversations.toPandas().itertuples()]
         for future in concurrent.futures.as_completed(futures):
-            print(future.result())
             results.append(future.result())
 
 def get_transcript_insights(spark: SparkSession, tenant: str, run_id: str, extract_start_time: str, extract_end_time: str):
@@ -156,3 +169,10 @@ def get_transcript_insights(spark: SparkSession, tenant: str, run_id: str, extra
     # Wait for both threads to complete
     thread1.join()
     thread2.join()
+
+    result = results1 + results2
+
+    df = pd.DataFrame(result)
+    tenant_path, db_path, log_path = get_path_vars(tenant)
+    df.to_csv(os.path.join(tenant_path, 'data', 'raw', 'audit', f'audit_{datetime.now()}.csv'),
+                                       header=True, index=False)
