@@ -1,13 +1,13 @@
 from dganalytics.utils.utils import get_spark_session, flush_utils
-from dganalytics.connectors.gpc_v2.gpc_utils import get_dbname, transform_parser, gpc_utils_logger
 from dganalytics.helios.transform.helios_transform import helios_transformation
+from dganalytics.helios.helios_utils import transform_parser, helios_utils_logger
 
 if __name__ == "__main__":
     tenant, run_id, extract_date, extract_start_time, extract_end_time, transformation = transform_parser()
     spark = get_spark_session(
-        app_name=transformation, tenant=tenant, default_db=get_dbname(tenant))
+        app_name=transformation, tenant=tenant, default_db=f"gpc_{tenant}")
 
-    logger = gpc_utils_logger(tenant, transformation)
+    logger = helios_utils_logger(tenant, transformation)
     
     try:
         logger.info(f"Applying helios transformation {transformation}")
