@@ -13,5 +13,3 @@ from gpc_{tenant}.raw_users u
 left join
     gpc_{tenant}.raw_users m
 on u.manager.id = m.id
-
--- SELECT * FROM dgdm_simplyenergy.dim_users

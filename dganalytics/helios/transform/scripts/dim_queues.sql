@@ -1,5 +1,5 @@
 INSERT OVERWRITE dgdm_{tenant}.dim_queues
-SELECT  id as queueId,
+    SELECT  id as queueId,
         name as queueName,
         mediaSettings.call.serviceLevel.durationMs AS callSLDuration,
         mediaSettings.call.serviceLevel.percentage AS callSLPercentage,
@@ -11,4 +11,4 @@ SELECT  id as queueId,
         mediaSettings.email.serviceLevel.percentage AS emailSLPercentage,
         mediaSettings.message.serviceLevel.durationMs AS messageSLDuration,
         mediaSettings.message.serviceLevel.percentage AS messageSLPercentage
-FROM gpc_{tenant}.raw_routing_queues
+    FROM gpc_{tenant}.raw_routing_queues

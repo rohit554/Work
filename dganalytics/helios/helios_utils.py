@@ -35,9 +35,9 @@ def get_sql_query(spark, transformation, tenant, extract_date, extract_start_tim
     raise Exception
 
 
-def get_sql_query(spark, transformation, tenant):
+def get_insert_overwrite_sql_query(spark, transformation, tenant):
   logger = helios_utils_logger(tenant,"helios")
-  sql_file_path = os.path.join(os.path.abspath(os.path.dirname('__file__')),"scripts", transformation,".sql")
+  sql_file_path = os.path.join(os.path.abspath(os.path.dirname('__file__')),"scripts", transformation+".sql")
   
   try:
     # Read SQL query from file
