@@ -560,6 +560,22 @@ def create_dim_tables(spark: SparkSession, db_name: str):
             USING DELTA
             LOCATION '{db_path}/{db_name}/fact_conversation_transcript_topics'
     """)
+    
+    spark.sql(f"""
+            CREATE TABLE IF NOT EXISTS { db_name }.fact_conversation_transcript_phrases(
+              conversationId STRING,
+              communicationId STRING,
+              transcriptId STRING,
+              language STRING,
+              text STRING,
+              stability INT,
+              startTimeMs LONG,
+              milliseconds LONG,
+              participantPurpose STRING
+            )
+            USING DELTA
+            LOCATION '{db_path}/{db_name}/fact_conversation_transcript_phrases'
+    """)
 
 
 def create_raw_table(api_name: str, spark: SparkSession, db_name: str):
