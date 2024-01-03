@@ -1,6 +1,4 @@
-from dganalytics.utils.utils import get_logger
-from dganalytics.helios.helios_utils import get_sql_query
-
+from dganalytics.helios.helios_utils import get_sql_query, get_insert_overwrite_sql_query
 
 def helios_transformation(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time):
     
@@ -12,3 +10,5 @@ def helios_transformation(spark, transformation, tenant, extract_date, extract_s
     
     spark.sql(get_sql_query(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time, "insert"))
     
+def helios_overwrite_transformation(spark, transformation, tenant):
+    spark.sql(get_insert_overwrite_sql_query(spark, transformation, tenant))

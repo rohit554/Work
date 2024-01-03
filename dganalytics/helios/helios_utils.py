@@ -35,6 +35,24 @@ def get_sql_query(spark, transformation, tenant, extract_date, extract_start_tim
     raise Exception
 
 
+def get_insert_overwrite_sql_query(spark, transformation, tenant):
+  logger = helios_utils_logger(tenant,"helios")
+  sql_file_path = os.path.join(os.path.abspath(os.path.dirname('__file__')),"scripts", transformation+".sql")
+  
+  try:
+    # Read SQL query from file
+    with open(sql_file_path, 'r') as file:
+      sql_query = file.read()
+    formatted_sql_query = sql_query.format(
+          tenant=tenant
+    )
+    return formatted_sql_query
+  except Exception as e:
+    logger.exception(f"Error Occured in reading helios transformation SQL Query for {tenant}_{transformation}_{sql_file_path}")
+    logger.exception(e, stack_info=True, exc_info=True)
+    raise Exception
+
+
 def transform_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--tenant', required=True)
