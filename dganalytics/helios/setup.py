@@ -342,6 +342,19 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
     """)
 
     spark.sql(f"""
+            CREATE TABLE IF NOT EXISTS {db_name}.fact_transcript_actions (
+                conversationId  STRING,
+                category        STRING,
+                action          STRING,
+                action_label    STRING,
+                startTime       TIMESTAMP,
+                endTime         TIMESTAMP
+            )
+            USING DELTA
+            LOCATION '{db_name}/fact_transcript_contact_reasons'
+        """)
+
+    spark.sql(f"""
         CREATE TABLE IF NOT EXISTS dgdm_simplyenergy.mv_transcript_results (
             noOfInteractions INT,
             conversationStartDateId INT,
