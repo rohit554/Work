@@ -351,7 +351,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
                 endTime         TIMESTAMP
             )
             USING DELTA
-            LOCATION '{db_name}/fact_transcript_contact_reasons'
+            LOCATION '{db_name}/fact_transcript_actions'
         """)
 
     spark.sql(f"""
