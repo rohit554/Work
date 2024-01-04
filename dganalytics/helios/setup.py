@@ -370,7 +370,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             )
         USING DELTA
         PARTITIONED BY (conversationStartDateId)
-        LOCATION 'dgdm_simplyenergy/mv_transcript_results'
+        LOCATION '{db_name}/mv_transcript_results'
     """)
 
 if __name__ == "__main__":
