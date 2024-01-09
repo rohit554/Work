@@ -73,4 +73,17 @@ def transform_parser():
 
     return tenant, run_id, extract_date, extract_start_time, extract_end_time, transformation
 
+def export_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--tenant', required=True)
+    parser.add_argument('--run_id', required=True)
+    parser.add_argument('--extract_name', required=True)
+    parser.add_argument('--output_file_name', required=True)
 
+    args, unknown_args = parser.parse_known_args()
+    tenant = args.tenant
+    run_id = args.run_id
+    extract_name = args.extract_name
+    output_file_name = args.output_file_name
+
+    return tenant, run_id, extract_name, output_file_name
