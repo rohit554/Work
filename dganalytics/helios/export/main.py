@@ -4,7 +4,7 @@ from dganalytics.helios.export.helios_export import helios_export
 if __name__ == "__main__":
     tenant, run_id, extract_name, output_file_name = export_parser()
     spark = get_spark_session(
-        app_name=extract_name, tenant=tenant, default_db=f"gpc_{tenant}")
+        app_name=extract_name, tenant=tenant, default_db=f"dgdm_{tenant}")
 
     logger = helios_utils_logger(tenant, extract_name)
     try:
