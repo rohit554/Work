@@ -109,9 +109,10 @@ def process_conversation(spark, conv, url, tenant, extract_start_time, extract_e
         data = response.json()['data']
 
         resp = [data]
-        insights = spark.createDataFrame(resp, schema=schema)
-        insights.createOrReplaceTempView('insights')
+        
         try:
+            insights = spark.createDataFrame(resp, schema=schema)
+            insights.createOrReplaceTempView('insights')
             spark.sql(f"""
                     INSERT INTO gpc_{tenant}.raw_transcript_insights (additional_service, process_knowledge, conversation_id, contact, system_knowledge, process_map, satisfaction, resolved, extractDate, extractIntervalStartTime, extractIntervalEndTime, recordInsertTime, recordIdentifier)
                     SELECT additional_service, process_knowledge, conversation_id, contact, system_knowledge, process_map, satisfaction, resolved,CAST('{extract_start_time}' AS DATE) extractDate, '{extract_start_time}' extractIntervalStartTime, '{extract_end_time}' extractIntervalEndTime, '{datetime.now()}' recordInsertTime,
@@ -119,8 +120,7 @@ def process_conversation(spark, conv, url, tenant, extract_start_time, extract_e
                     """)
             return {'status': True, "conversationId":conv.conversationId, "error_or_status_code": response.status_code }
         except Exception as e:
-            logger.exception(
-            f"Error Occurred in insights insertion for conversation: {conv.conversationId}")
+            logger.exception(f"Error Occurred in insights insertion for conversation: {conv.conversationId}")
             logger.exception(e, stack_info=True, exc_info=True)
             return {'status': False, "conversationId":conv.conversationId, "error_or_status_code": e }
         
@@ -136,13 +136,14 @@ def pool_executor(spark, conversations, url, tenant, extract_start_time, extract
             results.append(future.result())
 
 def get_transcript_insights(spark: SparkSession, tenant: str, run_id: str, extract_start_time: str, extract_end_time: str):
+    logger = helios_utils_logger(tenant, "transcript_insights")
     conversations = get_conversation_transcript(spark, tenant, extract_start_time, extract_end_time)
 
     # Splitting the conversations into two halves for two APIs
     total_conversations = conversations.count()
+    logger.info("Total Conversations to process: ", total_conversations)
     copy_df = conversations
 
-    # print(type(total_conversations))
     half = total_conversations // 2
 
     # Get the top `each_len` number of rows 
@@ -171,7 +172,7 @@ def get_transcript_insights(spark: SparkSession, tenant: str, run_id: str, extra
     thread2.join()
 
     result = results1 + results2
-
+    logger.info("Total processed conversations: ", len(result))
     df = pd.DataFrame(result)
     tenant_path, db_path, log_path = get_path_vars(tenant)
     df.to_csv(os.path.join(tenant_path, 'data', 'raw', 'audit', f'audit_{datetime.now()}.csv'),
