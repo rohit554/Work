@@ -9,7 +9,7 @@ def helios_transformation(spark, transformation, tenant, extract_date, extract_s
     
     spark.sql(get_sql_query(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time, "delete"))
     # resolve issue of concurrent append exception
-    time.sleep(1)
+    time.sleep(10)
     
     spark.sql(get_sql_query(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time, "insert"))
     
