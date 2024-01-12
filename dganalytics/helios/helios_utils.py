@@ -41,7 +41,7 @@ def get_insert_overwrite_sql_query(spark, transformation, tenant):
   logger = helios_utils_logger(tenant,"helios")
   tenant_path, db_path, log_path = get_path_vars('datagamz')
   file_path=os.path.join(tenant_path,'code','dganalytics','dganalytics','helios','transform','scripts')
-  sql_file_path = os.path.join(file_path,, transformation+".sql")
+  sql_file_path = os.path.join(file_path, transformation+".sql")
   
   try:
     # Read SQL query from file
