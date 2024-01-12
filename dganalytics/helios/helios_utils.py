@@ -18,7 +18,7 @@ def get_sql_query(spark, transformation, tenant, extract_date, extract_start_tim
     sql_file_path = os.path.join(file_path,interaction_type+"_query.sql")
   else:
     sql_file_path =os.path.join(file_path,transformation+"_"+interaction_type+".sql")
-  
+  logger.info(f"{transformation}_{interaction_type}")
   try:
     # Read SQL query from file
     with open(sql_file_path, 'r') as file:
