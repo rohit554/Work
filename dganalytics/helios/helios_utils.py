@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import get_logger
+from dganalytics.utils.utils import get_logger, get_path_vars
 from dganalytics.helios.transform.scripts import *
 import os
 import datetime
@@ -12,10 +12,12 @@ def helios_utils_logger(tenant, app_name):
  
 def get_sql_query(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time, interaction_type):
   logger = helios_utils_logger(tenant,"helios")
+  tenant_path, db_path, log_path = get_path_vars('datagamz')
+  file_path=os.path.join(tenant_path,'code','dganalytics','dganalytics','helios','transform','scripts')
   if interaction_type == "insert" :
-    sql_file_path = os.path.join(os.path.abspath(os.path.dirname('__file__')),"scripts",interaction_type+"_query.sql")
+    sql_file_path = os.path.join(file_path,interaction_type+"_query.sql")
   else:
-    sql_file_path = os.path.join(os.path.abspath(os.path.dirname('__file__')),"scripts",transformation+"_"+interaction_type+".sql")
+    sql_file_path =os.path.join(file_path,transformation+"_"+interaction_type+".sql")
   
   try:
     # Read SQL query from file
