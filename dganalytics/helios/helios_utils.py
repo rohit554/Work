@@ -13,11 +13,11 @@ def helios_utils_logger(tenant, app_name):
 def get_sql_query(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time, interaction_type):
   logger = helios_utils_logger(tenant,"helios")
   tenant_path, db_path, log_path = get_path_vars('datagamz')
-  file_path=os.path.join(tenant_path,'code','dganalytics','dganalytics','helios','transform','scripts')
+  # file_path=os.path.join(tenant_path,'code','dganalytics','dganalytics','helios','transform','scripts')
   if interaction_type == "insert" :
-    sql_file_path = os.path.join(file_path,interaction_type+"_query.sql")
+    sql_file_path = os.path.join(os.path.abspath(os.path.dirname('__file__')),"scripts",interaction_type+"_query.sql")
   else:
-    sql_file_path =os.path.join(file_path,transformation+"_"+interaction_type+".sql")
+    sql_file_path = os.path.join(os.path.abspath(os.path.dirname('__file__')),"scripts",transformation+"_"+interaction_type+".sql")
   logger.info(f"{transformation}_{interaction_type}")
   try:
     # Read SQL query from file
@@ -40,8 +40,8 @@ def get_sql_query(spark, transformation, tenant, extract_date, extract_start_tim
 def get_insert_overwrite_sql_query(spark, transformation, tenant):
   logger = helios_utils_logger(tenant,"helios")
   tenant_path, db_path, log_path = get_path_vars('datagamz')
-  file_path=os.path.join(tenant_path,'code','dganalytics','dganalytics','helios','transform','scripts')
-  sql_file_path = os.path.join(file_path, transformation+".sql")
+  # file_path=os.path.join(tenant_path,'code','dganalytics','dganalytics','helios','transform','scripts')
+  sql_file_path = os.path.join(os.path.abspath(os.path.dirname('__file__')),"scripts", transformation+".sql")
   
   try:
     # Read SQL query from file
