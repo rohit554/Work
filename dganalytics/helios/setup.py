@@ -347,6 +347,9 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
                 category        STRING,
                 action          STRING,
                 action_label    STRING,
+                contact_reason STRING,
+                main_inquiry STRING,
+                root_cause STRING,
                 startTime       TIMESTAMP,
                 endTime         TIMESTAMP
             )

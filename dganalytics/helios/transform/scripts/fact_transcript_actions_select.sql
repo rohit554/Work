@@ -3,6 +3,9 @@ conversationId,
 category,
 action,
 action_label,
+contact_reason,
+main_inquiry,
+root_cause,
 MIN(
     CASE
         WHEN line = startLine THEN from_unixtime(startTimeMs / 1000)
@@ -24,6 +27,9 @@ FROM
                 category,
                 action,
                 action_label,
+                contact_reason,
+                inquiries.main_inquiry,
+                inquiries.root_cause,
                 T.startTimeMs,
                 T.milliseconds,
                 T.line,
@@ -36,17 +42,21 @@ FROM
                     step.category,
                     step.action,
                     step.action_label,
-                    split(step.line, ',') lines
+                    split(step.line, ',') lines,
+                    contact.contact_reason,
+                    explode(contact.inquiries) inquiries 
                 FROM
                     (
                     SELECT
                         conversationId,
-                        EXPLODE(process_map) step
+                        EXPLODE(process_map) step,
+                        contact
                     FROM
                         (
                         SELECT
                             conversation_id conversationId,
                             process_map,
+                            explode(contact) contact,
                             row_number() OVER(
                             PARTITION BY conversation_id
                             ORDER BY
@@ -89,4 +99,7 @@ GROUP BY
 conversationId,
 category,
 action,
-action_label
+action_label,
+contact_reason,
+main_inquiry,
+root_cause
