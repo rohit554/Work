@@ -141,7 +141,7 @@ def get_transcript_insights(spark: SparkSession, tenant: str, run_id: str, extra
 
     # Splitting the conversations into two halves for two APIs
     total_conversations = conversations.count()
-    logger.info("Total Conversations to process: ", total_conversations)
+    print("Total Conversations to process: ", total_conversations)
     copy_df = conversations
 
     half = total_conversations // 2
@@ -172,7 +172,7 @@ def get_transcript_insights(spark: SparkSession, tenant: str, run_id: str, extra
     thread2.join()
 
     result = results1 + results2
-    logger.info("Total processed conversations: ", len(result))
+    print("Total processed conversations: ", len(result))
     df = pd.DataFrame(result)
     tenant_path, db_path, log_path = get_path_vars(tenant)
     df.to_csv(os.path.join(tenant_path, 'data', 'raw', 'audit', f'audit_{datetime.now()}.csv'),
