@@ -134,7 +134,8 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             divisionIds                ARRAY<STRING>,
             initialParticipantPurpose  STRING,
             initialSessionMediaTypeId  INT,
-            initialSessionMessageType  STRING
+            initialSessionMessageType  STRING,
+            location                   STRING
         )
         USING DELTA
         PARTITIONED BY (conversationStartDateId)
