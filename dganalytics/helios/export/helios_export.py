@@ -1,7 +1,8 @@
 from azure.storage.blob import BlobServiceClient, BlobClient, ContentSettings
 from io import BytesIO
-from dganalytics.utils.utils import get_secret
+from dganalytics.utils.utils import get_secret, get_env
 from dganalytics.helios.helios_utils import helios_utils_logger
+import os
 
 def helios_export(spark, tenant, extract_name, output_file_name):
     logger = helios_utils_logger(tenant,"helios")
@@ -15,7 +16,7 @@ def helios_export(spark, tenant, extract_name, output_file_name):
         container_client = blob_service_client.get_container_client(tenant)
 
         # Get a reference to the existing blob
-        blob_client = container_client.get_blob_client(output_file_name)
+        blob_client = container_client.get_blob_client(os.path.join(get_env(),output_file_name))
 
         df = spark.sql(f"""
             select * from dgdm_{tenant}.{extract_name} 
