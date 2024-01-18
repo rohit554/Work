@@ -9,4 +9,14 @@ initialParticipantPurpose,
 initialSessionMediaTypeId,
 initialSessionMessageType
 ) 
-select * from {transformation}
+select 
+conversationId,
+conversationStartDateId,
+conversationStart,
+conversationEnd,
+originatingDirectionId,
+divisionIds,
+initialParticipantPurpose,
+initialMediaTypeId,
+initialMessageType
+from {transformation}
