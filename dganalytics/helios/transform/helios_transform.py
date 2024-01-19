@@ -1,4 +1,4 @@
-from dganalytics.helios.helios_utils import get_sql_query, get_insert_overwrite_sql_query, helios_utils_logger
+from dganalytics.helios.helios_utils import get_sql_query, get_insert_overwrite_sql_query, helios_utils_logger, get_update_sql_query
 import time
 
 def helios_transformation(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time):
@@ -22,3 +22,7 @@ def helios_overwrite_transformation(spark, transformation, tenant):
     df = spark.sql(get_insert_overwrite_sql_query(spark, transformation, tenant))
     logger.info(f"Number of Insert/overwritten rows into {transformation} : {df.count()}")
 
+def helios_update_transformation(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time):
+    logger = helios_utils_logger(tenant, "helios-update"+transformation)
+    df = spark.sql(get_update_sql_query(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time, "update"))
+    logger.info(f"Number of Updated rows for location column in {transformation} : {df.count()}")

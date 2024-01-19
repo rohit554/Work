@@ -1,4 +1,4 @@
-UPDATE dgdm_{tenant}.dim_conversations C
+UPDATE dgdm_{tenant}.{transformation} C
 SET location = (
     SELECT participant.attributes["Mailing State"] 
     FROM (SELECT conversationId, explode(participants) participant FROM gpc_{tenant}.raw_conversation_details
