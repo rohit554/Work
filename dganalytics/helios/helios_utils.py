@@ -56,7 +56,29 @@ def get_insert_overwrite_sql_query(spark, transformation, tenant):
     logger.exception(e, stack_info=True, exc_info=True)
     raise Exception
 
-
+def get_update_sql_query(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time, interaction_type):
+  logger = helios_utils_logger(tenant,"helios")
+  tenant_path, db_path, log_path = get_path_vars('datagamz')
+  file_path=os.path.join(tenant_path,'code','dganalytics','dganalytics','helios','transform','scripts')
+  sql_file_path =os.path.join(file_path,transformation+"_"+interaction_type+".sql")
+  logger.info(f"{transformation}_{interaction_type}")
+  try:
+    # Read SQL query from file
+    with open(sql_file_path, 'r') as file:
+      sql_query = file.read()
+    formatted_sql_query = sql_query.format(
+          tenant=tenant,
+          extract_date=extract_date,
+          extract_start_time=extract_start_time,
+          extract_end_time=extract_end_time,
+          transformation = transformation
+      )
+    return formatted_sql_query
+  except Exception as e:
+    logger.exception(f"Error Occured in reading helios transformation SQL Query for {extract_start_time}_{extract_end_time}_{tenant}_{transformation}_{sql_file_path}")
+    logger.exception(e, stack_info=True, exc_info=True)
+    raise Exception
+  
 def transform_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--tenant', required=True)

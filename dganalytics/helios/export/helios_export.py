@@ -19,9 +19,30 @@ def helios_export(spark, tenant, extract_name, output_file_name):
         blob_client = container_client.get_blob_client(os.path.join(get_env(),output_file_name))
 
         df = spark.sql(f"""
-            select * from dgdm_{tenant}.{extract_name} 
+            select
+            fta.conversationId,
+            category,
+            action,
+            action_label,
+            contact_reason,
+            main_inquiry,
+            root_cause,
+            resolved,
+            location,
+            originatingDirectionId,
+            initialSessionMediaTypeId mediaType,
+            startTime,
+            endTime
+            from dgdm_{tenant}.{extract_name} fta
+            join
+            dgdm_{tenant}.fact_transcript_insights fti
+            join
+            dgdm_{tenant}.dim_conversations dc
+            on
+            fta.conversationId = fti.conversationId and
+            fta.conversationId = dc.conversationId
             WHERE startTime >= add_months(current_date(), -12)
-        """)
+            """)
         df = df.toPandas()
         
         csv_content = df.to_csv(index=False).encode('utf-8')
