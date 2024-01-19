@@ -14,7 +14,7 @@ def get_sql_query(spark, transformation, tenant, extract_date, extract_start_tim
   logger = helios_utils_logger(tenant,"helios")
   tenant_path, db_path, log_path = get_path_vars('datagamz')
   file_path=os.path.join(tenant_path,'code','dganalytics','dganalytics','helios','transform','scripts')
-  if interaction_type == "insert" and transformation != "dim_conversations":
+  if interaction_type == "insert":
     sql_file_path = os.path.join(file_path,interaction_type+"_query.sql")
   else:
     sql_file_path =os.path.join(file_path,transformation+"_"+interaction_type+".sql")

@@ -2,8 +2,9 @@ SELECT conversationId, dateId as conversationStartDateId, conversationStart, con
         OD.originatingDirectionId,
         divisionIds,
         initialParticipantPurpose,
-        mediaTypeId initialMediaTypeId,
-        messageType initialMessageType
+        mediaTypeId initialSessionMediaTypeId,
+        messageType initialSessionMessageType,
+        null as location
 FROM (
     SELECT conversationId, conversationStart, conversationEnd, originatingDirection, divisionIds,
             initialParticipant.purpose initialParticipantPurpose,
