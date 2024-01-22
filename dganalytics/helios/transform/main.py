@@ -1,5 +1,5 @@
 from dganalytics.utils.utils import get_spark_session, flush_utils
-from dganalytics.helios.transform.helios_transform import helios_transformation, helios_overwrite_transformation
+from dganalytics.helios.transform.helios_transform import helios_transformation, helios_overwrite_transformation, helios_update_transformation
 from dganalytics.helios.helios_utils import transform_parser, helios_utils_logger
 
 if __name__ == "__main__":
