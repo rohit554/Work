@@ -376,6 +376,13 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         PARTITIONED BY (conversationStartDateId)
         LOCATION '{db_name}/mv_transcript_results'
     """)
+    spark.sql(f"""
+        CREATE TABLE dgdm_{tenant}.dim_conversation_location
+        (
+            id STRING,
+            name STRING
+        )
+    """)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

@@ -12,9 +12,9 @@ if __name__ == "__main__":
     try:
         logger.info(f"Applying helios transformation {transformation}")
         if transformation in ["dim_conversations", "fact_conversation_metrics", "dim_conversation_participants", "dim_conversation_sessions", "dim_conversation_session_segments",
-                        "dim_surveys", "dim_evaluations", "fact_conversation_evaluations", "fact_conversation_surveys", "fact_transcript_contact_reasons", "fact_transcript_insights", "fact_transcript_actions"]:
+                        "dim_surveys", "dim_evaluations", "fact_conversation_evaluations", "fact_conversation_surveys", "fact_transcript_contact_reasons", "fact_transcript_insights", "fact_transcript_actions", "mv_cost_calculation", "mv_transcript_results", "mv_conversation_metrics"]:
             helios_transformation(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time)
-        elif transformation in ["dim_users", "dim_queues", "dim_wrap_up_codes"]:
+        elif transformation in ["dim_users", "dim_queues", "dim_wrap_up_codes", "mv_classification"]:
             helios_overwrite_transformation(spark, transformation, tenant)   
         elif transformation in ["dim_conversations_location"]:
             helios_update_transformation(spark, transformation.split("_location")[0], tenant, extract_date, extract_start_time, extract_end_time)

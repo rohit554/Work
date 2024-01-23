@@ -16,6 +16,8 @@ def get_sql_query(spark, transformation, tenant, extract_date, extract_start_tim
   file_path=os.path.join(tenant_path,'code','dganalytics','dganalytics','helios','transform','scripts')
   if interaction_type == "insert":
     sql_file_path = os.path.join(file_path,interaction_type+"_query.sql")
+  elif interaction_type == "delete" and transformation.startswith("mv"):
+    sql_file_path = os.path.join(file_path,"mv_"+interaction_type+".sql")
   else:
     sql_file_path =os.path.join(file_path,transformation+"_"+interaction_type+".sql")
   logger.info(f"{transformation}_{interaction_type}")
