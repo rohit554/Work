@@ -383,6 +383,69 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             name STRING
         )
     """)
+    spark.sql(f"""
+       CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_conversation_ivr_events
+        (
+            conversationId STRING,
+            eventName STRING,
+            eventValue STRING,
+            eventTime TIMESTAMP,
+            participantName STRING,
+            conversationStartDateId INT
+        )
+        USING DELTA
+        PARTITIONED BY (conversationStartDateId)      
+        LOCATION '{db_name}/dim_conversation_ivr_events' 
+    """)
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_conversation_ivr_menu_selections
+        (
+            conversationId STRING,
+            index INT,
+            menuId STRING,
+            previousMenuId STRING,
+            nextSelectedMenuId STRING,
+            menuEntryTime TIMESTAMP,
+            menuExitTime TIMESTAMP,
+            menuExitReason STRING,
+            conversationStart TIMESTAMP,
+            conversationStartDateId INT
+        )
+        USING DELTA
+        PARTITIONED BY (conversationStartDateId)
+        LOCATION '{db_name}/dim_conversation_ivr_menu_selections' 
+    """)
+    spark.sql(f"""
+       CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_conversation_session_flow
+        (
+            conversationId	STRING,
+            participantId	STRING,
+            sessionId	STRING,	
+            flowId	STRING,
+            endingLanguage	STRING,
+            entryReason	STRING,
+            entryType	STRING,
+            exitReason	STRING,
+            flowName	STRING,
+            flowType	STRING,
+            flowVersion	STRING,
+            flowOutcome	STRING,
+            flowOutcomeStartTimestamp	TIMESTAMP,
+            flowOutcomeEndTimestamp	TIMESTAMP,
+            flowOutcomeId	STRING,
+            flowOutcomeValue	STRING,
+            issuedCallback	STRING,
+            startingLanguage	STRING,
+            transferTargetAddress	STRING,
+            transferTargetName	STRING,
+            transferType	STRING,
+            conversationStartDateId	INT
+			
+        )
+        USING DELTA
+        PARTITIONED BY (conversationStartDateId)       
+        LOCATION '{db_name}/dim_conversation_session_flow' 
+    """)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
