@@ -12,10 +12,12 @@ def helios_utils_logger(tenant, app_name):
  
 def get_sql_query(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time, interaction_type):
   logger = helios_utils_logger(tenant,"helios")
-  tenant_path, db_path, log_path = get_path_vars('datagamz')
+  tenant_path, db_path, log_path = get_path_vars('')
   file_path=os.path.join(tenant_path,'code','dganalytics','dganalytics','helios','transform','scripts')
   if interaction_type == "insert":
     sql_file_path = os.path.join(file_path,interaction_type+"_query.sql")
+  elif interaction_type == "delete" and transformation.startswith("mv"):
+    sql_file_path = os.path.join(file_path,"mv_"+interaction_type+".sql")
   else:
     sql_file_path =os.path.join(file_path,transformation+"_"+interaction_type+".sql")
   logger.info(f"{transformation}_{interaction_type}")
@@ -39,7 +41,7 @@ def get_sql_query(spark, transformation, tenant, extract_date, extract_start_tim
 
 def get_insert_overwrite_sql_query(spark, transformation, tenant):
   logger = helios_utils_logger(tenant,"helios")
-  tenant_path, db_path, log_path = get_path_vars('datagamz')
+  tenant_path, db_path, log_path = get_path_vars('')
   file_path=os.path.join(tenant_path,'code','dganalytics','dganalytics','helios','transform','scripts')
   sql_file_path = os.path.join(file_path, transformation+".sql")
   
@@ -58,7 +60,7 @@ def get_insert_overwrite_sql_query(spark, transformation, tenant):
 
 def get_update_sql_query(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time, interaction_type):
   logger = helios_utils_logger(tenant,"helios")
-  tenant_path, db_path, log_path = get_path_vars('datagamz')
+  tenant_path, db_path, log_path = get_path_vars('')
   file_path=os.path.join(tenant_path,'code','dganalytics','dganalytics','helios','transform','scripts')
   sql_file_path =os.path.join(file_path,transformation+"_"+interaction_type+".sql")
   logger.info(f"{transformation}_{interaction_type}")

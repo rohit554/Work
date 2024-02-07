@@ -19,29 +19,323 @@ def helios_export(spark, tenant, extract_name, output_file_name):
         blob_client = container_client.get_blob_client(os.path.join(get_env(),output_file_name))
 
         df = spark.sql(f"""
-            select
-            fta.conversationId,
-            category,
-            action,
-            action_label,
-            contact_reason,
-            main_inquiry,
-            root_cause,
-            resolved,
-            location,
-            originatingDirectionId,
-            initialSessionMediaTypeId mediaType,
-            startTime,
-            endTime
-            from dgdm_{tenant}.{extract_name} fta
-            join
-            dgdm_{tenant}.fact_transcript_insights fti
-            join
-            dgdm_{tenant}.dim_conversations dc
-            on
-            fta.conversationId = fti.conversationId and
-            fta.conversationId = dc.conversationId
-            WHERE startTime >= add_months(current_date(), -12)
+                with conversations as (
+                select * from dgdm_simplyenergy.dim_conversations
+                WHERE conversationStart >= add_months(current_date(), -12)
+                ),
+                CTE AS (
+                SELECT
+                    conversationId, eventName,
+                    (case WHEN eventType = 'authStatus' THEN COALESCE(eventStart, TIMESTAMPADD(MICROSECOND, 1000, LAG(eventEnd, 1) OVER (PARTITION BY conversationId ORDER BY level1))) 
+                                                ELSE eventStart END)
+                                                AS eventStart,
+                    (case WHEN eventType = 'authStatus' THEN COALESCE(eventEnd, TIMESTAMPADD(MICROSECOND, 1000, LAG(eventEnd, 1) OVER (PARTITION BY conversationId ORDER BY level1))) 
+                                    ELSE eventEnd END)
+                                    AS eventEnd,
+                    level1,
+                    eventType,
+                    conversationStartDateId
+                FROM (
+                    -- 1. ANIS/DNIS
+                    select conversationId,
+                        conversationStart as eventStart,
+                        conversationStart as eventEnd,
+                        case when originatingDirectionId=1 then 'ANI' else 'DNIS'END  as eventName,
+                        0 as level1,
+                        'caller' eventType,
+                        conversationStartDateId
+                        FROM conversations
+                        
+                    UNION all
+
+                    -- 2. DNIS/ANIS
+                    select conversationId,
+                        TIMESTAMPADD(MICROSECOND, 1000, conversationStart) as eventStart,--add 1ms
+                        TIMESTAMPADD(MICROSECOND, 1000, conversationStart) as eventEnd,--add ms
+                        case when originatingDirectionId=1 then 'DNIS' else 'ANI'END  as eventName,
+                        1 as level1,
+                        'caller' eventType,
+                        conversationStartDateId
+                        FROM conversations
+                        
+                        UNION ALL
+
+                        -- 3.AuthenticationStatus
+                        select 
+                        as.conversationId,
+                        null as eventStart,
+                        null as eventEnd,
+                        eventName || ": "|| eventValue eventName,
+                        2 as level1,
+                        'authStatus' eventType,
+                        as.conversationStartDateId
+                        from dgdm_simplyenergy.dim_conversation_ivr_events  as 
+                        join conversations c
+                        on
+                        as.conversationStartDateId = c.conversationStartDateId 
+                        and as.conversationId = c.conversationId
+                        where eventName='AuthenticationStatus'
+
+                    UNION ALL
+
+                    -- 4.callflow
+                    select 
+                        f.conversationId,
+                        min(s.segmentStart) as eventStart,--add 1ms
+                        max(s.segmentEnd) as eventEnd,
+                        'Flow: ' ||flowName as eventName,
+                        3 as level1,
+                        'flow' eventType,
+                        f.conversationStartDateId
+                    from dgdm_simplyenergy.dim_conversation_session_flow f
+                    join
+                    dgdm_simplyenergy.dim_conversation_session_segments s 
+                    on
+                        f.conversationStartDateId = s.conversationStartDateId
+                        and f.conversationId = s.conversationId
+                        and f.sessionId = s.sessionId
+                    join conversations c
+                        on
+                        f.conversationStartDateId = c.conversationStartDateId and
+                        f.conversationId = c.conversationId
+                    group by f.conversationId, f.flowName, f.conversationStartDateId
+
+
+                    UNION ALL
+
+                -- 5. Menu Selections
+                    SELECT conversationId, TIMESTAMPADD(MICROSECOND, 1000 * (pos + 25), eventStart) eventStart, TIMESTAMPADD(MICROSECOND, 1000 * (pos + 25), eventStart) eventStart, eventName, (4 + pos) level1 , eventType, conversationStartDateId
+                    FROM(
+                    SELECT
+                        conversationId,
+                        conversationStart AS eventStart,
+                        conversationStart AS eventEnd,  -- Add eventEnd to the selection
+                        posexplode(split(eventValue, ',')) as (pos, eventName),
+                        -- 4 as level,
+                        'menu' eventType,
+                        conversationStartDateId
+                        FROM (SELECT  e.*, c.conversationStart 
+                    FROM dgdm_simplyenergy.dim_conversation_ivr_events e
+                    INNER JOIN conversations c
+                        ON e.conversationStartDateId = c.conversationStartDateId
+                        AND e.conversationId = c.conversationId
+                    WHERE e.eventName = 'MenuID' 
+                    )
+                    )
+                    WHERE TRIM(eventName) != '' AND eventName is not NULL
+
+                    UNION ALL
+
+                    -- 6.Queues
+                    select  
+                        s.conversationId,
+                        min(segmentStart) as eventStart,
+                        max(segmentEnd) as eventEnd,
+                        'Queue: ' ||q.queueName as eventName,
+                        100 as level1,
+                        'queue' eventType,
+                        s.conversationStartDateId
+                        from
+                        dgdm_simplyenergy.dim_conversation_session_segments s
+                        join
+                        dgdm_simplyenergy.dim_queues q
+                            on s.queueId = q.queueId
+                        join dgdm_simplyenergy.dim_conversation_participants p
+                            on s.conversationStartDateId = p.conversationStartDateId
+                            and s.conversationId = p.conversationId
+                            and s.participantId = p.participantId
+                        join conversations c
+                            on
+                            s.conversationStartDateId = c.conversationStartDateId and
+                            s.conversationId = c.conversationId
+                        where s.queueId is not null and p.purpose not in ('customer','external')
+                        group by s.conversationId, queueName, s.conversationStartDateId
+
+                    UNION ALL
+
+                    -- 7. Agents  
+                    select p.conversationId,
+                        min(segmentStart) as eventStart,
+                        max(segmentEnd)as eventEnd,
+                        'Agent ' || ROW_NUMBER() OVER (PARTITION BY p.conversationId ORDER BY MIN(segmentStart)) AS eventName,
+                        200 as level1,
+                        'agent' eventType,
+                        p.conversationStartDateId
+                    from dgdm_simplyenergy.dim_conversation_participants p
+                    join dgdm_simplyenergy.dim_conversation_session_segments s 
+                        on p.participantId=s.participantId 
+                        and p.conversationId=s.conversationId
+                    join conversations c
+                        on
+                        p.conversationStartDateId = c.conversationStartDateId and
+                        p.conversationId = c.conversationId
+                    where p.userId is not null 
+                    group by p.conversationId,userId, p.conversationStartDateId
+
+                    UNION ALL
+
+                    -- 8. KPI metric: nBlindTransferred
+                    select 
+                        b.conversationId,
+                        eventTime eventStart,
+                        eventTime eventEnd,
+                        'Blind Transferred' as eventName,
+                        250 as level1,
+                        'blindTransfer' eventType,
+                        b.conversationStartDateId
+                    from dgdm_simplyenergy.fact_conversation_metrics b
+                    join conversations c
+                        on
+                        b.conversationStartDateId = c.conversationStartDateId and
+                        b.conversationId = c.conversationId
+                    where name='nBlindTransferred' 
+
+                    UNION ALL
+
+                    -- 9. KPI metric: nConsultTransferred
+
+                    select 
+                        ct.conversationId,
+                        eventTime eventStart,
+                        eventTime eventEnd,
+                        'Consult Transferred' as eventName,
+                        300 as level1, 
+                        'consultTransfer' eventType,
+                        ct.conversationStartDateId
+                    from dgdm_simplyenergy.fact_conversation_metrics ct
+                    join conversations c
+                        on
+                        ct.conversationStartDateId = c.conversationStartDateId and
+                        ct.conversationId = c.conversationId
+                    where name='nConsultTransferred'
+
+                    UNION ALL
+
+                    -- 10. KPI metric: nConsult
+
+                    select distinct 
+                        cm.conversationId,
+                        eventTime eventStart,
+                        eventTime eventEnd,
+                        'Consult' as eventName,
+                        350 as level1,
+                        'consult' eventType,
+                        cm.conversationStartDateId
+                    from dgdm_simplyenergy.fact_conversation_metrics cm
+                    join conversations c
+                        on
+                        cm.conversationStartDateId = c.conversationStartDateId and
+                        cm.conversationId = c.conversationId
+                    where name='nConsult' 
+
+                    UNION ALL
+
+                    -- 11. KPI metric: Hold
+
+                    select 
+                        h.conversationId,
+                        eventTime eventStart,
+                        eventTime eventEnd,
+                        'Hold' as eventName,
+                        400 as level1,
+                        'hold' eventType,
+                        h.conversationStartDateId
+                    from dgdm_simplyenergy.fact_conversation_metrics h
+                    join conversations c
+                        on
+                        h.conversationStartDateId = c.conversationStartDateId and
+                        h.conversationId = c.conversationId
+                    where name='tHeld'  
+
+                )
+                )
+
+
+                SELECT a.conversationId,
+                    a.category,
+                    a.action,
+                    a.action_label,
+                    a.eventStart,
+                    a.eventEnd,
+                    a.contact_reason,
+                    a.main_inquiry,
+                    a.root_cause,
+                    a.location,
+                    a.originatingDirectionId,
+                    a.mediatype,
+                    ie.AuthenticationStatus,
+                    (CASE WHEN f.resolved IS NOT NULL THEN f.resolved ELSE i.resolved END) resolved,
+                    MAX(CASE WHEN fc.name = 'tHeld' THEN True ELSE False END) AS hashold,
+                        MAX(CASE WHEN fc.name = 'nConsult' THEN True ELSE False END) AS hasconsult,
+                        MAX(CASE WHEN fc.name = 'nConsultTransferred' THEN True ELSE False END) AS hasconsulttransfer,
+                        MAX(CASE WHEN fc.name = 'nBlindTransferred' THEN True ELSE False END) AS hasblindtransfer
+                FROM
+                (
+                    SELECT c.conversationId,
+                        (CASE WHEN eventType = 'menu' THEN 'Menu: ' || eventName ELSE eventName END) as category,
+                        '' action,
+                        '' action_label,
+                        eventStart,
+                        eventEnd,
+                        i.contactReason contact_reason,
+                        i.mainInquiry main_inquiry,
+                        i.rootCause root_cause,
+                        dc.location,
+                        dc.originatingDirectionId,
+                        dc.initialSessionMediaTypeId mediaType
+                FROM CTE c
+                JOIN conversations dc
+                    ON dc.conversationStartDateId = c.conversationStartDateId 
+                    and dc.conversationId = c.conversationId
+                LEFT JOIN dgdm_simplyenergy.fact_transcript_contact_reasons i
+                    ON c.conversationId = i.conversationId
+
+                UNION ALL
+
+                    SELECT  a.conversationId,
+                            category,
+                            action,
+                            action_label,
+                            startTime eventStart,
+                            endTime eventEnd,
+                            contact_reason,
+                            main_inquiry,
+                            root_cause,
+                            dc.location,
+                        dc.originatingDirectionId,
+                        dc.initialSessionMediaTypeId mediaType
+                    FROM dgdm_simplyenergy.fact_transcript_actions a
+                    JOIN conversations dc
+                    ON 
+                    dc.conversationId = a.conversationId
+                ) a
+                LEFT JOIN  dgdm_simplyenergy.fact_conversation_metrics fc
+                ON fc.conversationId = a.conversationid
+                LEFT JOIN 
+                (SELECT eventValue AuthenticationStatus, conversationId FROM dgdm_simplyenergy.dim_conversation_ivr_events 
+                    where eventName = 'AuthenticationStatus' ) ie
+                ON  a.conversationId = ie.conversationId
+                LEFT JOIN dgdm_simplyenergy.fact_transcript_insights i
+                ON i.conversationId = a.conversationId
+                LEFT JOIN (SELECT 'resolved' resolved, conversationId from dgdm_simplyenergy.dim_conversation_session_flow
+                where exitReason = 'FLOW_DISCONNECT') f
+                on f.conversationId = a.conversationId
+                GROUP BY a.conversationId,
+                    a.category,
+                    a.action,
+                    a.action_label,
+                    a.eventStart,
+                    a.eventEnd,
+                    a.contact_reason,
+                    a.main_inquiry,
+                    a.root_cause,
+                    a.location,
+                    a.originatingDirectionId,
+                    a.mediatype,
+                    ie.AuthenticationStatus,
+                    i.resolved,
+                    f.resolved
+                ORDER BY a.conversationId, a.eventStart, a.eventEnd
             """)
         df = df.toPandas()
         

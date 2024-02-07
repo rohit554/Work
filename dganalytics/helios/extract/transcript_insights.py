@@ -10,6 +10,7 @@ from dganalytics.utils.utils import get_secret, get_path_vars
 import pandas as pd
 from datetime import datetime
 import os
+import sys
 
 #TODO: remove this function later and read schema using from dganalytics.connectors.gpc_v2.gpc_utils import get_schema
 def get_api_schema():
@@ -82,52 +83,56 @@ def get_conversation_transcript(spark: SparkSession, tenant: str, extract_start_
 
 def process_conversation(spark, conv, url, tenant, extract_start_time, extract_end_time):
     logger = helios_utils_logger(tenant, "transcript_insights")
-    schema = get_api_schema()
-    token = getAccessToken()
+    if sys.getsizeof(conv.conversation) < 1024 :  
+      logger.exception(F"Small conversation: {conv.conversationId}")
+      return {'status': False, "conversationId": conv.conversationId, "Small Conversation": 500 }
+    else:
+        schema = get_api_schema()
+        token = getAccessToken()
 
-    headers = {
-        'dg-token': token,
-        'Content-Type': 'application/json'
-    }
+        headers = {
+            'dg-token': token,
+            'Content-Type': 'application/json'
+        }
 
-    payload = json.dumps({
-        "conversation_id": conv.conversationId,
-        "conversation": conv.conversation,
-        "tenant_id": tenant
-    })
+        payload = json.dumps({
+            "conversation_id": conv.conversationId,
+            "conversation": conv.conversation,
+            "tenant_id": tenant
+        })
 
-    retry = 0
-    while retry < 3:    
-        # Get Lambda Function Response
-        response = requests.request("POST", url, headers=headers, data=payload)
-        retry = retry + 1
+        retry = 0
+        while retry < 3:    
+            # Get Lambda Function Response
+            response = requests.request("POST", url, headers=headers, data=payload)
+            retry = retry + 1
 
-        if response.status_code != 502:
-            break
+            if response.status_code != 502:
+                break
 
-    if response.status_code == 200:
-        data = response.json()['data']
+        if response.status_code == 200:
+            data = response.json()['data']
 
-        resp = [data]
+            resp = [data]
+            
+            try:
+                insights = spark.createDataFrame(resp, schema=schema)
+                insights.createOrReplaceTempView('insights')
+                spark.sql(f"""
+                        INSERT INTO gpc_{tenant}.raw_transcript_insights (additional_service, process_knowledge, conversation_id, contact, system_knowledge, process_map, satisfaction, resolved, extractDate, extractIntervalStartTime, extractIntervalEndTime, recordInsertTime, recordIdentifier)
+                        SELECT additional_service, process_knowledge, conversation_id, contact, system_knowledge, process_map, satisfaction, resolved,CAST('{extract_start_time}' AS DATE) extractDate, '{extract_start_time}' extractIntervalStartTime, '{extract_end_time}' extractIntervalEndTime, '{datetime.now()}' recordInsertTime,
+                        1 recordIdentifier  FROM insights
+                        """)
+                return {'status': True, "conversationId":conv.conversationId, "error_or_status_code": response.status_code }
+            except Exception as e:
+                logger.exception(f"Error Occurred in insights insertion for conversation: {conv.conversationId}")
+                logger.exception(e, stack_info=True, exc_info=True)
+                return {'status': False, "conversationId":conv.conversationId, "error_or_status_code": e }
+            
+        if response.status_code != 200:
+            logger.exception(F"Error occurred with conversation: {conv.conversationId}, STATUS_CODE: {response.status_code}")
+            return {'status': False, "conversationId": conv.conversationId, "error_or_status_code": response.status_code }
         
-        try:
-            insights = spark.createDataFrame(resp, schema=schema)
-            insights.createOrReplaceTempView('insights')
-            spark.sql(f"""
-                    INSERT INTO gpc_{tenant}.raw_transcript_insights (additional_service, process_knowledge, conversation_id, contact, system_knowledge, process_map, satisfaction, resolved, extractDate, extractIntervalStartTime, extractIntervalEndTime, recordInsertTime, recordIdentifier)
-                    SELECT additional_service, process_knowledge, conversation_id, contact, system_knowledge, process_map, satisfaction, resolved,CAST('{extract_start_time}' AS DATE) extractDate, '{extract_start_time}' extractIntervalStartTime, '{extract_end_time}' extractIntervalEndTime, '{datetime.now()}' recordInsertTime,
-                    1 recordIdentifier  FROM insights
-                    """)
-            return {'status': True, "conversationId":conv.conversationId, "error_or_status_code": response.status_code }
-        except Exception as e:
-            logger.exception(f"Error Occurred in insights insertion for conversation: {conv.conversationId}")
-            logger.exception(e, stack_info=True, exc_info=True)
-            return {'status': False, "conversationId":conv.conversationId, "error_or_status_code": e }
-        
-    if response.status_code != 200:
-        logger.exception(F"Error occurred with conversation: {conv.conversationId}, STATUS_CODE: {response.status_code}")
-        return {'status': False, "conversationId": conv.conversationId, "error_or_status_code": response.status_code }
-    
 
 def pool_executor(spark, conversations, url, tenant, extract_start_time, extract_end_time, results):
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
