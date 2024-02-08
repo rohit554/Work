@@ -19,6 +19,7 @@ def helios_export(spark, tenant, extract_name, output_file_name):
         blob_client = container_client.get_blob_client(os.path.join(get_env(),output_file_name))
 
         df = spark.sql(f"""
+                %sql
                 with conversations as (
                 select * from dgdm_simplyenergy.dim_conversations
                 WHERE conversationStart >= add_months(current_date(), -12)
@@ -262,7 +263,7 @@ def helios_export(spark, tenant, extract_name, output_file_name):
                     a.root_cause,
                     a.location,
                     a.originatingDirectionId,
-                    a.mediatype,
+                    a.mediatypeId,
                     ie.AuthenticationStatus,
                     (CASE WHEN f.resolved IS NOT NULL THEN f.resolved ELSE i.resolved END) resolved,
                     MAX(CASE WHEN fc.name = 'tHeld' THEN True ELSE False END) AS hashold,
@@ -282,7 +283,7 @@ def helios_export(spark, tenant, extract_name, output_file_name):
                         i.rootCause root_cause,
                         dc.location,
                         dc.originatingDirectionId,
-                        dc.initialSessionMediaTypeId mediaType
+                        dc.initialSessionMediaTypeId mediatypeId
                 FROM CTE c
                 JOIN conversations dc
                     ON dc.conversationStartDateId = c.conversationStartDateId 
@@ -303,7 +304,7 @@ def helios_export(spark, tenant, extract_name, output_file_name):
                             root_cause,
                             dc.location,
                         dc.originatingDirectionId,
-                        dc.initialSessionMediaTypeId mediaType
+                        dc.initialSessionMediaTypeId mediatypeId
                     FROM dgdm_simplyenergy.fact_transcript_actions a
                     JOIN conversations dc
                     ON 
@@ -331,12 +332,12 @@ def helios_export(spark, tenant, extract_name, output_file_name):
                     a.root_cause,
                     a.location,
                     a.originatingDirectionId,
-                    a.mediatype,
+                    a.mediatypeId,
                     ie.AuthenticationStatus,
                     i.resolved,
                     f.resolved
                 ORDER BY a.conversationId, a.eventStart, a.eventEnd
-            """)
+        """)
         df = df.toPandas()
         
         csv_content = df.to_csv(index=False).encode('utf-8')
