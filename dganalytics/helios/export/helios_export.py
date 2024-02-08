@@ -19,7 +19,6 @@ def helios_export(spark, tenant, extract_name, output_file_name):
         blob_client = container_client.get_blob_client(os.path.join(get_env(),output_file_name))
 
         df = spark.sql(f"""
-                %sql
                 with conversations as (
                 select * from dgdm_simplyenergy.dim_conversations
                 WHERE conversationStart >= add_months(current_date(), -12)
@@ -37,7 +36,6 @@ def helios_export(spark, tenant, extract_name, output_file_name):
                     eventType,
                     conversationStartDateId
                 FROM (
-                    -- 1. ANIS/DNIS
                     select conversationId,
                         conversationStart as eventStart,
                         conversationStart as eventEnd,
@@ -49,7 +47,6 @@ def helios_export(spark, tenant, extract_name, output_file_name):
                         
                     UNION all
 
-                    -- 2. DNIS/ANIS
                     select conversationId,
                         TIMESTAMPADD(MICROSECOND, 1000, conversationStart) as eventStart,--add 1ms
                         TIMESTAMPADD(MICROSECOND, 1000, conversationStart) as eventEnd,--add ms
@@ -61,7 +58,6 @@ def helios_export(spark, tenant, extract_name, output_file_name):
                         
                         UNION ALL
 
-                        -- 3.AuthenticationStatus
                         select 
                         as.conversationId,
                         null as eventStart,
@@ -79,7 +75,6 @@ def helios_export(spark, tenant, extract_name, output_file_name):
 
                     UNION ALL
 
-                    -- 4.callflow
                     select 
                         f.conversationId,
                         min(s.segmentStart) as eventStart,--add 1ms
@@ -104,7 +99,6 @@ def helios_export(spark, tenant, extract_name, output_file_name):
 
                     UNION ALL
 
-                -- 5. Menu Selections
                     SELECT conversationId, TIMESTAMPADD(MICROSECOND, 1000 * (pos + 25), eventStart) eventStart, TIMESTAMPADD(MICROSECOND, 1000 * (pos + 25), eventStart) eventStart, eventName, (4 + pos) level1 , eventType, conversationStartDateId
                     FROM(
                     SELECT
@@ -127,7 +121,6 @@ def helios_export(spark, tenant, extract_name, output_file_name):
 
                     UNION ALL
 
-                    -- 6.Queues
                     select  
                         s.conversationId,
                         min(segmentStart) as eventStart,
@@ -154,7 +147,6 @@ def helios_export(spark, tenant, extract_name, output_file_name):
 
                     UNION ALL
 
-                    -- 7. Agents  
                     select p.conversationId,
                         min(segmentStart) as eventStart,
                         max(segmentEnd)as eventEnd,
@@ -175,7 +167,6 @@ def helios_export(spark, tenant, extract_name, output_file_name):
 
                     UNION ALL
 
-                    -- 8. KPI metric: nBlindTransferred
                     select 
                         b.conversationId,
                         eventTime eventStart,
@@ -192,8 +183,6 @@ def helios_export(spark, tenant, extract_name, output_file_name):
                     where name='nBlindTransferred' 
 
                     UNION ALL
-
-                    -- 9. KPI metric: nConsultTransferred
 
                     select 
                         ct.conversationId,
@@ -212,8 +201,6 @@ def helios_export(spark, tenant, extract_name, output_file_name):
 
                     UNION ALL
 
-                    -- 10. KPI metric: nConsult
-
                     select distinct 
                         cm.conversationId,
                         eventTime eventStart,
@@ -230,8 +217,6 @@ def helios_export(spark, tenant, extract_name, output_file_name):
                     where name='nConsult' 
 
                     UNION ALL
-
-                    -- 11. KPI metric: Hold
 
                     select 
                         h.conversationId,
