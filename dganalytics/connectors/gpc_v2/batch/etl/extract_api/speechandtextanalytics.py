@@ -1,11 +1,12 @@
 import json
-import requests as requests
+import requests
 import time
 from pyspark.sql import SparkSession
 from socket import error as SocketError
 import errno
 from dganalytics.connectors.gpc_v2.gpc_utils import authorize, get_api_url, process_raw_data
 from dganalytics.connectors.gpc_v2.gpc_utils import gpc_utils_logger
+import concurrent.futures
 
 def get_conversations(spark: SparkSession, extract_start_time: str, extract_end_time: str) -> list:
     conversations_df = spark.sql(f"""
@@ -61,17 +62,25 @@ def exec_speechandtextanalytics(spark: SparkSession, tenant: str, run_id: str, e
     global logger
     logger = gpc_utils_logger(tenant, "gpc_speechandtextanalytics")
     logger.info(f"getting conversations extracted between {extract_start_time} and {extract_end_time} for Speech And Text Analytics")
+
     conversations_df = get_conversations(spark, extract_start_time, extract_end_time)
+
+    if conversations_df is None or not hasattr(conversations_df, 'rdd'):
+        logger.error("Failed to retrieve valid conversations DataFrame. Exiting thread execution.")
+        return
+
     auth_headers = authorize(tenant)
     base_url = get_api_url(tenant)
     speechandtextanalytics = []
 
-    for conversation in conversations_df.rdd.collect():
-        conversation_id = conversation['conversationId']
-        resp_json = get_speechandtextanalytics(base_url, auth_headers, conversation_id, 0)
+    valid_conversations = conversations_df.filter(conversations_df['conversationId'].isNotNull())
 
-        if resp_json != None and len(resp_json) > 0:
-            logger.info(f"adding {len(resp_json)} Speech And Text Analytics for conversation {conversation_id}")
+    with ThreadPoolExecutor() as executor:
+        results = executor.map(lambda conversation: get_speechandtextanalytics(base_url, auth_headers, conversation['conversationId'], 0), valid_conversations.rdd.collect())
+
+    for resp_json in results:
+        if resp_json is not None and len(resp_json) > 0:
+            logger.info(f"adding {len(resp_json)} Speech And Text Analytics for a conversation")
             speechandtextanalytics.append(resp_json)
 
     if len(speechandtextanalytics) > 0:
