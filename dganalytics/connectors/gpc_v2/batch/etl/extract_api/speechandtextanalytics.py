@@ -7,6 +7,7 @@ import errno
 from dganalytics.connectors.gpc_v2.gpc_utils import authorize, get_api_url, process_raw_data
 from dganalytics.connectors.gpc_v2.gpc_utils import gpc_utils_logger
 import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 
 def get_conversations(spark: SparkSession, extract_start_time: str, extract_end_time: str) -> list:
     conversations_df = spark.sql(f"""
