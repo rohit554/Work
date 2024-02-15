@@ -6,7 +6,6 @@ from dganalytics.connectors.gpc_v2.gpc_utils import authorize, get_api_url, proc
 from dganalytics.connectors.gpc_v2.gpc_utils import gpc_utils_logger
 from concurrent.futures import ThreadPoolExecutor
 from pyspark.sql.functions import col
-import concurrent.futures
 
 def get_conversations(spark: SparkSession, extract_start_time: str, extract_end_time: str) :
     conversations_df = spark.sql(f"""
