@@ -150,7 +150,7 @@ def get_challenges(spark):
                     AND source.challengerMongoId = target.challengerMongoId
                     AND source.challengeThrownDate = target.challengeThrownDate
                     AND source.challengeName = target.challengeName
-                    AND source.challengeAcceptanceDate = target.challengeAcceptanceDate
+                    AND (source.challengeAcceptanceDate = target.challengeAcceptanceDate OR (source.challengeAcceptanceDate = target.challengeAcceptanceDate IS NULL AND target.challengeAcceptanceDate IS NULL) )
                 )
          """)     
             

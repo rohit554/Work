@@ -359,24 +359,6 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         """)
 
     spark.sql(f"""
-        CREATE TABLE IF NOT EXISTS dgdm_simplyenergy.mv_transcript_results (
-            noOfInteractions INT,
-            conversationStartDateId INT,
-            dateVal DATE,
-            mediaTypeId INT,
-            contactReason STRING,
-            mainInquiry STRING,
-            rootCause STRING,
-            inquiry_type STRING,
-            resolved STRING,
-            satisfaction STRING,
-            queueIds ARRAY<STRING>
-            )
-        USING DELTA
-        PARTITIONED BY (conversationStartDateId)
-        LOCATION '{db_name}/mv_transcript_results'
-    """)
-    spark.sql(f"""
         CREATE TABLE dgdm_{tenant}.dim_conversation_location
         (
             id STRING,
@@ -446,6 +428,105 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         PARTITIONED BY (conversationStartDateId)       
         LOCATION '{db_name}/dim_conversation_session_flow' 
     """)
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS dgdm_{tenant}.mv_cost_calculation (
+        conversationId STRING,
+        conversationStartDateId INT,
+        mediaTypeId INT,
+        region STRING,
+        contactReason STRING,
+        mainInquiry STRING,
+        rootCause STRING,
+        inquiry_type STRING,
+        resolved STRING,
+        satisfaction STRING,
+        queueIds ARRAY < STRING >,
+        tHandle BIGINT
+        ) USING DELTA 
+        PARTITIONED BY (conversationStartDateId) 
+        LOCATION '{db_name}/mv_cost_calculation';
+    """)
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS dgdm_{tenant}.mv_transcript_results (
+        noOfInteractions INT,
+        conversationStartDateId INT,
+        dateVal DATE,
+        mediaTypeId INT,
+        region STRING,
+        contactReason STRING,
+        mainInquiry STRING,
+        rootCause STRING,
+        inquiry_type STRING,
+        resolved STRING,
+        satisfaction STRING,
+        queueIds ARRAY < STRING >
+        ) USING DELTA 
+        PARTITIONED BY (conversationStartDateId) 
+        LOCATION '{db_name}/mv_transcript_results'       
+    """)
+    spark.sql(f"""
+            CREATE TABLE IF NOT EXISTS dgdm_{tenant}.mv_conversation_metrics (
+            conversationId STRING,
+            mediaTypeId INT,
+            conversationStartDateId INT,
+            userId STRING,
+            nBlindTransferred INT,
+            nConsultTransferred INT,
+            nConsult INT,
+            nTransferred INT,
+            resolved INT,
+            notResolved INT,
+            tHandle BIGINT,
+            tHandleResolved BIGINT,
+            tHandleNotResolved BIGINT,
+            tTalkComplete BIGINT,
+            tHeldComplete BIGINT,
+            tAcwComplete BIGINT,
+            satisfaction INT
+            )
+            USING DELTA
+            PARTITIONED BY (conversationStartDateId)
+            LOCATION '{db_name}/mv_conversation_metrics'
+              
+    """)
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS dgdm_{tenant}.mv_classification (
+        contactReason STRING,
+        mainInquiry STRING,
+        mediaTypeId INT,
+        tHandle INT,
+        additionalService INT,
+        resolved INT,
+        totalInteractions INT,
+        businessValue INT,
+        customerValue INT,
+        category STRING
+        ) 
+        USING DELTA 
+        PARTITIONED BY (contactReason, mainInquiry ) 
+        LOCATION '{db_name}/mv_classification'       
+    """)
+    spark.sql(f"""
+           CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_user_teams
+            (
+            id BIGINT GENERATED ALWAYS AS IDENTITY,
+            userId STRING,
+            userFullName STRING,
+            groupId STRING,
+            groupName STRING,
+            teamName STRING,
+            role STRING,
+            region STRING,
+            site STRING,
+            timezone STRING,
+            provider STRING,
+            startDate DATE,
+            endDate DATE,
+            isActive BOOLEAN
+            )
+            USING DELTA
+            LOCATION  '{db_name}/dim_user_teams'   
+        """)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

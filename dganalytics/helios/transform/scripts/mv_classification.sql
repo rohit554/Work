@@ -1,4 +1,4 @@
-INSERT OVERWRITE dgdm_{tenant}.mv_classification
+INSERT INTO dgdm_{tenant}.mv_classification
 SELECT
 *,
 CASE
