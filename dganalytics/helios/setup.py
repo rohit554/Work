@@ -334,7 +334,8 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             contactReason           STRING,
             mainInquiry             STRING,
             rootCause               STRING,
-            inquiry_type               STRING,
+            inquiry_type            STRING,
+            additional_inquiry      STRING,
             conversationStartDateId INT
         )
         USING DELTA
@@ -348,11 +349,15 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
                 category        STRING,
                 action          STRING,
                 action_label    STRING,
-                contact_reason STRING,
-                main_inquiry STRING,
-                root_cause STRING,
+                contact_reason  STRING,
+                main_inquiry    STRING,
+                root_cause      STRING,
                 startTime       TIMESTAMP,
-                endTime         TIMESTAMP
+                endTime         TIMESTAMP,
+                speaker         STRING,
+                start_line      STRING,
+                end_line        STRING
+                
             )
             USING DELTA
             LOCATION '{db_name}/fact_transcript_actions'

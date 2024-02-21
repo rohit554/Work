@@ -29,7 +29,8 @@ def get_api_schema():
                     StructType([
                         StructField("inquiry_type", StringType(), True),
                         StructField("main_inquiry", StringType(), True),
-                        StructField("root_cause", StringType(), True)
+                        StructField("root_cause", StringType(), True),
+                        StructField("additional_inquiry", StringType(), True)
                     ])
                 ), True)
             ])
@@ -38,7 +39,9 @@ def get_api_schema():
             StructType([
                 StructField("call_status", StringType(), True),
                 StructField("emotion", StringType(), True),
-                StructField("line", StringType(), True),
+                StructField("speaker", StringType(), True),
+                StructField("start_line", StringType(), True),
+                StructField("end_line", StringType(), True),
                 StructField("action", StringType(), True),
                 StructField("category", StringType(), True),
                 StructField("action_label", StringType(), True),
