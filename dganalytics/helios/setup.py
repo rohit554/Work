@@ -370,6 +370,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             name STRING
         )
     """)
+    
     spark.sql(f"""
        CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_conversation_ivr_events
         (
@@ -384,6 +385,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         PARTITIONED BY (conversationStartDateId)      
         LOCATION '{db_name}/dim_conversation_ivr_events' 
     """)
+    
     spark.sql(f"""
         CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_conversation_ivr_menu_selections
         (
@@ -402,6 +404,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         PARTITIONED BY (conversationStartDateId)
         LOCATION '{db_name}/dim_conversation_ivr_menu_selections' 
     """)
+    
     spark.sql(f"""
        CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_conversation_session_flow
         (
@@ -433,6 +436,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         PARTITIONED BY (conversationStartDateId)       
         LOCATION '{db_name}/dim_conversation_session_flow' 
     """)
+    
     spark.sql(f"""
         CREATE TABLE IF NOT EXISTS dgdm_{tenant}.mv_cost_calculation (
         conversationId STRING,
@@ -451,6 +455,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         PARTITIONED BY (conversationStartDateId) 
         LOCATION '{db_name}/mv_cost_calculation';
     """)
+    
     spark.sql(f"""
         CREATE TABLE IF NOT EXISTS dgdm_{tenant}.mv_transcript_results (
         noOfInteractions INT,
@@ -469,6 +474,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         PARTITIONED BY (conversationStartDateId) 
         LOCATION '{db_name}/mv_transcript_results'       
     """)
+    
     spark.sql(f"""
             CREATE TABLE IF NOT EXISTS dgdm_{tenant}.mv_conversation_metrics (
             conversationId STRING,
@@ -492,8 +498,8 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             USING DELTA
             PARTITIONED BY (conversationStartDateId)
             LOCATION '{db_name}/mv_conversation_metrics'
-              
     """)
+    
     spark.sql(f"""
         CREATE TABLE IF NOT EXISTS dgdm_{tenant}.mv_classification (
         contactReason STRING,
@@ -511,6 +517,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         PARTITIONED BY (contactReason, mainInquiry ) 
         LOCATION '{db_name}/mv_classification'       
     """)
+    
     spark.sql(f"""
            CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_user_teams
             (
