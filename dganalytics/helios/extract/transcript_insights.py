@@ -30,9 +30,13 @@ def get_api_schema():
                         StructField("inquiry_type", StringType(), True),
                         StructField("main_inquiry", StringType(), True),
                         StructField("root_cause", StringType(), True),
-                        StructField("additional_inquiry", StringType(), True)
+                        StructField("additional_inquiry", StringType(), True),
+                        StructField("main_inquiry_raw", StringType(), True),
+                        StructField("root_cause_raw", StringType(), True)
                     ])
-                ), True)
+                ), True),
+                StructField("contact_reason_raw", StringType(), True)
+
             ])
         ), True),
         StructField("process_map", ArrayType(
@@ -42,6 +46,7 @@ def get_api_schema():
                 StructField("speaker", StringType(), True),
                 StructField("start_line", StringType(), True),
                 StructField("end_line", StringType(), True),
+                StructField("line", StringType(), True),
                 StructField("action", StringType(), True),
                 StructField("category", StringType(), True),
                 StructField("action_label", StringType(), True),
