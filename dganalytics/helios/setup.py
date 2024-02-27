@@ -336,6 +336,9 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             rootCause               STRING,
             inquiry_type            STRING,
             additional_inquiry      STRING,
+            main_inquiry_raw        STRING,
+            root_cause_raw          STRING,
+            contact_reason_raw      STRING,
             conversationStartDateId INT
         )
         USING DELTA

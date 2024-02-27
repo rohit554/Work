@@ -15,7 +15,10 @@ MAX(
     CASE
         WHEN line = endLine THEN from_unixtime((startTimeMs + COALESCE(milliseconds, 0)) / 1000)
     END
-    ) as endTime
+    ) as endTime,
+    speaker,
+    start_line,
+    end_line
 FROM
 (
     SELECT
@@ -34,7 +37,10 @@ FROM
                 T.milliseconds,
                 T.line,
                 element_at(lines, 1) startLine,
-                element_at(lines, size(lines)) endLine
+                element_at(lines, size(lines)) endLine,
+                speaker,
+                start_line,
+                end_line
             FROM
             (
                 SELECT
@@ -44,7 +50,10 @@ FROM
                     step.action_label,
                     split(step.line, ',') lines,
                     contact.contact_reason,
-                    explode(contact.inquiries) inquiries 
+                    explode(contact.inquiries) inquiries,
+                    step.speaker,
+                    step.start_line,
+                    step.end_line 
                 FROM
                     (
                     SELECT
@@ -102,4 +111,7 @@ action,
 action_label,
 contact_reason,
 main_inquiry,
-root_cause
+root_cause,
+speaker,
+start_line,
+end_line
