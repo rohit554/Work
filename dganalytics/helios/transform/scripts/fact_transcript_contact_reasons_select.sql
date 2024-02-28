@@ -1,13 +1,13 @@
 SELECT T.conversationId,
  T.contactReason,
- contact_reason_raw,
  T.mainInquiry,
  T.rootCause,
  T.inquiry_type,
- additional_inquiry,
+ C.conversationStartDateId,
  main_inquiry_raw,
  root_cause_raw,
- C.conversationStartDateId
+ contact_reason_raw,
+ additional_inquiry
  FROM (
   SELECT conversationId,
             contactReason,
