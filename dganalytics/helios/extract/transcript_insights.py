@@ -150,6 +150,8 @@ def pool_executor(spark, conversations, url, tenant, extract_start_time, extract
 
 def get_transcript_insights(spark: SparkSession, tenant: str, run_id: str, extract_start_time: str, extract_end_time: str):
     logger = helios_utils_logger(tenant, "transcript_insights")
+    logger.info(f'extract_start_time : {extract_start_time}')
+    logger.info(f'extract_end_time : {extract_end_time}')
     conversations = get_conversation_transcript(spark, tenant, extract_start_time, extract_end_time)
 
     # Splitting the conversations into two halves for two APIs
