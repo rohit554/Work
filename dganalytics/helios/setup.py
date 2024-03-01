@@ -542,6 +542,17 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             USING DELTA
             LOCATION  '{db_name}/dim_user_teams'   
         """)
+    
+    spark.sql(f"""
+            CREATE TABLE IF NOT EXISTS dgdm_{tenant}.transcript_insights_audit (
+            status   BOOLEAN,
+            conversationId STRING,
+            error_or_status_code INT,
+            small_conversation INT
+            )
+            USING DELTA
+            LOCATION '{db_name}/transcript_insights_audit'
+        """)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
