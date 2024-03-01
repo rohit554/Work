@@ -8,30 +8,30 @@ SELECT
   nConsult,
   nTransferred,
   CASE
-    WHEN COALESCE(LOWER(T.resolved), '') = 'resolved' THEN 1
+    WHEN COALESCE(LOWER(T.resolved), '') IN ('resolved', 'partially resolved') THEN 1
     ELSE 0
   END AS resolved,
   CASE
-    WHEN COALESCE(LOWER(T.resolved), '') != 'resolved' THEN 1
+    WHEN COALESCE(LOWER(T.resolved), '') = 'not resolved' THEN 1
     ELSE 0
   END AS notResolved,
   tHandle,
   CASE
-    WHEN COALESCE(LOWER(T.resolved), "") = "resolved" then tHandle
+    WHEN COALESCE(LOWER(T.resolved), "") In ('resolved', 'partially resolved') then tHandle
     ELSE 0
   end AS tHandleResolved,
   CASE
-    WHEN COALESCE(LOWER(T.resolved), "") != "resolved" then tHandle
+    WHEN COALESCE(LOWER(T.resolved), "") = "not resolved" then tHandle
     ELSE 0
   end AS tHandleNotResolved,
   tTalkComplete,
   tHeldComplete,
   tAcwComplete,
   CASE
-    WHEN LOWER(T.satisfaction) = 'lowest' THEN 0
-    WHEN LOWER(T.satisfaction) = 'low' THEN 25
-    WHEN LOWER(T.satisfaction) = 'medium' THEN 50
-    WHEN LOWER(T.satisfaction) = 'high' THEN 75
+    WHEN LOWER(T.satisfaction) = 'lowest' THEN 20
+    WHEN LOWER(T.satisfaction) = 'low' THEN 40
+    WHEN LOWER(T.satisfaction) = 'medium' THEN 60
+    WHEN LOWER(T.satisfaction) = 'high' THEN 80
     WHEN LOWER(T.satisfaction) = 'highest' THEN 100
     ELSE 0
   END AS satisfaction
