@@ -59,7 +59,9 @@ def helios_export(spark, tenant, extract_name, output_file_name):
         else:
             queue_condition='1=1'  
             conversations = f"""select * from dgdm_{tenant}.dim_conversations
-                    WHERE conversationStart >= add_months(current_date(), -12)
+                    WHERE originatingDirectionId=1 
+                    and initialSessionMediaTypeId=1 
+                    and conversationStartDateId >= 20240101 
             """
         df=spark.sql(f"""
                 with conversations as (

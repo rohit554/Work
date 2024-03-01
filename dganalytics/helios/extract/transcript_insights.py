@@ -93,7 +93,7 @@ def process_conversation(spark, conv, url, tenant, extract_start_time, extract_e
     logger = helios_utils_logger(tenant, "transcript_insights")
     if sys.getsizeof(conv.conversation) < 1024 :  
       logger.exception(F"Small conversation: {conv.conversationId}")
-      return {'status': False, "conversationId": conv.conversationId, "Small Conversation": 500 }
+      return {'status': False, "conversationId": conv.conversationId, "error_or_status_code": 500, "Small Conversation": 500 }
     else:
         schema = get_api_schema()
         token = getAccessToken()
@@ -131,7 +131,7 @@ def process_conversation(spark, conv, url, tenant, extract_start_time, extract_e
                         SELECT additional_service, process_knowledge, conversation_id, contact, system_knowledge, process_map, satisfaction, resolved,CAST('{extract_start_time}' AS DATE) extractDate, '{extract_start_time}' extractIntervalStartTime, '{extract_end_time}' extractIntervalEndTime, '{datetime.now()}' recordInsertTime,
                         1 recordIdentifier  FROM insights
                         """)
-                return {'status': True, "conversationId":conv.conversationId, "error_or_status_code": response.status_code }
+                return {'status': True, "conversationId":conv.conversationId, "error_or_status_code": response.status_code, "Small Conversation": 0 }
             except Exception as e:
                 logger.exception(f"Error Occurred in insights insertion for conversation: {conv.conversationId}")
                 logger.exception(e, stack_info=True, exc_info=True)
@@ -139,7 +139,7 @@ def process_conversation(spark, conv, url, tenant, extract_start_time, extract_e
             
         if response.status_code != 200:
             logger.exception(F"Error occurred with conversation: {conv.conversationId}, STATUS_CODE: {response.status_code}")
-            return {'status': False, "conversationId": conv.conversationId, "error_or_status_code": response.status_code }
+            return {'status': False, "conversationId": conv.conversationId, "error_or_status_code": response.status_code, "Small Conversation": 0 }
         
 
 def pool_executor(spark, conversations, url, tenant, extract_start_time, extract_end_time, results):
@@ -150,6 +150,8 @@ def pool_executor(spark, conversations, url, tenant, extract_start_time, extract
 
 def get_transcript_insights(spark: SparkSession, tenant: str, run_id: str, extract_start_time: str, extract_end_time: str):
     logger = helios_utils_logger(tenant, "transcript_insights")
+    logger.info(f'extract_start_time : {extract_start_time}')
+    logger.info(f'extract_end_time : {extract_end_time}')
     conversations = get_conversation_transcript(spark, tenant, extract_start_time, extract_end_time)
 
     # Splitting the conversations into two halves for two APIs
@@ -187,6 +189,7 @@ def get_transcript_insights(spark: SparkSession, tenant: str, run_id: str, extra
     result = results1 + results2
     print("Total processed conversations: ", len(result))
     df = pd.DataFrame(result)
-    tenant_path, db_path, log_path = get_path_vars(tenant)
-    df.to_csv(os.path.join(tenant_path, 'data', 'raw', 'audit', f'audit_{datetime.now()}.csv'),
-                                       header=True, index=False)
+    df = spark.createDataFrame(df)
+
+    df.createOrReplaceTempView("transcript_insights_audit")
+    spark.sql(f"INSERT INTO dgdm_{tenant}.transcript_insights_audit SELECT * FROM transcript_insights_audit")

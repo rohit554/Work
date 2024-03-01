@@ -28,7 +28,7 @@ FROM
       CASE
         WHEN (resolved * 100) / totalInteractions >= 50
         AND 
-          (tHandle / (totalInteractions * 1000) < 700) THEN 1
+          (tHandle / (totalInteractions * 1000) < 400) THEN 1
           ELSE 0
         END AS customerValue
         FROM
@@ -48,7 +48,7 @@ FROM
               COUNT(
                 DISTINCT(
                   CASE
-                    WHEN lower(resolved) = "resolved" THEN conversationId
+                    WHEN lower(resolved) In ("resolved", "partially resolved") THEN conversationId
                   END
                 )
               ) resolved,
