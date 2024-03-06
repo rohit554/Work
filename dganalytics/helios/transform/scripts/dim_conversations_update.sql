@@ -9,5 +9,6 @@ SET location = (
     
     ) 
     WHERE conversationId = C.conversationId AND 
-    coalesce(participant.attributes["Mailing State"], participant.attributes["MailingState"]) IS NOT NULL     LIMIT 1
+    coalesce(participant.attributes["Mailing State"], participant.attributes["MailingState"]) IS NOT NULL     
+    LIMIT 1
 )

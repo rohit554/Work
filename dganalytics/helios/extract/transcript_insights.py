@@ -2,7 +2,6 @@ import requests
 import json
 from pyspark.sql import SparkSession
 import datetime
-from dganalytics.helios.helios_utils import helios_utils_logger
 from pyspark.sql.types import StructType, StructField, StringType, ArrayType, IntegerType, TimestampType, DateType
 import concurrent.futures
 import threading
@@ -11,6 +10,8 @@ import pandas as pd
 from datetime import datetime
 import os
 import sys
+from dganalytics.helios.helios_utils import helios_utils_logger
+
 
 #TODO: remove this function later and read schema using from dganalytics.connectors.gpc_v2.gpc_utils import get_schema
 def get_api_schema():
@@ -82,18 +83,21 @@ def get_conversation_transcript(spark: SparkSession, tenant: str, extract_start_
     return spark.sql(f"""
         SELECT conversationId, concat_ws("\\n", collect_list(phrase)) conversation
         FROM (SELECT P.conversationId, concat(string(row_number() OVER(PARTITION BY P.conversationId ORDER BY startTimeMs)), ':', participantPurpose, ':', text) phrase FROM gpc_{tenant}.fact_conversation_transcript_phrases P
-        INNER JOIN gpc_{tenant}.raw_speechandtextanalytics_transcript C
-        ON P.conversationId = c.conversationId
-        where c.extractDate = CAST('{extract_start_time}' AS DATE) AND c.extractIntervalStartTime = '{extract_start_time}' and c.extractIntervalEndTime = '{extract_end_time}'
+        INNER JOIN dgdm_{tenant}.dim_conversations C
+        ON P.conversationId = C.conversationId
+        where C.conversationStartDateId=date_format(date_add(current_date(), -1), 'yyyyMMdd')
         )
         GROUP BY conversationId
+        
     """)
 
 def process_conversation(spark, conv, url, tenant, extract_start_time, extract_end_time):
+    startTime = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
     logger = helios_utils_logger(tenant, "transcript_insights")
     if sys.getsizeof(conv.conversation) < 1024 :  
       logger.exception(F"Small conversation: {conv.conversationId}")
-      return {'status': False, "conversationId": conv.conversationId, "error_or_status_code": 500, "Small Conversation": 500 }
+      endTime = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+      return {'status': False, "conversationId": conv.conversationId, "error_or_status_code": 500, "transcriptSize": sys.getsizeof(conv.conversation), "transcriptProcessingStartTime": startTime, "transcriptProcessingEndTime": endTime }
     else:
         schema = get_api_schema()
         token = getAccessToken()
@@ -131,15 +135,18 @@ def process_conversation(spark, conv, url, tenant, extract_start_time, extract_e
                         SELECT additional_service, process_knowledge, conversation_id, contact, system_knowledge, process_map, satisfaction, resolved,CAST('{extract_start_time}' AS DATE) extractDate, '{extract_start_time}' extractIntervalStartTime, '{extract_end_time}' extractIntervalEndTime, '{datetime.now()}' recordInsertTime,
                         1 recordIdentifier  FROM insights
                         """)
-                return {'status': True, "conversationId":conv.conversationId, "error_or_status_code": response.status_code, "Small Conversation": 0 }
+                endTime = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")              
+                return {'status': True, "conversationId":conv.conversationId, "error_or_status_code": response.status_code, "transcriptSize": sys.getsizeof(conv.conversation), "transcriptProcessingStartTime": startTime, "transcriptProcessingEndTime": endTime}
             except Exception as e:
+                endTime = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
                 logger.exception(f"Error Occurred in insights insertion for conversation: {conv.conversationId}")
                 logger.exception(e, stack_info=True, exc_info=True)
-                return {'status': False, "conversationId":conv.conversationId, "error_or_status_code": e }
+                return {'status': False, "conversationId":conv.conversationId, "error_or_status_code": e , "transcriptSize": sys.getsizeof(conv.conversation), "transcriptProcessingStartTime": startTime, "transcriptProcessingEndTime": endTime}
             
         if response.status_code != 200:
+            endTime = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
             logger.exception(F"Error occurred with conversation: {conv.conversationId}, STATUS_CODE: {response.status_code}")
-            return {'status': False, "conversationId": conv.conversationId, "error_or_status_code": response.status_code, "Small Conversation": 0 }
+            return {'status': False, "conversationId": conv.conversationId, "error_or_status_code": response.status_code, "transcriptSize": sys.getsizeof(conv.conversation), "transcriptProcessingStartTime": startTime, "transcriptProcessingEndTime": endTime }
         
 
 def pool_executor(spark, conversations, url, tenant, extract_start_time, extract_end_time, results):
@@ -192,4 +199,18 @@ def get_transcript_insights(spark: SparkSession, tenant: str, run_id: str, extra
     df = spark.createDataFrame(df)
 
     df.createOrReplaceTempView("transcript_insights_audit")
-    spark.sql(f"INSERT INTO dgdm_{tenant}.transcript_insights_audit SELECT * FROM transcript_insights_audit")
+    spark.sql(f"""
+              INSERT INTO dgdm_{tenant}.transcript_insights_audit 
+              SELECT 
+              status,
+              a.conversationId, 
+              error_or_status_code,
+              transcriptSize,
+              transcriptProcessingStartTime,
+              transcriptProcessingEndTime,
+              C.conversationStartDateId,
+              date_format(current_timestamp(), 'yyyy-MM-dd HH:mm:ss') as recordInsertTime
+              FROM transcript_insights_audit a
+              join dgdm_{tenant}.dim_conversations C
+              on a.conversationId=C.conversationId""")
+    
