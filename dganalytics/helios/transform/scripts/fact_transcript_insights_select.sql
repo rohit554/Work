@@ -10,7 +10,7 @@ FROM
   select * from(
     SELECT *,
           row_number() OVER (PARTITION BY conversation_id ORDER BY recordInsertTime DESC) RN
-       FROM gpc_simplyenergy.raw_transcript_insights 
+       FROM gpc_{tenant}.raw_transcript_insights 
        WHERE
         extractDate = '{extract_date}'
         AND extractIntervalStartTime = '{extract_start_time}'
@@ -18,5 +18,5 @@ FROM
       ) 
  where RN=1     
 )T
-JOIN dgdm_simplyenergy.dim_conversations C
+JOIN dgdm_{tenant}.dim_conversations C
     ON T.conversation_id = C.conversationId
