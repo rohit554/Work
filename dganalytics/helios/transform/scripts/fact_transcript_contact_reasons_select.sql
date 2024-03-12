@@ -23,12 +23,15 @@ SELECT T.conversationId,
                 contact.contact_reason_raw contact_reason_raw,
                 EXPLODE(contact.inquiries) inquiry
         FROM ( SELECT conversation_id conversationId,
-                        EXPLODE(contact) contact
+                        EXPLODE(contact) contact,
+                        row_number() OVER (PARTITION BY conversation_id ORDER BY recordInsertTime DESC) RN
+
                 FROM gpc_{tenant}.raw_transcript_insights
                 WHERE extractDate = '{extract_date}'
                   AND extractIntervalStartTime = '{extract_start_time}'
                   AND extractIntervalEndTime = '{extract_end_time}'
-            )
+
+            ) where RN=1
         )
     ) T
 JOIN dgdm_{tenant}.dim_conversations C
