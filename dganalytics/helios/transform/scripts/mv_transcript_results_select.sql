@@ -9,7 +9,8 @@ SELECT COUNT(DISTINCT D.conversationId) noOfInteractions,
     inquiry_type,
     resolved,
     T.satisfaction,
-    collect_list(DISTINCT S.queueId) queueIds
+    collect_list(DISTINCT S.queueId) queueIds,
+    collect_list(DISTINCT S.wrapUpCodeId) wrapUpCodeIds
 FROM dgdm_{tenant}.dim_conversations D
 JOIN dgdm_{tenant}.dim_conversation_session_segments S
     ON D.conversationStartDateId = S.conversationStartDateId
