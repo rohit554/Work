@@ -85,7 +85,10 @@ def get_conversation_transcript(spark: SparkSession, tenant: str, extract_start_
         FROM (SELECT P.conversationId, concat(string(row_number() OVER(PARTITION BY P.conversationId ORDER BY startTimeMs)), ':', participantPurpose, ':', text) phrase FROM gpc_{tenant}.fact_conversation_transcript_phrases P
         INNER JOIN dgdm_{tenant}.dim_conversations C
         ON P.conversationId = C.conversationId
-        where C.conversationStartDateId=date_format(date_add(current_date(), -1), 'yyyyMMdd')
+        where C.conversationStartDateId = date_format('{extract_start_time}', 'yyyyMMdd') 
+          and p.conversationId not in (select conversationId FROM dgdm_simplyenergy.fact_transcript_insights 
+                                        where conversationStartDateId = date_format('{extract_start_time}', 'yyyyMMdd')
+                                    )
         )
         GROUP BY conversationId
         

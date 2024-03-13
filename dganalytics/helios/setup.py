@@ -453,10 +453,11 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         resolved STRING,
         satisfaction STRING,
         queueIds ARRAY < STRING >,
-        tHandle BIGINT
+        tHandle BIGINT,
+        wrapUpCodeIds ARRAY < STRING >
         ) USING DELTA 
         PARTITIONED BY (conversationStartDateId) 
-        LOCATION '{db_name}/mv_cost_calculation';
+        LOCATION '{db_name}/mv_cost_calculation'
     """)
     
     spark.sql(f"""
@@ -472,7 +473,8 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         inquiry_type STRING,
         resolved STRING,
         satisfaction STRING,
-        queueIds ARRAY < STRING >
+        queueIds ARRAY < STRING >,
+        wrapUpCodeIds ARRAY < STRING >
         ) USING DELTA 
         PARTITIONED BY (conversationStartDateId) 
         LOCATION '{db_name}/mv_transcript_results'       
@@ -547,7 +549,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             CREATE TABLE IF NOT EXISTS dgdm_{tenant}.transcript_insights_audit (
                         status   BOOLEAN,
                         conversationId STRING,
-                        error_or_status_code INT,
+                        error_or_status_code STRING,
                         transcriptSize INT,
                         transcriptProcessingStartTime TIMESTAMP, 
                         transcriptProcessingEndTime TIMESTAMP, 
