@@ -452,9 +452,9 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         inquiry_type STRING,
         resolved STRING,
         satisfaction STRING,
-        queueIds ARRAY < STRING >,
+        queueIds ARRAY <STRING>,
         tHandle BIGINT,
-        wrapUpCodeIds ARRAY < STRING >
+        wrapUpCodeIds ARRAY <STRING>
         ) USING DELTA 
         PARTITIONED BY (conversationStartDateId) 
         LOCATION '{db_name}/mv_cost_calculation'
@@ -473,8 +473,8 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         inquiry_type STRING,
         resolved STRING,
         satisfaction STRING,
-        queueIds ARRAY < STRING >,
-        wrapUpCodeIds ARRAY < STRING >
+        queueIds ARRAY <STRING>,
+        wrapUpCodeIds ARRAY <STRING>
         ) USING DELTA 
         PARTITIONED BY (conversationStartDateId) 
         LOCATION '{db_name}/mv_transcript_results'       
@@ -554,6 +554,8 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
                         transcriptProcessingStartTime TIMESTAMP, 
                         transcriptProcessingEndTime TIMESTAMP, 
                         conversationStartDateId INT,
+                        error STRING,
+                        url STRING,
                         recordInsertTime TIMESTAMP
                         )
                         USING DELTA

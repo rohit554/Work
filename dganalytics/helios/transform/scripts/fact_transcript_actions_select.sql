@@ -92,8 +92,8 @@ FROM
                         ) line
                     FROM
                         gpc_{tenant}.fact_conversation_transcript_phrases TP
-                        INNER JOIN gpc_{tenant}.raw_speechandtextanalytics_transcript C ON TP.conversationId = c.conversationId
-                        where
+                        INNER JOIN dgdm_simplyenergy.dim_conversations C ON TP.conversationId = c.conversationId
+                        where c.conversationStartDateId = (select dateId from dgdm_{tenant}.dim_date where dateVal = cast('{extract_date}' as date))
                         c.extractDate = '{extract_date}'
                 ) T ON T.conversationid = P.conversationId
             and (
