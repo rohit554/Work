@@ -110,11 +110,11 @@ def insert_insights_audit(spark: SparkSession, tenant: str, status : bool, conve
 
 def get_conversations(spark: SparkSession, tenant: str, extract_start_time: str, extract_end_time: str):
   return spark.sql(f"""
-    SELECT distinct P.conversationId FROM gpc_simplyenergy.fact_conversation_transcript_phrases P
-    INNER JOIN dgdm_simplyenergy.dim_conversations C
+    SELECT distinct P.conversationId FROM gpc_{tenant}.fact_conversation_transcript_phrases P
+    INNER JOIN dgdm_{tenant}.dim_conversations C
     ON P.conversationId = C.conversationId
     where C.conversationStartDateId = date_format('{extract_start_time}', 'yyyyMMdd') 
-            and not exists  (select 1  FROM dgdm_simplyenergy.fact_transcript_insights i
+            and not exists  (select 1  FROM dgdm_{tenant}.fact_transcript_insights i
                                     where i.conversationStartDateId = date_format('{extract_start_time}', 'yyyyMMdd')
                                     and i.conversationId = p.conversationId
                                 )
