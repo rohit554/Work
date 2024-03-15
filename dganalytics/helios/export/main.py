@@ -1,8 +1,8 @@
 from dganalytics.utils.utils import get_spark_session, flush_utils
 from dganalytics.helios.helios_utils import export_parser, helios_utils_logger
 from dganalytics.helios.export.helios_export import helios_export
-from dganalytics.helios.export.helios_export import helios_process_map
-from dganalytics.helios.export.helios_export import ivr_export
+from dganalytics.helios.export.helios_process_map import helios_process_map
+from dganalytics.helios.export.ivr_export import ivr_export
 
 if __name__ == "__main__":
     tenant, run_id, extract_name, output_file_name = export_parser()
