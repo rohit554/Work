@@ -39,7 +39,6 @@ FROM
   JOIN (
     SELECT
       C.conversationId,
-      C.mediaTypeId,
       SUM(C.tHandle) tHandle
     FROM
       (
@@ -54,7 +53,6 @@ FROM
       NOT(tHandle IS NULL)
     GROUP BY
       C.conversationId,
-      C.mediaTypeId,
       C.conversationStartDateId
   ) A ON A.conversationId = V.conversationId
 WHERE
