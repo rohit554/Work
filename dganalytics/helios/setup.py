@@ -562,6 +562,38 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
                         PARTITIONED BY (conversationStartDateId)
                         LOCATION '{db_name}/transcript_insights_audit'
         """)
+    
+    spark.sql(f"""
+           CREATE TABLE IF NOT EXISTS dgdm_{tenant}.helios_process_map (
+                conversationId	STRING,
+                category	STRING,
+                action	STRING,
+                action_label	STRING,
+                eventStart	TIMESTAMP,
+                eventEnd	TIMESTAMP,
+                contact_reason	STRING,
+                main_inquiry	STRING,
+                root_cause	STRING,
+                location STRING,
+                originatingDirectionId	INT,
+                mediatypeId	INT,
+                AuthenticationStatus	STRING,
+                resolved	STRING,
+                hashold	BOOLEAN,
+                hasconsult	BOOLEAN,
+                hasconsulttransfer	BOOLEAN,
+                hasblindtransfer	BOOLEAN,
+                userNames	STRING,
+                teamNames	STRING,
+                speaker	STRING,
+                finalQueueName	STRING,
+                finalWrapupCode	STRING,
+                conversationStartDateId INT
+            )
+            USING DELTA
+            PARTITIONED BY (conversationStartDateId)
+            LOCATION '{db_name}/helios_process_map'                 
+        """)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
