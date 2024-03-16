@@ -49,7 +49,7 @@ def helios_process_map(spark, tenant):
       conversations = f"""select * from dgdm_{tenant}.dim_conversations
               WHERE originatingDirectionId=1 
               and initialSessionMediaTypeId=1 
-              and conversationStartDateId >= DATE_FORMAT(DATE_SUB(CURRENT_DATE,10), 'YYYYMMDD')    
+              and conversationStartDateId >= (select dateId from dgdm_{tenant}.dim_date where dateVal = DATE_SUB(CURRENT_DATE,10))     
             """
   df=spark.sql(f"""
       with conversations as (
@@ -464,7 +464,7 @@ def helios_process_map(spark, tenant):
   spark.sql(f"""
     delete from dgdm_{tenant}.helios_process_map hpm
     where exists 
-      (select 1 helios_process_map m 
+      (select 1 from helios_process_map m 
           where m.conversationId =  hpm.conversationId
           and m.conversationStartDateId = hpm.conversationStartDateId
       )
