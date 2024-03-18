@@ -359,7 +359,8 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
                 endTime         TIMESTAMP,
                 speaker         STRING,
                 start_line      STRING,
-                end_line        STRING
+                end_line        STRING,
+                conversationStartDateId INT
                 
             )
             USING DELTA
