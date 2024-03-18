@@ -463,11 +463,7 @@ def helios_process_map(spark, tenant):
   df.createOrReplaceTempView("helios_process_map")
   spark.sql(f"""
     delete from dgdm_{tenant}.helios_process_map hpm
-    where exists 
-      (select 1 from helios_process_map m 
-          where m.conversationId =  hpm.conversationId
-          and m.conversationStartDateId = hpm.conversationStartDateId
-      )
+    where conversationStartDateId >= (select dateId from dgdm_{tenant}.dim_date where dateVal = DATE_SUB(CURRENT_DATE,10))
 
   """)
 
