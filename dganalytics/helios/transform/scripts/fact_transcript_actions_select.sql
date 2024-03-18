@@ -94,7 +94,7 @@ FROM
                     FROM
                         gpc_simplyenergy.fact_conversation_transcript_phrases TP
                         INNER JOIN dgdm_simplyenergy.dim_conversations C ON TP.conversationId = c.conversationId
-                        where c.conversationStartDateId = (select dateId from dgdm_simplyenergy.dim_date where dateVal = cast('2024-03-17' as date)) 
+                        where c.conversationStartDateId = (select dateId from dgdm_simplyenergy.dim_date where dateVal = cast('{extract_date}' as date)) 
                 ) T ON T.conversationid = P.conversationId
             and (
             start_line = T.line
