@@ -8,17 +8,18 @@ main_inquiry,
 root_cause,
 MIN(
     CASE
-        WHEN line = startLine THEN from_unixtime(startTimeMs / 1000)
+        WHEN line = start_line THEN from_unixtime(startTimeMs / 1000)
     END
     ) as startTime,
 MAX(
     CASE
-        WHEN line = endLine THEN from_unixtime((startTimeMs + COALESCE(milliseconds, 0)) / 1000)
+        WHEN line = end_line THEN from_unixtime((startTimeMs + COALESCE(milliseconds, 0)) / 1000)
     END
     ) as endTime,
     speaker,
     start_line,
-    end_line
+    end_line,
+    conversationStartDateId
 FROM
 (
     SELECT
@@ -36,11 +37,10 @@ FROM
                 T.startTimeMs,
                 T.milliseconds,
                 T.line,
-                element_at(lines, 1) startLine,
-                element_at(lines, size(lines)) endLine,
                 speaker,
                 start_line,
-                end_line
+                end_line,
+                T.conversationStartDateId
             FROM
             (
                 SELECT
@@ -72,7 +72,7 @@ FROM
                                 recordInsertTime DESC
                             ) RN
                         FROM
-                        gpc_{tenant}.raw_transcript_insights
+                        gpc_simplyenergy.raw_transcript_insights
                         WHERE extractDate = '{extract_date}'
                         )
                     WHERE
@@ -89,15 +89,16 @@ FROM
                         PARTITION BY TP.conversationId
                         ORDER BY
                             startTimeMs
-                        ) line
+                        ) line,
+                        conversationStartDateId
                     FROM
-                        gpc_{tenant}.fact_conversation_transcript_phrases TP
+                        gpc_simplyenergy.fact_conversation_transcript_phrases TP
                         INNER JOIN dgdm_simplyenergy.dim_conversations C ON TP.conversationId = c.conversationId
-                        where c.conversationStartDateId = (select dateId from dgdm_{tenant}.dim_date where dateVal = cast('{extract_date}' as date))
+                        where c.conversationStartDateId = (select dateId from dgdm_simplyenergy.dim_date where dateVal = cast('2024-03-17' as date)) 
                 ) T ON T.conversationid = P.conversationId
             and (
-            element_at(lines, 1) = T.line
-            OR element_at(lines, size(lines)) = T.line
+            start_line = T.line
+            OR end_line = T.line
             )
         order by
             P.conversationId
@@ -113,4 +114,5 @@ main_inquiry,
 root_cause,
 speaker,
 start_line,
-end_line
+end_line,
+conversationStartDateId
