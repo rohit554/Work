@@ -360,10 +360,10 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
                 speaker         STRING,
                 start_line      STRING,
                 end_line        STRING,
-                conversationStartDateId INT
-                
+                conversationStartDateId INT                
             )
             USING DELTA
+            PARTITIONED BY (conversationStartDateId)
             LOCATION '{db_name}/fact_transcript_actions'
         """)
 
