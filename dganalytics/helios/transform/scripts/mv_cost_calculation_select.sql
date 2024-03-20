@@ -51,8 +51,6 @@ FROM
             SUM(value) for name in ('tHandle')
           )
       ) C
-    WHERE
-      NOT(tHandle IS NULL)
     GROUP BY
       C.conversationId,
       C.conversationStartDateId
