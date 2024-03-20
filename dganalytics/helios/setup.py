@@ -447,6 +447,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         conversationStartDateId INT,
         mediaTypeId INT,
         region STRING,
+        originatingDirectionId	INT,
         contactReason STRING,
         mainInquiry STRING,
         rootCause STRING,
@@ -454,8 +455,8 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         resolved STRING,
         satisfaction STRING,
         queueIds ARRAY <STRING>,
-        tHandle BIGINT,
-        wrapUpCodeIds ARRAY <STRING>
+        wrapUpCodeIds ARRAY <STRING>,
+        tHandle BIGINT        
         ) USING DELTA 
         PARTITIONED BY (conversationStartDateId) 
         LOCATION '{db_name}/mv_cost_calculation'
@@ -468,6 +469,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         dateVal DATE,
         mediaTypeId INT,
         region STRING,
+        originatingDirectionId	INT,
         contactReason STRING,
         mainInquiry STRING,
         rootCause STRING,
@@ -511,7 +513,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
         contactReason STRING,
         mainInquiry STRING,
         mediaTypeId INT,
-        tHandle INT,
+        tHandle BIGINT,
         additionalService INT,
         resolved INT,
         totalInteractions INT,
@@ -594,6 +596,26 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             USING DELTA
             PARTITIONED BY (conversationStartDateId)
             LOCATION '{db_name}/helios_process_map'                 
+        """)
+    
+    spark.sql(f"""
+           CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_ivr_menus
+            (
+                menuId STRING,
+                menuName STRING
+            )
+            USING DELTA
+            LOCATION '{db_name}/dim_ivr_menus'
+        """)
+    spark.sql(f"""
+           CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_resolution
+            (
+                id INT,
+                name STRING
+            )
+            USING DELTA
+            PARTITIONED BY (id)
+            LOCATION '{db_name}/dim_resolution'
         """)
 
 if __name__ == "__main__":

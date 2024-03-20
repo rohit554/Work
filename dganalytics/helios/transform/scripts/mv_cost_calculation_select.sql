@@ -8,6 +8,7 @@ FROM
       D.conversationStartDateId,
       D.initialSessionMediaTypeId mediaTypeId,
       D.location region,
+      D.originatingDirectionId,
       F.contactReason,
       F.mainInquiry,
       F.rootCause,
@@ -29,7 +30,8 @@ FROM
       D.conversationId,
       D.initialSessionMediaTypeId,
       D.location,
-       F.contactReason,
+      D.originatingDirectionId,
+      F.contactReason,
       F.mainInquiry,
       F.rootCause,
       F.inquiry_type,
@@ -49,8 +51,6 @@ FROM
             SUM(value) for name in ('tHandle')
           )
       ) C
-    WHERE
-      NOT(tHandle IS NULL)
     GROUP BY
       C.conversationId,
       C.conversationStartDateId
