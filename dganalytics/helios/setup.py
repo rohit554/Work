@@ -347,24 +347,22 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
     """)
 
     spark.sql(f"""
-            CREATE TABLE IF NOT EXISTS {db_name}.fact_transcript_actions (
-                conversationId  STRING,
-                category        STRING,
-                action          STRING,
-                action_label    STRING,
-                contact_reason  STRING,
-                main_inquiry    STRING,
-                root_cause      STRING,
-                startTime       TIMESTAMP,
-                endTime         TIMESTAMP,
-                speaker         STRING,
-                start_line      STRING,
-                end_line        STRING,
-                conversationStartDateId INT                
+            CREATE TABLE IF NOT EXISTS {db_name}.fact_transcript_contact_reasons (
+                conversationId          STRING,
+                contactReason           STRING,
+                mainInquiry             STRING,
+                rootCause               STRING,
+                inquiry_type            STRING,
+                conversationStartDateId INT,
+                main_inquiry_raw        STRING,
+                root_cause_raw          STRING,
+                contact_reason_raw      STRING,
+                additional_inquiry      STRING
+                
             )
             USING DELTA
             PARTITIONED BY (conversationStartDateId)
-            LOCATION '{db_name}/fact_transcript_actions'
+            LOCATION '{db_name}/fact_transcript_contact_reasons'
         """)
 
     spark.sql(f"""
