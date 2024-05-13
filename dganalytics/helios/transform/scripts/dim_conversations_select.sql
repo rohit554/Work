@@ -4,14 +4,15 @@ SELECT conversationId, dateId as conversationStartDateId, conversationStart, con
         initialParticipantPurpose,
         mediaTypeId initialSessionMediaTypeId,
         messageType initialSessionMessageType,
-        null as location
+        location
 FROM (
     SELECT conversationId, conversationStart, conversationEnd, originatingDirection, divisionIds,
             initialParticipant.purpose initialParticipantPurpose,
             initialParticipant.sessions[0].mediaType mediaType,
-            initialParticipant.sessions[0].messageType messageType  FROM
+            initialParticipant.sessions[0].messageType messageType,
+            coalesce(participant.attributes["Mailing State"],participant.attributes["MailingState"]) as location  FROM
             (
-                select conversationId, conversationStart, conversationEnd, originatingDirection, divisionIds, participants[0] initialParticipant, row_number() over (partition by conversationId order by recordInsertTime DESC) rn
+                select conversationId, conversationStart, conversationEnd, originatingDirection, divisionIds, participants[0] initialParticipant, explode(participants) participant, row_number() over (partition by conversationId order by recordInsertTime DESC) rn
                 from gpc_{tenant}.raw_conversation_details
                 where extractDate = '{extract_date}'
                 and  extractIntervalStartTime = '{extract_start_time}' 
