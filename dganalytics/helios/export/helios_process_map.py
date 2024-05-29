@@ -127,28 +127,20 @@ def helios_process_map(spark, tenant):
 
               UNION ALL
 
-              SELECT conversationId, 
-                TIMESTAMPADD(MICROSECOND, 1000 * (pos + 35), eventStart) eventStart, 
-                TIMESTAMPADD(MICROSECOND, 1000 * (pos + 35), eventStart) eventEnd, 
-                eventName, (4 + pos) level1 , eventType, conversationStartDateId
-              FROM(
-              SELECT
-                  conversationId,
-                  conversationStart AS eventStart,
-                  conversationStart AS eventEnd,  -- Add eventEnd to the selection
-                  posexplode(split(eventValue, ',')) as (pos, eventName),
-                  -- 4 as level,
-                  'menu' eventType,
-                  conversationStartDateId
-                  FROM (SELECT  e.*, c.conversationStart 
-              FROM dgdm_{tenant}.dim_conversation_ivr_events e
-              INNER JOIN conversations c
-                  ON e.conversationStartDateId = c.conversationStartDateId
-                  AND e.conversationId = c.conversationId
-              WHERE e.eventName = 'MenuID' 
-              )
-              )
-              WHERE TRIM(eventName) != '' AND eventName is not NULL
+            
+                    
+                select e.conversationId,
+                    menuEntryTime as eventStart,
+                    menuExitTime as eventEnd,
+                    menuId as eventName,
+                    3+index as level1,
+                    'menu' eventType,
+                    e.conversationStartDateId
+                    from (select * from dgdm_{tenant}.dim_conversation_ivr_menu_selections order by menuEntryTime,menuExitTime) e
+                    INNER JOIN conversations c
+                                    ON e.conversationStartDateId = c.conversationStartDateId
+                                    AND e.conversationId = c.conversationId
+
 
               UNION ALL
 
@@ -298,8 +290,11 @@ def helios_process_map(spark, tenant):
               (CASE WHEN eventType = 'menu' THEN 'Menu: ' || eventName ELSE eventName END) as category,
               '' action,
               '' action_label,
-              eventStart,
-              eventEnd,
+              case when eventStart is null then lag(eventEnd) over (PARTITION BY c.conversationId order by eventStart)
+                                when eventStart is null and lag(eventEnd) over (PARTITION BY c.conversationId order by eventStart) is null then  dc.conversationStart 
+                                else eventStart 
+                                END AS eventStart,
+              case when eventEnd is null then lead (eventStart) over (PARTITION BY c.conversationId order by eventStart) else eventEnd end as eventEnd,
               case when FIRST(f.conversationId) IS NULL then 'Ended in IVR' else i.contactReason end as contact_reason,
               case when FIRST(f.conversationId) IS NULL  then 'Ended in IVR' else i.mainInquiry end as main_inquiry,
               case when FIRST(f.conversationId) IS NULL  then 'Ended in IVR' else i.rootCause end as root_cause,
@@ -330,7 +325,8 @@ def helios_process_map(spark, tenant):
                   location,
                   originatingDirectionId,
                   initialSessionMediaTypeId,
-                  C.conversationStartDateId
+                  C.conversationStartDateId,
+                  dc.conversationStart
 
       UNION ALL
 
@@ -456,11 +452,10 @@ def helios_process_map(spark, tenant):
           fqn.finalQueueName,
           fwcn.finalWrapupCode,
           a.conversationStartDateId
-          HAVING eventEnd is NOT NULL
+        HAVING eventEnd is NOT NULL
       ORDER BY a.conversationId, a.eventStart, a.eventEnd
   """)
-
-  df.createOrReplaceTempView("helios_process_map")
+  df.createOrReplaceTempView("helios_process_map") 
   spark.sql(f"""
     delete from dgdm_{tenant}.helios_process_map hpm
     where conversationStartDateId >= (select dateId from dgdm_{tenant}.dim_date where dateVal = DATE_SUB(CURRENT_DATE,10))
