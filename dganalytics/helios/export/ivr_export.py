@@ -176,11 +176,11 @@ def ivr_export(spark, tenant, extract_name, output_file_name):
                     (
                         SELECT c.conversationId,
                             (CASE WHEN eventType = 'menu' THEN 'Menu: ' || replace(eventName, '_', ' ') ELSE eventName END) as category,
-                            case when eventStart is null then lag(eventEnd) over (PARTITION BY c.conversationId order by eventStart)
-                                when eventStart is null and lag(eventEnd) over (PARTITION BY c.conversationId order by eventStart) is null then  dc.conversationStart 
-                                else eventStart 
-                                END AS eventStart,
-                            case when eventEnd is null then lead(eventStart) over (PARTITION BY c.conversationId order by eventStart) else eventEnd end as eventEnd,
+                            eventStart,
+                            case when eventEnd is null and lead(eventStart) over (PARTITION BY c.conversationId order by eventStart) is null then eventStart 
+                                when eventEnd is null and lead(eventStart) over (PARTITION BY c.conversationId order by eventStart) is not null then lead(eventStart) over (PARTITION BY c.conversationId order by eventStart) 
+                                else eventEnd 
+                            end as eventEnd,
                             dc.location,
                             dc.originatingDirectionId,
                             dc.initialSessionMediaTypeId mediatypeId
@@ -195,8 +195,7 @@ def ivr_export(spark, tenant, extract_name, output_file_name):
                                 eventEnd,
                                 location,
                                 originatingDirectionId,
-                                initialSessionMediaTypeId,
-                                dc.conversationStart
+                                initialSessionMediaTypeId
 
 
                     ) a

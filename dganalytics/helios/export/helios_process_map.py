@@ -290,11 +290,11 @@ def helios_process_map(spark, tenant):
               (CASE WHEN eventType = 'menu' THEN 'Menu: ' || eventName ELSE eventName END) as category,
               '' action,
               '' action_label,
-              case when eventStart is null then lag(eventEnd) over (PARTITION BY c.conversationId order by eventStart)
-                                when eventStart is null and lag(eventEnd) over (PARTITION BY c.conversationId order by eventStart) is null then  dc.conversationStart 
-                                else eventStart 
-                                END AS eventStart,
-              case when eventEnd is null then lead (eventStart) over (PARTITION BY c.conversationId order by eventStart) else eventEnd end as eventEnd,
+              eventStart,
+              case when eventEnd is null and lead(eventStart) over (PARTITION BY c.conversationId order by eventStart) is null then eventStart 
+                when eventEnd is null and lead(eventStart) over (PARTITION BY c.conversationId order by eventStart) is not null then lead(eventStart) over (PARTITION BY c.conversationId order by eventStart) 
+                else eventEnd 
+              end as eventEnd,
               case when FIRST(f.conversationId) IS NULL then 'Ended in IVR' else i.contactReason end as contact_reason,
               case when FIRST(f.conversationId) IS NULL  then 'Ended in IVR' else i.mainInquiry end as main_inquiry,
               case when FIRST(f.conversationId) IS NULL  then 'Ended in IVR' else i.rootCause end as root_cause,
@@ -325,8 +325,7 @@ def helios_process_map(spark, tenant):
                   location,
                   originatingDirectionId,
                   initialSessionMediaTypeId,
-                  C.conversationStartDateId,
-                  dc.conversationStart
+                  C.conversationStartDateId
 
       UNION ALL
 
