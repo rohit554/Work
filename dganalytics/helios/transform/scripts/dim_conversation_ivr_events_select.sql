@@ -37,10 +37,9 @@ FROM
             FROM
             gpc_{tenant}.raw_conversation_details
             WHERE
-            originatingDirection = 'inbound'
-            and extractDate='{extract_date}'
+            extractDate='{extract_date}'
             and participants is not null
-            and participants [0].sessions [0].mediaType = 'voice'
+            
             and date_diff(extractIntervalEndTime,extractIntervalStartTime) = 1
           )
           where rn = 1

@@ -95,25 +95,17 @@ def ivr_export(spark, tenant, extract_name, output_file_name):
 
                             UNION ALL
 
-                            SELECT conversationId, TIMESTAMPADD(MICROSECOND, 1000 * (pos + 35), eventStart) eventStart, TIMESTAMPADD(MICROSECOND, 1000 * (pos + 35), eventStart) eventEnd, eventName, (4 + pos) level1 , eventType, conversationStartDateId
-                            FROM(
-                            SELECT
-                                conversationId,
-                                conversationStart AS eventStart,
-                                conversationStart AS eventEnd,  -- Add eventEnd to the selection
-                                posexplode(split(eventValue, ',')) as (pos, eventName),
-                                -- 4 as level,
+                            select e.conversationId,
+                                menuEntryTime as eventStart,
+                                menuExitTime as eventEnd,
+                                menuId as eventName,
+                                3+index as level1,
                                 'menu' eventType,
-                                conversationStartDateId
-                                FROM (SELECT  e.*, c.conversationStart 
-                            FROM dgdm_simplyenergy.dim_conversation_ivr_events e
-                            INNER JOIN conversations c
-                                ON e.conversationStartDateId = c.conversationStartDateId
-                                AND e.conversationId = c.conversationId
-                            WHERE e.eventName = 'MenuID' 
-                            )
-                            )
-                            WHERE TRIM(eventName) != '' AND eventName is not NULL
+                                e.conversationStartDateId
+                                from (select * from dgdm_simplyenergy.dim_conversation_ivr_menu_selections order by menuEntryTime,menuExitTime) e
+                                INNER JOIN conversations c
+                                                ON e.conversationStartDateId = c.conversationStartDateId
+                                                AND e.conversationId = c.conversationId
 
                             UNION ALL
 
@@ -185,7 +177,10 @@ def ivr_export(spark, tenant, extract_name, output_file_name):
                         SELECT c.conversationId,
                             (CASE WHEN eventType = 'menu' THEN 'Menu: ' || replace(eventName, '_', ' ') ELSE eventName END) as category,
                             eventStart,
-                            eventEnd,
+                            case when eventEnd is null and lead(eventStart) over (PARTITION BY c.conversationId order by eventStart) is null then eventStart 
+                                when eventEnd is null and lead(eventStart) over (PARTITION BY c.conversationId order by eventStart) is not null then lead(eventStart) over (PARTITION BY c.conversationId order by eventStart) 
+                                else eventEnd 
+                            end as eventEnd,
                             dc.location,
                             dc.originatingDirectionId,
                             dc.initialSessionMediaTypeId mediatypeId
@@ -201,6 +196,7 @@ def ivr_export(spark, tenant, extract_name, output_file_name):
                                 location,
                                 originatingDirectionId,
                                 initialSessionMediaTypeId
+
 
                     ) a
                     LEFT JOIN

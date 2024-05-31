@@ -1,0 +1,113 @@
+{
+	"fields": [
+		{
+			"metadata": {},
+			"name": "id",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "name",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "division",
+			"nullable": true,
+			"type": {
+				"fields": [
+					{
+						"metadata": {},
+						"name": "id",
+						"nullable": true,
+						"type": "string"
+					},
+					{
+						"metadata": {},
+						"name": "name",
+						"nullable": true,
+						"type": "string"
+					},
+					{
+						"metadata": {},
+						"name": "selfUri",
+						"nullable": true,
+						"type": "string"
+					}
+				],
+				"type": "struct"
+			}
+		},
+		{
+			"metadata": {},
+			"name": "currentOperation",
+			"nullable": true,
+			"type": {
+				"fields": [
+					{
+						"metadata": {},
+						"name": "id",
+						"nullable": true,
+						"type": "string"
+					},
+					{
+						"metadata": {},
+						"name": "complete",
+						"nullable": true,
+						"type": "boolean"
+					},
+					{
+						"metadata": {},
+						"name": "user",
+						"nullable": true,
+						"type": {
+							"fields": [
+								{
+									"metadata": {},
+									"name": "id",
+									"nullable": true,
+									"type": "string"
+								},
+								{
+									"metadata": {},
+									"name": "name",
+									"nullable": true,
+									"type": "string"
+								},
+								{
+									"metadata": {},
+									"name": "selfUri",
+									"nullable": true,
+									"type": "string"
+								}
+							],
+							"type": "struct"
+						}
+					},
+					{
+						"metadata": {},
+						"name": "actionName",
+						"nullable": true,
+						"type": "string"
+					},
+					{
+						"metadata": {},
+						"name": "actionStatus",
+						"nullable": true,
+						"type": "string"
+					}
+				],
+				"type": "struct"
+			}
+		},
+		{
+			"metadata": {},
+			"name": "selfUri",
+			"nullable": true,
+			"type": "string"
+		}
+	],
+	"type": "struct"
+}

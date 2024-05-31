@@ -1,5 +1,4 @@
 import shutil
-from statistics import mode
 from numpy.lib.utils import lookfor
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
@@ -17,7 +16,6 @@ from typing import List
 import string
 import random
 from pyspark.sql.types import StructType, StructField, StringType, BooleanType, DateType
-
 
 def free_text_feild_correction(DataFrame, free_text_fields):
     """[summary]
@@ -126,6 +124,10 @@ def get_path_vars(tenant: str):
         db_path = "file:///" + \
             tenant_path.replace("\\", "/") + "/data/databases"
         log_path = os.path.join(tenant_path, 'logs')
+    # if tenant == 'datagamz':
+    #     tenant_path = "/dbfs/mnt/datagamz/datagamz/{}".format(tenant)
+    #     db_path = "dbfs:/mnt/datagamz/{}/data/databases".format(tenant)
+    #     log_path = "/dbfs/mnt/datagamz/{}/logs".format(tenant)
     else:
         tenant_path = "/dbfs/mnt/datagamz/{}".format(tenant)
         db_path = "dbfs:/mnt/datagamz/{}/data/databases".format(tenant)
@@ -251,25 +253,26 @@ def push_gamification_data(df: pd.DataFrame, org_id: str, connection_name: str):
     prefix = "# Mandatory fields are Date & UserID (Format must be YYYY-MM-DD)"
     a = tempfile.NamedTemporaryFile()
     print(str(df.shape))
-    with tempfile.NamedTemporaryFile(suffix=".csv", mode="ab") as a:
-        a.file.write(bytes(prefix + "\n", 'utf-8'))
-        a.file.write(bytes(df.to_csv(index=False, header=True, mode='a'), 'utf-8'))
-        a.flush()
-        body = {
-            "connectionName": f"{connection_name}",
-            "user_id": f"{user_Id}"
-        }
-        files = [
-            ('profile', open(a.name, 'rb'))
-        ]
-        print(f"{get_secret('gamificationurl')}/api/connection/uploaDataFile")
-        resp = requests.post(
-            f"{get_secret('gamificationurl')}/api/connection/uploaDataFile", headers=headers, files=files, data=body)
-        if resp.status_code != 200:
-            raise Exception("publishing failed")
-        else:
-            print("File data submitted to API")
-        a.close()
+    a.file.write(bytes(prefix + "\n", 'utf-8'))
+    a.file.write(bytes(df.to_csv(index=False, header=True, mode='a'), 'utf-8'))
+    body = {
+        "connectionName": f"{connection_name}",
+        "user_id": f"{user_Id}"
+    }
+    files = [
+        ('profile', open(a.name, 'rb'))
+    ]
+    print(f"{get_secret('gamificationurl')}/api/connection/uploaDataFile")
+    a.seek(0)
+    # print(str(body))
+
+    resp = requests.post(
+        f"{get_secret('gamificationurl')}/api/connection/uploaDataFile", headers=headers, files=files, data=body)
+    if resp.status_code != 200:
+        raise Exception("publishing failed")
+    else:
+        print("File data submitted to API")
+    a.close()
 
 
 def upload_gamification_users(df: pd.DataFrame, org_id: str):
@@ -310,9 +313,9 @@ def deactivate_gamification_users(df: pd.DataFrame, org_id: str):
     }
     payload = {}
     files = {('profile', ('deactivateusers.csv', df.to_csv(index=False, header=True, mode='a')))}
-
     resp = requests.post(
         f"{get_secret('gamificationurl')}/api/user/bulkdeactivate", headers=headers, files=files, data=payload)
+    
     if resp.status_code != 200:
         raise Exception("Bulk Deactivate failed")
     else:
@@ -373,6 +376,7 @@ def exec_mongo_pipeline(spark, pipeline, collection, schema, mongodb=None):
         "collection", collection).option("database", mongodb).option(
             "pipeline", json.dumps(pipeline)).schema(schema).load()
     return df
+
 
 def get_powerbi_access_token():
     global pb_access_token
@@ -447,7 +451,6 @@ def delta_table_partition_ovrewrite(df, table, partition_cols: List[str]):
                       ).partitionBy(partition_cols
                                     ).option("replaceWhere",
                                              filter_condition).saveAsTable(f"{table}")
-
 
 def delta_table_ovrewrite(df, table):
     if df.count() != 0:
@@ -594,7 +597,21 @@ def get_mongodb_users(orgId, spark):
                 "path": "$org",
                 "preserveNullAndEmptyArrays": True
             }
-        },{
+        },
+		{
+        '$lookup': {
+				'from': 'Campaign', 
+				'localField': 'MongoUserId', 
+				'foreignField': 'game_design.gd_users.user_id', 
+				'as': 'lob'
+			}
+		}, {
+			'$unwind': {
+				'path': '$lob', 
+				'preserveNullAndEmptyArrays': True
+			}
+		},
+		{
           "$project": {
             "first_name": 1,
             "last_name": 1,
@@ -604,6 +621,8 @@ def get_mongodb_users(orgId, spark):
             "is_deleted": 1,
             "role_id": 1,
             "team_id": 1,
+			"name": 1,
+            'LOB_Name': '$lob.name',
             "communication_email": 1,
             "name": 1,
             "user_start_date":{
@@ -628,6 +647,7 @@ def get_mongodb_users(orgId, spark):
                         StructField('email', StringType(), True),
                         StructField('role_id', StringType(), True),
                         StructField('team_id', StringType(), True),
+						StructField('LOB_Name', StringType(), True),
                         StructField('communication_email', StringType(), True),
                         StructField('name', StringType(), True),
                         StructField('user_start_date', StringType(), True),
@@ -653,12 +673,7 @@ def get_mongodb_teams(orgId, spark):
 
     teamSchema = StructType([StructField('team_id', StringType(), True),
                      StructField('name', StringType(), True)])
-    return exec_mongo_pipeline(spark, teamPipeline, 'User', teamSchema)
-
-pb_access_token = None
-dbutils = None
-secrets = None
-env = get_env()
+    return exec_mongo_pipeline(spark, teamPipeline, 'Organization', teamSchema)
 
 def get_active_org():
     tenant_path, db_path, log_path = get_path_vars('datagamz')
@@ -667,7 +682,6 @@ def get_active_org():
     tenants_df = tenants_df[tenants_df['platform'] == 'new']
     tenants = tenants_df.to_dict('records')
     return [tenant['name'].upper() for tenant in tenants]
-    
 
 def get_active_organization_timezones(spark):
   tenants = get_active_org()
@@ -697,3 +711,8 @@ def get_active_organization_timezones(spark):
 
   org_timezone_df = exec_mongo_pipeline(spark, org_timezone_pipeline, 'Organization', org_timezone_schema)
   return org_timezone_df
+
+pb_access_token = None
+dbutils = None
+secrets = None
+env = get_env()
