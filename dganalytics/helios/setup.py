@@ -596,6 +596,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             LOCATION '{db_name}/helios_process_map'                 
         """)
     
+    
     spark.sql(f"""
            CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_ivr_menus
             (
@@ -605,6 +606,7 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             USING DELTA
             LOCATION '{db_name}/dim_ivr_menus'
         """)
+    
     spark.sql(f"""
            CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_resolution
             (
@@ -614,6 +616,25 @@ def create_model_tables(spark: SparkSession, path: str, db_name: str):
             USING DELTA
             PARTITIONED BY (id)
             LOCATION '{db_name}/dim_resolution'
+        """)
+    
+    spark.sql(f"""
+              CREATE TABLE IF NOT EXISTS dgdm_{tenant}.dim_flow_outcomes
+        (
+            conversationId	STRING,
+            participantId	STRING,
+            sessionId	STRING,	
+            flowId	STRING,
+            flowOutcome	STRING,
+            flowOutcomeStartTimestamp	TIMESTAMP,
+            flowOutcomeEndTimestamp	TIMESTAMP,
+            flowOutcomeId	STRING,
+            flowOutcomeValue	STRING,
+            conversationStartDateId INT
+        )        
+        USING DELTA
+        PARTITIONED BY (conversationStartDateId)
+        LOCATION '{db_name}/dim_flow_outcomes'
         """)
 
 if __name__ == "__main__":

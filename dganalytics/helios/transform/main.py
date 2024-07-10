@@ -13,7 +13,7 @@ if __name__ == "__main__":
         logger.info(f"Applying helios transformation {transformation}")
         if transformation in ["dim_conversations", "fact_conversation_metrics", "dim_conversation_participants", "dim_conversation_sessions", "dim_conversation_session_segments",
                         "dim_surveys", "dim_evaluations", "fact_conversation_evaluations", "fact_conversation_surveys", "fact_transcript_contact_reasons", "fact_transcript_insights", 
-                        "fact_transcript_actions", "mv_cost_calculation", "mv_transcript_results", "mv_conversation_metrics", "dim_conversation_session_flow", "dim_conversation_ivr_events", "dim_conversation_ivr_menu_selections"]:
+                        "fact_transcript_actions", "mv_cost_calculation", "mv_transcript_results", "mv_conversation_metrics", "dim_conversation_session_flow", "dim_conversation_ivr_events", "dim_conversation_ivr_menu_selections", "dim_flow_outcomes"]:
             helios_transformation(spark, transformation, tenant, extract_date, extract_start_time, extract_end_time)
         elif transformation in ["dim_users", "dim_queues", "dim_wrap_up_codes", "mv_classification"]:
             helios_overwrite_transformation(spark, transformation, tenant)   
