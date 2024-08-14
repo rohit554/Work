@@ -8,7 +8,7 @@ SELECT
   nConsult,
   nTransferred,
   CASE
-    WHEN COALESCE(LOWER(T.resolved), '') IN ('resolved', 'partially resolved') THEN 1
+    WHEN COALESCE(LOWER(T.resolved), '') IN ('resolved') THEN 1
     ELSE 0
   END AS resolved,
   CASE
@@ -17,7 +17,7 @@ SELECT
   END AS notResolved,
   tHandle,
   CASE
-    WHEN COALESCE(LOWER(T.resolved), "") In ('resolved', 'partially resolved') then tHandle
+    WHEN COALESCE(LOWER(T.resolved), "") In ('resolved') then tHandle
     ELSE 0
   end AS tHandleResolved,
   CASE
