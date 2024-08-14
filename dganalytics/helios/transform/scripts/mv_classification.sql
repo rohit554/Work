@@ -48,7 +48,7 @@ FROM
               COUNT(
                 DISTINCT(
                   CASE
-                    WHEN lower(resolved) In ("resolved", "partially resolved") THEN conversationId
+                    WHEN lower(resolved) In ("resolved") THEN conversationId
                   END
                 )
               ) resolved,
