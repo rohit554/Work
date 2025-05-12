@@ -64,7 +64,7 @@ def get_genesys_clients_attendance(spark,tenant,extractStartTime):
 
 
 def get_logins(spark):
-  extract_start_time = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  extract_start_time = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-4] + 'Z'
   logins_schema = StructType([
       StructField('date', StringType(), True),
       StructField('org_id', StringType(), True),
@@ -77,9 +77,17 @@ def get_logins(spark):
           {
               '$match': {
                   'org_id': tenant['org_id'],
-                  'timestamp': {
-                      "$gte": {"$date":extract_start_time}
-                  }
+                  "$expr": {
+                        "$gte": [
+                            "$timestamp",
+                            {
+                                "$dateFromString": {
+                                    "dateString": extract_start_time,
+                                    "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                                }
+                            },
+                        ]
+                    },
               }  
           },
           {

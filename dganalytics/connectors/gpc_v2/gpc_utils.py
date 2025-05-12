@@ -38,6 +38,14 @@ def get_drop_duplicates(api_name: str):
     return gpc_end_points[api_name]['drop_duplicates']
 
 
+def get_manage_duplicates(api_name: str):
+    return gpc_end_points[api_name]['manage_duplicates']
+
+
+def get_raw_primary_key(api_name: str):
+    return gpc_end_points[api_name]['raw_primary_key']
+
+
 def get_raw_tbl_name(api_name: str):
     if 'table_name' in gpc_end_points[api_name].keys():
         return 'raw_' + gpc_end_points[api_name]['table_name']
@@ -213,8 +221,7 @@ def process_raw_data(spark: SparkSession, tenant: str, api_name: str, run_id: st
 
 def get_schema(api_name: str):
     logger.info(f"read spark schema for {api_name}")
-    schema_path = os.path.join(
-        Path(__file__).parent, 'source_api_schemas', '{}.json'.format(api_name))
+    schema_path = os.path.join('/dbfs/mnt/datagamz/code/dganalytics/dganalytics/connectors/gpc_v2/source_api_schemas', '{}.json'.format(api_name))
     with open(schema_path, 'r') as f:
         schema = f.read()
     schema = StructType.fromJson(json.loads(schema))

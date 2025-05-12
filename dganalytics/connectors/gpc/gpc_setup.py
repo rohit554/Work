@@ -111,7 +111,7 @@ def create_dim_tables(spark: SparkSession, db_name: str):
                 conversationStartDate date,
                 sourceRecordIdentifier long,
                 soucePartition string,
-                dnis string
+				dnis string
             )
             using delta
             PARTITIONED BY (conversationStartDate)
@@ -590,7 +590,7 @@ def create_raw_table(api_name: str, spark: SparkSession, db_name: str):
     table_name = "raw_" + f"{api_name}"
     logger.info(f"creating genesys raw table - {table_name}")
     spark.createDataFrame(spark.sparkContext.emptyRDD(),
-                          schema=schema).createOrReplaceTempView(table_name)
+                          schema=schema).regcreateOrReplaceTempViewsterTempTable(table_name)
     create_qry = f"""create table if not exists {db_name}.{table_name}
                         using delta partitioned by(extractDate, extractIntervalStartTime, extractIntervalEndTime) LOCATION
                                 '{db_path}/{db_name}/{table_name}'
@@ -627,7 +627,7 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     create_raw_table("wfm_forecast_meta", spark, db_name)
     create_raw_table("wfm_planninggroups", spark, db_name)
     create_raw_table("conversation_aggregates", spark, db_name)
-
+    create_raw_table("outbound_campaigns", spark, db_name)
     return True
 
 

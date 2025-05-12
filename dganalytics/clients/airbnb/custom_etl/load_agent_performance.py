@@ -27,4 +27,5 @@ if __name__ == "__main__":
 
     data.toPandas().to_csv(os.path.join(tenant_path, 'data', 'pbdatasets', 'pm_agent_performance', 'agent_performance.csv'),
                                        header=True, index=False)
+
     exec_powerbi_refresh(get_secret('pb-airbnb-agent-performance-workspace'), get_secret('pb-airbnb-agent-performance-dataset'))

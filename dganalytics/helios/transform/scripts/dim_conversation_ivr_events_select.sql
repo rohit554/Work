@@ -37,9 +37,8 @@ FROM
             FROM
             gpc_{tenant}.raw_conversation_details
             WHERE
-            extractDate='{extract_date}'
+            extractDate >='{extract_date}'
             and participants is not null
-            
             and date_diff(extractIntervalEndTime,extractIntervalStartTime) = 1
           )
           where rn = 1

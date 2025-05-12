@@ -1,0 +1,7 @@
+azure-functions
+requests
+pandas
+msrestazure
+azure-mgmt-resource
+azure-keyvault
+azure-identity

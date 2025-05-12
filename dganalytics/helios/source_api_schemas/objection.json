@@ -1,0 +1,80 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "metadata": {},
+      "name": "conversation_id",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "objection",
+      "nullable": true,
+      "type": {
+        "containsNull": true,
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "metadata": {},
+              "name": "objection",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "objection_start_line",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "objection_end_line",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "objection_summary",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "action",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "action_start_line",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "action_end_line",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "action_summary",
+              "nullable": false,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "stage_name",
+              "nullable": false,
+              "type": "string"
+            }
+          ],
+          "type": "struct"
+        },
+        "type": "array"
+      }
+    }
+  ]
+}

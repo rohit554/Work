@@ -1,0 +1,47 @@
+{
+    "type": "struct",
+    "fields": [
+        {
+            "metadata": {},
+            "name": "tenant_id",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "bedrock_region",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "call_type",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "type",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "raw_phrases",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "dictionary_list",
+            "nullable": true,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "label",
+            "nullable": true,
+            "type": "string"
+        }
+    ]
+}

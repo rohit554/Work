@@ -1,4 +1,4 @@
-from dganalytics.utils.utils import get_spark_session, exec_mongo_pipeline, export_powerbi_csv, get_path_vars, exec_powerbi_refresh, get_secret
+from dganalytics.utils.utils import get_spark_session, exec_mongo_pipeline, export_powerbi_csv, get_path_vars, exec_powerbi_refresh
 from dganalytics.connectors.gpc.gpc_utils import get_dbname, gpc_utils_logger
 from pyspark.sql.types import StructType, StructField, StringType, BooleanType
 from datetime import datetime, timedelta
@@ -41,7 +41,7 @@ def spark_users(spark):
             U.state,
             U.userId,
             COALESCE(MU.role_id, "Agent") AS role_id,
-            date_format(to_date('{last_month_start_datetime}'), 'MMMM') AS month
+            date_format(to_timestamp('{last_month_start_datetime}', "yyyy-MM-dd'T'HH:mm:ssX"), 'MMMM-yyyy') AS month
         FROM (
             SELECT DISTINCT agentId
             FROM gpc_salmatcolesonline.dim_conversations
@@ -58,7 +58,7 @@ def spark_users(spark):
                 U1.state,
                 MU1.user_id,
                 MU1.role_id,
-                date_format(to_date('{last_month_start_datetime}'), 'MMMM') AS month
+                date_format(to_timestamp('{last_month_start_datetime}', "yyyy-MM-dd'T'HH:mm:ssX"), 'MMMM-yyyy') AS month
             FROM users MU1
             INNER JOIN gpc_salmatcolesonline.dim_users U1
                 ON U1.userId = MU1.user_id
@@ -82,12 +82,12 @@ if __name__ == "__main__":
     billingUsers = spark_users(spark)
 
     pandas_df = billingUsers.toPandas()
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    timestamp = datetime.now().strftime("%Y%m")
     file_name = f"billing_users_{timestamp}.csv"
 
     file_path = os.path.join(tenant_path, "data", "pbdatasets", "billing_users", file_name)
 
     pandas_df.to_csv(file_path, index=False)
-    exec_powerbi_refresh("73667350-ee9d-4e55-8d18-e1954b40c7a0", "97f7c57e-c7b0-444b-9bd7-7bd7e5fdd5b4")
 
     print("CSV file saved successfully.")
+    exec_powerbi_refresh("cd616e0c-d61c-408b-ab74-76c39c544e37", "a0996f6a-7b95-4446-a3d1-008cd52035d5")

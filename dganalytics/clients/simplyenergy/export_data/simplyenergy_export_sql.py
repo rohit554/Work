@@ -248,7 +248,7 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
                             participant.purpose AS purpose,
                             participant.attributes["transaction_type"] AS participantTransactionType,
                             participant.attributes["transaction_id"] AS participantTransactionId,
-                            participant.attributes["Mailing State"] As participantMailingState,
+                            IFNULL(participant.attributes["Mailing State"], participant.attributes["MailingState"]) As participantMailingState,
                             participant.attributes["T&C Acceptance"] As participantTandCAcceptance,
                             explode(participant.sessions) AS session
                         FROM (
@@ -324,8 +324,6 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
             outboundContactListId,
             element_at(sessionSegments, size(sessionSegments)).queueId,
             element_at(sessionSegments, size(sessionSegments)).wrapUpCode
-        ORDER BY
-            conversationId
     """
 
 
@@ -566,32 +564,31 @@ def fact_speechandtextanalytics(extract_start_time: str, extract_end_time: str):
 def fact_conversation_transcript_topics(extract_start_time: str, extract_end_time: str):
     return f"""
             SELECT DISTINCT
-                conversationId,
-                communicationId,
-                mediaType,
-                topics.participant AS participant,
-                topics.topicId AS topicId,
-                topics.topicName AS topicName,
-                topics.topicPhrase AS topicPhrase,
-                topics.transcriptPhrase AS transcriptPhrase,
-                topics.confidence,
-                RANK() OVER (PARTITION BY conversationId ORDER BY topics.startTimeMs) AS topicOrder
-            FROM (
-                SELECT
-                    conversationId,
-                    communicationId,
-                    mediaType,
-                    EXPLODE(transcripts.analytics.topics) AS topics
-                FROM (
-                    SELECT
-                        conversationId,
-                        communicationId,
-                        mediaType,
-                        EXPLODE(transcripts) AS transcripts
-                    FROM gpc_simplyenergy.raw_speechandtextanalytics_transcript
-            WHERE   recordInsertTime >= '{extract_start_time}'
-            AND recordInsertTime < '{extract_end_time}'))
-            ORDER BY conversationId,topicOrder;
+				conversationId,
+				communicationId,
+				mediaType,
+				topics.participant AS participant,
+				topics.topicId AS topicId,
+				topics.topicName AS topicName,
+				topics.topicPhrase AS topicPhrase,
+				topics.transcriptPhrase AS transcriptPhrase,
+				topics.confidence,
+				RANK() OVER (PARTITION BY conversationId ORDER BY topics.startTimeMs) AS topicOrder
+			FROM (
+				SELECT
+					conversationId,
+					communicationId,
+					mediaType,
+					EXPLODE(transcripts.analytics.topics) AS topics
+				FROM (
+					SELECT
+						conversationId,
+						communicationId,
+						mediaType,
+						EXPLODE(transcripts) AS transcripts
+					FROM gpc_simplyenergy.raw_speechandtextanalytics_transcript
+					WHERE   recordInsertTime >= '{extract_start_time}'
+                    	AND recordInsertTime < '{extract_end_time}'))
     """
 
 

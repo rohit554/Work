@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     kpi = pd.DataFrame()
     if input_file.endswith(".xlsx"):
-        kpi = pd.read_excel(os.path.join(tenant_path, "data", "raw", "kpi", input_file), engine='openpyxl')
+        kpi = pd.read_excel(os.path.join(tenant_path, "data", "raw", "kpi", input_file), engine='openpyxl', sheet_name = "Sep'23")
     elif input_file.endswith(".csv"):
         kpi = pd.read_csv(os.path.join(tenant_path, "data", "raw", "kpi", input_file))
     elif input_file.endswith(".xlsb"):
@@ -82,7 +82,7 @@ if __name__ == '__main__':
 
     kpi = spark.sql(f"""
         SELECT  `HRMS ID` UserID,
-				date_format(`Date`, 'dd-MMM-yyyy') AS Date,
+                date_format(`Date`, 'dd-MMM-yyyy') AS Date,
                 `Chat Handled`,
                 `Chat Handled Time (Hours)` `Chat Handled Time Hour`,
                 `Total Survery`,

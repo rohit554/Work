@@ -98,32 +98,38 @@ def get_attendance_data(spark, orgId, orgIds):
 def store_genesys_clients_attendance(spark):
   extract_start_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
   for tenant in ['salmatcolesonline', 'skynzib', 'skynzob', 'hellofreshanz']:
-    get_genesys_clients_attendance(spark,tenant, extract_start_time).createOrReplaceTempView("genesys_attendance")
-    df=spark.sql(f"""
-                SELECT to_date(actualStartTime, 'dd-MM-yyyy') AS reportDate,
-                userId,
-                actualStartTime loginTime,
-                actualEndTime logoutTime,
-                true as isPresent,
-                '{tenant}' AS orgId,
-                "{datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ')}" AS recordInsertDate
-                FROM genesys_attendance
-                WHERE actualStartTime IS NOT NULL
+    gdf = get_genesys_clients_attendance(spark,tenant, extract_start_time)
+    if gdf.count() > 0:
+        gdf.createOrReplaceTempView("genesys_attendance")
+        # spark.sql("select * from genesys_attendance").display()
+        df=spark.sql(f"""
+                    SELECT userId,to_date(actualStartTime, 'dd-MM-yyyy') AS reportDate,
+                    true as isPresent,
+                    '{tenant}' AS orgId,
+                    "{datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ')}" AS recordInsertDate,
+                    actualStartTime loginTime,
+                    actualEndTime logoutTime
+                    FROM genesys_attendance
+                    WHERE actualStartTime IS NOT NULL
+                    """)
+
+
+        df.distinct().createOrReplaceTempView("attendance")
+        spark.sql(f"""
+            DELETE FROM dg_performance_management.attendance a
+                    WHERE exists(
+                        SELECT 1 FROM attendance b 
+                        where date_format(cast(a.reportDate AS date), 'dd-MM-yyyy') = date_format(cast(b.reportDate AS date), 'dd-MM-yyyy')
+                        AND a.userId = b.userId
+                            AND a.orgId = b.orgId
+                    )
+            
+            """)
+        spark.sql("""
+                INSERT INTO dg_performance_management.attendance
+                    SELECT distinct * FROM attendance
                 """)
 
-    df.createOrReplaceTempView("attendance")
-    spark.sql(f"""MERGE INTO dg_performance_management.attendance target
-                    USING attendance source
-                    ON date_format(cast(source.reportDate AS date), 'dd-MM-yyyy') = date_format(cast(target.reportDate AS date), 'dd-MM-yyyy')
-                    AND source.userId = target.userId
-                    AND source.orgId = target.orgId
-                    AND source.loginTime = target.loginTime
-                    AND source.logoutTime = target.logoutTime
-                    WHEN MATCHED THEN
-                        UPDATE SET *
-                    WHEN NOT MATCHED THEN
-                        INSERT *
-                    """)
 
 if __name__ == "__main__":
 
@@ -140,7 +146,7 @@ if __name__ == "__main__":
     store_genesys_clients_attendance(spark)
     tables = ["activity_wise_points", "badges", "campaign", "challenges", "levels", "logins", "questions",
               "quizzes", "user_campaign", "users", "activity_mapping", "data_upload_audit_log", 
-              "data_upload_connections", "kpi_data", "campaign_kpis", "trek_data", "kpi_values", "attendance", "announcement"]
+              "data_upload_connections", "kpi_data", "campaign_kpis", "trek_data", "kpi_values", "attendance", "announcement", "xoxodayredeemedvouchers", "userrewards"]
     for tenant in tenants:
         print(f"Getting ROI data for {tenant}")
         if 'hellofresh' in tenant['name']:

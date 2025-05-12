@@ -85,7 +85,7 @@ select distinct conversationId,
                 FROM
                   gpc_{tenant}.raw_conversation_details
                 join dgdm_{tenant}.dim_date on cast(conversationStart as date) = dateVal
-                where extractDate='{extract_date}'
+                where extractDate >='{extract_date}'
               )
                WHERE rn = 1
             )

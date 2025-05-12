@@ -1,8 +1,9 @@
+with CTE as (
 SELECT
 conversationId,
 category,
 action,
-action_label,
+'' action_label,
 contact_reason,
 main_inquiry,
 root_cause,
@@ -19,7 +20,22 @@ MAX(
     speaker,
     start_line,
     end_line,
-    conversationStartDateId
+    conversationStartDateId,
+    confidence,
+    contribution,
+    impact,
+    impact_reason,
+    emotion,
+    difficulty,
+    -- Use FIRST() to get the sentiment in GROUP BY
+    FIRST(
+        (
+            SELECT AVG(fcts.sentiment)
+            FROM gpc_{tenant}.fact_conversation_transcript_sentiments AS fcts
+            WHERE fcts.conversationId = fta.conversationId
+            AND fcts.phraseIndex BETWEEN fta.start_line AND fta.end_line
+        )
+    ) AS sentiment
 FROM
 (
     SELECT
@@ -30,30 +46,39 @@ FROM
                 P.conversationId,
                 category,
                 action,
-                action_label,
                 contact_reason,
                 inquiries.main_inquiry,
                 inquiries.root_cause,
                 T.startTimeMs,
                 T.milliseconds,
-                T.line,
                 speaker,
                 start_line,
                 end_line,
-                T.conversationStartDateId
+                T.conversationStartDateId,
+                confidence,
+                contribution,
+                difficulty,
+                impact,
+                impact_reason,
+                emotion,
+                T.line
             FROM
             (
                 SELECT
                     conversationId,
                     step.category,
                     step.action,
-                    step.action_label,
-                    split(step.line, ',') lines,
                     contact.contact_reason,
                     explode(contact.inquiries) inquiries,
                     step.speaker,
                     step.start_line,
-                    step.end_line 
+                    step.end_line,
+                    step.confidence,
+                    step.contribution,
+                    step.difficulty,
+                    step.impact,
+                    step.impact_reason,
+                    step.emotion
                 FROM
                     (
                     SELECT
@@ -72,7 +97,7 @@ FROM
                                 recordInsertTime DESC
                             ) RN
                         FROM
-                        gpc_simplyenergy.raw_transcript_insights
+                        gpc_{tenant}.raw_transcript_insights
                         WHERE extractDate = '{extract_date}'
                         )
                     WHERE
@@ -92,9 +117,8 @@ FROM
                         ) line,
                         conversationStartDateId
                     FROM
-                        gpc_simplyenergy.fact_conversation_transcript_phrases TP
-                        INNER JOIN dgdm_simplyenergy.dim_conversations C ON TP.conversationId = c.conversationId
-                        where c.conversationStartDateId = (select dateId from dgdm_simplyenergy.dim_date where dateVal = cast('{extract_date}' as date)) 
+                        gpc_{tenant}.fact_conversation_transcript_phrases TP
+                        INNER JOIN dgdm_{tenant}.dim_conversations C ON TP.conversationId = c.conversationId
                 ) T ON T.conversationid = P.conversationId
             and (
             start_line = T.line
@@ -103,7 +127,7 @@ FROM
         order by
             P.conversationId
     )
-)
+) fta
 GROUP BY
 conversationId,
 category,
@@ -115,4 +139,16 @@ root_cause,
 speaker,
 start_line,
 end_line,
-conversationStartDateId
+conversationStartDateId,
+confidence,
+contribution,
+difficulty,
+impact,
+impact_reason,
+emotion
+)
+SELECT * FROM CTE b
+    WHERE NOT EXISTS (
+        SELECT 1 FROM dgdm_{tenant}.fact_transcript_actions a
+        WHERE a.conversationId = b.conversationId
+    )

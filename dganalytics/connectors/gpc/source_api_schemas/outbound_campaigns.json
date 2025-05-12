@@ -1,0 +1,51 @@
+{
+	"fields": [
+		{
+			"metadata": {},
+			"name": "id",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "name",
+			"nullable": true,
+			"type": "string"
+		},
+		{
+			"metadata": {},
+			"name": "queue",
+			"nullable": true,
+			"type": {
+				"fields": [
+					{
+						"metadata": {},
+						"name": "id",
+						"nullable": true,
+						"type": "string"
+					},
+					{
+						"metadata": {},
+						"name": "name",
+						"nullable": true,
+						"type": "string"
+					},
+					{
+						"metadata": {},
+						"name": "selfUri",
+						"nullable": true,
+						"type": "string"
+					}
+				],
+				"type": "struct"
+			}
+		},
+		{
+			"metadata": {},
+			"name": "campaignStatus",
+			"nullable": true,
+			"type": "string"
+		}
+	],
+	"type": "struct"
+}

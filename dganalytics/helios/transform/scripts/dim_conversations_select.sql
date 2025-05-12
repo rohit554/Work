@@ -4,7 +4,7 @@ SELECT conversationId, dateId as conversationStartDateId, conversationStart, con
         initialParticipantPurpose,
         mediaTypeId initialSessionMediaTypeId,
         messageType initialSessionMessageType,
-        location
+        location,false isManualAssessmentNeeded, false hasManuallyEvaluated
 FROM (
     SELECT conversationId, conversationStart, conversationEnd, originatingDirection, divisionIds,
             initialParticipant.purpose initialParticipantPurpose,
@@ -14,9 +14,7 @@ FROM (
             (
                 select conversationId, conversationStart, conversationEnd, originatingDirection, divisionIds, participants[0] initialParticipant, explode(participants) participant, row_number() over (partition by conversationId order by recordInsertTime DESC) rn
                 from gpc_{tenant}.raw_conversation_details
-                where extractDate = '{extract_date}'
-                and  extractIntervalStartTime = '{extract_start_time}' 
-                and extractIntervalEndTime = '{extract_end_time}'
+                where extractDate = '{extract_date}' and conversationStart between cast('{extract_start_time}' as timestamp) and cast('{extract_end_time}' as timestamp)
             )
             where rn = 1
 ) C

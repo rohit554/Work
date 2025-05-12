@@ -10,7 +10,7 @@ def export_users_routing_status(spark: SparkSession, tenant: str):
         os.path.join(tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'))
     user_timezone.createOrReplaceTempView("user_timezone")
 
-    df = spark.sql("""
+    df = spark.sql(f"""
             SELECT 
                 fp.userId as UserKey, fp.userId, 
                 from_utc_timestamp(fp.startTime, trim(ut.timeZone)) startTime,
@@ -21,7 +21,7 @@ def export_users_routing_status(spark: SparkSession, tenant: str):
                 user_timezone ut
             WHERE 
                 fp.userId = ut.userId
-                AND ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
+                {"AND ut.region  IN ('US', 'CA-HF', 'CP-CA', 'CA-CP','FA-HF')" if region == 'US' else " " }
                 AND CAST(from_utc_timestamp(fp.startTime, trim(ut.timeZone)) AS date) >= add_months(current_date(), -12)
 
     """)

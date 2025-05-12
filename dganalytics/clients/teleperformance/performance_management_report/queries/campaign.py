@@ -38,7 +38,7 @@ databases = ['tp-prod']
 def get_campaign(spark):
     for db in databases:
         df = exec_mongo_pipeline(spark, pipeline, 'Campaign', schema, mongodb=db)
-        df.createOrReplaceTempView("campaign")
+        df.registerTempTable("campaign")
         df = spark.sql("""
                         select  distinct campaign_id.oid campaignId,
                                 cast(start_date as date) start_date,

@@ -83,51 +83,50 @@ def get_conversations(extract_start_time, extract_end_time):
 	    """)
 	return conversations
 
-def transform_conversation_surveys(conv, list, conversation):
-    if conv != None and len(conv) > 0:
-        if conv != None and conv["participants"] != None and len(conv["participants"]) > 0:
-                
-            for participant in conv["participants"]:
-                has_survey = False
-                dict = {
-                    "csat": None,
-                    "fcr": None,
-                    "nps": None,
-                    "survey_initiated": None,
-                    "survey_completed": None,
-                    "conversationId": conv["id"],
-                    "conversationStart": conversation["conversationStart"],
-                    "conversationEnd": conversation["conversationEnd"],
-                    "agentId": conversation["agentId"],
-                    "mediaType": conversation["mediaType"]
-                    }
+def transform_conversation_surveys(conv, lst, conversation):
+    if conv and "participants" in conv and conv["participants"]:
+        for participant in conv["participants"]:
+            has_survey = False
+            data_dict = {
+                "csat": None,
+                "fcr": None,
+                "nps": None,
+                "survey_initiated": None,
+                "survey_completed": None,
+                "conversationId": conv["id"],
+                "conversationStart": conversation["conversationStart"],
+                "conversationEnd": conversation["conversationEnd"],
+                "agentId": conversation["agentId"],
+                "mediaType": conversation["mediaType"]
+            }
 
-                if participant != None and participant["attributes"] != None and participant["attributes"] != {}:
-                    if "Survey CSAT Agent" in participant["attributes"]:
-                        csat = participant["attributes"]["Survey CSAT Agent"]
-                        dict["csat"] = int(csat) if csat != "" and csat.isnumeric() else None
-                        has_survey = True
-                    if "Survey NPS" in participant["attributes"]:
-                        nps = participant["attributes"]["Survey NPS"]
-                        dict["nps"] = int(nps) if nps != "" and nps.isnumeric() else None
-                        has_survey = True
-                    if "Survey Resolution" in participant["attributes"]:
-                        fcr = participant["attributes"]["Survey Resolution"]
-                        dict["fcr"] = int(fcr) if fcr != "" and fcr.isnumeric() else None
-                        has_survey = True
-                    if "Survey Completed" in participant["attributes"]:
-                        survey_completed = participant["attributes"]["Survey Completed"]
-                        dict["survey_completed"] = True if survey_completed == "Yes" else False
-                        has_survey = True
-                    if "Survey Initiated" in participant["attributes"]:
-                        survey_initiated = participant["attributes"]["Survey Initiated"]
-                        dict["survey_initiated"] = True if survey_initiated == "Yes" else False
-                        has_survey = True
-                if has_survey:
-                    if dict["fcr"] != None or dict["csat"] != None or dict["nps"] != None or dict["survey_completed"] != None or dict["survey_initiated"] != None:
-                        list.append(dict.copy())
+            attributes = participant.get("attributes", {})
+            if "Survey CSAT Agent" in attributes:
+                csat = attributes["Survey CSAT Agent"]
+                data_dict["csat"] = int(csat) if csat and csat.isnumeric() else None
+                has_survey = True
+            if "Survey NPS" in attributes:
+                nps = attributes["Survey NPS"]
+                data_dict["nps"] = int(nps) if nps and nps.isnumeric() else None
+                has_survey = True
+            if "Survey Resolution" in attributes:
+                fcr = attributes["Survey Resolution"]
+                data_dict["fcr"] = int(fcr) if fcr and fcr.isnumeric() else None
+                has_survey = True
+            if "Survey Completed" in attributes:
+                survey_completed = attributes["Survey Completed"]
+                data_dict["survey_completed"] = survey_completed == "Yes"
+                has_survey = True
+            if "Survey Initiated" in attributes:
+                survey_initiated = attributes["Survey Initiated"]
+                data_dict["survey_initiated"] = survey_initiated == "Yes"
+                has_survey = True
+            
+            if has_survey:
+                lst.append(data_dict)
 
-    return list
+    return lst
+
 
 if __name__ == '__main__':
     tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()

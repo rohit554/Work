@@ -21,7 +21,7 @@ def get_lobs(lob: str = ""):
         return matching_rows.iloc[0]['Campaign']
     else:
         return ""
- 
+  
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_file', required=True)

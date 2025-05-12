@@ -1,0 +1,280 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "name": "EVENT_TYPE",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "TIMESTAMP",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "REQUEST_ID",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ORGANIZATION_ID",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "USER_ID",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CLIENT_ID",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "SESSION_KEY",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "LOGIN_KEY",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "USER_TYPE",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "APP_NAME",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "DEVICE_PLATFORM",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "SDK_APP_VERSION",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "OS_NAME",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "OS_VERSION",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "USER_AGENT",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "BROWSER_NAME",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "BROWSER_VERSION",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "SDK_VERSION",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "DEVICE_MODEL",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "DEVICE_ID",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "SDK_APP_TYPE",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CLIENT_GEO",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CONNECTION_TYPE",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "UI_EVENT_ID",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "UI_EVENT_SOURCE",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "UI_EVENT_TIMESTAMP",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PAGE_START_TIME",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "DURATION",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "EFFECTIVE_PAGE_TIME_DEVIATION",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "EFFECTIVE_PAGE_TIME_DEVIATION_REASON",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "EFFECTIVE_PAGE_TIME_DEVIATION_ERROR_TYPE",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "EFFECTIVE_PAGE_TIME",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "DEVICE_SESSION_ID",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "UI_EVENT_SEQUENCE_NUM",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PAGE_ENTITY_ID",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PAGE_ENTITY_TYPE",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PAGE_CONTEXT",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PAGE_URL",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PAGE_APP_NAME",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PREVPAGE_ENTITY_ID",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PREVPAGE_ENTITY_TYPE",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PREVPAGE_CONTEXT",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PREVPAGE_URL",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PREVPAGE_APP_NAME",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "TARGET_UI_ELEMENT",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PARENT_UI_ELEMENT",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "GRANDPARENT_UI_ELEMENT",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "TIMESTAMP_DERIVED",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "USER_ID_DERIVED",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CLIENT_IP",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "UI_EVENT_TYPE",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "COMPONENT_NAME",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "RECORD_TYPE",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "RECORD_ID",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "RELATED_LIST",
+      "type": "string",
+      "nullable": true
+    }
+  ]
+}

@@ -15,7 +15,7 @@ kpi_data_schema = StructType([
     StructField("connection_name", StringType(), True)])
 
 def get_kpi_data(spark):
-  extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-4] + 'Z'
   for org_timezone in get_active_organization_timezones(spark).rdd.collect():
     org_id = org_timezone['org_id'].lower()
     org_timezone = org_timezone['timezone']
@@ -49,11 +49,23 @@ def get_kpi_data(spark):
                           '$or': [
                               {
                                   '$gte': [
-                                      '$creation_date', { '$date': extract_start_time }
+                                      '$creation_date',
+                                      {
+                                            "$dateFromString": {
+                                                "dateString": extract_start_time,
+                                                "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                                            }
+                                        }
                                   ]
                               }, {
                                   '$gte': [
-                                      '$report_date', { '$date': extract_start_time }
+                                      '$report_date',
+                                      {
+                                            "$dateFromString": {
+                                                "dateString": extract_start_time,
+                                                "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                                            }
+                                        }
                                   ]
                               }
                           ]

@@ -8,7 +8,7 @@ spark = get_spark_session(app_name=app_name, tenant=tenant)
 
 
 spark.sql(f"""
-                create database if not exists dg_{tenant} LOCATION '{db_path}/dg_airbnbprod'
+                create database if not exists dg_airbnbprod LOCATION '{db_path}/dg_airbnbprod'
             """)
 
 spark.sql(f"""
@@ -36,7 +36,7 @@ spark.sql(f"""
             )
             USING delta
             PARTITIONED BY (orgId)
-            LOCATION '{db_path}/dg_{tenant}/airbnb_user_data'
+            LOCATION '{db_path}/dg_airbnbprod/airbnb_user_data'
         """)
 
 spark.sql(f"""
@@ -55,7 +55,7 @@ spark.sql(f"""
             )
             USING delta
             PARTITIONED BY (orgId)
-            LOCATION '{db_path}/dg_{tenant}/airbnb_day_wise'
+            LOCATION '{db_path}/dg_airbnbprod/airbnb_day_wise'
         """)
 
 spark.sql(f"""
@@ -77,7 +77,7 @@ spark.sql(f"""
             )
             USING delta
             PARTITIONED BY (orgId)
-            LOCATION '{db_path}/dg_{tenant}/day_wise_behaviour_score'
+            LOCATION '{db_path}/dg_airbnbprod/day_wise_behaviour_score'
         """)
 
 spark.sql(f"""
@@ -131,7 +131,7 @@ spark.sql(f"""
             )
             USING delta
             PARTITIONED BY (orgId)
-            LOCATION '{db_path}/dg_{tenant}/Ambassador_wise_conformance'
+            LOCATION '{db_path}/dg_airbnbprod/Ambassador_wise_conformance'
         """)
 
 spark.sql(f"""
@@ -145,5 +145,5 @@ spark.sql(f"""
             )
             using delta
             PARTITIONED BY (orgId)
-            LOCATION '{db_path}/dg_{tenant}/airbnb_attendance'
+            LOCATION '{db_path}/dg_airbnbprod/airbnb_attendance'
             """)

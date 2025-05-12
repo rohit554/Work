@@ -77,7 +77,7 @@ databases = ['tp-prod']
 def get_badges(spark):
     for db in databases:
         df = exec_mongo_pipeline(spark, pipeline, 'User_Outcome', schema, mongodb=db)
-        df.createOrReplaceTempView("badges")
+        df.registerTempTable("badges")
         df = spark.sql("""
                         select  distinct badge_name badgeName,
                                 campaign_id.oid campaignId,

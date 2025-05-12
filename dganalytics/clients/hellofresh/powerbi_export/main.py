@@ -22,7 +22,11 @@ pipelines = {
     "survey_summary": powerbi_export.export_survey_summary,
     "realtime_queue_mapping": powerbi_export.export_realtime_queue_mapping,
     "conversation_summary": powerbi_export.export_conversation_summary,
-    "raw_project_issues": powerbi_export.raw_project_issues
+    "raw_project_issues": powerbi_export.raw_project_issues,
+    "wrapup_category": powerbi_export.export_wrapup_category,
+    "internal_fcr": powerbi_export.export_internal_fcr,
+    "conversation_final_segment": powerbi_export.export_conversation_final_segment,
+    "user_presence_global": powerbi_export.export_user_presence_global
 }
 
 

@@ -5,7 +5,7 @@ def fact_conversation_metrics(spark: SparkSession, extract_date, extract_start_t
     conversation_metrics = spark.sql(f"""
                                             select
                                         conversationId, agentId, mediaType, messageType, originatingDirection,
-                            element_at(segments, size(segments)).queueId as queueId,
+                            element_at(segments, 1).queueId as queueId,
                             element_at(segments, size(segments)).wrapUpCode as wrapUpCode,
                         max(element_at(segments, size(segments)).wrapUpNote) as wrapUpNote,
                     cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'),
@@ -55,7 +55,7 @@ def fact_conversation_metrics(spark: SparkSession, extract_date, extract_start_t
                     from (
                     select
                         conversationId, agentId, originatingDirection, purpose, 
-                        element_at(segments, size(segments)).queueId, mediaType, messageType, 
+                        element_at(segments, 1).queueId, mediaType, messageType, 
                         metrics.emitDate, metrics.name, metrics.value, segments,
                         sourceRecordIdentifier, soucePartition
                     from
@@ -104,7 +104,7 @@ def fact_conversation_metrics(spark: SparkSession, extract_date, extract_start_t
                             )
                     )
                     group by conversationId, agentId, mediaType, messageType, originatingDirection, 
-                    element_at(segments, size(segments)).queueId,
+                    element_at(segments, 1).queueId,
                             element_at(segments, size(segments)).wrapUpCode,
                     cast(concat(date_format(emitDate, 'yyyy-MM-dd HH:'),
                         format_string("%02d", floor(minute(emitDate)/15) * 15), ':00') as timestamp)

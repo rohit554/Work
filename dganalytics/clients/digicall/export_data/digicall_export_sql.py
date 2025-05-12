@@ -113,7 +113,7 @@ dim_evaluation_forms = """
 
 def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
     return f"""
-        SELECT 
+		SELECT DISTINCT
             conversationId,
             min(conversationStart) AS conversationStart,
             max(conversationEnd) AS conversationEnd,
@@ -122,17 +122,11 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
             max(element_at(sessionSegments, size(sessionSegments)).segmentEnd) AS interactionEndTime,
             userId,
             purpose,
-            participantTransactionType,
-            participantTransactionId,
             mediaType,
             messageType,
             direction,
             ani,
             dnis,
-            dispositionName,
-            outboundCampaignId,
-            outboundContactId,
-            outboundContactListId,
             element_at(sessionSegments, size(sessionSegments)).queueId AS queueId,
             element_at(sessionSegments, size(sessionSegments)).wrapUpCode AS wrapUpCode,
             sum(CASE WHEN coalesce(tAbandon, 0) > 0 THEN 1 ELSE 0 END) AS nAbandon,
@@ -181,17 +175,11 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
                     originatingDirection,
                     userId,
                     purpose,
-                    participantTransactionType,
-                    participantTransactionId,
                     mediaType,
                     messageType,
                     direction,
                     ani,
                     dnis,
-                    dispositionName,
-                    outboundCampaignId,
-                    outboundContactId,
-                    outboundContactListId,
                     sessionMetric.name AS sessionMetricName,
                     sessionMetric.value AS sessionMetricValue,
                     sessionSegments
@@ -203,17 +191,11 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
                         originatingDirection,
                         userId,
                         purpose,
-                        participantTransactionType,
-                        participantTransactionId,
                         session.mediaType AS mediaType,
                         session.messageType AS messageType,
                         session.direction AS direction,
                         session.ani AS ani,
                         session.dnis AS dnis,
-                        session.dispositionName AS dispositionName,
-                        session.outboundCampaignId AS outboundCampaignId,
-                        session.outboundContactId AS outboundContactId,
-                        session.outboundContactListId AS outboundContactListId,
                         explode(session.metrics) AS sessionMetric,
                         session.segments AS sessionSegments
                     FROM (
@@ -224,8 +206,6 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
                             originatingDirection,
                             participant.userId AS userId,
                             participant.purpose AS purpose,
-                            participant.attributes["transaction_type"] AS participantTransactionType,
-                            participant.attributes["transaction_id"] AS participantTransactionId,
                             explode(participant.sessions) AS session
                         FROM (
                             SELECT 
@@ -285,17 +265,11 @@ def fact_conversation_metrics(extract_start_time: str, extract_end_time: str):
             originatingDirection,
             userId,
             purpose,
-            participantTransactionId,
-            participantTransactionType,
             mediaType,
             messageType,
             direction,
             ani,
             dnis,
-            dispositionName,
-            outboundCampaignId,
-            outboundContactId,
-            outboundContactListId,
             element_at(sessionSegments, size(sessionSegments)).queueId,
             element_at(sessionSegments, size(sessionSegments)).wrapUpCode
         ORDER BY
@@ -364,10 +338,9 @@ def fact_conversation_evaluations(extract_start_time: str, extract_end_time: str
         )
     """
 
-
 def fact_user_primary_presence(extract_start_time: str, extract_end_time: str):
     return f"""
-        SELECT
+        SELECT DISTINCT
             userId,
             primaryPresence.startTime AS startTime,
             primaryPresence.endTime AS endTime,
@@ -386,7 +359,7 @@ def fact_user_primary_presence(extract_start_time: str, extract_end_time: str):
 
 def fact_user_routing_status(extract_start_time: str, extract_end_time: str):
     return f"""
-        SELECT
+        SELECT DISTINCT
             userId,
             routingStatus.startTime AS startTime,
             routingStatus.endTime AS endTime,

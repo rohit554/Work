@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
         df = get_probeabg_data(spark, extract_date)
         df = df.drop_duplicates()
-        df.createOrReplaceTempView("probeabg_game_data")
+        df.registerTempTable("probeabg_game_data")
 
         push_sales_data(spark)
         push_service_data(spark)

@@ -330,33 +330,48 @@ spark.sql(f"""
                 kpi_id string,
                 campaign_id string,
                 trek_global_state int,
-                trek_date string,
-                discoveryStart string,
-                discoveryEnd string,
-                actionLMSStart string,
-                actionLMSEnd string,
-                actionLMSLink string,
-                actionArticleStart string,
-                actionArticleEnd string,
-                actionArticleLink string,
-                actionRecordedCallStart string,
-                actionRecordedCallEnd string,
-                actionRecordedCallLink string,
-                actionOneOnOneStart string,
-                actionOneOnOneEnd string,
-                actionOneOnOneLink string,
-                actionState string,
-                scoreLMS int,
-                scoreArticle int,
-                scoreRecordedCall int,
-                scoreOneOnOne int,
-                action_complete string,
-                feedback_given string,
-                action_start string,
-                discovery_complete string,
-                discovery_start string,
-                action_completed string,
-                orgId string
+                trek_date string, 
+                discoveryStart string, 
+                discoveryEnd string, 
+                actionLMSStart string, 
+                actionLMSEnd string, 
+                actionLMSLink string, 
+                actionArticleStart string, 
+                actionArticleEnd string, 
+                actionArticleLink string, 
+                actionRecordedCallStart string, 
+                actionRecordedCallEnd string, 
+                actionRecordedCallLink string, 
+                actionOneOnOneStart string, 
+                actionOneOnOneEnd string, 
+                actionOneOnOneLink string, 
+                actionState string, 
+                scoreLMS int, 
+                scoreArticle int, 
+                scoreRecordedCall int, 
+                scoreOneOnOne int, 
+                action_complete string, 
+                feedback_given string, 
+                action_start string, 
+                discovery_complete string, 
+                discovery_start string, 
+                action_completed string, 
+                orgId string, 
+                actionGoalTarget string, 
+                Survey_question string, 
+                Survey_type string, 
+                Survey_value string, 
+                Feedback_question string, 
+                Feedback_answer string, 
+                Feedeback_value string, 
+                Survey_score string, 
+                trek_id string, 
+                actionLMSState string, 
+                actionOneOnOneState string, 
+                actionArticleState string, 
+                actionActionState string, 
+                actionRecordedCallState string, 
+                teamlead_name string
              )
             using delta
             PARTITIONED BY (orgId)
@@ -385,19 +400,56 @@ spark.sql(f"""
 			dg_performance_management.announcement
 			(
 				
-				is_future_announcement BOOLEAN,
-				is_custom_subject      BOOLEAN,
-				is_deleted             BOOLEAN,
-				org_id                 STRING,
-				creation_date          STRING,
-				priority               STRING,
-				title                  STRING,
-				description            STRING,
-				sender                 STRING,
-				campaign_id            STRING,
-				recipient              STRING
+				Announcement_sent_By         STRING,
+				Announcement_received_By         STRING,
+				Campaign_Name         STRING,
+				campaign_id         STRING,
+				is_deleted  BOOLEAN,
+				is_active   BOOLEAN,
+				orgId STRING,
+				creation_date STRING,
+				priority    STRING,
+				title   STRING,
+				description STRING
 			)
 			using delta
 			PARTITIONED BY (orgId)
 			LOCATION '{db_path}/dg_performance_management/announcement'
 		""")
+		
+spark.sql(f"""
+        create table if not exists 
+            dg_performance_management.userrewards
+            (
+                coin_id string,
+                coins_earned double,
+                conversion_rate double,
+                converted_points double,
+                outcome_quantity double,
+                processed_date string,
+                orgId string,
+                status boolean,
+                userid string
+            )
+            using delta
+            PARTITIONED BY (orgId)
+            LOCATION '{db_path}/dg_performance_management/userrewards'
+            """)
+
+spark.sql(f"""
+        create table if not exists 
+            dg_performance_management.xoxodayredeemedvouchers
+            (
+                reedemId string,
+                userMongoId string,
+                coinsUsed double,
+                campaignId string,
+                teamId string,
+                amountCharged double,
+                creation_date string,
+                orgId string
+            )
+            using delta
+            PARTITIONED BY (orgId)
+            LOCATION '{db_path}/dg_performance_management/xoxodayredeemedvouchers'
+            """)

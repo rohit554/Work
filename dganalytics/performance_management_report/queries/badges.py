@@ -1,39 +1,31 @@
 from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DateType
+from datetime import datetime, timedelta
+extract_start_time = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-4] + 'Z'
 
 pipeline = [
     {
         "$match": {
-            "outcome_type": "badge"
+            
+            "outcome_type": "badge",
+            "$expr": {
+                        "$gte": [
+                            "$start_date",
+                            {
+                                "$dateFromString": {
+                                    "dateString": extract_start_time,
+                                    "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                                }
+                            },
+                        ]
+                    }
         }
     },
     {
         "$lookup": {
             "from": "User",
-            "let": {
-                "user_id": "$user_id"
-            },
-            "pipeline": [
-                {
-                    "$match": {
-                        "$expr": {
-                            "$and": [
-                                {
-                                    "$eq": [
-                                        "$user_id",
-                                        "$$user_id"
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "$project": {
-                        "org_id": 1.0
-                    }
-                }
-            ],
+            "localField": "user_id",
+            "foreignField": "user_id",
             "as": "users"
         }
     },
@@ -57,41 +49,8 @@ pipeline = [
     {
         "$lookup": {
             "from": "Organization",
-            "let": {
-                "oid": "$org_id"
-            },
-            "pipeline": [
-                {
-                    "$match": {
-                        "$expr": {
-                            "$and": [
-                                {
-                                    "$eq": [
-                                        "$org_id",
-                                        "$$oid"
-                                    ]
-                                },
-                                {
-                                    "$eq": [
-                                        "$type",
-                                        "Organisation"
-                                    ]
-                                }
-                            ]
-                        }
-                    }
-                },
-                {
-                    "$project": {
-                        "timezone": {
-                            "$ifNull": [
-                                "$timezone",
-                                "Australia/Melbourne"
-                            ]
-                        }
-                    }
-                }
-            ],
+            "localField": "org_id",
+            "foreignField": "org_id",
             "as": "org"
         }
     },
@@ -102,26 +61,27 @@ pipeline = [
         }
     },
     {
+        "$match": {
+            "org.type": "Organisation"
+        }
+    },
+    {
         "$project": {
-            "date": {
-                "$dateToString": {
-                    "format": "%Y-%m-%d",
-                    "date": {
-                        "$toDate": {
-                            "$dateToString": {
-                                "date": "$date",
-                                "timezone": "$org.timezone"
-                            }
-                        }
+            "date": 
+                {
+                    "$dateToString": {
+                        "format": "%Y-%m-%d",
+                        "date": "$date",
+                        "timezone": "$org.timezone"
                     }
-                }
+            
             },
             "campaign_id": 1.0,
             "description": 1.0,
             "badge_name": 1.0,
             "awarded_by_mongo_user_id": 1.0,
             "user_id": 1.0,
-            "org_id": 1.0
+            "org_id": 1.0,
         }
     }
 ]

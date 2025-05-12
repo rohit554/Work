@@ -66,6 +66,8 @@ if __name__ == '__main__':
 
     kpi['Shift'] = kpi['Shift'].replace(['np.nan'], '')
     kpi['Attendance_Status'] = kpi['Attendance_Status'].replace(['np.nan'], '')
+    kpi = kpi.drop_duplicates('ECN')
+    Kpi = kpi.drop_duplicates('IST_Date')
 
     kpi.insert(45, 'orgId', customer)
     kpi = spark.createDataFrame(kpi)

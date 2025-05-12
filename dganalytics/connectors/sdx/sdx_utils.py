@@ -83,6 +83,16 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
     # handling conversation details job failure scenario
     if resp.status_code in [200]:
         return "OK"
+    elif resp.status_code == 429:
+        # sleep if too many request error occurs
+        retry = retry + 1
+        logger.info(f"retrying - {tenant} - {api_name} - {run_id} - {retry}")
+        time.sleep(180)
+        if retry > 5:
+            message = f"SDX API Extraction failed - {tenant} - {api_name} - {run_id}"
+            logger.exception(message + str(resp.text))
+            raise Exception
+        return "SLEEP"
     elif resp.status_code == 204:
         # sleep if too many request error occurs
         print("survey dynamix api extraction failed")

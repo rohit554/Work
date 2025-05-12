@@ -1,0 +1,226 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "name": "AccountId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "AssistantName",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "AssistantPhone",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Birthdate",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CleanStatus",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Department",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Description",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Email",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Fax",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "FirstName",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "LastName",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "MailingAddress",
+      "type": {
+        "type": "array",
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "name": "MailingStreet",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "MailingCity",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "MailingState",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "MailingPostalCode",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "MailingCountry",
+              "type": "string",
+              "nullable": true
+            }
+          ]
+        },
+        "containsNull": true
+      },
+      "nullable": true
+    },
+    {
+      "name": "MobilePhone",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "OwnerId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Phone",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Title",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CreatedById",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Jigsaw",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "HomePhone",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "IndividualId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Languages__c",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "LastModifiedById",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "LastCURequestDate",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "LastCUUpdateDate",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "LeadSource",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Level__c",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Name",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Salutation",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "OtherAddress",
+      "type": {
+        "type": "array",
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "name": "OtherStreet",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "OtherCity",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "OtherState",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "OtherPostalCode",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "OtherCountry",
+              "type": "string",
+              "nullable": true
+            }
+          ]
+        },
+        "containsNull": true
+      },
+      "nullable": true
+    },
+    {
+      "name": "OtherPhone",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ReportsToId",
+      "type": "string",
+      "nullable": true
+    }
+  ]
+}

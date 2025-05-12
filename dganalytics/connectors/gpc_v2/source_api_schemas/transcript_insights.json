@@ -128,7 +128,7 @@
 						},
 						{
 							"metadata": {},
-							"name": "end_line ",
+							"name": "end_line",
 							"nullable": true,
 							"type": "string"
 						},

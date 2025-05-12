@@ -24,7 +24,7 @@ schema = StructType([
     StructField('awardedBy', StringType(), True)
 ])
 def get_activity_wise_points(spark):
-  extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  extract_start_time = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-4] + 'Z'
   for org_timezone in get_active_organization_timezones(spark).rdd.collect():
     org_id = org_timezone['org_id']
     org_timezone = org_timezone['timezone']
@@ -38,18 +38,52 @@ def get_activity_wise_points(spark):
                 '$or': [
                     {
                         '$gte': [
-                            '$creation_date', { '$date': extract_start_time }
+                            '$creation_date', 
+                            {
+                                "$dateFromString": {
+                                    "dateString": extract_start_time,
+                                    "format": "%Y-%m-%dT%H:%M:%S.%LZ"
+                                }
+                            }
                         ]
                     }, {
                         '$gte': [
-                            '$last_updated', { '$date': extract_start_time }
+                            '$last_updated',
+                            {
+                                "$dateFromString": {
+                                    "dateString": extract_start_time,
+                                    "format": "%Y-%m-%dT%H:%M:%S.%LZ"
+                                }
+                            }
                         ]
                     }
                 ]
             }
             
         }
-      }, 
+      },
+      # {
+      #   "$lookup": {
+      #       "from": "User",
+      #       "localField": "user_id",
+      #       "foreignField": "user_id",
+      #       "pipeline" : [
+      #         {
+      #           "$project" : {
+      #             "_id" : 1,
+      #             "user_id" : 1
+      #           }
+      #         }  
+              
+      #       ],
+      #       "as": "users"
+      #   }
+      # }, {
+      #   "$unwind": {
+      #       "path": "$users",
+      #       "preserveNullAndEmptyArrays": False
+      #   }
+      # }, 
       {
         "$project": {
             "campaignId": "$campaign_id",
@@ -73,7 +107,8 @@ def get_activity_wise_points(spark):
                     "date": "$creation_date",
                     "timezone": org_timezone
                   }
-             }
+            },
+            "mongoUserId": ""
         }     
       }  
     ]
@@ -82,9 +117,17 @@ def get_activity_wise_points(spark):
         "$match": {
             "org_id": org_id,
             "outcome_type": "badge",
-            'creation_date': {
-                  '$gte': { '$date': extract_start_time }
-                 }
+            "$expr": {
+                        "$gte": [
+                            "$creation_date",
+                            {
+                                "$dateFromString": {
+                                    "dateString": extract_start_time,
+                                    "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                                }
+                            },
+                        ]
+                    },
         }
       }, { 
         "$project": {
@@ -98,35 +141,18 @@ def get_activity_wise_points(spark):
             "org_id": 1
         }
       }, {
-        "$lookup": {
-            "from":
-            "User",
-            "let": {
-                "userid": "$user_id"
-            },
-            "pipeline": [{
-                "$match": {
-                    "$expr": {
-                        "$and": [{
-                            "$eq": ["$user_id", "$$userid"]
-                        }]
-                    }
-                }
-            }, {
-                "$project": {
-                    "_id": 1.0,
-                    "org_id": 1.0
-                }
-            }],
-            "as":
-            "users"
-        }
-      }, {
-        "$unwind": {
-            "path": "$users",
-            "preserveNullAndEmptyArrays": False
-        }
-      }, {
+      #   "$lookup": {
+      #       "from": "User",
+      #       "localField": "user_id",
+      #       "foreignField": "user_id",
+      #       "as": "users"
+      #   }
+      # }, {
+      #   "$unwind": {
+      #       "path": "$users",
+      #       "preserveNullAndEmptyArrays": False
+      #   }
+      # }, {
         "$project": {
             "points": "$outcome_quantity",
             "userId": "$user_id",
@@ -136,17 +162,11 @@ def get_activity_wise_points(spark):
             "date": {
                 "$dateToString": {
                     "format": "%Y-%m-%d",
-                    "date": {
-                        "$toDate": {
-                            "$dateToString": {
-                                "date": "$creation_date",
-                                "timezone": org_timezone
-                            }
-                        }
-                    }
+                    "date": "$creation_date",
+                    "timezone": org_timezone
                 }
             },
-            "mongoUserId": "$users._id",
+            "mongoUserId": "",
             "orgId": "$org_id",
             "outcomeType": "$outcome_type"
         }
@@ -158,7 +178,30 @@ def get_activity_wise_points(spark):
     points_df = points_df.union(badge_bonus_points_df)
     points_df = points_df.withColumn("orgId", lower(points_df["orgId"]))
     
-    points_df.createOrReplaceTempView("activity_wise_points")
+    points_df.createOrReplaceTempView("points")
+
+    df = spark.sql(f"""
+                   select campaignId,
+                     activityId,
+                      a.userId,
+                     points,
+                     outcomeType,
+                     teamId,
+                    kpiName,
+                     fieldName,
+                      fieldValue,
+                      frequency,
+                     entityName,
+                      noOfTimesPerformed,
+                      activityName,
+                       target,
+                      date,
+                      u.mongoUserId,
+                     awardedBy,
+                         a.orgId  from points a
+                   join dg_performance_management.users u ON a.userId = u.userId AND a.orgId = u.orgId
+                   """)
+    df.createOrReplaceTempView("activity_wise_points")
     spark.sql("""
                 DELETE FROM dg_performance_management.activity_wise_points a
                 WHERE EXISTS (
@@ -194,4 +237,3 @@ def get_activity_wise_points(spark):
                        awardedBy,
                        orgId FROM activity_wise_points
       """)
-

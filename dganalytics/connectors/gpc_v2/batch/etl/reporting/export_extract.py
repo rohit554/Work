@@ -34,4 +34,5 @@ def get_speechandtextanalytics_topics(spark):
                 phrasesCount
         FROM raw_speechandtextanalytics_topics
     """)
+
     return df.withColumn("tags", concat_ws(",",col("tags")))

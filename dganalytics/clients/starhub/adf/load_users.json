@@ -131,7 +131,7 @@
 				],
 				"type": "BlobEventsTrigger",
 				"typeProperties": {
-					"blobPathBeginsWith": "/starthub/blobs/data/raw/user_management",
+					"blobPathBeginsWith": "/feb7kpiformulatestorg/blobs/data/raw/user_management",
 					"blobPathEndsWith": "",
 					"ignoreEmptyBlobs": true,
 					"scope": "[concat('/subscriptions/590f7ac0-b909-4092-adb4-2ad447a5bb19/resourceGroups/dg', parameters('env'), 'analytics/providers/Microsoft.Storage/storageAccounts/dg', parameters('env'), 'lakestorage')]",

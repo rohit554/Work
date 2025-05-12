@@ -1,0 +1,226 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "name": "Id",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "AccountId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ActivatedById",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ActivatedDate",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "BillToContactId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "BillingAddress",
+      "type": {
+        "type": "array",
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "name": "BillingStreet",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "BillingCity",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "BillingState",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "BillingPostalCode",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "BillingCountry",
+              "type": "string",
+              "nullable": true
+            }
+          ]
+        },
+        "containsNull": true
+      },
+      "nullable": true
+    },
+    {
+      "name": "CompanyAuthorizedById",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CompanyAuthorizedDate",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ContractId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CreatedById",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CustomerAuthorizedById",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CustomerAuthorizedDate",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Description",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "LastModifiedById",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "TotalAmount",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "EndDate",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Name",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "OrderNumber",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "OwnerId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "OrderReferenceNumber",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "EffectiveDate",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Type",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "OriginalOrderId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PoDate",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PoNumber",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Pricebook2Id",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "IsReductionOrder",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ShipToContactId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ShippingAddress",
+      "type": {
+        "type": "array",
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "name": "ShippingStreet",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "ShippingCity",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "ShippingState",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "ShippingPostalCode",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "name": "ShippingCountry",
+              "type": "string",
+              "nullable": true
+            }
+          ]
+        },
+        "containsNull": true
+      },
+      "nullable": true
+    },
+    {
+      "name": "Status",
+      "type": "string",
+      "nullable": true
+    },    
+    {
+      "name": "LastModifiedDate",
+      "type": "string",
+      "nullable": true
+    }
+  ]
+}

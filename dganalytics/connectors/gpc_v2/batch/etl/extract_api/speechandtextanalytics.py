@@ -9,19 +9,20 @@ from dganalytics.connectors.gpc_v2.gpc_utils import gpc_utils_logger
 import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
 
-def get_conversations(spark: SparkSession, extract_start_time: str, extract_end_time: str) -> list:
+def get_conversations(spark: SparkSession, tenant: str, extract_start_time: str, extract_end_time: str) -> list:
     conversations_df = spark.sql(f"""
         SELECT  DISTINCT conversationId
         FROM (SELECT  conversationId,
                         EXPLODE(participants.sessions) sessions
                 FROM (SELECT  conversationId,
                             explode(participants) as participants
-                    FROM gpc_simplyenergy.raw_conversation_details
+                    FROM gpc_{tenant}.raw_conversation_details
                     WHERE   extractIntervalStartTime = '{extract_start_time}'
                             AND extractIntervalEndTime = '{extract_end_time}'
                             AND conversationId IS NOT NULL
+                            AND NOT EXISTS (select 1 FROM gpc_{tenant}.fact_speechandtextanalytics fs where fs.conversationId = raw_conversation_details.conversationId)
                 )
-            WHERE participants.purpose = 'customer')
+            WHERE participants.purpose IN( 'customer', 'external'))
        WHERE sessions.mediaType IN ('voice', 'chat', 'email')
     """)
 
@@ -48,7 +49,8 @@ def get_speechandtextanalytics(base_url: str, auth_headers, conversation_id: str
         logger.info(f"Rate limit exceeded for get Speech And Text Analytics API call, sleeping for 30 seconds, retry count {retry_count} of 3")
         time.sleep(30)
 
-        return get_speechandtextanalytics(base_url, auth_headers, conversation_id, retry_count)
+        # return get_speechandtextanalytics(base_url, auth_headers, conversation_id, retry_count)
+        return {}
     elif resp.status_code == 404:
         logger.info(f"No Speech And Text Analytics found for conversation {conversation_id}")
         return {}
@@ -64,7 +66,7 @@ def exec_speechandtextanalytics(spark: SparkSession, tenant: str, run_id: str, e
     logger = gpc_utils_logger(tenant, "gpc_speechandtextanalytics")
     logger.info(f"getting conversations extracted between {extract_start_time} and {extract_end_time} for Speech And Text Analytics")
 
-    conversations_df = get_conversations(spark, extract_start_time, extract_end_time)
+    conversations_df = get_conversations(spark, tenant, extract_start_time, extract_end_time)
 
     if conversations_df is None or not hasattr(conversations_df, 'rdd'):
         logger.error("Failed to retrieve valid conversations DataFrame. Exiting thread execution.")
@@ -76,7 +78,7 @@ def exec_speechandtextanalytics(spark: SparkSession, tenant: str, run_id: str, e
 
     valid_conversations = conversations_df.filter(conversations_df['conversationId'].isNotNull())
 
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers = 20) as executor:
         results = executor.map(lambda conversation: get_speechandtextanalytics(base_url, auth_headers, conversation['conversationId'], 0), valid_conversations.rdd.collect())
 
     for resp_json in results:

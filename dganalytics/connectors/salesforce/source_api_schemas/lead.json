@@ -1,0 +1,199 @@
+{
+    "type": "struct",
+    "fields": [
+      {
+        "name": "Address",
+        "type": {
+          "type": "array",
+          "elementType": {
+            "type": "struct",
+            "fields": [
+              {
+                "name": "Street",
+                "type": "string",
+                "nullable": true
+              },
+              {
+                "name": "City",
+                "type": "string",
+                "nullable": true
+              },
+              {
+                "name": "State",
+                "type": "string",
+                "nullable": true
+              },
+              {
+                "name": "PostalCode",
+                "type": "string",
+                "nullable": true
+              },
+              {
+                "name": "Country",
+                "type": "string",
+                "nullable": true
+              }
+            ]
+          },
+          "containsNull": true
+        },
+        "nullable": true
+      },
+      {
+        "name": "AnnualRevenue",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "CleanStatus",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Company",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "CompanyDunsNumber",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "CreatedById",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "CurrentGenerators__c",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "DandbCompanyId",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Jigsaw",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Description",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Email",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Fax",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "IndividualId",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Industry",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "LastModifiedById",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "OwnerId",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "LeadSource",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Status",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "MobilePhone",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Name",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Salutation",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "FirstName",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "LastName",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "NumberOfEmployees",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "NumberofLocations__c",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Phone",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Primary__c",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "ProductInterest__c",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Rating",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "SICCode__c",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Title",
+        "type": "string",
+        "nullable": true
+      },
+      {
+        "name": "Website",
+        "type": "string",
+        "nullable": true
+      }
+    ]
+  }
+  

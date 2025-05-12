@@ -52,6 +52,7 @@ def export_evaluation_details_info(spark: SparkSession, tenant: str, region: str
             AND a.conversationDatePart = c.conversationDatePart
             AND a.queueId = d.queueId
             AND d.queueName = e.queueName
+			{"AND e.region IN ('US', 'CA')" if region == 'US' else " " }
     """)
 
     return df

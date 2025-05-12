@@ -81,12 +81,12 @@ if __name__ == "__main__":
                     if sftp_folder_path == "./" or sftp_folder_path is None:
                         upload_name = f"./{export_name_normalised}_{export_part}.csv"
                     else: 
-                      upload_name = f"./{sftp_folder_path}/{export_name_normalised}_{export_part}.csv"
+                      upload_name = f"{sftp_folder_path}/{export_name_normalised}_{export_part}.csv"
                 else:
                     if sftp_folder_path == "./" or sftp_folder_path is None:
                         upload_name = f"./{export_name_normalised}.csv"
                     else: 
-                      upload_name = f"./{sftp_folder_path}/{export_name_normalised}.csv"
+                      upload_name = f"{sftp_folder_path}/{export_name_normalised}.csv"
 
                 logger.info(f"uploading {file_path} to {upload_name}...")
                 sftp_conn.put(file_path, upload_name, confirm=False)

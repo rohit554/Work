@@ -147,6 +147,7 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 100000},
         "table_name": "evaluation_forms",
         "tbl_overwrite": True,
+		"entity_name": "entities",
         "raw_primary_key": ["id"]
     },
     "divisions": {
@@ -246,6 +247,7 @@ gpc_end_points = {
         "spark_partitions": {"max_records_per_partition": 100000},
         "table_name": "wfm_planninggroups",
         "tbl_overwrite": False,
+		"entity_name": "entities",
         "raw_primary_key": ["id", "businessUnitId"]
     },
     "conversation_aggregates": {
@@ -269,19 +271,52 @@ gpc_end_points = {
         "tbl_overwrite": False,
         "entity_name": "results",
     },
-    "conversation_export": {
-        "endpoint": "/api/v2/conversationexport",
+    "speechandtextanalytics": {
+        "endpoint": "/api/v2/speechandtextanalytics/conversations/{conversation_id}",
+        "extract_type": "custom",
+        "spark_partitions": {"max_records_per_partition": 100000},
+        "table_name": "speechandtextanalytics",
+        "tbl_overwrite": False,
+        "drop_duplicates": True,
+        "raw_primary_key": ["id"]
+    },
+    "speechandtextanalytics_topics": {
+        "endpoint": "/api/v2/speechandtextanalytics/topics",
         "request_type": "GET",
         "paging": True,
         "cursor": False,
         "interval": False,
         "params": {
-            "ids": "any",
+            "pageSize": 10000
+        },
+        "entity_name": "entities",
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "tbl_overwrite": True,
+        "drop_duplicates": True,
+        "raw_primary_key": ["id"]
+    },
+    "speechandtextanalytics_transcript": {
+        "endpoint": "api/v2/speechandtextanalytics/conversations/{conversationId}/communications/{communicationId}/transcripturl",
+        "extract_type": "custom",
+        "spark_partitions": {"max_records_per_partition": 100000},
+        "table_name": "speechandtextanalytics_transcript",
+        "tbl_overwrite": False,
+        "drop_duplicates": True,
+        "raw_primary_key": ["communicationId"]
+    },
+    "outbound_campaigns": {
+        "endpoint": "/api/v2/outbound/campaigns",
+        "request_type": "GET",
+        "paging": True,
+        "cursor": False,
+        "interval": False,
+        "params": {
             "pageSize": 500
         },
         "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": True,
-        "raw_primary_key": ["coversationId"]
-    },
+        "drop_duplicates": True,
+        "raw_primary_key": ["id"]
+    }
 }

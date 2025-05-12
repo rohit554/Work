@@ -1,1 +1,1 @@
-insert into dgdm_{tenant}.{transformation} select * from {transformation}
+insert into dgdm_{tenant}.{transformation} select distinct * from {transformation}

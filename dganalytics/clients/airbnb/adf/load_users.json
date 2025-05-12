@@ -5,7 +5,7 @@
 		"env": {
 			"type": "string",
 			"metadata": "Environment name",
-			"defaultValue": "uat"
+			"defaultValue": "dev"
 		}
 	},
 	"variables": {

@@ -20,16 +20,24 @@ schema = StructType([
 
 
 def get_data_upload_audit_log(spark):
-  extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+  extract_start_time = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-4] + 'Z'
   data_upload_audit_pipeline = [
         {
           "$match": {
               "org_id" :  {
                 '$in' : get_active_org()
               }, 
-              "start_date":{
-                      '$gte': { '$date': extract_start_time }
-                  }
+              "$expr": {
+                        "$gte": [
+                            "$start_date",
+                            {
+                                "$dateFromString": {
+                                    "dateString": extract_start_time,
+                                    "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                                }
+                            },
+                        ]
+                    }
           }
         }, 
         {

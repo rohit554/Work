@@ -4,7 +4,7 @@ import pandas as pd
 import datetime
 import os
 import numpy as np
-from spark.sql.functions import to_date
+import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -47,10 +47,11 @@ if __name__ == '__main__':
     
     attendance['userId'] = pd.to_numeric(attendance['userId'], errors='coerce').fillna(-1).astype(np.int64)
     attendance['reportDate'] = attendance['reportDate'].astype('str').str.strip()
+
+    attendance = attendance[['userId', 'reportDate', 'isPresent', 'orgId', 'recordInsertDate', 'loginTime', 'logoutTime']]
     
     attendance= spark.createDataFrame(attendance)
-    attendance = attendance.withColumn('reportDate', to_date('reportDate', 'dd-MM-yyyy'))
-    
+    attendance = attendance.filter(attendance.reportDate.isNotNull() & (attendance.isPresent == True))
     attendance.createOrReplaceTempView("attendance")
     
     spark.sql(f"""merge into dg_performance_management.attendance DB
@@ -66,19 +67,23 @@ if __name__ == '__main__':
         
       
     attendance = spark.sql(f"""
-                         SELECT DISTINCT  
-                         reportDate, 
-                         isPresent, 
-                         userId
-                         FROM
-                         (SELECT A.reportDate, 
-                         A.isPresent, 
-                         DB.user_id as userId
-                         FROM dg_performance_management.attendance AS A
-                         JOIN dg_airbnbprod.airbnb_user_data AS DB
-                         ON A.userId = DB.Emp_code
-                         WHERE DB.orgId = 'airbnbprod'
-                         )
+                         SELECT DISTINCT
+                                userId,
+                                reportDate,
+                                isPresent
+                            FROM (
+                                SELECT A.reportDate,
+                                      A.isPresent,
+                                      DB.user_id AS userId
+                                FROM dg_performance_management.attendance AS A
+                                JOIN dg_airbnbprod.airbnb_user_data AS DB
+                                ON A.userId = DB.Emp_code
+                                WHERE DB.orgId = 'airbnbprod'
+                                AND A.reportDate IS NOT NULL
+                                AND (A.isPresent = 'true' OR A.isPresent = 'True')
+                            )
                          """)
+    
+    attendance = attendance.coalesce(1)
     
     export_powerbi_csv(customer, attendance, f"pm_attendance")

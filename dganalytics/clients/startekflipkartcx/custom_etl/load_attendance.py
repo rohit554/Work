@@ -5,7 +5,6 @@ import datetime
 import os
 import numpy as np
 import re
-from pyspark.sql.functions import to_date
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -25,9 +24,10 @@ if __name__ == '__main__':
     elif input_file.endswith(".csv"):
         attendance = pd.read_csv(os.path.join(tenant_path, "data", "raw", "attendance", input_file), skiprows = 2)
 
-    attendance['Date'] = pd.to_datetime(attendance['Date'], format='%d-%b-%y').dt.strftime('%d-%m-%Y')
+    attendance['Date'] = pd.to_datetime(attendance['Date'], format='%d-%m-%Y').dt.strftime('%d-%m-%Y')
 
-    attendance['IsPresent'] = np.where(attendance['IsPresent'] == 'Yes', True, False)
+    attendance['IsPresent'] = np.where((attendance['IsPresent'].str.lower() == 'yes') | 
+    (attendance['IsPresent'].str.upper() == 'YES'), True, False)
 
     attendance['recordInsertDate'] = datetime.datetime.now()
     attendance['orgId'] = customer
@@ -44,7 +44,6 @@ if __name__ == '__main__':
     attendance = attendance[['userId', 'reportDate', 'isPresent', 'recordInsertDate', 'orgId', 'loginTime', 'logoutTime']]
 
     attendance= spark.createDataFrame(attendance)
-    attendance = attendance.withColumn('reportDate', to_date('reportDate', 'dd-MM-yyyy'))
 
     attendance.createOrReplaceTempView("attendance")
 
@@ -65,7 +64,9 @@ if __name__ == '__main__':
                                             FROM 
                                             dg_performance_management.attendance
                                             where orgId = 'startekflipkartcx'
+                                            and isPresent = 'true'
                                             """)
+    attendance = attendance.coalesce(1)
 
     export_powerbi_csv(customer, attendance, f"pm_attendance")
 

@@ -67,7 +67,7 @@ if __name__ == '__main__':
             frames = [users, sheetDf]
             users = pd.concat(frames)
     
-    global lobs 
+    #global lobs 
     lobs = pd.read_csv(os.path.join(tenant_path, "data", "config", "campaing_lob_mapping.csv"))
     spark.conf.set("spark.sql legacy.timeParserPolicy", "LEGACY")
     spark.udf.register("get_lob_udf", get_lobs, StringType())
@@ -100,9 +100,10 @@ if __name__ == '__main__':
     users = users.rename(columns={'Emp code': 'Emp_code'})
     users = users.rename(columns={'LDAP ID': 'LDAP_ID'})
     users = users.rename(columns={'CCMS ID': 'CCMS_ID'})
-    users['CCMS_ID'] = users['CCMS_ID'].astype(str).apply(lambda x: re.sub(pattern, '', x) if isinstance(pattern, (str, bytes)) else x)
     
-    users['DOJ'] = users['DOJ'].fillna(pd.Timestamp('now')).apply(lambda doj: datetime.now().strftime("%d-%m-%Y") if doj == 'DNA' else pd.to_datetime(doj).strftime('%d-%m-%Y'))
+    users = users[users['DOJ'] != 'DNA']
+    users['DOJ'] = users['DOJ'].replace(['-', '--'], None)
+    users['DOJ'] = pd.to_datetime(users['DOJ']).dt.strftime('%d-%m-%Y')
 
     users = users.rename(columns={'DOJ': 'user_start_date'})
 
@@ -116,6 +117,7 @@ if __name__ == '__main__':
     users['role'] = np.where(users['role'] == 'Ambassador', 'Agent',
                          np.where(users['role'].isin(['Team Leader -  Operations', 'Trainer', 'Team Leader -  MIS', 'Deputy Team Lead']), 'Team Lead', 'Team Manager'))
 
+    users['team'] = np.where(users['role'] == 'Team Lead', users['name'] + ' Team', users['team'])
 
     users = users.rename(columns={'Email ID': 'Communication_Email'})
     users['Communication_Email'] = np.where(users['Communication_Email'].isin(['-', '--', 'DNA']) | users['Communication_Email'].isna(), users['first_name'] + '.' + users['last_name'] + '@datagamz.com', users['Communication_Email'])
@@ -139,6 +141,8 @@ if __name__ == '__main__':
     users= spark.createDataFrame(users)
 
     users.createOrReplaceTempView("users")
+
+    spark.sql(f"""DELETE FROM {db_name}.airbnb_user_data""")
     
     spark.sql(f"""MERGE into {db_name}.airbnb_user_data DB
                     USING users A
@@ -174,7 +178,7 @@ if __name__ == '__main__':
         ON MU.user_id = U.user_id
         AND MU.email = U.email
     WHERE MU.role_id != 'Team Manager'
-    AND U.LOB IN ('R1', 'CE', 'R2', 'DSS')
+    AND U.LOB IN ('R1', 'CE', 'R2', 'DSS','R1 - GGN')
     """)
     
     
@@ -200,7 +204,7 @@ if __name__ == '__main__':
             FROM users U
             WHERE NOT EXISTS (SELECT * FROM mongoUsers MU WHERE LOWER(MU.user_id) = LOWER(U.user_id))
                   AND TRIM(email) NOT IN ('-@datagamz.com', '@datagamz.com', 'Not Received@datagamz.com')
-                  AND U.LOB IN ('R1', 'CE', 'R2', 'DSS')
+                  AND U.LOB IN ('R1', 'CE', 'R2', 'DSS', 'R1 - GGN')
     """)
     
     

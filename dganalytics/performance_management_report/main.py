@@ -19,8 +19,12 @@ pipelines = {
     "data_upload_connections": queries.get_connections,
     "kpi_data": queries.get_kpi_data,
     "campaign_kpis": queries.get_campaign_kpis,
-    "trek_data": queries.get_trek_data,
-    "campaign_activities": queries.get_campaign_activities
+	"trek_data": queries.get_trek_data,
+	"campaign_activities": queries.get_campaign_activities,
+    "announcement": queries.get_announcement,
+    "user_rewards": queries.get_userreward,
+    "redeem_vouchers": queries.get_redeemedvouchers,
+	"attendance": queries.get_attendance
 }
 
 if __name__ == "__main__":

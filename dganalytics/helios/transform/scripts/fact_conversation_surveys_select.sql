@@ -13,8 +13,6 @@ SELECT conversation.id conversationId,
         C.conversationStartDateId
 FROM (SELECT * FROM gpc_{tenant}.raw_surveys 
           WHERE extractDate = '{extract_date}'
-          AND extractIntervalStartTime = '{extract_start_time}'
-          AND extractIntervalEndTime = '{extract_end_time}'
       ) S
 JOIN (SELECT conversationId, conversationStartDateId FROM dgdm_{tenant}.dim_conversations) C
     ON S.conversation.id = C.conversationId

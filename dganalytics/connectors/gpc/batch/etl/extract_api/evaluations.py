@@ -37,22 +37,15 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_
                 "params": body
             }
         }
-        '''
-        resp = rq.get(f"{get_api_url(tenant)}/api/v2/quality/evaluations/query",
-                      headers=api_headers, params=body)
-        if resp.status_code != 200:
-            logger.exception("Detailed Evaluations API Failed" + resp.text)
-
-        evaluation_details_list.append(resp.json()['entities'])
-        '''
+        
         try:
             response = gpc_request(spark, tenant, 'evaluations', run_id, extract_start_time, extract_end_time, api_config, True)
             evaluation_details_list.append(response)
         except Exception as ex:
             logger.exception(ex, stack_info=True, exc_info=True)
-            
 
     evaluation_details_list = [
         item for sublist in evaluation_details_list for item in sublist]
+
     process_raw_data(spark, tenant, 'evaluations', run_id,
                      evaluation_details_list, extract_start_time, extract_end_time, len(evaluators))

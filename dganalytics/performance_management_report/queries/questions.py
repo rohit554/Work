@@ -15,7 +15,7 @@ schema = StructType([StructField('answerGiven', StringType(), True),
 
 
 def get_questions(spark):
-    extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    extract_start_time = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-4] + 'Z'
     for org_timezone in get_active_organization_timezones(spark).rdd.collect():
       org_id = org_timezone['org_id']
       org_timezone = org_timezone['timezone']
@@ -23,9 +23,17 @@ def get_questions(spark):
         {
           "$match":{
               "org_id" : org_id,
-              'answered_date': {
-                    '$gte': { '$date': extract_start_time }
-                }
+              "$expr": {
+                        "$gte": [
+                            "$answered_date",
+                            {
+                                "$dateFromString": {
+                                    "dateString": extract_start_time,
+                                    "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                                }
+                            }
+                        ]
+                    }
           }
         },
         {
@@ -124,16 +132,38 @@ def get_questions(spark):
 
       spark.sql("""
             MERGE INTO dg_performance_management.questions AS target
-            USING questions AS source
+            USING (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY orgId, campaignId, quiz_id, userId, question, subject_area
+                        ORDER BY answeredDate DESC
+                    ) AS row_number
+                FROM questions
+            ) AS source
             ON target.orgId = source.orgId
             AND target.campaignId = source.campaignId
             AND target.quiz_id = source.quiz_id
             AND target.userId = source.userId
             AND target.question = source.question
             AND target.subject_area = source.subject_area
+            AND source.row_number = 1
             WHEN MATCHED THEN
                 UPDATE SET *
             WHEN NOT MATCHED THEN
                 INSERT *        
-            """)
+        """)
+    #   spark.sql("""
+    #         MERGE INTO dg_performance_management.questions AS target
+    #         USING questions AS source
+    #         ON target.orgId = source.orgId
+    #         AND target.campaignId = source.campaignId
+    #         AND target.quiz_id = source.quiz_id
+    #         AND target.userId = source.userId
+    #         AND target.question = source.question
+    #         AND target.subject_area = source.subject_area
+    #         WHEN MATCHED THEN
+    #             UPDATE SET *
+    #         WHEN NOT MATCHED THEN
+    #             INSERT *        
+    #         """)
    

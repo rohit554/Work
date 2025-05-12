@@ -1,0 +1,40 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "name": "EVENT_TYPE",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "USER_ID",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "RECORD_ID",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PAGE_ENTITY_TYPE",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PAGE_URL",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "TARGET_UI_ELEMENT",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "TIMESTAMP_DERIVED",
+      "type": "string",
+      "nullable": true
+    }
+  ]
+}

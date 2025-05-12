@@ -1,16 +1,18 @@
 import requests as rq
 import json
 from pyspark.sql import SparkSession
-from dganalytics.connectors.gpc_v2.gpc_utils import authorize, get_api_url, process_raw_data
-from dganalytics.connectors.gpc_v2.gpc_utils import get_interval
-from dganalytics.connectors.gpc_v2.gpc_utils import gpc_utils_logger, gpc_request
+from dganalytics.connectors.gpc.gpc_utils import authorize, get_api_url, process_raw_data
+from dganalytics.connectors.gpc.gpc_utils import get_interval
+from dganalytics.connectors.gpc.gpc_utils import gpc_utils_logger, gpc_request
 from datetime import datetime, timedelta
+
 
 def get_evaluators(spark: SparkSession) -> list:
     evaluators = spark.sql("""select distinct userId  from (
         select id as userId, explode(authorization.roles) as roles  from raw_users where lower(state) = 'active'
             ) where lower(roles.name) like '%evalua%' OR lower(roles.name) = 'supervisor'""").toPandas()['userId'].tolist()
     return evaluators
+
 
 def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_start_time: str, extract_end_time: str):
 
@@ -35,22 +37,15 @@ def exec_evaluations_api(spark: SparkSession, tenant: str, run_id: str, extract_
                 "params": body
             }
         }
-        '''
-        resp = rq.get(f"{get_api_url(tenant)}/api/v2/quality/evaluations/query",
-                      headers=api_headers, params=body)
-        if resp.status_code != 200:
-            logger.exception("Detailed Evaluations API Failed" + resp.text)
-
-        evaluation_details_list.append(resp.json()['entities'])
-        '''
+        
         try:
             response = gpc_request(spark, tenant, 'evaluations', run_id, extract_start_time, extract_end_time, api_config, True)
             evaluation_details_list.append(response)
         except Exception as ex:
             logger.exception(ex, stack_info=True, exc_info=True)
-            
 
     evaluation_details_list = [
         item for sublist in evaluation_details_list for item in sublist]
+
     process_raw_data(spark, tenant, 'evaluations', run_id,
                      evaluation_details_list, extract_start_time, extract_end_time, len(evaluators))

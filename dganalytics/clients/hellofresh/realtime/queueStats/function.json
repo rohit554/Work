@@ -1,0 +1,12 @@
+{
+  "scriptFile": "__init__.py",
+  "bindings": [
+    {
+      "name": "queueStatsTimer",
+      "type": "timerTrigger",
+      "direction": "in",
+      "schedule": "*/5 * * * * *",
+      "useMonitor": true
+    }
+  ]
+}

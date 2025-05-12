@@ -23,6 +23,13 @@ def get_activity_mapping(spark):
                 'from': 'Campaign', 
                 'localField': 'campaign_id', 
                 'foreignField': '_id', 
+                "pipeline": [
+                {
+                    "$project": {
+                        "name": 1
+                    }
+                }
+                ],
                 'as': 'Campaign'
             }
         }, {
@@ -45,5 +52,3 @@ def get_activity_mapping(spark):
     df = exec_mongo_pipeline(spark, pipeline, 'Outcomes', schema)
     df = df.withColumn("orgId", lower(df["orgId"]))
     delta_table_partition_ovrewrite(df, "dg_performance_management.activity_mapping", ['orgId'])
-
-      

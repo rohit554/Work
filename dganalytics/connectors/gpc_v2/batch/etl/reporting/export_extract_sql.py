@@ -57,6 +57,7 @@ dim_users = """
             from dim_users
             """
 
+
 fact_queue_state = """
             WITH CTE AS (
               SELECT distinct
@@ -326,6 +327,7 @@ fact_wfm_actuals = """
                 int(date_format(endDate, 'HHmmss')) endTime,
                 actualActivityCategory, (to_unix_timestamp(endDate) - to_unix_timestamp(startDate)) duration
             from fact_wfm_actuals
+			
             """
 
 fact_wfm_day_metrics = """
@@ -340,6 +342,7 @@ fact_wfm_day_metrics = """
                 conformanceActualSecs , conformanceScheduleSecs,
                 dayStartOffsetSecs , exceptionCount , exceptionDurationSecs , impactSeconds , scheduleLengthSecs, impact
             from fact_wfm_day_metrics
+			
             """
 
 fact_wfm_exceptions = """
@@ -421,7 +424,6 @@ fact_conversation_transcript_topics = """
         FROM raw_speechandtextanalytics_transcript))
 """
 
-
 fact_conversation_transcript_sentiments = """
     SELECT DISTINCT conversationId,
                 communicationId,
@@ -440,4 +442,10 @@ fact_conversation_transcript_sentiments = """
                     mediaType,
                     EXPLODE(transcripts) transcripts
             FROM raw_speechandtextanalytics_transcript))
+"""
+
+speechandtextanalytics_topic_tags = """
+    SELECT  DISTINCT    id topicId,
+                        explode(tags) tags
+    FROM raw_speechandtextanalytics_topics
 """

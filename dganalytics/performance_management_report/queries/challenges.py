@@ -4,14 +4,46 @@ from datetime import datetime, timedelta
 from pyspark.sql.functions import lower
 
 def build_pipeline(org_id: str, org_timezone: str):  
-    extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    extract_start_time = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-4] + 'Z'
     pipeline = [
         {
             "$match": {
                 "org_id": org_id,
-                'start_date': {
-                  '$gte': { '$date': extract_start_time }
-                 }
+                '$expr': {
+                            '$or': [
+                                {
+                                    '$gte': [
+                                        '$creation_date', 
+                                        {
+                                            "$dateFromString": {
+                                                "dateString": extract_start_time,
+                                                "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                                            }
+                                        }
+                                    ]
+                                }, {
+                                    '$gte': [
+                                        '$modified_date',
+                                        {
+                                            "$dateFromString": {
+                                                "dateString": extract_start_time,
+                                                "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                                            }
+                                        }
+                                    ]
+                                }, {
+                                    '$gte': [
+                                        '$start_date',
+                                        {
+                                            "$dateFromString": {
+                                                "dateString": extract_start_time,
+                                                "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
             }
         }, 
         {
@@ -150,7 +182,7 @@ def get_challenges(spark):
                     AND source.challengerMongoId = target.challengerMongoId
                     AND source.challengeThrownDate = target.challengeThrownDate
                     AND source.challengeName = target.challengeName
-                    AND (source.challengeAcceptanceDate = target.challengeAcceptanceDate OR (source.challengeAcceptanceDate = target.challengeAcceptanceDate IS NULL AND target.challengeAcceptanceDate IS NULL) )
+                    AND source.challengeAcceptanceDate = target.challengeAcceptanceDate
                 )
          """)     
             

@@ -278,7 +278,7 @@ databases = ['tp-prod']
 def get_challenges(spark):
     for db in databases:
         df = exec_mongo_pipeline(spark, pipeline, 'User', schema, mongodb=db)
-        df.createOrReplaceTempView("challenges")
+        df.registerTempTable("challenges")
         df = spark.sql("""
                         select  distinct action action,
                                 campaign_id.oid campaignId,

@@ -7,7 +7,7 @@ sdx_end_points = {
         "params": {
             "_include_responses": "true",
             "_include_data": "true",
-            "_limit": 1000
+            "_limit": 500
         },
         "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": False,

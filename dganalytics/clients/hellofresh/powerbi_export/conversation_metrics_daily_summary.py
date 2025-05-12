@@ -82,8 +82,8 @@ def export_conversion_metrics_daily_summary(spark: SparkSession, tenant: str, re
 		WHERE
 			a.queueId = b.queueId
 			AND b.queueName = c.queueName
-			AND CAST(from_utc_timestamp(a.intervalStart, trim(c.timeZone)) AS date) >= add_months(current_date(), -12)
-			AND c.region {" = 'US'" if region == 'US' else " <> 'US'" }
+			AND CAST(from_utc_timestamp(a.date, trim(c.timeZone)) AS date) >= add_months(current_date(), -12)
+			{"AND c.region IN ('US', 'CA')" if region == 'US' else ""}
 		GROUP BY
 			c.timeZone,
 			a.originatingDirection,

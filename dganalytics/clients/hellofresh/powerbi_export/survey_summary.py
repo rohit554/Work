@@ -17,8 +17,7 @@ def export_survey_summary(spark: SparkSession, tenant: str, region: str):
     queue_mapping.createOrReplaceTempView("queue_mapping")
 
     df = spark.sql(f"""
-           WITH SDX_interactions AS (
-            SELECT 
+            SELECT DISTINCT 
                 a.surveyId,
                 a.agentId,
                 a.callType,
@@ -61,43 +60,74 @@ def export_survey_summary(spark: SparkSession, tenant: str, region: str):
                 a.selServerCsatMaxResponse,
                 a.usCsat,
                 a.usCsatMaxResponse,
-                a.originatingDirection
+                a.originatingDirection,
+                b.participants[0].sessions[0].mediaType mediaType,
+                b.participants[0].sessions[0].messageType messageType,
+                e.region,
+                cast(from_utc_timestamp(a.surveySentDate, trim(coalesce(e.timeZone, 'UTC'))) as DATE) AS surveySentDatePart
             FROM 
-                sdx_hellofresh.dim_hellofresh_interactions a 
+                sdx_hellofresh.dim_hellofresh_interactions a
                 LEFT JOIN queue_mapping e ON trim(lower(a.callType)) = trim(lower(e.queueName))
-            WHERE
-               CAST(from_utc_timestamp(a.createdAt, trim(e.timeZone)) AS date) >= add_months(current_date(), -12)
-               AND e.region {" = 'US'" if region == 'US' else " <> 'US'"}
-        ),
-        GPC_conversation AS (
-            SELECT DISTINCT 
-                conversationId,
-                session.mediaType AS mediaType,
-                agentId
-            FROM (
-                SELECT   
-                    conversationId, 
-                    EXPLODE(participants.sessions) AS session,
-                    participants.userId AS agentId
-                FROM (
-                    SELECT  
-                        conversationId,
-                        EXPLODE(participants) AS participants,
-                        ROW_NUMBER() OVER (PARTITION BY conversationId ORDER BY recordInsertTime DESC) AS rn
-                    FROM 
-                        gpc_hellofresh.raw_conversation_details
-                    WHERE CAST(a.conversationStart, AS date) >= add_months(current_date(), -12)
-                )
-                WHERE rn = 1
-            )
-        )
-        SELECT 
-            SDX_interactions.*,  
-            GPC_conversation.mediaType
-        FROM 
-            SDX_interactions
-            LEFT JOIN GPC_conversation
-            ON SDX_interactions.conversationId = GPC_conversation.conversationId
+                join gpc_hellofresh.raw_conversation_details b
+                    ON a.conversationId = b.conversationId
+                    AND cast(from_utc_timestamp(a.surveySentDate, trim(coalesce(e.timeZone, 'UTC'))) as DATE) >= date_sub(current_date(), 16)
+                    AND extractDate >= date_sub(current_date(), 16)
     """)
 
-    return df
+    # Delete old data from the table for the last 15 days before inserting new data
+    spark.sql(f"""
+        DELETE FROM pbi_hellofresh.survey_summary 
+        WHERE surveySentDatePart >= date_sub(current_date(), 16)
+    """)
+
+    # Write new data to the target table
+    df.write.mode("append").saveAsTable("pbi_hellofresh.survey_summary")
+
+    return spark.sql(f"""SELECT surveyId,
+            agentId,
+            callType,
+            surveyCompletionDate,
+            createdAt,
+            email,
+            externalRef,
+            conversationId,
+            conversationKey,
+            queueKey,
+            userKey,
+            wrapUpCodeKey,
+            restricted,
+            surveySentDate,
+            statusDescription,
+            status,
+            surveyTypeId,
+            surveyType,
+            updatedAt,
+            respondentLanguage,
+            country,
+            agentEmail,
+            agentGroup,
+            contactChannel,
+            wrapUpName,
+            comments,
+            OcsatAchieved,
+            OcsatMax,
+            improvement_categories,
+            csatAchieved,
+            csatMax,
+            fcr,
+            fcrMaxResponse,
+            npsScore,
+            npsMaxResponse,
+            ces,
+            cesMaxResponse,
+            openText,
+            selServerCsat,
+            selServerCsatMaxResponse,
+            usCsat,
+            usCsatMaxResponse,
+            originatingDirection,
+            mediaType,
+            messageType
+    FROM pbi_hellofresh.survey_summary
+                     WHERE surveySentDatePart >= add_months(current_date(), -12)
+                     {"and region IN ('US', 'CA')" if region == 'US' else " " } """)

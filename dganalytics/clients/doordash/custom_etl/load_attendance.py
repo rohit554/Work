@@ -8,8 +8,6 @@ from pyspark.sql.functions import date_format, to_date
 from pyspark.sql.functions import from_unixtime, when
 from pyspark.sql.functions import concat_ws
 
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_file', required=True)
@@ -55,8 +53,6 @@ if __name__ == '__main__':
     df['userId'] = df['userId'].astype(np.int64)
 
     df = spark.createDataFrame(df)
-    df = df.withColumn('reportDate', to_date('reportDate', 'dd-MM-yyyy'))
-
     df.createOrReplaceTempView("attendance")
 
     spark.sql(f"""merge into dg_performance_management.attendance DB
@@ -74,8 +70,11 @@ if __name__ == '__main__':
                                         to_date(reportDate, 'dd-MM-yyyy') reportDate,
                                         isPresent 
                                         FROM dg_performance_management.attendance
-                                        where orgId = 'doordashprod' 
+                                        where orgId = 'doordashprod'
+                                        and isPresent = 'true'
                                         """)
+
+    attendance = attendance.coalesce(1)
 
     attendance = attendance.withColumn("reportDate", date_format("reportDate", "dd-MM-yyyy"))
 

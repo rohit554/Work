@@ -100,7 +100,7 @@ from
                         and  extractDate = '{extract_date}'
                         ) ) ) ) ) pivot ( sum(`count`) `count`,
 	sum(`sum`) `sum`, max(`max`) `max`, min(`min`) `min`
-   for metric in ("nBlindTransferred", "nConnected", "nConsult", "nConsultTransferred",
+	for metric in ("nBlindTransferred", "nConnected", "nConsult", "nConsultTransferred",
                                     "nError", "nOffered", "nOutbound", "nOutboundAbandoned", "nOutboundAttempted",
                                     "nOutboundConnected", "nOverSla", "nStateTransitionError", "nTransferred",
                                     "tAbandon", "tAcd", "tAcw", "tAgentResponseTime", "tAlert", "tAnswered",
@@ -113,7 +113,7 @@ from
 
     incorrect_interval_data = spark.sql(f"""
 			select count(*) as count from conversation_agg_metrics 
-      			where cast((intervalEnd - intervalStart) as string) != '15 minutes'
+      			where (cast(intervalEnd as long) - cast(intervalStart as long)) != 900
                         """).rdd.collect()[0]['count']
     if incorrect_interval_data > 0:
         raise Exception("Incorrect interval in aggregates - only 15 min intervals are allowed")

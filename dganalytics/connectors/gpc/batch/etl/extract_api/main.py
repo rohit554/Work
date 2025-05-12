@@ -12,6 +12,8 @@ from dganalytics.connectors.gpc.batch.etl.extract_api.activity_codes import exec
 from dganalytics.connectors.gpc.batch.etl.extract_api.wfm_forecast import exec_wfm_forecast_api
 from dganalytics.connectors.gpc.batch.etl.extract_api.wfm_planninggroups import exec_wfm_planninggroups
 from dganalytics.connectors.gpc.batch.etl.extract_api.conversation_aggregates import exec_conversation_aggregates
+from dganalytics.connectors.gpc.batch.etl.extract_api.speechandtextanalytics import exec_speechandtextanalytics
+from dganalytics.connectors.gpc.batch.etl.extract_api.speechandtextanalytics_transcript import exec_speechandtextanalytics_transcript
 
 if __name__ == "__main__":
     tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()
@@ -24,20 +26,8 @@ if __name__ == "__main__":
     try:
         logger.info(f"Extracting GPC API {api_name}")
 
-        # if check_prev_gpc_extract(spark, api_name, extract_date, run_id):
-        '''
-        if 1 == 2:
-            logger.info(
-                f"API {api_name} for {tenant} - {extract_date} already extracted")
-            resp_list = get_prev_extract_data(
-                tenant, extract_date, run_id, api_name)
-            process_raw_data(spark, tenant, api_name, run_id,
-                             resp_list, extract_date, 0, re_process=True)
-            logger.info("re-processed")
-        else:
-        '''
         if api_name in ["users", "routing_queues", "groups", "users_details", "wrapup_codes",
-                        "conversation_details", "divisions", "presence_definitions"]:
+                        "conversation_details", "divisions", "presence_definitions", "speechandtextanalytics_topics", "outbound_campaigns"]:
             df = gpc_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
         elif api_name == "conversation_details_job":
@@ -79,6 +69,10 @@ if __name__ == "__main__":
         elif api_name == "wfm_planninggroups":
             exec_wfm_planninggroups(
                 spark, tenant, run_id, extract_start_time, extract_end_time)
+        elif api_name == "speechandtextanalytics":
+            exec_speechandtextanalytics(spark, tenant, run_id, extract_start_time, extract_end_time)
+        elif api_name == "speechandtextanalytics_transcript":
+            exec_speechandtextanalytics_transcript(spark, tenant, run_id, extract_start_time, extract_end_time)
         else:
             logger.exception("invalid api name")
             raise Exception

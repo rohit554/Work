@@ -1,367 +1,476 @@
-from dganalytics.utils.utils import get_spark_session, push_gamification_data, export_powerbi_csv
+from dganalytics.utils.utils import get_spark_session, get_path_vars, push_gamification_data
 from dganalytics.connectors.gpc.gpc_utils import dg_metadata_export_parser, get_dbname, gpc_utils_logger, get_path_vars
-from pyspark.sql import SparkSession
 import os
-import pandas as pd
-from dganalytics.clients.hellofresh.export_gamification_data.keyword_map_table import keyword_map
+import pandas as pd 
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import expr
+import concurrent.futures
 
 def get_config_file_data(tenant_path, file_name):
-    data = pd.read_json(os.path.join(tenant_path, 'data',
-                                                'config', file_name))
+    data = pd.read_json(os.path.join(tenant_path, 'data', 'config', file_name))
     data = pd.DataFrame(data['values'].tolist())
     header = data.iloc[0]
     data = data[1:]
     data.columns = header
     return data
 
-def get_base_data(spark: SparkSession, extract_date: str):
+def get_config_csv_file_data(tenant_path, file_name):
+    path = os.path.join(tenant_path, "data", "config", file_name)
+    data = pd.read_csv(path)
+    return data
+
+def push_outbound_sales(spark): 
     tenant_path, db_path, log_path = get_path_vars('hellofresh')
-    spark.sql(keyword_map)
-    queue_timezones = pd.read_json(os.path.join(tenant_path, 'data',
-                                                'config', 'Queue_TimeZone_Mapping.json'))
-    queue_timezones = pd.DataFrame(queue_timezones['values'].tolist())
-    header = queue_timezones.iloc[0]
-    queue_timezones = queue_timezones[1:]
-    queue_timezones.columns = header
+    outbound_wrapups = get_config_csv_file_data(tenant_path, 'Outbound_Wrapup_Codes.csv')
+    outbound_wrapups = spark.createDataFrame(outbound_wrapups)
+    outbound_wrapups.createOrReplaceTempView("outbound_wrap_codes")
 
-    queue_timezones = spark.createDataFrame(queue_timezones)
-    queue_timezones.createOrReplaceTempView("queue_timezones")
+    user_df = get_config_csv_file_data(tenant_path, 'User_Group_region_Sites.csv')
+    user_df = spark.createDataFrame(user_df)
+    user_df.createOrReplaceTempView("user_timezones")
 
-    user_timezone = pd.read_csv(os.path.join(
-        tenant_path, 'data', 'config', 'User_Group_region_Sites.csv'), header=0)
-    user_timezone = spark.createDataFrame(user_timezone)
-    user_timezone.createOrReplaceTempView("user_timezone")
-
-    backword_days = 16
-
-    df = spark.sql(f"""
-        SELECT * FROM (
+    df=spark.sql(f"""        
+        with CTE as
+        (
+            SELECT a.conversationId,
+            from_utc_timestamp(a.conversationStart, trim(ut.timeZone)) as conversationStart,
+            from_utc_timestamp(a.conversationEnd, trim(ut.timeZone)) as conversationEnd,
+            a.userId,
+            a.wrapUpCode
+            from
+            (
                 SELECT
-                    u.userId, u.date, u.department, cm.nAnswered, cm.tAnswered/1000.0 tAnswered, cm.nAcw, cm.tAcw/1000.0 tAcw, cm.nHeldComplete, cm.tHeldComplete/1000.0 tHeldComplete,
-                    cm.nHandle, cm.tHandle/1000.0 tHandle, cm.nTalkComplete, cm.tTalkComplete/1000.0 tTalkComplete,
-                    cm.chat_tAcw/1000.0 chat_tAcw, cm.chat_tHeldComplete/1000.0 chat_tHeldComplete, cm.chat_tHandle/1000.0 chat_tHandle, cm.chat_tTalkComplete/1000.0 chat_tTalkComplete,
-                    cm.email_tAcw/1000.0 email_tAcw, cm.email_tHeldComplete/1000.0 email_tHeldComplete, cm.email_tHandle/1000.0 email_tHandle, cm.email_tTalkComplete/1000.0 email_tTalkComplete,
-                    cm.voice_tAcw/1000.0 voice_tAcw, cm.voice_tHeldComplete/1000.0 voice_tHeldComplete, cm.voice_tHandle/1000.0 voice_tHandle, cm.voice_tTalkComplete/1000.0 voice_tTalkComplete,
-                    cm.social_tAcw/1000.0 social_tAcw, cm.social_tHeldComplete/1000.0 social_tHeldComplete, cm.social_tHandle/1000.0 social_tHandle, cm.social_tTalkComplete/1000.0 social_tTalkComplete,
-                    cm.chat_nAcw, cm.chat_nHeldComplete, cm.chat_nHandle, cm.chat_nTalkComplete,
-                    cm.email_nAcw, cm.email_nHeldComplete, cm.email_nHandle, cm.email_nTalkComplete,
-                    cm.voice_nAcw, cm.voice_nHeldComplete, cm.voice_nHandle, cm.voice_nTalkComplete,
-                    cm.social_nAcw, cm.social_nHeldComplete, cm.social_nHandle, cm.social_nTalkComplete,
-                    us.duration, us.interacting_duration, us.idle_duration, us.not_responding_duration,
-                    qa.totalScore, wfm.adherencePercentage, wfm.conformancePercentage, kw.kw_count, survey.csat,
-                    wfm.adherenceScheduleSecs, wfm.exceptionDurationSecs, wfm.adherenceScheduleSecs,
-                    wfm.conformanceActualSecs, wfm.conformanceScheduleSecs, qa.totalScoreSum, qa.totalScoreCount,
-                    survey.csatSum, survey.csatCount,survey.nSurveySent,
-                    survey.fcr, 
-                    survey.nSurveysCompleted,
-                    up.oqtTime userPresenceOqtTime, up.totalTime userPresenceTotalTime,
-                    wc.retentionOfCustomer
-                    from (select userId, date, department from gpc_hellofresh.dim_users,
-                        (select explode(sequence((cast('{extract_date}' as date))-{backword_days} + 2, (cast('{extract_date}' as date))+1, interval 1 day )) as date) dates) u
-                    left join
-                    (select
-                    cast(from_utc_timestamp(a.intervalStart, trim(c.timeZone)) as date) date, a.userId agentId,
-                    sum(a.nAnswered) nAnswered, sum(a.tAnswered) tAnswered,
-                    sum(a.nAcw) nAcw, sum(a.tAcw) tAcw,
-                    sum(a.nHeldComplete) nHeldComplete, sum(a.tHeldComplete) tHeldComplete,
-                    sum(a.nHandle) nHandle, sum(a.tHandle) tHandle,
-                    sum(a.nTalkComplete) nTalkComplete, sum(a.tTalkComplete) tTalkComplete,
-
-                    sum(case when mediaType = 'chat' then a.nAcw else null end) chat_nAcw, sum(case when mediaType = 'chat' then a.tAcw else null end) chat_tAcw,
-                    sum(case when mediaType = 'chat' then a.nHeldComplete else null end) chat_nHeldComplete, sum(case when mediaType = 'chat' then a.tHeldComplete else null end) chat_tHeldComplete,
-                    sum(case when mediaType = 'chat' then a.nHandle else null end) chat_nHandle, sum(case when mediaType = 'chat' then a.tHandle else null end) chat_tHandle,
-                    sum(case when mediaType = 'chat' then a.nTalkComplete else null end) chat_nTalkComplete, sum(case when mediaType = 'chat' then a.tTalkComplete else null end) chat_tTalkComplete,
-
-                    sum(case when mediaType = 'email' then a.nAcw else null end) email_nAcw, sum(case when mediaType = 'email' then a.tAcw else null end) email_tAcw,
-                    sum(case when mediaType = 'email' then a.nHeldComplete else null end) email_nHeldComplete, sum(case when mediaType = 'email' then a.tHeldComplete else null end) email_tHeldComplete,
-                    sum(case when mediaType = 'email' then a.nHandle else null end) email_nHandle, sum(case when mediaType = 'email' then a.tHandle else null end) email_tHandle,
-                    sum(case when mediaType = 'email' then a.nTalkComplete else null end) email_nTalkComplete, sum(case when mediaType = 'email' then a.tTalkComplete else null end) email_tTalkComplete,
-
-                    sum(case when mediaType = 'voice' then a.nAcw else null end) voice_nAcw, sum(case when mediaType = 'voice' then a.tAcw else null end) voice_tAcw,
-                    sum(case when mediaType = 'voice' then a.nHeldComplete else null end) voice_nHeldComplete, sum(case when mediaType = 'voice' then a.tHeldComplete else null end) voice_tHeldComplete,
-                    sum(case when mediaType = 'voice' then a.nHandle else null end) voice_nHandle, sum(case when mediaType = 'voice' then a.tHandle else null end) voice_tHandle,
-                    sum(case when mediaType = 'voice' then a.nTalkComplete else null end) voice_nTalkComplete, sum(case when mediaType = 'voice' then a.tTalkComplete else null end) voice_tTalkComplete,
-
-                    sum(case when mediaType = 'message' then a.nAcw else null end) social_nAcw, sum(case when mediaType = 'message' then a.tAcw else null end) social_tAcw,
-                    sum(case when mediaType = 'message' then a.nHeldComplete else null end) social_nHeldComplete, sum(case when mediaType = 'message' then a.tHeldComplete else null end) social_tHeldComplete,
-                    sum(case when mediaType = 'message' then a.nHandle else null end) social_nHandle, sum(case when mediaType = 'message' then a.tHandle else null end) social_tHandle,
-                    sum(case when mediaType = 'message' then a.nTalkComplete else null end) social_nTalkComplete, sum(case when mediaType = 'message' then a.tTalkComplete else null end) social_tTalkComplete
-
-                    from gpc_hellofresh.fact_conversation_aggregate_metrics a, gpc_hellofresh.dim_routing_queues b, queue_timezones c
-                            where a.queueId = b.queueId
-                                and b.queueName = c.queueName
-                                and cast(intervalStart as date) >= ((cast('{extract_date}' as date)) - {backword_days})
-                    group by
-                            cast(from_utc_timestamp(a.intervalStart, trim(c.timeZone)) as date), a.userId) cm
-                    on cm.agentId = u.userId
-                    and cm.date = u.date
-                    left join
+                conversationId,
+                conversationStart,
+                conversationEnd,
+                userId,
+                element_at(session.segments, size(session.segments)).wrapUpCode AS wrapUpCode
+                FROM(
+                    SELECT
+                    conversationId,
+                    conversationStart,
+                    conversationEnd,
+                    participant.userId,
+                    element_at(participant.sessions, size(participant.sessions)) AS session
+                    FROM
                     (
-                    select
-                    cast(from_utc_timestamp(frs.startTime, trim(ut.timeZone)) as date) date, frs.userId, 
-                    sum(to_unix_timestamp(endTime) - to_unix_timestamp(startTime)) duration,
-                    sum(case when frs.routingStatus = 'INTERACTING' then to_unix_timestamp(endTime) - to_unix_timestamp(startTime) else null end) interacting_duration,
-                    sum(case when frs.routingStatus = 'IDLE' then to_unix_timestamp(endTime) - to_unix_timestamp(startTime) else null end) idle_duration,
-                    sum(case when frs.routingStatus = 'NOT_RESPONDING' then to_unix_timestamp(endTime) - to_unix_timestamp(startTime) else null end) not_responding_duration
-                    from gpc_hellofresh.fact_routing_status frs, user_timezone ut
-                        where frs.userId = ut.userId
-                            and frs.startDate >= ((cast('{extract_date}' as date)) - {backword_days})
-                        group by cast(from_utc_timestamp(frs.startTime, trim(ut.timeZone)) as date), frs.userId
-                    ) us
-                    on us.userId = u.userId
-                    and us.date = u.date
-                    left join
-                    (
-                        select
-                    cast(from_utc_timestamp(fpp.startTime, trim(ut.timeZone)) as date) date, fpp.userId, 
-                    sum(case when fpp.systemPresence in ('ON_QUEUE', 'TRAINING') then to_unix_timestamp(endTime) - to_unix_timestamp(startTime) else null end) oqtTime,
-                    sum(case when fpp.systemPresence in ('AWAY','BUSY','MEETING','AVAILABLE','IDLE','ON_QUEUE','MEAL','BREAK','TRAINING') then to_unix_timestamp(endTime) - to_unix_timestamp(startTime) else null end) totalTime
-                    from gpc_hellofresh.fact_primary_presence fpp, user_timezone ut
-                        where fpp.userId = ut.userId
-                            and fpp.startDate >= ((cast('{extract_date}' as date)) - {backword_days})
-                        group by cast(from_utc_timestamp(fpp.startTime, trim(ut.timeZone)) as date), fpp.userId
-                    ) up
-                    on up.userId = u.userId
-                    and up.date = u.date
-                    left join
-                    (
-                    select 
-                    cast(from_utc_timestamp(a.releaseDate, trim(e.timeZone)) as date) date,
-                    a.agentId,
-                    avg(c.totalScore) totalScore,
-                    sum(c.totalScore) totalScoreSum,
-                    count(c.totalScore) totalScoreCount
-                    from gpc_hellofresh.dim_evaluations a, gpc_hellofresh.dim_evaluation_forms b,
-                        gpc_hellofresh.fact_evaluation_total_scores c,
-                    gpc_hellofresh.dim_routing_queues d, queue_timezones e
-                    where a.evaluationFormId = b.evaluationFormId
-                    and a.evaluationId = c.evaluationId
-                    and a.conversationDatePart = c.conversationDatePart
-                    and a.releaseDate >= ((cast('{extract_date}' as date)) - {backword_days})
-                    and a.queueId = d.queueId
-                                and d.queueName = e.queueName
-                    group by cast(from_utc_timestamp(a.releaseDate, trim(e.timeZone)) as date), a.agentId
-                    ) qa
-                    on qa.agentId = u.userId
-                    and qa.date = u.date
-                    left join
-                    (select
-                    cast(from_utc_timestamp(fw.startDate, trim(ut.timeZone)) as date) date,  fw.userId,
-                    ((sum(fw.adherenceScheduleSecs) - sum(exceptionDurationSecs))/(sum(fw.adherenceScheduleSecs))) * 100 as adherencePercentage,
-                    sum(fw.adherenceScheduleSecs) adherenceScheduleSecs,
-                    sum(fw.exceptionDurationSecs) exceptionDurationSecs,
-                    (sum(fw.conformanceActualSecs)/sum(fw.conformanceScheduleSecs)) * 100 as conformancePercentage,
-                    sum(fw.conformanceActualSecs) conformanceActualSecs,
-                    sum(fw.conformanceScheduleSecs) conformanceScheduleSecs
-                    from gpc_hellofresh.fact_wfm_day_metrics fw, user_timezone ut
-                                where fw.userId = ut.userId
-                                and fw.startDatePart >= ((cast('{extract_date}' as date)) - {backword_days})
-                                group by cast(from_utc_timestamp(fw.startDate, trim(ut.timeZone)) as date),  fw.userId
-                    ) wfm
-                    on wfm.userId = u.userId
-                    and wfm.date = u.date
-                    left join 
-                    (
-                    select 
-                    cast(from_utc_timestamp(conversationEnd, trim(qt.timeZone)) as date) date, agentId,
-                    ((count(distinct (case when instr(trim(lower(dc.wrapUpNote)), trim(lower(km.keyword))) > 0 then dc.wrapUpNote else null end)))/count(distinct dc.wrapUpNote)*100) as kw_count
-                    from gpc_hellofresh.dim_conversations dc, gpc_hellofresh.dim_wrapup_codes dwc, gpc_hellofresh.dim_routing_queues drq, keyword_map km, queue_timezones qt
-                    where conversationStartDate >= ((cast('{extract_date}' as date)) - {backword_days})
-                    and dc.wrapUpCode = dwc.wrapupId
-                    and drq.queueId = dc.queueId
-                    and qt.queueName = drq.queueName
-                    and lower(trim(substr(drq.queueName, 0, 2))) = lower(trim(km.region))
-                    and lower(trim(dwc.wrapupCode)) = lower(trim(km.wrapcode))
-                    group by cast(from_utc_timestamp(conversationEnd, trim(qt.timeZone)) as date), agentId
-                    ) kw
-                    on kw.agentId = u.userId
-                    and kw.date = u.date
-                    left join
-                    (
-                    select
-                    cast(from_utc_timestamp(s.surveySentDate, trim(c.timeZone)) as date) date, s.userKey userId, 
-                    round(sum(coalesce(s.csatAchieved, 0))/sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) * 20, 0) as csat,
-                    sum(coalesce(s.csatAchieved, 0)) csatSum,
-                    COUNT(surveySentDate) nSurveySent,
-                    sum(case when  s.csatAchieved is null or s.csatAchieved = -1 then 0 else 1 end) csatCount,
-                    sum(case when s.status = 'Completed' THEN fcr ELSE NULL END) fcr,
-                    sum(case when s.status = 'Completed' THEN 1 ELSE 0 END) nSurveysCompleted
-                    from sdx_hellofresh.dim_hellofresh_interactions  s, gpc_hellofresh.dim_routing_queues b, queue_timezones c
-                    where s.surveySentDatePart >=  ((cast('{extract_date}' as date)) - {backword_days})
-                    and s.queueKey = b.queueId
-                    and b.queueName = c.queueName
-                    group by cast(from_utc_timestamp(s.surveySentDate, trim(c.timeZone)) as date), s.userKey
-                    ) survey
-                    on
-                    survey.userId = u.userId
-                    and survey.date = u.date
-
-                    left join
-                    (
-                    select  date,
-                            agentId,
-                            SUM(CASE WHEN wrapUpCode = '36185a4e-371b-4c0d-95f6-8d3fe958b8d5' THEN 1 ELSE 0 END) retentionOfCustomer
-                    from (select distinct dc.ConversationId,
-                                          cast(from_utc_timestamp(conversationEnd, trim(timeZone)) as date) date,
-                                          dc.agentId,
-                                          dc.wrapUpCode
-                    from gpc_hellofresh.dim_conversations dc, gpc_hellofresh.dim_routing_queues drq, queue_timezones qt
-                    where conversationStartDate >= ((cast('{extract_date}' as date)) - {backword_days})
-                          and drq.queueId = dc.queueId
-                          and qt.queueName = drq.queueName)
-                    group by date, agentId
-                    )wc
-                    on 
-                    wc.agentId = u.userId
-                    and wc.date = u.date
+                        SELECT
+                            conversationId,
+                            conversationStart,
+                            element_at(participants, size(participants)) AS participant,
+                            conversationEnd
+                            FROM
+                            (
+                                select
+                                    conversationId,
+                                    conversationStart,
+                                    conversationEnd,
+                                    participants,
+                                    row_number() over (
+                                    partition by conversationId
+                                    order by
+                                        recordInsertTime DESC
+                                    ) rn
+                                from
+                                    gpc_hellofresh.raw_conversation_details
+                                where
+                                    extractDate >= DATE_SUB(CURRENT_TIMESTAMP(), 3)
+                                    and originatingDirection = 'outbound'
+                            )
+                            where rn = 1
                     )
-        WHERE cast(date as date) >=  (cast('{extract_date}' as date) - ({backword_days} + 2))
-
-    """)
-    df.cache()
-
-    return df
-
-
-def push_anz_data(spark):
-    tenant_path, db_path, log_path = get_path_vars('hellofresh')
-    agent_groups = get_config_file_data(tenant_path, "DG_Agent_Group_Site_Timezone.json")
-    agent_groups = spark.createDataFrame(agent_groups)
-    agent_groups.createOrReplaceTempView("agent_groups")
-    anz = spark.sql("""
-        SELECT * FROM (
-                SELECT 
-                        GD.userId `UserID`,
-                        date_format(cast(GD.date as date), 'dd-MM-yyyy') `Date`,
-                        GD.conformancePercentage Conformance,
-                        GD.totalScore `QA Score`,
-                        GD.adherencePercentage Adherence,
-                        GD.kw_count Keyword,
-                        GD.voice_tAcw/GD.voice_nAcw `Voice ACW`,
-                        GD.chat_tAcw/GD.chat_nAcw `Chat ACW`,
-                        GD.social_tAcw/GD.social_nAcw `Social ACW`,                  
-                        GD.voice_tHeldComplete/GD.voice_nHeldComplete `Voice Hold Time`,
-                        GD.not_responding_duration `Not Responding Time`,
-                        GD.csat CSAT,
-                        GD.fcr * 100 / GD.nSurveysCompleted as `FCR Percent`,
-                        GD.voice_tHandle/GD.voice_nHandle `AHT Voice`,
-                        GD.chat_tHandle/GD.chat_nHandle `AHT Chat`,
-                        GD.social_tHandle/GD.social_nHandle `AHT Social`,
-                        GD.retentionOfCustomer `Retention Of Customer`,
-                        (GD.tAcw/GD.nAcw) `ACW`,
-                        GD.tHeldComplete/GD.nHeldComplete `Hold Time`
-                FROM hf_game_data GD
-                INNER JOIN gpc_hellofresh.dim_user_groups UG
-                  ON GD.userId = UG.userId
-                INNER JOIN agent_groups AG
-                  ON AG.agentGroupName = UG.groupName
-                      AND `Include in the game?` = true
-                WHERE GD.department IN ('CP CA HC MNL',
-                                        'CP CA Manila',
-                                        'EP AU HC MNL',
-                                        'FA CA HC MNL',
-                                        'GC UK HC MNL',
-                                        'HF AU HC MNL',
-                                        'HF AU HC PLW',
-                                        'HF AU Manila',
-                                        'HF AU Sydney',
-                                        'HF CA HC MNL',
-                                        'HF CA Manila',
-                                        'HF CA Toronto',
-                                        'HF IE HC MNL',
-                                        'HF JP HC MNL',
-                                        'HF NZ HC MNL',
-                                        'HF UK HC MNL',
-                                        'HF UK Manila',
-                                        'HF YF Manila',
-                                        'HFUK | GCUK',
-                                        'INT. Manila',
-                                        'YF AU HC MNL',
-                                        'YF AU MNL')            
-                AND date_format(cast(date as date), 'dd-MM-yyyy') >= "28-11-2022"
                 )
-        WHERE NOT (Conformance IS NULL
-                    AND `QA Score` IS NULL
-                    AND Adherence IS NULL
-                    AND Keyword IS NULL
-                    AND `Voice ACW` IS NULL
-                    AND `Chat ACW` IS NULL
-                    AND `Social ACW` IS NULL
-                    AND `Voice Hold Time` IS NULL
-                    AND `Not Responding Time` IS NULL
-                    AND CSAT IS NULL
-                    AND `FCR Percent` IS NULL
-                    AND `AHT Voice` IS NULL
-                    AND `AHT Chat` IS NULL
-                    AND `AHT Social` IS NULL
-                    AND `Retention Of Customer` IS NULL
-                    AND `ACW` IS NULL
-                    AND `Hold Time` IS NULL)
+            ) a
+            join user_timezones ut
+            on a.userId = ut.userId
+        )   
+        select UserID, 
+        date_format(date, 'dd-MM-yyyy') Date,
+        salesCount as Sales,
+        case when decisionMakerContactCount is not null or decisionMakerContactCount > 0 then round((salesCount/decisionMakerContactCount)*100) else null end as `Percent Customer Connect`
+        
+        from
+        (
+            select date,
+            userId,
+            SUM(CASE WHEN decisionMakerContact THEN 1 ELSE 0 END) AS decisionMakerContactCount,
+            SUM(CASE WHEN sales THEN 1 ELSE 0 END) AS salesCount
+            from(
+
+                select 
+                conversationId,cast(conversationStart as date) date,cw.wrapUpCode,ow.wrapupCode,cw.userId,
+                    decisionMakerContact,
+                    sales
+                from CTE cw
+                join outbound_wrap_codes ow
+                on cw.wrapUpCode = ow.wrapupId                
+            )
+            group by userId,date
+        )
     """)
-    push_gamification_data(anz.toPandas(), 'HELLOFRESHANZ', 'ANZConnection')
+    print("Uploading outbound sales data")
+    push_gamification_data(df.toPandas(), 'HELLOFRESHANZ', 'HF_OutboundSales_Connection')
     return True
 
+def push_conversation(spark):
+    tenant_path, db_path, log_path = get_path_vars('hellofresh')
+    timezones = get_config_file_data(tenant_path, "Queue_TimeZone_Mapping.json")
+    timezones = spark.createDataFrame(timezones)
+    timezones.createOrReplaceTempView("queue_timezones")    
+    df_conversation = spark.sql(f"""
+                        SELECT
+                        UserId,
+                        date_format(from_utc_timestamp(intervalStart, trim(coalesce(ut.timeZone, 'UTC'))), 'dd-MM-yyyy') as Date,
+                        SUM(CASE WHEN mediaType = 'voice' AND tAcw <> 0 THEN tAcw ELSE NULL END) AS tAcw_voice,
+                        SUM(CASE WHEN mediaType = 'voice' THEN NULLIF(nAcw, 0) ELSE "" END) AS nAcw_voice,
+                        SUM(CASE WHEN mediaType = 'voice' AND tHeldComplete <> 0 THEN tHeldComplete ELSE NULL END) AS tHeldComplete_voice,
+                        SUM(CASE WHEN mediaType = 'voice' THEN NULLIF(nHandle, 0) ELSE "" END) AS nHandle_voice,
+                        SUM(CASE WHEN mediaType = 'voice' AND tTalkComplete <> 0 THEN tTalkComplete ELSE NULL END) AS tTalkComplete_voice,
+                        SUM(CASE WHEN mediaType = 'voice' THEN NULLIF(nTalkComplete, 0) ELSE "" END) AS nTalkComplete_voice,
+                        SUM(CASE WHEN (messageType IN ('webmessaging', 'open') OR mediaType = 'chat') THEN NULLIF(tAcw, 0) ELSE "" END) as tACW_chat,
+                        SUM(CASE WHEN (messageType IN ('webmessaging', 'open') OR mediaType = 'chat') THEN NULLIF(nAcw, 0) ELSE "" END) AS nAcw_chat,
+                        SUM(CASE WHEN (messageType IN ('webmessaging', 'open') OR mediaType = 'chat') THEN NULLIF(tTalkComplete, 0) ELSE "" END) AS tTalkComplete_chat,
+                        SUM(CASE WHEN (messageType IN ('webmessaging', 'open') OR mediaType = 'chat') THEN NULLIF(nTalkComplete, 0) ELSE "" END) AS nTalkComplete_chat,
+                        AVG(tNotResponding / 1000) AS NRT
+                    FROM
+                        gpc_hellofresh.fact_conversation_aggregate_metrics a
+                      JOIN gpc_hellofresh.dim_routing_queues b
+                      ON a.queueId = b.queueId
+                      JOIN queue_timezones ut
+                      ON b.queueName = ut.queueName
+                      WHERE date >= DATE_SUB(CURRENT_Date(), 3)
+                     GROUP BY
+                         UserId,
+                         date_format(from_utc_timestamp(intervalStart, trim(coalesce(ut.timeZone, 'UTC'))), 'dd-MM-yyyy')
+                     """)
+    print("Uploading conversation data")
+    push_gamification_data(df_conversation.toPandas(), 'HELLOFRESHANZ', 'HF_Conversation_Connection')
+    return True
 
-def push_us_data(spark):
-    us = spark.sql("""
-        SELECT * FROM (
-            SELECT  userId `UserID`,
-                    date_format(cast(date as date), 'MM/dd/yyyy') `Date`,
-                    tAcw/nAcw `ACW`,
-                    not_responding_duration `Not Responding Time`,
-                    csat `CSAT`,
-                    ((userPresenceOqtTime * 1.0)/userPresenceTotalTime)*100 `OQT`,
-                    voice_tAcw/voice_nAcw `Voice ACW`,
-                    chat_tAcw/chat_nAcw `Chat ACW`,
-                    email_tAcw/chat_nAcw `Email ACW`,
-                    voice_tHeldComplete/voice_nHeldComplete `Voice Hold Time` 
-            FROM hf_game_data
-            WHERE department IN ('MultiBrand US Newark')
-            )
-            WHERE NOT (`ACW` IS NULL
-                        AND `Voice ACW` IS NULL
-                        AND `Chat ACW` IS NULL
-                        AND `Email ACW` is null
-                        AND `Voice Hold Time` IS NULL
-                        AND `Not Responding Time` IS NULL
-                        AND CSAT IS NULL
-                        AND OQT IS NULL)
-    """)
-    push_gamification_data(us.toPandas(), 'HELLOFRESHUS', 'NewHFUSConnection')
+def push_survey(spark):
+    tenant_path, db_path, log_path = get_path_vars('hellofresh')
+    timezones = get_config_file_data(tenant_path, "Queue_TimeZone_Mapping.json")
+    timezones = spark.createDataFrame(timezones)
+    timezones.createOrReplaceTempView("queue_timezones") 
+    df_survey = spark.sql(f"""
+                          SELECT 
+                          a.userKey UserId,
+                          date_format(from_utc_timestamp(surveyCompletionDate, trim(coalesce(ut.timeZone, 'UTC'))), 'dd-MM-yyyy') as `Date`,
+                          SUM(CASE 
+                              WHEN a.csatAchieved != '-1' OR a.mediaType = 'chat' OR b.messageType IN ('webmessaging', 'open') 
+                              THEN a.csatAchieved 
+                              ELSE 0
+                          END) AS `agent_csat_sum_chat`,
+                          COUNT(CASE 
+                              WHEN a.csatAchieved != '-1' OR a.mediaType = 'chat' OR b.messageType IN ('webmessaging', 'open') 
+                              THEN 1
+                          END) AS `agent_csat_count_chat`,
+                          SUM(CASE 
+                              WHEN a.csatAchieved != '-1' OR a.mediaType = 'voice' 
+                              THEN a.csatAchieved 
+                              ELSE 0
+                          END) AS `agent_csat_sum_voice`,
+                          COUNT(CASE 
+                              WHEN a.csatAchieved != '-1' OR a.mediaType = 'voice' 
+                              THEN 1
+                          END) AS `agent_csat_count_voice`,
+                          SUM(CASE WHEN a.createdAt IS NOT NULL OR b.mediaType = 'voice' THEN 1 ELSE 0 END) AS `count_scheduled_at_voice`,
+                          SUM(CASE WHEN b.mediaType = 'voice' THEN NULLIF(b.nAcw, 0) ELSE 0 END) AS `sum_tHandleCount_voice`,
+                          COUNT(CASE WHEN a.createdAt IS NOT NULL OR a.mediaType = 'chat' OR b.messageType IN ('webmessaging', 'open') THEN 1 END) AS `count_scheduled_at_chat`,
+                          SUM(CASE WHEN b.mediaType = 'chat' OR b.messageType IN ('webmessaging', 'open') THEN NULLIF(b.nAcw, 0) ELSE 0 END) AS `sum_tHandleCount_chat`,
+                          AVG(case when status = 'Completed' THEN a.fcr ELSE NULL END) nfcr
+                      FROM sdx_hellofresh.dim_hellofresh_interactions a
+                      JOIN gpc_hellofresh.fact_conversation_aggregate_metrics b
+                          ON a.surveySentDatePart = b.date and a.userKey = b.userId
+                      JOIN gpc_hellofresh.dim_routing_queues c
+                          ON b.queueId = c.queueId
+                      JOIN queue_timezones ut
+                          ON c.queueName = ut.queueName
+                      WHERE 
+                          a.surveyCompletionDate >= DATEADD(DAY, -16, GETDATE())
+                          
+                      GROUP BY 
+                          a.userKey,
+                          date_format(from_utc_timestamp(surveyCompletionDate, trim(coalesce(ut.timeZone, 'UTC'))), 'dd-MM-yyyy')
+                          """)
+    print("Uploading Surveys data")
+    push_gamification_data(df_survey.toPandas(), 'HELLOFRESHANZ', 'HF_Survey_Connection')
+    return True
+
+def push_quality(spark):
+    tenant_path, db_path, log_path = get_path_vars('hellofresh')
+    timezones = get_config_file_data(tenant_path, "Queue_TimeZone_Mapping.json")
+    timezones = spark.createDataFrame(timezones)
+    timezones.createOrReplaceTempView("queue_timezones")
+    df_quality=spark.sql(f"""        
+                        SELECT DISTINCT
+                            c.agentId as UserId,
+                            date_format(from_utc_timestamp(c.conversationDate, trim(coalesce(f.timeZone, 'UTC'))), 'dd-MM-yyyy') as `Date`,
+                            SUM(CASE WHEN a.markedNA = false AND b.failedKillQuestion = false AND d.mediaType = 'voice' THEN a.totalScore ELSE 0 END) * 100 AS pRefined_Score_voice,
+                            SUM(CASE WHEN (d.messageType IN ('webmessaging', 'open') OR d.mediaType = 'CALL') THEN NULLIF(a.maxTotalScore, 0) ELSE 0 END) as zMaxAnswerValue_voice,
+                            SUM(CASE WHEN (c.mediaType = 'MESSAGE') THEN a.maxTotalScore ELSE 0 END) as zMaxAnswerValue_chat,
+                            SUM(CASE WHEN  a.markedNA = false AND b.failedKillQuestion = false AND d.messageType IN ('webmessaging', 'open') OR c.mediaType = 'MESSAGE' THEN a.totalScore ELSE 0 END) * 100 AS pRefined_Score_chat
+                        FROM 
+                            gpc_hellofresh.fact_evaluation_question_group_scores a
+                        JOIN gpc_hellofresh.fact_evaluation_question_scores b 
+                        ON a.conversationDatePart = b.conversationDatePart and a.evaluationId = b.evaluationId AND a.questionGroupId = b.questionGroupId
+                        JOIN gpc_hellofresh.dim_evaluations c 
+                        ON a.conversationDatePart = c.conversationDatePart and a.evaluationId = c.evaluationId
+                        JOIN (SELECT
+                              DISTINCT 
+                              queueId, 
+                              userId, 
+                              mediaType, 
+                              messageType 
+                        FROM gpc_hellofresh.fact_conversation_aggregate_metrics
+                        where date >= DATE_SUB(current_date(), 3)) d 
+                        ON c.agentid = d.userId AND c.queueId = d.queueId
+                        JOIN gpc_hellofresh.dim_routing_queues e 
+                        ON c.queueId = e.queueId
+                        JOIN queue_timezones f 
+                        ON e.queueName = f.queueName
+                        WHERE c.conversationDate >= DATE_SUB(current_date(), 3)
+                        GROUP BY
+                          c.agentId,
+                          date_format(from_utc_timestamp(c.conversationDate, trim(coalesce(f.timeZone, 'UTC'))), 'dd-MM-yyyy')
+                        """)
+    print("Uploading Quality data")
+    push_gamification_data(df_quality.toPandas(), 'HELLOFRESHANZ', 'HF_Quality_Connection')
+    return True
+
+def push_adherence(spark):
+    tenant_path, db_path, log_path = get_path_vars('hellofresh')
+    timezones = get_config_file_data(tenant_path, "Queue_TimeZone_Mapping.json")
+    timezones = spark.createDataFrame(timezones)
+    timezones.createOrReplaceTempView("queue_timezones")
+    df_adherence = spark.sql(f"""
+                             SELECT
+                              D.userId as `UserID`,
+                              date_format(from_utc_timestamp(startDate, trim(coalesce(ut.timeZone, 'UTC'))), 'dd-MM-yyyy') as Date,
+                              SUM(D.adherenceScheduleSecs) AS adherenceScheduleSecs,
+                              SUM(D.exceptionDurationSecs) AS exceptionDurationSecs
+                          FROM
+                              gpc_hellofresh.fact_wfm_day_metrics D
+                          JOIN
+                              gpc_hellofresh.fact_conversation_aggregate_metrics a
+                              ON d.startDatePart = a.date and a.userId = D.userId
+                          JOIN
+                              gpc_hellofresh.dim_routing_queues b
+                              ON a.queueId = b.queueId
+                          JOIN queue_timezones ut
+                              ON b.queueName = ut.queueName
+                          WHERE
+                              D.startDate >= DATE_SUB(CURRENT_DATE(), 63)
+                          GROUP BY
+                              D.userId,
+                              date_format(from_utc_timestamp(startDate, trim(coalesce(ut.timeZone, 'UTC'))), 'dd-MM-yyyy')
+                              """)
+    print("Uploading Adherence data")
+    push_gamification_data(df_adherence.toPandas(), 'HELLOFRESHANZ', 'HF_Adherence_Connection')
+    return True
+
+def push_evaluation_form(spark):
+    tenant_path, db_path, log_path = get_path_vars('hellofresh')
+    timezones = get_config_file_data(tenant_path, "Queue_TimeZone_Mapping.json")
+    timezones = spark.createDataFrame(timezones)
+    timezones.createOrReplaceTempView("queue_timezones")
+
+    df_evaluation = spark.sql("""
+                                  SELECT DISTINCT
+                                      DE.agentId AS UserID,
+                                      DATE_FORMAT(FROM_UTC_TIMESTAMP(TS.conversationDatePart, TRIM(COALESCE(ut.timeZone, 'UTC'))), 'dd-MM-yyyy') AS Date,
+                                      AVG(CASE WHEN TRIM(DE.evaluationFormName) = 'ANZ Outbound Compliance Scorecard.V2' THEN TS.totalScore ELSE NULL END) AS QA_Compliance,
+                                      AVG(CASE WHEN TRIM(DE.evaluationFormName) = 'ANZ Outbound Performance Scorecard' THEN TS.totalScore ELSE NULL END) AS QA_Performance
+                                  FROM 
+                                      gpc_hellofresh.fact_evaluation_total_scores TS
+                                  JOIN 
+                                      gpc_hellofresh.dim_evaluations DE 
+                                      ON DE.conversationDatePart = TS.conversationDatePart
+                                      AND TS.evaluationId = DE.evaluationId 
+                                      
+                                  JOIN 
+                                      gpc_hellofresh.dim_routing_queues e ON DE.queueId = e.queueId
+                                  JOIN 
+                                     queue_timezones ut ON e.queueName = ut.queueName
+                                  WHERE 
+                                      TS.totalScore IS NOT NULL
+                                      AND TRIM(DE.evaluationFormName) IN ('ANZ Outbound Compliance Scorecard.V2', 'ANZ Outbound Performance Scorecard')
+                                      AND TS.conversationDatePart >= DATE_SUB(CURRENT_DATE(), 33)
+                                  GROUP BY 
+                                      DE.agentId, 
+                                      DATE_FORMAT(FROM_UTC_TIMESTAMP(TS.conversationDatePart, TRIM(COALESCE(ut.timeZone, 'UTC'))), 'dd-MM-yyyy')
+                                """)
+    print("Uploading Evaluation data")
+    push_gamification_data(df_evaluation.toPandas(), 'HELLOFRESHANZ', 'HF_OutboundEvaluation_Connection')
+    return True
+
+def push_helios_data(spark):
+    tenant_path, db_path, log_path = get_path_vars('hellofresh')
+    timezones = get_config_file_data(tenant_path, "Queue_TimeZone_Mapping.json")
+    timezones = spark.createDataFrame(timezones)
+    timezones.createOrReplaceTempView("queue_timezones")
+
+    df_helios_data = spark.sql("""
+								WITH CTE1 AS (
+									SELECT DISTINCT
+										c.agentId AS userId,
+										DATE_FORMAT(
+											FROM_UTC_TIMESTAMP(c.conversationDate, TRIM(COALESCE(f.timeZone, 'UTC'))), 
+											'yyyy-MM-dd'
+										) AS `date`,
+										SUM(totalScore) * 100 / SUM(maxTotalScore) AS `Quality Score`
+									FROM 
+										gpc_hellofresh.fact_evaluation_question_group_scores a
+									JOIN 
+										gpc_hellofresh.fact_evaluation_question_scores b 
+										ON a.conversationDatePart = b.conversationDatePart 
+										AND a.evaluationId = b.evaluationId 
+										AND a.questionGroupId = b.questionGroupId
+									JOIN 
+										gpc_hellofresh.dim_evaluations c 
+										ON a.conversationDatePart = c.conversationDatePart 
+										AND a.evaluationId = c.evaluationId
+									JOIN (
+										SELECT DISTINCT 
+											queueId, 
+											userId, 
+											mediaType, 
+											messageType 
+										FROM 
+											gpc_hellofresh.fact_conversation_aggregate_metrics
+										WHERE 
+											date >= DATE_SUB(CURRENT_DATE(), 10)
+									) d 
+										ON c.agentId = d.userId AND c.queueId = d.queueId
+									JOIN 
+										gpc_hellofresh.dim_routing_queues e 
+										ON c.queueId = e.queueId
+									JOIN 
+										queue_timezones f 
+										ON e.queueName = f.queueName
+									WHERE 
+										c.conversationDate >= DATE_SUB(CURRENT_DATE(), 10)
+									GROUP BY
+										c.agentId,
+										DATE_FORMAT(
+											FROM_UTC_TIMESTAMP(c.conversationDate, TRIM(COALESCE(f.timeZone, 'UTC'))), 
+											'yyyy-MM-dd'
+										)
+								),
+
+								CTE2 AS (
+									SELECT
+										userId,
+										DATE_FORMAT(
+											FROM_UTC_TIMESTAMP(conversationStart, TRIM(COALESCE(ut.timeZone, 'UTC'))), 
+											'yyyy-MM-dd'
+										) AS date,
+										TRY_DIVIDE(
+											SUM(CASE
+												WHEN b.wrapUpCode IN (
+													'Z-OUT-Success-1Week',
+													'Z-OUT-Success-2Week',
+													'Z-OUT-Success-3Week',
+													'Z-OUT-Success-4Week',
+													'Z-OUT-Success-5+Week-TL APPROVED'
+												) THEN 1 ELSE 0 END) * 100,
+											SUM(CASE 
+												WHEN b.wrapUpCode IN (
+													'Z-OUT-Success-1Week',
+													'Z-OUT-Success-2Week',
+													'Z-OUT-Success-3Week',
+													'Z-OUT-Success-4Week',
+													'Z-OUT-Success-5+Week-TL APPROVED',
+													'Z-OUT-Failure'
+												) THEN 1 ELSE 0 END)
+										) AS `Reactivation Rate`
+									FROM
+										gpc_hellofresh.dim_last_handled_conversation a
+									JOIN 
+										gpc_hellofresh.dim_wrapup_codes b 
+										ON a.wrapUpCodeId = b.wrapUpId
+									JOIN 
+										gpc_hellofresh.dim_routing_queues rq 
+										ON a.queueId = rq.queueId
+									JOIN 
+										queue_timezones ut 
+										ON rq.queueName = ut.queueName
+									WHERE 
+										a.conversationStart >= DATE_SUB(CURRENT_DATE(), 10)
+									GROUP BY
+										userId,
+										DATE_FORMAT(
+											FROM_UTC_TIMESTAMP(conversationStart, TRIM(COALESCE(ut.timeZone, 'UTC'))), 
+											'yyyy-MM-dd'
+										)
+								),
+								CTE3 AS (SELECT
+								  explode(userIds) as userId,
+								  DATE_FORMAT(metricDate, 'yyyy-MM-dd') date,
+								  ROUND((SUM(noOfYesAnswer) * 100) / SUM(totalQuestions), 2) AS Conformance
+  
+								FROM
+								  dgdm_hellofresh.mv_process_conformance
+								  WHERE metricDate >= DATE_SUB(CURRENT_DATE(), 10)
+								GROUP BY
+								  userIds,
+								  metricDate)
+
+								SELECT 
+                                    COALESCE(CTE1.userId, CTE2.userId, CTE3.userId) AS userId,
+                                    COALESCE(CTE1.date, CTE2.date, CTE3.date) AS date,
+                                    CTE1.`Quality Score`,
+                                    CTE2.`Reactivation Rate`,
+                                    CTE3.Conformance
+                                FROM 
+                                    CTE1
+                                FULL OUTER JOIN CTE2 
+                                    ON CTE1.userId = CTE2.userId AND CTE1.date = CTE2.date
+                                FULL OUTER JOIN CTE3 
+                                    ON COALESCE(CTE1.userId, CTE2.userId) = CTE3.userId
+                                AND COALESCE(CTE1.date, CTE2.date) = CTE3.date
+                                WHERE
+                                    CTE1.`Quality Score` IS NOT NULL
+                                    OR CTE2.`Reactivation Rate` IS NOT NULL
+                                    OR CTE3.Conformance IS NOT NULL
+								    ;
+                                """)
+    print("Uploading helios_data")
+    push_gamification_data(df_helios_data.toPandas(), 'HELLOFRESHHELIOS', 'HellofreshHelios_Connection')
     return True
 
 
 if __name__ == "__main__":
     tenant, run_id, extract_date, org_id = dg_metadata_export_parser()
-    tenant = 'hellofresh'
-    db_name = get_dbname(tenant)
     app_name = "hellofresh_push_gamification_data"
-    spark = get_spark_session(app_name, tenant, default_db=db_name)
+    spark = get_spark_session(app_name, tenant)
     logger = gpc_utils_logger(tenant, app_name)
+
+    functions_to_run = [
+        push_conversation,
+        push_survey,
+        push_quality,
+        push_adherence,
+        push_evaluation_form,
+        push_outbound_sales,
+		push_helios_data
+    ]
+
     try:
         logger.info("hellofresh_push_gamification_data")
 
-        df = get_base_data(spark, extract_date)
-        df = df.drop_duplicates()
-        df.createOrReplaceTempView("hf_game_data")
+        # Use ThreadPoolExecutor to run functions in parallel
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            futures = {executor.submit(func, spark): func.__name__ for func in functions_to_run}
 
-        push_anz_data(spark)
-        #push_us_data(spark)
-
-        spark.sql(f"""
-                        MERGE INTO dg_hellofresh.kpi_raw_data
-                        USING hf_game_data 
-                            ON kpi_raw_data.userId = hf_game_data.UserID
-                            AND kpi_raw_data.date = hf_game_data.Date
-                        WHEN MATCHED THEN 
-                            UPDATE SET *
-                        WHEN NOT MATCHED THEN
-                            INSERT *
-                    """)
-
-        pb_export = spark.sql(
-            "SELECT * FROM dg_hellofresh.kpi_raw_data")
-        export_powerbi_csv(tenant, pb_export, 'kpi_raw_data')
+            for future in concurrent.futures.as_completed(futures):
+                func_name = futures[future]
+                try:
+                    future.result()  # This will raise an exception if the function raised one
+                    logger.info(f"{func_name} completed successfully.")
+                except Exception as e:
+                    logger.exception(f"Error in {func_name}: {e}", stack_info=True, exc_info=True)
+                    raise
 
     except Exception as e:
         logger.exception(e, stack_info=True, exc_info=True)

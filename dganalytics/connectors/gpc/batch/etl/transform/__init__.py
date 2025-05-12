@@ -20,3 +20,8 @@ from dganalytics.connectors.gpc.batch.etl.transform.dim_wrapup_codes import dim_
 from dganalytics.connectors.gpc.batch.etl.transform.fact_wfm_forecast import fact_wfm_forecast
 from dganalytics.connectors.gpc.batch.etl.transform.fact_conversation_aggregate_metrics import fact_conversation_aggregate_metrics
 from dganalytics.connectors.gpc.batch.etl.transform.fact_user_presence import fact_user_presence
+from dganalytics.connectors.gpc.batch.etl.transform.dim_last_handled_conversation import dim_last_handled_conversation
+from dganalytics.connectors.gpc.batch.etl.transform.fact_conversation_transcript_phrases import fact_conversation_transcript_phrases
+from dganalytics.connectors.gpc.batch.etl.transform.fact_conversation_transcript_sentiments import fact_conversation_transcript_sentiments
+from dganalytics.connectors.gpc.batch.etl.transform.fact_conversation_transcript_topics import fact_conversation_transcript_topics
+from dganalytics.connectors.gpc.batch.etl.transform.fact_speechandtextanalytics import fact_speechandtextanalytics

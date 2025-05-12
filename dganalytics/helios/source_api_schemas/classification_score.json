@@ -1,0 +1,54 @@
+{
+	"type": "struct",
+	"fields": [
+		{
+			"name": "tenant_id",
+			"type": "string",
+			"nullable": false,
+			"metadata": {}
+		},
+		{
+			"name": "type",
+			"type": "string",
+			"nullable": false,
+			"metadata": {}
+		},
+		{
+			"name": "raw_phrases",
+			"type": "string",
+			"nullable": false,
+			"metadata": {}
+		},
+		{
+			"name": "classification",
+			"type": {
+				"containsNull": true,
+				"elementType": {
+					"type": "struct",
+					"fields": [
+						{
+							"name": "category",
+							"type": "string",
+							"nullable": false,
+							"metadata": {}
+						},
+						{
+							"name": "confidence",
+							"type": "integer",
+							"nullable": false,
+							"metadata": {}
+						},
+						{
+							"name": "reasoning",
+							"type": "string",
+							"nullable": false,
+							"metadata": {}
+						}
+					],
+					"type": "struct"
+				},
+				"type": "array"
+			}
+		}
+	]
+}

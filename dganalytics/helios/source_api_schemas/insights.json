@@ -1,0 +1,255 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "metadata": {},
+      "name": "conversation_id",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "insights",
+      "nullable": true,
+      "type": {
+        "containsNull": true,
+        "elementType": {
+          "fields": [
+            {
+              "metadata": {},
+              "name": "agent_identifier",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "contact",
+              "nullable": true,
+              "type": {
+                "containsNull": true,
+                "elementType": {
+                  "fields": [
+                    {
+                      "metadata": {},
+                      "name": "contact_reason",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "contact_reason_raw",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "inquiries",
+                      "nullable": true,
+                      "type": {
+                        "containsNull": true,
+                        "elementType": {
+                          "fields": [
+                            {
+                              "metadata": {},
+                              "name": "main_inquiry",
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            {
+                              "metadata": {},
+                              "name": "root_cause",
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            {
+                              "metadata": {},
+                              "name": "inquiry_type",
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            {
+                              "metadata": {},
+                              "name": "main_inquiry_raw",
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            {
+                              "metadata": {},
+                              "name": "root_cause_raw",
+                              "nullable": true,
+                              "type": "string"
+                            },
+                            {
+                              "metadata": {},
+                              "name": "additional_inquiry",
+                              "nullable": true,
+                              "type": "string"
+                            }
+                          ],
+                          "type": "struct"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    {
+                      "metadata": {},
+                      "name": "outcome",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "outcome_raw",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "objection",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "objection_raw",
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  ],
+                  "type": "struct"
+                },
+                "type": "array"
+              }
+            },
+            {
+              "metadata": {},
+              "name": "scoring",
+              "nullable": true,
+              "type": {
+                "fields": [
+                  {
+                    "metadata": {},
+                    "name": "nps_score",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "nps_reason",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "knowledge_score",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "knowledge_reason",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "empathy_score",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "empathy_reason",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "clarity_score",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "clarity_reason",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "reasoning_score",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "reasoning_reason",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "csat_verbatim",
+                    "nullable": true,
+                    "type": "string"
+                  }
+                ],
+                "type": "struct"
+              }
+            },
+            {
+              "metadata": {},
+              "name": "sentiment",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "resolved",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "satisfaction",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "additional_service",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "process_knowledge",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "system_knowledge",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "process_name",
+              "nullable": true,
+              "type": "string"
+            }
+          ],
+          "type": "struct"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "summary",
+      "nullable": true,
+      "type": "string"
+    }
+  ]
+}

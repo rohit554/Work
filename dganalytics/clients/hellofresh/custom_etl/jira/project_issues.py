@@ -1,17 +1,16 @@
-from dganalytics.utils.utils import get_spark_session, get_path_vars
+from dganalytics.utils.utils import get_spark_session, get_path_vars, get_secret
 from typing import List
 import requests
 from pyspark.sql import SparkSession
 from requests.auth import HTTPBasicAuth
 import datetime
-from pyspark.sql.types import StructType, StructField, StringType, TimestampType, BooleanType, DateType
+from pyspark.sql.types import StructType, StructField, StringType, TimestampType, BooleanType, DateType, FloatType
 from pyspark.sql.functions import to_timestamp, from_utc_timestamp, expr, col, unix_timestamp, date_format, to_date
 from datetime import datetime
 import re
 from pyspark.sql import functions as F
 from dateutil import parser
 from pyspark.sql import Column
-
 
 def get_emailId(tenant: str):
     email = get_secret(f'{tenant}jirauserid')
@@ -21,12 +20,12 @@ def get_accesskey(tenant: str):
     api_key = get_secret(f'{tenant}jiraaccesskey')
     return api_key
 
-def get_api_url(tenant: str):
+def get_api_url(tenant: str, nextPageToken: str = None):
     url = get_secret(f'{tenant}jiraurl')
-    url = "https://"+url+"/rest/api/3/search?jql=project%20%3D%20'CCMCBESC'%20AND%20updated%20>=%20-1d%20order%20by%20updated%20"
+    url = "https://"+url+"/rest/api/3/search/jql?jql=project = CCMCBESC AND updated >= -1d ORDER BY updated ASC&maxResults=100&fields=*all" + ("&nextPageToken=" + nextPageToken if nextPageToken else "")
     return url
 
-def jira_request(spark: SparkSession, url: str, email : str, api_key : str):
+def jira_request(spark: SparkSession, email : str, api_key : str):
     app_name = "jira_project_issues"
     tenant = "hellofresh"
     db_name = f"dg_{tenant}"
@@ -35,10 +34,9 @@ def jira_request(spark: SparkSession, url: str, email : str, api_key : str):
     auth = HTTPBasicAuth(email, api_key)
     entity = "issues"
     combined_data = []
-    startAt = 0
     maxResults = 100
     req_type = "GET"
-
+    
     schema = StructType([
                 StructField("issueId", StringType(), True),
                 StructField("issueKey", StringType(), True),
@@ -46,6 +44,10 @@ def jira_request(spark: SparkSession, url: str, email : str, api_key : str):
                 StructField("projectKey", StringType(), True),
                 StructField("projectName", StringType(), True),
                 StructField("customFieldId", StringType(), True),
+                StructField("customerId", StringType(), True),
+                StructField("requestId", StringType(), True),
+                StructField("requestType", StringType(), True),
+                StructField("resolutionName", StringType(), True),
                 StructField("priority", StringType(), True),
                 StructField("market", StringType(), True),
                 StructField("brand", StringType(), True),
@@ -72,20 +74,24 @@ def jira_request(spark: SparkSession, url: str, email : str, api_key : str):
                 StructField("orgId", StringType(), True)
             ])
     record_insert_date = datetime.now()
+    nextPageToken = None
     while True:
         resp_list = []
-        print("startAt:", startAt)
-        params = {'maxResults': maxResults, 'startAt': startAt}
+        
         if req_type == "GET":
-            resp = requests.request(method='GET', url=url, auth=auth, params=params)
+            url = get_api_url(tenant, nextPageToken)
+            print(url)
+            resp = requests.request(method='GET', url=url, auth=auth)
         else:
             raise Exception("Unknown request type in config")
 
         resp_json = resp.json()
-        print(resp_json['total'])
-        startAt = startAt + maxResults
         resp_list.extend(resp_json[entity])
-
+        nextPageToken = resp_json.get('nextPageToken')
+        issues = resp_json['issues']
+        if not nextPageToken or not issues:
+            break
+        
         for item in resp_list:
             if 'fields' in item:
                 fields = item['fields']
@@ -173,14 +179,42 @@ def jira_request(spark: SparkSession, url: str, email : str, api_key : str):
                 customfield_13697_value = None
                 customfield_13697_id = None
                 if customfield_13697 is not None:
-                    customfield_13697_value = customfield_13697.get('value')
+                    customfield_13697_value = customfield_13697.get('value') if customfield_13697 is not None else None
                     customfield_13697_id = customfield_13697.get('id')
 
-                values = customfield_13697_value.split() if customfield_13697_value else []
-                market = values[0] if values else None
-                brand = values[1] if len(values) > 1 else None
+                if customfield_13697_value is None:
+                    customfield_15947 = fields.get('customfield_15947')
+                    customfield_15947_value = customfield_15947.get('value') if customfield_15947 is not None else None
+                    customfield_13697_value = customfield_15947_value
 
-                combined_data.append({'issueId': id_value, 'issueKey': key_value, 'customFieldId': id, 'priority': priority_name, 'customFieldId': customfield_13697_id,'market': market, 'brand': brand, 'assigneeName': assignee_display_name, 'assigneeEmail': assignee_email_address, 'assigneeIsactive': isactive_assignee, 'reporterEmail': reporter_email_address, 'reporterName':reporter_display_name, 'reporterIsactive': isactive_reporter, 'status': status_name, 'statusDescription': status_description, 'statusCategoryName': status_category_name, 'projectId': project_id,'projectKey': project_key, 'projectName': project_name, 'issueTypeDescription': issue_type_description, 'issueTypeName': issue_type_name, 'callbackReason': customfield_15946_value, 'resolutionDate': resolutiondate, 'createdDate': created, 'updatedDate': updated, 'creatorName': creator_name, 'creatorEmail':creator_email, 'creatorIsactive':isactive_creator, 'recordInsertDate': record_insert_date, "genesysInteractionURL": customfield_14355_value, 'orgId': orgId})
+                if customfield_13697_value:
+                    values = customfield_13697_value.split()
+                    market = values[0] if values else None
+                    brand = values[1] if len(values) > 1 else None
+
+                customfield_15945_value = None
+                customfield_15945 = fields.get('customfield_15945')
+                if customfield_15945 is not None:
+                    if isinstance(customfield_15945, dict):
+                        customfield_15945_value = customfield_15945.get('value')
+                    else:
+                        customfield_15945_value = str(customfield_15945)
+
+                resolution_column = fields.get('resolution')
+                resolution_name = resolution_column.get('name') if resolution_column else None
+
+                customfield_11600 = fields.get('customfield_11600')
+                if customfield_11600 is not None and 'requestType' in customfield_11600:
+                    request_type = customfield_11600.get('requestType')
+                    if request_type is not None:
+                        request_id = request_type.get('id')
+                        request_name = request_type.get('name')
+                    else:
+                        request_id, request_name = None, None
+                else:
+                    request_id, request_name = None, None
+
+                combined_data.append({'issueId': id_value, 'issueKey': key_value, 'customFieldId': id, 'priority': priority_name, 'customFieldId': customfield_13697_id, 'customerId': customfield_15945_value, 'requestId': request_id, 'requestType': request_name, 'resolutionName': resolution_name, 'market': market, 'brand': brand, 'assigneeName': assignee_display_name, 'assigneeEmail': assignee_email_address, 'assigneeIsactive': isactive_assignee, 'reporterEmail': reporter_email_address, 'reporterName':reporter_display_name, 'reporterIsactive': isactive_reporter, 'status': status_name, 'statusDescription': status_description, 'statusCategoryName': status_category_name, 'projectId': project_id,'projectKey': project_key, 'projectName': project_name, 'issueTypeDescription': issue_type_description, 'issueTypeName': issue_type_name, 'callbackReason': customfield_15946_value, 'resolutionDate': resolutiondate, 'createdDate': created, 'updatedDate': updated, 'creatorName': creator_name, 'creatorEmail':creator_email, 'creatorIsactive':isactive_creator, 'recordInsertDate': record_insert_date, "genesysInteractionURL": customfield_14355_value, 'orgId': orgId})
 
         combined_df = spark.createDataFrame(combined_data, schema=schema)
         combined_df = combined_df.withColumn('created', to_date('createdDate'))
@@ -195,12 +229,11 @@ def jira_request(spark: SparkSession, url: str, email : str, api_key : str):
                     WHEN NOT MATCHED THEN
                         INSERT *
                     """)
-        if startAt >= resp_json['total']:
-            break
-    return combined_df
+        
+    return True
 
 if __name__ == '__main__':
-    api_url = get_api_url(tenant)
+    tenant = 'hellofresh'
     userid = get_emailId(tenant)
     accesskey = get_accesskey(tenant)
-    jira_request(spark, api_url, userid, accesskey)
+    jira_request(spark, userid, accesskey)

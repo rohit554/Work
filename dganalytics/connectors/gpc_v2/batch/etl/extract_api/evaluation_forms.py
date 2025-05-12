@@ -79,7 +79,7 @@ def exec_evaluation_forms_api(spark: SparkSession, tenant: str, run_id: str,
             f"{get_api_url(tenant)}/api/v2/quality/forms/evaluations/{e}", headers=api_headers)
         if resp.status_code != 200:
             logger.exception("Evaluation Forms API Failed" + resp.text)
-            raise Exception
+            continue
 
         evaluation_forms_list.append(resp.json())
 

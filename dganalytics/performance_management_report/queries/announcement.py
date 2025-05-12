@@ -17,7 +17,7 @@ schema = StructType([
                      StructField('campaign_id', StringType(), True)])
 
 def get_announcement(spark):
-    extract_start_time = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    extract_start_time = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-4] + 'Z'
 
     for org_timezone in get_active_organization_timezones(spark).rdd.collect():
       org_id = org_timezone['org_id']
@@ -26,40 +26,35 @@ def get_announcement(spark):
             {
                 "$match" : {
                     'org_id' : org_id,
-                    "creation_date":{
-                        '$gte': { '$date': extract_start_time }
+                     "$expr": {
+                        "$gte": [
+                            "$creation_date",
+                            {
+                                "$dateFromString": {
+                                    "dateString": extract_start_time,
+                                    "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                                }
+                            },
+                        ]
                     }
                 }
             },
             {
-                    '$lookup': {
-                        'from': 'User', 
-                        'let': {
-                            'oid': '$sender'
-                        }, 
-                        'pipeline': [
-                            {
-                                '$match': {
-                                    '$expr': {
-                                        '$and': [
-                                            {
-                                                '$eq': [
-                                                    '$_id', '$$oid'
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                }
-                            }, {
-                                '$project': {
-                                    '_id': 0, 
-                                    'user_id': 1
-                                }
+                "$lookup": {
+                    "from": "User",
+                    "localField" :"sender",
+                    "foreignField": "_id",
+                    "pipeline": [
+                        {
+                            "$project": {
+                                "_id": 0,
+                                "user_id": 1
                             }
-                        ], 
-                        'as': 'sender_userId'
-                    }
-                }, 
+                        }
+                    ],
+                    "as": "sender_userId"
+                }
+            },
                 {
                     '$unwind': {
                         'path': '$sender_userId'
@@ -73,31 +68,18 @@ def get_announcement(spark):
                 }, 
                 {
                     '$lookup': {
-                        'from': 'User', 
-                        'let': {
-                            'oid': '$recipient'
-                        }, 
-                        'pipeline': [
+                        "from": "User",
+                        "localField" :"recipient",
+                        "foreignField": "_id",
+                        "pipeline": [
                             {
-                                '$match': {
-                                    '$expr': {
-                                        '$and': [
-                                            {
-                                                '$eq': [
-                                                    '$_id', '$$oid'
-                                                ]
-                                            }
-                                        ]
-                                    }
-                                }
-                            }, {
-                                '$project': {
-                                    '_id': 0, 
-                                    'user_id': 1
+                                "$project": {
+                                    "_id": 0,
+                                    "user_id": 1
                                 }
                             }
-                        ], 
-                        'as': 'receiver_userId'
+                        ],
+                        "as": "receiver_userId"
                     }
                 }, 
                 {
@@ -139,7 +121,15 @@ def get_announcement(spark):
         ON target.orgId = source.orgId
         AND target.Announcement_sent_By = source.Announcement_sent_By
         AND target.Announcement_received_By = source.Announcement_received_By
+        AND target.Campaign_Name = source.Campaign_Name
+        AND target.campaign_id = source.campaign_id
+        AND target.is_deleted = source.is_deleted
+        AND target.is_active = source.is_active
         AND target.creation_date = source.creation_date
+        AND target.priority = source.priority
+        AND target.creation_date = source.creation_date
+        AND target.priority = source.priority
+
         WHEN MATCHED THEN
                 UPDATE SET *
         WHEN NOT MATCHED THEN

@@ -20,7 +20,7 @@ data_upload_connection_schema = StructType([
 
 # Connections
 def get_connections(spark):
-    extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    extract_start_time = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-4] + 'Z'
     
     connectionPipeline = [
         {
@@ -28,10 +28,18 @@ def get_connections(spark):
                 "is_active" : True,
                 "org_id" :  {
                     '$in' : get_active_org()
-                  },
-                "update_date":{
-                    '$gte': { '$date': extract_start_time }
-                }
+                },
+                "$expr": {
+                        "$gte": [
+                            "$update_date",
+                            {
+                                "$dateFromString": {
+                                    "dateString": extract_start_time,
+                                    "format": "%Y-%m-%dT%H:%M:%S.%LZ",
+                                }
+                            },
+                        ]
+                    }
             }
         }, 
         {

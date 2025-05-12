@@ -39,13 +39,13 @@ def export_users_routing_status_sliced(spark: SparkSession, tenant: str, region:
             from_utc_timestamp(frs.startTime, trim(ut.timeZone)) AS timeSlot,
             1800 AS timeDiff,
             'users_routing_status' AS pTableFlag,
-            ut.timeZone AS timeZone
+            ut.timeZone AS timeZone,
+            ut.region,
+            startDate as startDatePart
         FROM
             gpc_hellofresh.fact_routing_status frs
             JOIN user_timezone ut ON frs.userId = ut.userId
-        WHERE
-            ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
-            AND CAST(from_utc_timestamp(frs.startTime, trim(ut.timeZone)) AS date) >= add_months(current_date(), -12)
+        WHERE startDate >= date_sub(current_date(), 5)
     """)
 
     routing.createOrReplaceTempView("routing")
@@ -62,7 +62,9 @@ def export_users_routing_status_sliced(spark: SparkSession, tenant: str, region:
             (to_unix_timestamp(CASE WHEN endTime > (from_unixtime(timeSlot) + interval 30 minutes) THEN (from_unixtime(timeSlot) + interval 30 minutes) ELSE endTime END)
                 - to_unix_timestamp((CASE WHEN startTime > from_unixtime(timeSlot) THEN startTime ELSE from_unixtime(timeSlot) END))
             ) AS timeDiff,
-            pTableFlag
+            pTableFlag,
+            region,
+            startDatePart
         FROM (
             SELECT
                 userKey,
@@ -76,7 +78,9 @@ def export_users_routing_status_sliced(spark: SparkSession, tenant: str, region:
                 )) AS timeSlot,
                 timeDiff,
                 pTableFlag,
-                timeZone
+                timeZone,
+                region,
+                startDatePart
             FROM
                 routing
             WHERE
@@ -86,4 +90,15 @@ def export_users_routing_status_sliced(spark: SparkSession, tenant: str, region:
             is_valid_date_udf(date_format((CASE WHEN startTime > from_unixtime(timeSlot) THEN startTime ELSE from_unixtime(timeSlot) END), 'yyyy-MM-dd HH:mm:ss'), timeZone)
    """)
 
-    return df
+    # Delete old data from the table for the last 5 days before inserting new data
+    spark.sql(f"""
+        DELETE FROM pbi_hellofresh.users_routing_status_sliced 
+        WHERE startDatePart >= date_sub(current_date(), 5)
+    """)
+
+    # Write new data to the target table
+    df.write.mode("append").saveAsTable("pbi_hellofresh.users_routing_status_sliced")
+
+    return spark.sql(f"""SELECT * FROM pbi_hellofresh.users_routing_status_sliced
+                     WHERE startDatePart > add_months(current_date(), -12)
+                     {"AND region IN ('US', 'CA-HF', 'CP-CA', 'CA-CP','FA-HF')" if region == 'US' else " " }""")

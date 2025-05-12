@@ -1,7 +1,9 @@
+import json
 import argparse
 from dganalytics.utils.utils import get_spark_session
 from pyspark.sql.functions import *
 from pyspark.sql.types import StructType, StructField, StringType, BooleanType
+import pymongo
 from dganalytics.clients.breadfinancial.utils import exec_mongo_pipeline, push_gamification_data_for_tenant
 
 timezone = 'US/Eastern'

@@ -1,0 +1,55 @@
+from dganalytics.utils.utils import exec_mongo_pipeline,delta_table_partition_ovrewrite
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DateType
+
+pipeline = [
+    {
+        "$match": {
+            "outcome_type": "badge"
+        }
+    },
+    {
+        "$project": {
+            "_id": 0.0,
+            "date": {
+                "$dateToString": {
+                    "format": "%Y-%m-%d",
+                    "date": "$creation_date"
+                }
+            },
+            "campaign_id": 1.0,
+            "description": "$badge_desc",
+            "badge_name": "$badge_name",
+            "lead_mongo_user_id": "$teamlead_id",
+            "user_id": 1.0
+        }
+    }
+]
+
+schema = StructType([StructField('badge_name', StringType(), True),
+                     StructField('campaign_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('date', StringType(), True),
+                     StructField('description', StringType(), True),
+                     StructField('lead_mongo_user_id', StructType(
+                         [StructField('oid', StringType(), True)]), True),
+                     StructField('user_id', StringType(), True)])
+
+
+def get_badges(spark):
+    df = exec_mongo_pipeline(spark, pipeline, 'User_Outcome', schema, mongodb='hellofresh-prod')
+    df.registerTempTable("badges")
+    df = spark.sql("""
+                    select  distinct badge_name badgeName,
+                            campaign_id.oid campaignId,
+                            cast(date as date) date,
+                            replace(replace(replace(replace(description, '\\n', ' '), '""',''), '\\r', ' ') , '\\r\\n', ' ') description,
+                            lead_mongo_user_id.oid leadMongoUserId,
+                            user_id userId,
+                            'hellofresh' orgId
+                    from badges
+                """)
+    '''
+    df.coalesce(1).write.format("delta").mode("overwrite").partitionBy(
+        'orgId').saveAsTable("dg_performance_management.badges")
+    '''
+    delta_table_partition_ovrewrite(df, "dg_performance_management.badges", ['orgId'])

@@ -21,3 +21,4 @@ build/
 /.vs/dganalytics/config/applicationhost.config
 /env
 /playground
+/.vs/dganalytics

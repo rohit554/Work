@@ -20,7 +20,7 @@ def fact_evaluation_question_scores(spark: SparkSession, extract_date, extract_s
                                     )
                                     lateral view explode(questionScores) as qa
                                     """)
-    evaluation_question_scores.createOrReplaceTempView("evaluation_question_scores")
+    evaluation_question_scores.registerTempTable("evaluation_question_scores")
     spark.sql("""
                 merge into fact_evaluation_question_scores as target
                     using evaluation_question_scores as source

@@ -19,7 +19,7 @@ def fact_conversation_surveys(spark: SparkSession, extract_date, extract_start_t
             survey.surveyFormName AS surveyFormName,
             survey.surveyPromoterScore AS surveyPromoterScore,
             survey.oSurveyTotalScore AS oSurveyTotalScore,
-            CAST(survey.eventTime AS date) AS eventDate,
+            TRY_CAST(survey.eventTime AS date) AS eventDate,
             recordIdentifier as sourceRecordIdentifier,
             concat(extractDate, '|', extractIntervalStartTime, '|', extractIntervalEndTime) as sourcePartition
         FROM (
@@ -39,7 +39,7 @@ def fact_conversation_surveys(spark: SparkSession, extract_date, extract_start_t
                 extractDate = '{extract_date}'
                 AND extractIntervalStartTime = '{extract_start_time}'
                 AND extractIntervalEndTime = '{extract_end_time}'
-                AND surveys IS NOT NULL
+				AND surveys IS NOT NULL
         )
         WHERE 
             survey IS NOT NULL

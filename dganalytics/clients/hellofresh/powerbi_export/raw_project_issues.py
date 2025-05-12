@@ -13,6 +13,10 @@ def raw_project_issues(spark: SparkSession, tenant: str, region: str):
                     a.projectKey,
                     a.projectName,
                     a.customFieldId,
+                    a.customerId,
+                    a.requestId, 
+                    a.requestType,
+                    a.resolutionName,
                     a.priority,
                     a.market,
                     a.brand,
@@ -40,5 +44,6 @@ def raw_project_issues(spark: SparkSession, tenant: str, region: str):
                     a.created
                   FROM
                     dg_hellofresh.raw_project_issues a
+										where created > add_months(current_date(), -12)
                     """)
     return df

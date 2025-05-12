@@ -16,9 +16,12 @@ def get_lobs(lob: str = ""):
     if lobs is None or lob is None:
         return ""
     lob = lob.strip()
-    return lobs.where(lobs['LOB'] == lob).dropna().iloc[0]['Campaign']
+    if len(lobs) > 0 and 'LOB' in lobs.columns:
+        matching_rows = lobs[lobs['LOB'] == lob].dropna()
+        if len(matching_rows) > 0:
+            return matching_rows.iloc[0]['Campaign']
+    return ""
 
-  
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--input_file', required=True)
@@ -57,7 +60,6 @@ if __name__ == '__main__':
     users['dateofbirth'] = pd.to_datetime(users['dateofbirth']).dt.strftime('%d-%m-%Y').fillna('')
     users['team'] = users['team'].fillna('').astype(str).apply(lambda x: x.strip() + ' Team')
 
-    users['Communication_Email'] = users['email']
     users.insert(19, 'orgId', 'starthub')
 
     users = users.drop_duplicates()

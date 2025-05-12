@@ -25,9 +25,13 @@ transform_to_method = {
     "dim_wrapup_codes": transform.dim_wrapup_codes,
     "fact_wfm_forecast": transform.fact_wfm_forecast,
     "fact_conversation_aggregate_metrics": transform.fact_conversation_aggregate_metrics,
-    "fact_user_presence": transform.fact_user_presence
+    "fact_user_presence": transform.fact_user_presence,
+    "dim_last_handled_conversation": transform.dim_last_handled_conversation,
+    "fact_conversation_transcript_topics": transform.fact_conversation_transcript_topics,
+    "fact_conversation_transcript_sentiments": transform.fact_conversation_transcript_sentiments,
+    "fact_conversation_transcript_phrases": transform.fact_conversation_transcript_phrases,
+    "fact_speechandtextanalytics": transform.fact_speechandtextanalytics
 }
-
 
 if __name__ == "__main__":
     tenant, run_id, extract_date, extract_start_time, extract_end_time, transformation = transform_parser()

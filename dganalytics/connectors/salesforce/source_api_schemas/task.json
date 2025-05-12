@@ -1,0 +1,125 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "name": "OwnerId",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "CallDurationInSeconds",
+      "type": "integer",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "CallObject",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "CallDisposition",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "CallType",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "Description",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "CompletedDateTime",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "IsRecurrence",
+      "type": "boolean",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "CreatedById",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "ActivityDate",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "LastModifiedById",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "WhoId",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "Priority",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "RecurrenceInterval",
+      "type": "integer",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "WhatId",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "IsReminderSet",
+      "type": "boolean",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "RecurrenceRegeneratedType",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "Status",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "Subject",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "TaskSubtype",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    }
+  ]
+}

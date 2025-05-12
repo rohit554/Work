@@ -15,27 +15,6 @@ schema = StructType([StructField('campaign_id', StringType(), True),
 
 def get_tp_kpi_raw_data(spark):
     start_date = (datetime.utcnow() - timedelta(days=15)).strftime("%Y-%m-%d")
-    holden_data = rq.get(
-        f"https://holden.datagamz.com/api/auth/getKpiData?start_date={start_date}&orgid=HOLDEN")
-
-    holden_data = spark.read.schema(schema).json(spark._sc.parallelize(
-        holden_data.json()['data']))
-    df = holden_data.withColumn("orgId", lit('holden'))
-    df.createOrReplaceTempView("tp_kpi_raw_data")
-    df = spark.sql("""
-                    select  campaign_id as campaignId,
-                            kpi as kpi,
-                            outcome_name as outcomeName,
-                            outcome_id as outcomeId,
-                            user_id as userId,
-                            cast(date as date) as date,
-                            value as value,
-                            lower(orgId) as orgId
-                    from tp_kpi_raw_data
-                    where value is not null
-                """)
-    delta_table_partition_ovrewrite(
-        df, "dg_performance_management.tp_kpi_raw_data", ['orgId', 'date'])
 
     # tp_orgs = ['bcp', 'bob']
     tp_orgs = spark.sql("select distinct upper(orgId) as orgId from dg_performance_management.campaign").toPandas()['orgId'].tolist()
@@ -45,11 +24,8 @@ def get_tp_kpi_raw_data(spark):
         df = spark.read.schema(schema).json(spark._sc.parallelize(
             tp_data.json()['data']))
         df = df.withColumn("orgId", lit(org))
-        # df = df.union(tp_data)
 
-    # df = holden_data.union(tp_data)
-
-        df.createOrReplaceTempView("tp_kpi_raw_data")
+        df.registerTempTable("tp_kpi_raw_data")
         df = spark.sql("""
                         select  distinct campaign_id as campaignId,
                                 kpi as kpi,

@@ -10,7 +10,6 @@ schema = StructType([StructField("user_id", StringType(), True),
                      StructField("Name", StringType(), True),
                      StructField("Communication Email", StringType(), True),
                      StructField("user_start_date", DateType(), True),
-                     StructField("Current Phase", StringType(), True),
                      StructField("Designation", StringType(), True),
                      StructField("Location", StringType(), True),
                      StructField("LOB", StringType(), True),
@@ -99,10 +98,10 @@ if __name__ == "__main__":
     # Renaming columns based on the API template
     users.rename(columns = {'New Emp ID':'user_id', 'DOJ': 'user_start_date', 'Gender': 'gender', 'Email Id': 'Communication Email' }, inplace = True)
     # Generating email address based on the NT ID
-    users['email'] = users['NT ID/TP LAN ID'].astype(str) + '@datagamz.com' # '@teleperformancedibs.com'
+    users['email'] = users['NT ID/TP LAN ID'].astype(str) + '@teleperformancedibs.com'
     users['team'] = users['Team Leader Name'].astype(str) + ' Team'
     users['team'] = users['team'].str.title()
-    users['LWD'] = users['LWD'].replace({np.nan: None})
+
     mongoUsers.createOrReplaceTempView("mongoUsers")
     mongoTeams.createOrReplaceTempView("mongoTeams")
 
@@ -170,7 +169,7 @@ if __name__ == "__main__":
             FROM users U
             WHERE NOT EXISTS (SELECT 1 FROM mongoUsers MU WHERE LOWER(MU.user_id) = LOWER(U.user_id))
                   AND (U.LWD IS NULL OR U.LWD > CURRENT_DATE())
-                  AND TRIM(email) NOT IN ('-@datagamz.com', '@datagamz.com', 'Not Received@datagamz.com')
+                  AND TRIM(email) NOT IN ('-@teleperformancedibs.com', '@teleperformancedibs.com', 'Not Received@teleperformancedibs.com')
                   AND U.LOB IN ('CX Chat Sendbird', 'Payment Pod', 'DX Chat Sendbird', 'Doordash')
             ORDER BY date_format(U.user_start_date, 'dd-MM-yyyy') DESC
     """)
@@ -185,6 +184,7 @@ if __name__ == "__main__":
         WHERE role_id IN ('Agent', 'Team Lead', 'Team Manager') and (NOT EXISTS (SELECT 1 FROM Users U WHERE LOWER(U.user_id) = LOWER(MU.user_id) AND (U.LWD IS NULL OR U.LWD > CURRENT_DATE())))
         AND user_id NOT IN ('doordashprodmanager', '123445', '12345')
         AND MU.is_active
+		AND MU.LOB_Name != "PKT"
     """)
 
     deactivate_gamification_users(deactivatedUsersDF.toPandas(), customer.upper())

@@ -24,6 +24,11 @@
             "type": "array"
         }
     }, {
+            "metadata": {},
+            "name": "selfServed",
+            "nullable": true,
+            "type": "boolean"
+    }, {
         "metadata": {},
         "name": "evaluations",
         "nullable": true,
@@ -376,7 +381,49 @@
                                         "name": "transferType",
                                         "nullable": true,
                                         "type": "string"
-                                    }],
+                                    },
+                                    {
+                                        "metadata": {},
+                                        "name": "outcomes",
+                                        "nullable": true,
+                                        "type": {
+                                          "containsNull": true,
+                                          "elementType": {
+                                            "fields": [
+                                              {
+                                                "metadata": {},
+                                                "name": "flowOutcome",
+                                                "nullable": true,
+                                                "type": "string"
+                                              }, {
+                                                "metadata": {},
+                                                "name": "flowOutcomeEndTimestamp",
+                                                "nullable": true,
+                                                "type": "string"
+                                              }, {
+                                                "metadata": {},
+                                                "name": "flowOutcomeId",
+                                                "nullable": true,
+                                                "type": "string"
+                                              }, {
+                                                "metadata": {},
+                                                "name": "flowOutcomeStartTimestamp",
+                                                "nullable": true,
+                                                "type": "string"
+                                              }, {
+                                                "metadata": {},
+                                                "name": "flowOutcomeValue",
+                                                "nullable": true,
+                                                "type": "string"
+                                              }
+                                            ],
+                                          
+                                            "type": "struct"
+                                          },
+                                          "type": "array"
+                                        }
+                                      }
+                                    ],
                                     "type": "struct"
                                 }
                             }, {

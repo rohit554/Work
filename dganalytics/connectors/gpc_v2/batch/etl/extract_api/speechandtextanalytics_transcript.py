@@ -11,14 +11,14 @@ def get_conversations(spark: SparkSession, extract_start_time: str, extract_end_
     conversations_df = spark.sql(f"""
        SELECT   DISTINCT  C.conversationId,
                           C.sessionId communicationId
-        FROM gpc_simplyenergy.raw_speechandtextanalytics RS
+        FROM raw_speechandtextanalytics RS
         JOIN (SELECT  conversationId,
                             sessions.sessionId sessionId
                     FROM (SELECT  conversationId,
                                     EXPLODE(participants.sessions) sessions
                             FROM (SELECT  conversationId,
                                         explode(participants) as participants
-                                FROM gpc_simplyenergy.raw_conversation_details
+                                FROM raw_conversation_details
                 )
         WHERE participants.purpose = 'customer')) C
         ON RS.conversation.id = c.conversationId

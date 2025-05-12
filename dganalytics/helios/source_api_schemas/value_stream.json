@@ -1,0 +1,62 @@
+{
+    "type": "struct",
+    "fields": [
+        {
+            "metadata": {},
+            "name": "conversation_id",
+            "nullable": false,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "value_stream",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": {
+                    "type": "struct",
+                    "fields": [
+                        {
+                            "metadata": {},
+                            "name": "stage_name",
+                            "nullable": false,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "did_happen",
+                            "nullable": false,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "successful",
+                            "nullable": false,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "start_line",
+                            "nullable": false,
+                            "type": "integer"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "end_line",
+                            "nullable": false,
+                            "type": "integer"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "summary",
+                            "nullable": false,
+                            "type": "string"
+                        }
+                    ],
+                    "type": "struct"
+                },
+                "type": "array"
+            }
+        }
+    ]
+}

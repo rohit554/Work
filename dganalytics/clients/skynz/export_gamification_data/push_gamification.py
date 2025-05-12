@@ -1,6 +1,6 @@
 from dganalytics.utils.utils import get_spark_session, push_gamification_data, export_powerbi_csv
 from dganalytics.connectors.gpc.gpc_utils import dg_metadata_export_parser, get_dbname, gpc_utils_logger
-from pyspark.sql.functions import from_utc_timestamp, col
+from pyspark.sql.functions import from_utc_timestamp, col, date_format
 from pyspark.sql.types import DateType
 from pyspark.sql import SparkSession
 from datetime import datetime, timedelta

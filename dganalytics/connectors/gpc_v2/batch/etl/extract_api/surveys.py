@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 
 def get_conversationIds(api_headers, base_url, extract_start_time: str, extract_end_time: str) -> list:
     body = {
-        "interval": get_interval((datetime.fromisoformat(extract_start_time) + timedelta(days=-14)).strftime('%Y-%m-%dT%H:%M:%S'), extract_end_time),
+        "interval": get_interval((datetime.fromisoformat(extract_start_time) + timedelta(days=-15)).strftime('%Y-%m-%dT%H:%M:%S'), extract_end_time),
         "granularity": "P1D",
             "groupBy": ["surveyId", "conversationId"],
             "metrics": ["oSurveyTotalScore", "oSurveyQuestionScore"],
@@ -37,7 +37,6 @@ def get_conversationIds(api_headers, base_url, extract_start_time: str, extract_
         
     conversationIds = set()
     
-    print(resp.json())
 	
     for result in resp.json()["results"]:
         conversationId = result['group']["conversationId"]

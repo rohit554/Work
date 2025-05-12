@@ -4,79 +4,51 @@ from datetime import datetime, timedelta
 from pyspark.sql.functions import lower
 
 def build_pipeline(org_id: str, timezone: str):
-    extract_start_time = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    extract_start_time = (datetime.now() - timedelta(days=5)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')[:-4] + 'Z'
     pipeline = [
         {
             "$match": {
                 "org_id": org_id
             }
-        }, 
+        },
         {
             "$project": {
                 "name": 1.0,
                 "levels": 1.0,
                 "org_id": 1.0
             }
-        }, 
+        },
         {
             "$unwind": {
                 "path": "$levels",
                 "preserveNullAndEmptyArrays": False
             }
-        }, 
+        },
         {
             "$lookup": {
                 "from": "User_Levels",
-                "let": {
-                    "campaignId": "$_id",
-                    "levelId": "$levels._id",
-                    "orgId": "$org_id"
-                },
-                "pipeline": [
-                    {
-                        "$match": {
-                            "$expr": {
-                                "$and": [
-                                    {
-                                        "$eq": [
-                                            "$org_id",
-                                            "$$orgId"
-                                        ]
-                                    },
-                                    {
-                                        "$eq": [
-                                            "$campaign_id",
-                                            "$$campaignId"
-                                        ]
-                                    },
-                                    {
-                                        "$eq": [
-                                            "$level_id",
-                                            "$$levelId"
-                                        ]
-                                    }
-                                ]
-                            }
-                        }
-                    }
-                ],
+                "localField": "org_id",
+                "foreignField": "org_id",
                 "as": "userLevels"
             }
-        }, 
+        },
         {
             "$unwind": {
                 "path": "$userLevels",
                 "preserveNullAndEmptyArrays": False
             }
-        }, 
+        },
         {
             "$match": {
-                "userLevels.achieved_date": {
-                    '$gte': { '$date': extract_start_time }
+                "$expr": {
+                    "$and": [
+                        { "$eq": ["$userLevels.campaign_id", "$_id"] },
+                        { "$eq": ["$userLevels.level_id", "$levels._id"] },
+                        { "$gte": ["$userLevels.achieved_date", { "$dateFromString": { "dateString": extract_start_time, "format": "%Y-%m-%dT%H:%M:%S.%LZ" } }] }
+                    ]
                 }
             }
         },
-
         {
             "$project": {
                 "_id": 0.0,
@@ -85,12 +57,7 @@ def build_pipeline(org_id: str, timezone: str):
                 "campaignId": "$_id",
                 "levelId": "$userLevels.level_id",
                 "achievedDate": {
-                    "$toDate": {
-                        "$dateToString": {
-                            "date": "$userLevels.achieved_date",
-                            "timezone": timezone
-                        }
-                    }
+                       "$toDate": "$userLevels.achieved_date" 
                 },
                 "campaignName": "$name",
                 "levelNumber": "$userLevels.level_no",
@@ -127,17 +94,31 @@ def get_levels(spark):
 
     
     levels_df.createOrReplaceTempView("levels")
-
     spark.sql("""
-            MERGE INTO dg_performance_management.levels AS target
-            USING levels AS source
-            ON target.orgId = source.orgId
-            AND target.campaignId = source.campaignId
-            AND target.levelId = source.levelId
-            AND target.userId = source.userId
-            WHEN MATCHED THEN
-                UPDATE SET *
-            WHEN NOT MATCHED THEN
-                INSERT *        
-            """)
+                DELETE FROM dg_performance_management.levels target
+                WHERE EXISTS (
+                    SELECT 1
+                    FROM levels b
+                    WHERE b.userId = target.userId
+                    AND b.campaignId = target.campaignId
+                    AND b.orgId = target.orgId
+                    AND b.levelId = target.levelId
+                )
+    """)
+    spark.sql("""
+                INSERT INTO dg_performance_management.levels
+                    SELECT * FROM levels
+    """)
+    # spark.sql("""
+    #         MERGE INTO dg_performance_management.levels AS target
+    #         USING levels AS source
+    #         ON target.orgId = source.orgId
+    #         AND target.campaignId = source.campaignId
+    #         AND target.levelId = source.levelId
+    #         AND target.userId = source.userId
+    #         WHEN MATCHED THEN
+    #             UPDATE SET *
+    #         WHEN NOT MATCHED THEN
+    #             INSERT *        
+    #         """)
  

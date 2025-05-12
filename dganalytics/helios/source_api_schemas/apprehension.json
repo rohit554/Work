@@ -1,0 +1,61 @@
+{
+    "type": "struct",
+    "fields": [
+        {
+            "metadata": {},
+            "name": "conversation_id",
+            "nullable": false,
+            "type": "string"
+        },
+        {
+            "metadata": {},
+            "name": "apprehension",
+            "nullable": true,
+            "type": {
+                "containsNull": true,
+                "elementType": {
+                    "fields": [
+                        {
+                            "metadata": {},
+                            "name": "apprehension",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "category",
+                            "nullable": true,
+                            "type": "string"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "start_line",
+                            "nullable": true,
+                            "type": "integer"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "end_line",
+                            "nullable": true,
+                            "type": "integer"
+                        },
+                        {
+                            "metadata": {},
+                            "name": "agent_response",
+                            "nullable": true,
+                            "type": "string"
+                        },
+						{
+                            "metadata": {},
+                            "name": "stage_name",
+                            "nullable": true,
+                            "type": "string"
+                        }
+                    ],
+                    "type": "struct"
+                },
+                "type": "array"
+            }
+        }
+    ]
+}

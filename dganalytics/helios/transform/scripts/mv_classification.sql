@@ -1,4 +1,4 @@
-INSERT INTO dgdm_{tenant}.mv_classification
+INSERT OVERWRITE dgdm_{tenant}.mv_classification
 SELECT
 *,
 CASE
@@ -28,7 +28,7 @@ FROM
       CASE
         WHEN (resolved * 100) / totalInteractions >= 50
         AND 
-          (tHandle / (totalInteractions * 1000) < 400) THEN 1
+          (tHandle / (totalInteractions * 1000) < 700) THEN 1
           ELSE 0
         END AS customerValue
         FROM
@@ -48,7 +48,7 @@ FROM
               COUNT(
                 DISTINCT(
                   CASE
-                    WHEN lower(resolved) In ("resolved") THEN conversationId
+                    WHEN lower(resolved) In ("resolved", "partially resolved") THEN conversationId
                   END
                 )
               ) resolved,
@@ -84,8 +84,7 @@ FROM
                       C.mediaTypeId,
                       C.conversationStartDateId
                   ) A ON A.conversationId = F.conversationId
-                WHERE
-                  F.conversationStartDateId > (select dateId from dgdm_{tenant}.dim_date where dateVal = cast(DATEADD(DAY, -30, '{extract_date}') as date))
+
               )
             GROUP BY
               contactReason,

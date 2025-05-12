@@ -276,7 +276,7 @@ gpc_end_points = {
         "drop_duplicates": True,
         "raw_primary_key": ["id"]
     },
-    "speechandtextanalytics": {
+	"speechandtextanalytics": {
         "endpoint": "/api/v2/speechandtextanalytics/conversations/{conversation_id}",
         "extract_type": "custom",
         "spark_partitions": {"max_records_per_partition": 100000},
@@ -309,36 +309,6 @@ gpc_end_points = {
         "drop_duplicates": True,
         "raw_primary_key": ["communicationId"]
     },
-    "survey_aggregates": {
-        "endpoint": "/api/v2/analytics/surveys/aggregates/query",
-        "request_type": "POST",
-        "paging": False,
-        "cursor": False,
-        "interval": True,
-        "params": {
-            "granularity": "P1D",
-            "groupBy": ["surveyId", "conversationId"],
-            "metrics": ["oSurveyTotalScore", "oSurveyQuestionScore"],
-            "filter": {
-                "type": "or",
-                "predicates": [{
-                    "type": "dimension",
-                    "dimension": "surveyStatus",
-                    "operator": "matches",
-                    "value": "Finished"
-                },
-                {
-                    "type": "dimension",
-                    "dimension": "surveyStatus",
-                    "operator": "matches",
-                    "value": "In Progress"
-                }]
-            }
-        },
-        "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": False,
-        "entity_name": "results",
-    },
     "outcomes": {
         "endpoint": "/api/v2/flows/outcomes",
         "request_type": "GET",
@@ -354,6 +324,4 @@ gpc_end_points = {
         "drop_duplicates": True,
         "raw_primary_key": ["id"]
     }
-
 }
-

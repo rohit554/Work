@@ -1,0 +1,179 @@
+{
+  "fields": [
+    {
+      "name": "Id",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "AccountId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Comments",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CaseNumber",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CreatedDate",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ClosedDate",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ContactEmail",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ContactFax",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ContactId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ContactMobile",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ContactPhone",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Description",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "IsClosed",
+      "type": "boolean",
+      "nullable": true
+    },
+    {
+      "name": "IsEscalated",
+      "type": "boolean",
+      "nullable": true
+    },
+    {
+      "name": "Origin",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "OwnerId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Priority",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Reason",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Status",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Subject",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Type",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "AssetId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "SourceId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CreatedById",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "EngineeringReqNumber__c",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "LastModifiedById",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Linked_Order__c",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ParentId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "PotentialLiability__c",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Product__c",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "SLAViolation__c",
+      "type": "boolean",
+      "nullable": true
+    },
+    {
+      "name": "SuppliedCompany",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "SuppliedEmail",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "SuppliedName",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "SuppliedPhone",
+      "type": "string",
+      "nullable": true
+    }
+  ]
+}

@@ -20,7 +20,7 @@ if __name__ == '__main__':
     tenant_path, db_path, log_path = get_path_vars(customer)
 
     if input_file.endswith(".xlsx"):
-        kpi = pd.read_excel(os.path.join(tenant_path, "data", "raw", "kpi", "behaviour_score", input_file), engine='openpyxl', skiprows=2)
+        kpi = pd.read_excel(os.path.join(tenant_path, "data", "raw", "kpi", "behaviour_score", input_file), engine='openpyxl')
     elif input_file.endswith(".csv"):
         kpi = pd.read_csv(os.path.join(tenant_path, "data", "raw", "kpi", "behaviour_score", input_file)) 
 
@@ -55,8 +55,7 @@ if __name__ == '__main__':
                     USING behaviour_score A
                     ON A.Recorded_Date = DB.Recorded_Date
                     AND A.airbnb_agent_id = DB.airbnb_agent_id
-                    WHEN MATCHED THEN
-                    UPDATE SET *
+                    AND A.orgId = DB.orgId
                     WHEN NOT MATCHED THEN
                     INSERT *
                      """)

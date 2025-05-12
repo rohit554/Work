@@ -18,53 +18,70 @@ if __name__ == '__main__':
     db_name = f"dg_{customer}"
     tenant_path, db_path, log_path = get_path_vars(customer)
 
-    #reading input file either csv or xlsx
+    # reading input file either csv or xlsx
     if input_file.endswith(".xlsx"):
         kpi = pd.read_excel(os.path.join(tenant_path, "data", "raw", "kpi", "day_wise", input_file), engine='openpyxl')
     elif input_file.endswith(".csv"):
         kpi = pd.read_csv(os.path.join(tenant_path, "data", "raw", "kpi", "day_wise", input_file))
 
-    kpi_pivot = pd.pivot_table(kpi, index=['OM Breakdown selection', 'Day of Chart_date'], columns='Measure Names', values='Measure Values')
+    columns_to_drop = ['Unnamed: 7', 'Unnamed: 8', 'Breakdown Selection 2', 'Breakdown Selection 3', 'Breakdown Selection 4']
+    kpi.drop(columns=[col for col in columns_to_drop if col in kpi.columns], inplace=True)
 
+    kpi['Column Breakdown Selection'] = pd.to_datetime(kpi['Column Breakdown Selection'], format='%d-%b-%y').dt.strftime('%d-%m-%Y')
+    kpi.rename(columns={'Column Breakdown Selection': 'Date'}, inplace=True)
+
+    kpi_pivot = pd.pivot(kpi, index=['Breakdown Selection 1', 'Date'], columns='Measure Names', values='Measure Values')
     kpi_pivot.columns = kpi_pivot.columns.str.strip()
-
     kpi_pivot.reset_index(inplace=True)
 
-    kpi_pivot['Date'] = pd.to_datetime(kpi_pivot['Day of Chart_date']).dt.strftime('%d-%m-%Y')
-    kpi_pivot.drop('Day of Chart_date', axis=1, inplace=True)
+    kpi_pivot.fillna('', inplace=True)
 
-    kpi = kpi_pivot[['OM Breakdown selection', 'Date'] + [col for col in kpi_pivot.columns if col not in ['OM Breakdown selection', 'Date']]]
+    if 'Resolution Rate' not in kpi_pivot.columns:
+        kpi_pivot['Resolution Rate'] = ''
 
-    kpi.rename(columns={'OM Breakdown selection': 'UserID'}, inplace=True)
+    if 'Love Score' not in kpi_pivot.columns:
+        kpi_pivot['Love Score'] = ''
 
-    kpi.rename(columns={'Escalation rate': 'Escalation_rate'}, inplace=True)
-    kpi['Escalation_rate'] = kpi['Escalation_rate'].replace([np.nan], '')
+    if 'Solves Per Day' not in kpi_pivot.columns:
+        kpi_pivot['Solves Per Day'] = ''
 
-    kpi.rename(columns={'Reopen Rate': 'Reopen_Rate'}, inplace=True)
-    kpi['Reopen_Rate'] = kpi['Reopen_Rate'].replace([np.nan], '')
+    if 'Ambassador Occupancy' not in kpi_pivot.columns:
+        kpi_pivot['Ambassador Occupancy'] = ''
 
-    kpi.rename(columns={'Resolution Rate': 'Resolution_Rate'}, inplace=True)
-    kpi['Resolution_Rate'] = kpi['Resolution_Rate'].replace([np.nan], '')
 
-    kpi.rename(columns={'SPD (logged)': 'SPD_logged'}, inplace=True)
-    kpi['SPD_logged'] = kpi['SPD_logged'].replace([np.nan], '')
+    kpi_pivot.rename(columns={
+        'Breakdown Selection 1': 'UserID',
+        'Solves Per Day': 'SPD_logged',
+        'Resolution Rate': 'Resolution_Rate',
+        'NPS': 'NPS',
+        'Love Score': 'Total_Crewbie_Love_Score',
+        'Ambassador Occupancy': 'Ticket_Occupancy'
+    }, inplace=True)
 
-    kpi.rename(columns={'Schedule Adherence': 'Schedule_Adherence'}, inplace=True)
-    kpi['Schedule_Adherence'] = kpi['Schedule_Adherence'].replace([np.nan], '')
+    if 'Escalation rate' in kpi_pivot.columns:
+        kpi_pivot.rename(columns={'Escalation rate': 'Escalation_Rate'}, inplace=True)
+        kpi_pivot['Escalation_Rate'] = kpi_pivot['Escalation_Rate'].replace([np.nan], '')
+    else:
+        kpi_pivot['Escalation_Rate'] = ''
 
-    kpi.rename(columns={'Ticket Occupancy': 'Ticket_Occupancy'}, inplace=True)
-    kpi['Ticket_Occupancy'] = kpi['Ticket_Occupancy'].replace([np.nan], '')
+    if 'Reopen Rate' in kpi_pivot.columns:
+        kpi_pivot.rename(columns={'Reopen Rate': 'Reopen_Rate'}, inplace=True)
+        kpi_pivot['Reopen_Rate'] = kpi_pivot['Reopen_Rate'].replace([np.nan], '')
+    else:
+        kpi_pivot['Reopen_Rate'] = ''
 
-    kpi.rename(columns={'Total Crewbie Love Score': 'Total_Crewbie_Love_Score'}, inplace=True)
-    kpi['Total_Crewbie_Love_Score'] = kpi['Total_Crewbie_Love_Score'].replace([np.nan], '')
+    if 'Schedule Adherence' in kpi_pivot.columns:
+        kpi_pivot.rename(columns={'Schedule Adherence': 'Schedule_Adherence'}, inplace=True)
+        kpi_pivot['Schedule_Adherence'] = kpi_pivot['Schedule_Adherence'].replace([np.nan], '')
+    else:
+        kpi_pivot['Schedule_Adherence'] = ''
 
-    kpi['NPS'] = kpi['NPS'].replace([np.nan], '')
 
-    kpi.insert(10, 'orgId', customer)
-    kpi = kpi.astype(str)
-    kpi = spark.createDataFrame(kpi)
-    kpi.createOrReplaceTempView("day_wise")
-    
+    kpi_pivot.insert(10, 'orgId', customer)
+    kpi_pivot = kpi_pivot.astype(str)
+    kpi_spark = spark.createDataFrame(kpi_pivot)
+    kpi_spark.createOrReplaceTempView("day_wise")
+
     spark.sql(f"""merge into {db_name}.airbnb_day_wise DB
                     USING day_wise A
                     ON A.UserID = DB.UserID

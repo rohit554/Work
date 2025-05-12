@@ -19,9 +19,9 @@ def fact_conversation_transcript_sentiments(spark: SparkSession, extract_date, e
                             mediaType,
                             EXPLODE(transcripts) transcripts
                     FROM raw_speechandtextanalytics_transcript
-                    WHERE   extractDate = '{extract_date}'
-                    AND  extractIntervalStartTime = '{extract_start_time}'
-                    AND extractIntervalEndTime = '{extract_end_time}'))
+					WHERE   extractDate = '{extract_date}'
+                AND  extractIntervalStartTime = '{extract_start_time}'
+                AND extractIntervalEndTime = '{extract_end_time}'))
     """)
 
     transcript_sentiments.createOrReplaceTempView("transcript_sentiments")

@@ -16,7 +16,7 @@ def export_user_presence(spark: SparkSession, tenant: str, region: str):
             explode(date) AS date 
         FROM (
             SELECT
-                sequence(add_months(current_date(), -13), current_date() + 2, interval 1 day) AS date
+                sequence(add_months(current_date(), -12), current_date() + 2, interval 1 day) AS date
         )
     """)
 
@@ -35,12 +35,13 @@ def export_user_presence(spark: SparkSession, tenant: str, region: str):
             fp.presenceDefinitionDeactivated,
             fp.presenceDefinitionPrimary,
             fp.presenceDefinitionLabel,
-            'user_presence' pTableFlag
+            'user_presence' pTableFlag,
+            ut.region,
+            startDate startDatePart
         FROM 
             gpc_hellofresh.fact_user_presence fp, user_timezone ut
         WHERE fp.userId = ut.userId
-            AND ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
-            AND CAST(from_utc_timestamp(fp.startTime, trim(ut.timeZone)) AS date) >= add_months(current_date(), -12)
+            AND CAST(from_utc_timestamp(fp.startTime, trim(ut.timeZone)) AS date) >= date_sub(current_date(), 35)
     """)
 
     pp.createOrReplaceTempView("presence")
@@ -58,11 +59,24 @@ def export_user_presence(spark: SparkSession, tenant: str, region: str):
             presenceDefinitionDeactivated,
             presenceDefinitionPrimary,
             presenceDefinitionLabel,
-            'user_presence' pTableFlag
+            'user_presence' pTableFlag,
+            region,
+            startDatePart
         FROM
             presence pp, dates d 
         WHERE d.date BETWEEN cast(pp.startTime as date) AND cast(pp.endTime as date)
-        AND CAST(pp.startTime AS date) >= add_months(current_date(), -12)
+        AND CAST(pp.startTime AS date) >= date_sub(current_date(), 35)
     """)
 
-    return df
+    # Delete old data from the table for the last 5 days before inserting new data
+    spark.sql(f"""
+        DELETE FROM pbi_hellofresh.user_presence 
+        WHERE startDatePart >= date_sub(current_date(), 35)
+    """)
+
+    # Write new data to the target table
+    df.write.mode("append").saveAsTable("pbi_hellofresh.user_presence")
+
+    return spark.sql(f"""SELECT * FROM pbi_hellofresh.user_presence
+                     WHERE startDatePart > add_months(current_date(), -12)
+                     {"AND region IN ('US', 'CA-HF', 'CP-CA', 'CA-CP','FA-HF')" if region == 'US' else " " }""")

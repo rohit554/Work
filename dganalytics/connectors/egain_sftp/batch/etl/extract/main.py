@@ -59,7 +59,7 @@ if __name__ == "__main__":
 							# Reading data from the dat files
 							tab_data = pd.DataFrame()
 							for line in open(os.path.join(extractPath, tab_file), encoding='UTF-16 LE'):
-								row = StringIO(line.replace("\t", " ").replace("\n", " ").replace("<EOFD>", "\t").replace("<EORD>", "\n").replace("\"", ""))
+								row = StringIO(line.replace("\t", " ").replace("\n", " ").replace("<EOFD>", "\t").replace("<EORD>", "\n").replace("\"", " "))
 								#
 								# Write logic to validate the table format
 								# Check if any custom attributes are present in the data

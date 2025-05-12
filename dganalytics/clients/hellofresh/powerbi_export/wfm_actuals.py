@@ -18,10 +18,24 @@ def export_wfm_actuals(spark: SparkSession, tenant: str, region: str):
                     from_utc_timestamp(fw.endDate, trim(ut.timeZone)) actualsEndDate,
                     fw.actualActivityCategory actualActivityCategory,
                     0 endOffsetSeconds,
-                    0 startOffsetSeconds
+                    0 startOffsetSeconds,
+                    ut.region,
+                    fw.startDatePart
             FROM gpc_hellofresh.fact_wfm_actuals fw, user_timezone ut
             WHERE fw.userId = ut.userId
-            AND ut.region {" = 'US'" if region == 'US' else " <> 'US'"}
-            AND CAST(from_utc_timestamp(fw.startDate, trim(ut.timeZone)) AS date) >= add_months(current_date(), -12)
+            AND fw.startDatePart >= date_sub(current_date(), 35)
     """)
-    return df
+
+    # Delete old data from the table for the last 5 days before inserting new data
+    spark.sql(f"""
+        DELETE FROM pbi_hellofresh.wfm_actuals 
+        WHERE startDatePart >= date_sub(current_date(), 35)
+    """)
+
+    # Write new data to the target table
+    df.write.mode("append").saveAsTable("pbi_hellofresh.wfm_actuals")
+
+    return spark.sql(f"""SELECT * FROM pbi_hellofresh.wfm_actuals
+                     WHERE startDatePart > add_months(current_date(), -12)
+                     {"AND region  IN ('US', 'CA-HF', 'CP-CA', 'CA-CP','FA-HF')" if region == 'US' else " " }""")
+    

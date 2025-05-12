@@ -1,0 +1,30 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "name": "Id",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "ParentId",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "Body",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CreatedDate",
+      "type": "string",
+      "nullable": true
+    },
+    {
+      "name": "CreatedById",
+      "type": "string",
+      "nullable": true
+    }
+  ]
+}

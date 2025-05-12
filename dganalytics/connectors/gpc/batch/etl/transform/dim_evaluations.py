@@ -17,26 +17,55 @@ def dim_evaluations(spark: SparkSession, extract_date, extract_start_time, extra
                                     and  extractIntervalStartTime = '{extract_start_time}' and extractIntervalEndTime = '{extract_end_time}'
                                     """)
     pre_evaluations.createOrReplaceTempView("pre_evaluations")
-    pre_evaluations.show()
-    evaluations = spark.sql("""
-                select * from (
-                        select  
-                            e.evaluationId, e.evaluatorId, e.agentId, e.conversationId, e.evaluationFormId, e.status,
-                                e.assignedDate, e.releaseDate, e.changedDate, e.conversationDate, e.mediaType, 
-                                e.agentHasRead, e.anyFailedKillQuestions, e.comments,
-                                e.evaluationFormName, e.evaluationFormPublished, e.neverRelease, 
-                                e.resourceType, dc.queueId, dc.wrapUpCode, e.conversationDatePart, e.sourceRecordIdentifier, e.soucePartition,
-                                row_number() over(partition by dc.conversationId order by dc.sessionEnd desc) as rn
-                         from pre_evaluations e, dim_conversations dc 
-                            where e.conversationDatePart = dc.conversationStartDate
-                            and e.conversationId = dc.conversationId
-                            ) where rn = 1
-            """)
-    evaluations.show()
-    evaluations = evaluations.drop("rn")
+    evaluations = spark.sql(f"""
+            select distinct * from (
+                    select  
+                        e.evaluationId, e.evaluatorId, e.agentId, e.conversationId, e.evaluationFormId, e.status,
+                            e.assignedDate, e.releaseDate, e.changedDate, e.conversationDate, e.mediaType, 
+                            e.agentHasRead, e.anyFailedKillQuestions, e.comments,
+                            e.evaluationFormName, e.evaluationFormPublished, e.neverRelease, 
+                            e.resourceType, dc.queueId, dc.wrapUpCode, e.conversationDatePart, e.sourceRecordIdentifier, e.soucePartition
+                        from pre_evaluations e
+                      left JOIN (SELECT DISTINCT conversationId,
+                          queueId,
+                          wrapUpCode,
+                          conversationStartDate
+                          FROM
+          (SELECT conversationId,
+                          co.queueId,
+                          wrapUpCode,
+                          conversationStartDate,
+                          row_number() OVER(PARTITION BY co.conversationId ORDER BY co.sessionEnd DESC) rn
+              FROM dim_conversations co
+              WHERE conversationStartDate between date_sub('{extract_date}', 90) and '{extract_date}'
+              AND co.wrapUpCode IS NOT NULL)
+          WHERE rn = 1
+          UNION ALL
+          SELECT conversationId,
+                  queueId,
+                  wrapUpCode,
+                  conversationStartDate FROM
+          (SELECT DISTINCT conversationId,
+                  co.queueId,
+                  wrapUpCode,
+                  conversationStartDate,
+                  row_number() OVER (PARTITION BY co.conversationId ORDER BY co.sessionEnd DESC) rn
+              FROM dim_conversations co
+              WHERE cast(conversationStartDate as DATE) between date_sub('{extract_date}', 90) and '{extract_date}'
+              and 
+              co.conversationId in (SELECT conversationId FROM dim_conversations
+              WHERE conversationStartDate  between date_sub('{extract_date}', 90) and '{extract_date}'
+              
+              GROUP BY conversationId
+              having count(wrapUpCode) = 0))) dc 
+                        ON  cast(e.conversationDatePart as date) = cast(dc.conversationStartDate as Date)
+                        and 
+                       e.conversationId = dc.conversationId
+                        )
+             
+        """)
     
     evaluations.createOrReplaceTempView("evaluations")
-    evaluations.show()
     evaluations = spark.sql("""
                                 merge into dim_evaluations as target
                                     using evaluations as source

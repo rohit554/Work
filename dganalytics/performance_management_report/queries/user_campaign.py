@@ -1,7 +1,14 @@
-from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite
+from dganalytics.utils.utils import exec_mongo_pipeline, delta_table_partition_ovrewrite, get_active_org
 from pyspark.sql.types import StructType, StructField, StringType
 
 pipeline = [
+	{
+  '$match': {
+		"org_id" :  {
+		'$in' : get_active_org()
+		}            
+	}
+	},
     {
         "$project": {
             "game_design.gd_users": 1.0,

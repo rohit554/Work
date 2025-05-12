@@ -1,0 +1,68 @@
+{
+    "type": "struct",
+    "fields": [
+      {
+        "metadata": {},
+        "name": "conversation_id",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "conversation_map",
+        "nullable": true,
+        "type": {
+          "containsNull": true,
+          "elementType": {
+            "fields": [
+              {
+                "metadata": {},
+                "name": "step_name",
+                "nullable": true,
+                "type": "string"
+              },
+              {
+                "metadata": {},
+                "name": "start_line",
+                "nullable": true,
+                "type": "integer"
+              },
+              {
+                "metadata": {},
+                "name": "end_line",
+                "nullable": true,
+                "type": "integer"
+              },
+              {
+                "metadata": {},
+                "name": "summary",
+                "nullable": true,
+                "type": "string"
+              },
+              {
+                "metadata": {},
+                "name": "sentiment",
+                "nullable": true,
+                "type": "string"
+              },
+              {
+                "metadata": {},
+                "name": "satisfaction",
+                "nullable": true,
+                "type": "integer"
+              },
+              {
+                "metadata": {},
+                "name": "stage_name",
+                "nullable": true,
+                "type": "string"
+              }
+            ],
+            "type": "struct"
+          },
+          "type": "array"
+        }
+      }
+    ]
+  }
+  

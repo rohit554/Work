@@ -1,5 +1,4 @@
 import shutil
-from numpy.lib.utils import lookfor
 from pyspark.sql import SparkSession
 from pyspark import SparkConf
 import os
@@ -356,7 +355,7 @@ def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_
         import findspark
         findspark.init(os.environ['SPARK_HOME'])
 
-        conf = conf.setAll([("spark.jars.packages", "io.delta:delta-core_2.12:0.7.0,org.mongodb.spark:mongo-spark-connector_2.12:3.0.0"),
+        conf = conf.setAll([("spark.jars.packages", "io.delta:delta-core_2.12:0.7.0,org.mongodb.spark:mongo-spark-connector_2.12:10.2.0"),
                             ("spark.sql.extensions",
                              "io.delta.sql.DeltaSparkSessionExtension"),
                             ("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")])
@@ -681,7 +680,7 @@ def get_active_org():
         tenant_path,'data', 'config', 'PowerBI_ROI_DataSets_AutoRefresh_Config.csv'))
     tenants_df = tenants_df[tenants_df['platform'] == 'new']
     tenants = tenants_df.to_dict('records')
-    return [tenant['name'].upper() for tenant in tenants]
+    return list(set([tenant['name'].upper() for tenant in tenants]))
 
 def get_active_organization_timezones(spark):
   tenants = get_active_org()

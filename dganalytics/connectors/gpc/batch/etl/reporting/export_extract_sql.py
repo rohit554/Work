@@ -155,7 +155,7 @@ fact_conversation_metrics_per_conversation = """
                         sum(F.tVoicemail) tVoicemail,
                         sum(F.tWait) tWait
                 from fact_conversation_metrics F
-                INNER JOIN dim_conversations D
+                LEFT JOIN dim_conversations D
                     ON F.conversationId = D.conversationId
                     AND F.agentId = D.agentId
                     AND F.mediaType = D.mediaType

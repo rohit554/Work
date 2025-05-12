@@ -5,7 +5,9 @@ import datetime
 import os
 import numpy as np
 import re
-from pyspark.sql.functions import to_timestamp, to_date
+from pyspark.sql.functions import to_timestamp, to_date, date_format
+from pyspark.sql.types import StringType, TimestampType, BooleanType, StructField, StructType
+import argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -14,16 +16,15 @@ if __name__ == '__main__':
     args, unknown_args = parser.parse_known_args()
     input_file = args.input_file
 
-    tenant = 'datagamz'
-    spark = get_spark_session('kpi_data', tenant)
-    customer = 'tpindiait'
-    db_name = f"dg_{customer}"
-    tenant_path, db_path, log_path = get_path_vars(customer)
+    tenant = 'tpindiait'
+    app_name = f"{tenant}_attendance"
+    spark = get_spark_session(app_name=app_name, tenant=tenant)
+    tenant_path, db_path, log_path = get_path_vars(tenant)
 
     if input_file.endswith(".xlsx"):
-        attendance = pd.read_excel(os.path.join(tenant_path, "data", "raw", "attendance", input_file), engine='openpyxl')
+        attendance = pd.read_excel(os.path.join(tenant_path, "data", "raw", "attendance", input_file), engine='openpyxl', skiprows=1)
     elif input_file.endswith(".csv"):
-        attendance = pd.read_csv(os.path.join(tenant_path, "data", "raw", "attendance", input_file))
+        attendance = pd.read_csv(os.path.join(tenant_path, "data", "raw", "attendance", input_file), skiprows=1)
 
     attendance['Original Date'] = pd.to_datetime(attendance['Date'], format="%d-%m-%Y")
     attendance['Login Time'] = pd.to_datetime(attendance['Login Time'], format="%I:%M %p")
@@ -42,7 +43,7 @@ if __name__ == '__main__':
     attendance['IsPresent'] = np.where(attendance['IsPresent'] == 'Yes', True, False)
 
     attendance['recordInsertDate'] = datetime.datetime.now()
-    attendance['orgId'] = customer
+    attendance['orgId'] = tenant
     
     
     attendance = attendance.rename(columns={
@@ -54,13 +55,16 @@ if __name__ == '__main__':
     }, errors="raise")
     attendance = attendance.drop_duplicates()
 
-    attendance= spark.createDataFrame(attendance)
-    attendance = attendance.withColumn("loginTime",to_timestamp("Login_Time"))
-    attendance = attendance.withColumn("logoutTime",to_timestamp("Logout_Time"))
-    attendance = attendance.withColumn('reportDate', to_date('reportDate', 'dd-MM-yyyy'))
+    attendance = spark.createDataFrame(attendance)
+    attendance = attendance.withColumn("loginTime", to_timestamp("Login_Time"))
+    attendance = attendance.withColumn("logoutTime", to_timestamp("Logout_Time"))
+    attendance = attendance.withColumn('reportDate', to_date('reportDate'))
 
-    attendance = attendance[['userId', 'reportDate', 'loginTime', 'logoutTime', 'isPresent', 'recordInsertDate', 'orgId']]
+    attendance = attendance.withColumn('reportDate', date_format(attendance.reportDate, 'dd-MM-yyyy'))
 
+    attendance = attendance[['userId', 'reportDate', 'isPresent', 'orgId', 'loginTime', 'logoutTime','recordInsertDate']]
+
+    attendance = attendance.filter(attendance.reportDate.isNotNull() & (attendance.isPresent == True))
     attendance.createOrReplaceTempView("attendance")
 
     spark.sql(f"""merge into dg_performance_management.attendance DB
@@ -68,20 +72,24 @@ if __name__ == '__main__':
                 on date_format(cast(A.reportDate as date), 'dd-MM-yyyy') = date_format(cast(DB.reportDate as date), 'dd-MM-yyyy')
                 and A.userId = DB.userId
                 and A.orgId = DB.orgId
+                and A.reportDate is not null
                 WHEN MATCHED THEN
                     UPDATE SET *
                 WHEN NOT MATCHED THEN
                     INSERT *
                 """)
     
-    attendance = spark.sql("""SELECT
+    newAttendance = spark.sql("""SELECT
                               DISTINCT 
                                DB.userId,
                                DB.reportDate,
                                DB.isPresent 
                               FROM 
                                dg_performance_management.attendance DB
-                               where orgId = 'tpindiait'
+                               where orgId = 'tpindiait' AND DB.reportDate IS NOT NULL
+                               and isPresent != 'false'
                   """)
 
-    export_powerbi_csv(customer, attendance, f"pm_attendance") 
+    newAttendance = newAttendance.coalesce(1)
+
+    export_powerbi_csv(tenant, newAttendance, f"pm_attendance")

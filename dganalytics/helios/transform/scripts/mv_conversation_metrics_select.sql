@@ -8,7 +8,7 @@ SELECT
   nConsult,
   nTransferred,
   CASE
-    WHEN COALESCE(LOWER(T.resolved), '') IN ('resolved') THEN 1
+    WHEN COALESCE(LOWER(T.resolved), '') IN ('resolved', 'partially resolved') THEN 1
     ELSE 0
   END AS resolved,
   CASE
@@ -17,7 +17,7 @@ SELECT
   END AS notResolved,
   tHandle,
   CASE
-    WHEN COALESCE(LOWER(T.resolved), "") In ('resolved') then tHandle
+    WHEN COALESCE(LOWER(T.resolved), "") In ('resolved', 'partially resolved') then tHandle
     ELSE 0
   end AS tHandleResolved,
   CASE
@@ -34,7 +34,8 @@ SELECT
     WHEN LOWER(T.satisfaction) = 'high' THEN 80
     WHEN LOWER(T.satisfaction) = 'highest' THEN 100
     ELSE 0
-  END AS satisfaction
+  END AS satisfaction,
+	tAnswered
 FROM
   (
     SELECT
@@ -49,7 +50,8 @@ FROM
       SUM(C.tHandle) tHandle,
       SUM(C.tTalkComplete) tTalkComplete,
       SUM(C.tHeldComplete) tHeldComplete,
-      SUM(C.tAcw) tAcwComplete
+      SUM(C.tAcw) tAcwComplete,
+      SUM(C.tAnswered) tAnswered
     FROM
       (
         SELECT
@@ -64,7 +66,8 @@ FROM
               'tHandle',
               'tTalkComplete',
               'tHeldComplete',
-              'tAcw'
+              'tAcw',
+							'tAnswered'
             )
           )
       ) C
@@ -106,4 +109,5 @@ GROUP BY
   tHeldComplete,
   tAcwComplete,
   resolved,
-  satisfaction  
+  satisfaction,
+	tAnswered

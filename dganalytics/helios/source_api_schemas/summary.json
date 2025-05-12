@@ -1,0 +1,17 @@
+{
+    "type": "struct",
+    "fields": [
+      {
+        "metadata": {},
+        "name": "conversation_id",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "summary",
+        "nullable": true,
+        "type": "string"
+      }
+    ]
+}

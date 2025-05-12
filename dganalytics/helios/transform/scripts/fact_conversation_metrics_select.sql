@@ -29,9 +29,7 @@ FROM (SELECT conversationId,
                           participants,
                           row_number() OVER (PARTITION BY conversationId ORDER BY recordInsertTime DESC) RN
                   FROM gpc_{tenant}.raw_conversation_details 
-                  where extractDate = '{extract_date}' 
-                    and  extractIntervalStartTime = '{extract_start_time}'
-                    and extractIntervalEndTime = '{extract_end_time}'
+                  where extractDate >= '{extract_date}' 
               )
           WHERE RN =1
           )
