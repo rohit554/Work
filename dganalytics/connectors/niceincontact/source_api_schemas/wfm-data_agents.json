@@ -1,0 +1,97 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "wfM_Data_Agents",
+      "nullable": true,
+      "type": {
+        "type": "array",
+        "containsNull": true,
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "metadata": {},
+              "name": "agentNo",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "teamName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "teamNo",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "businessUnitId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "businessUnitName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "firstName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "middleName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "lastName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "status",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "createDate",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "modDateTime",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "productId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "ntLoginName",
+              "nullable": true,
+              "type": "string"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "type": "struct"
+}

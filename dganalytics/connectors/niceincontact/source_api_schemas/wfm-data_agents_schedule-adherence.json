@@ -1,0 +1,85 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "agentStateHistory",
+      "nullable": true,
+      "type": {
+        "type": "array",
+        "containsNull": true,
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "metadata": {},
+              "name": "businessUnitId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "businessUnitName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "agentId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "stateIndex",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "startDate",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "agentStateId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "agentSessionId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "skillId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "outStateId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "outStateDescription",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "duration",
+              "nullable": true,
+              "type": "integer"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "type": "struct"
+}

@@ -17,10 +17,22 @@
             "name": "next",
             "nullable": true,
             "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "previous",
+            "nullable": true,
+            "type": "string"
           }
         ],
         "type": "struct"
       }
+    },
+    {
+      "metadata": {},
+      "name": "totalRecords",
+      "nullable": true,
+      "type": "integer"
     },
     {
       "metadata": {},
@@ -36,18 +48,312 @@
     },
     {
       "metadata": {},
-      "name": "totalRecords",
-      "nullable": true,
-      "type": "integer"
-    },
-    {
-      "metadata": {},
-      "name": "teams",
+      "name": "completedContacts",
       "nullable": true,
       "type": {
         "containsNull": true,
         "elementType": {
           "fields": [
+            {
+              "metadata": {},
+              "name": "abandoned",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "metadata": {},
+              "name": "abandonSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "acwSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "agentId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "agentSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "analyticsProcessedDate",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "callbackTime",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "campaignId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "campaignName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "conferenceSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "contactId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "contactStartDate",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "dateACWWarehoused",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "dateContactWarehoused",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "dispositionNotes",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "endReason",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "firstName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "fromAddress",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "highProficiency",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "holdCount",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "holdSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "inQueueSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "isAnalyticsProcessed",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "metadata": {},
+              "name": "isLogged",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "metadata": {},
+              "name": "isOutbound",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "metadata": {},
+              "name": "isRefused",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "metadata": {},
+              "name": "isShortAbandon",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "metadata": {},
+              "name": "isTakeover",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "metadata": {},
+              "name": "lastName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "lastUpdateTime",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "lowProficiency",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "masterContactId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "mediaSubTypeId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "mediaSubTypeName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "mediaTypeId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "mediaTypeName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "pointOfContactId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "pointOfContactName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "postQueueSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "preQueueSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "primaryDispositionId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "refuseReason",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "refuseTime",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "releaseSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "routingAttribute",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "routingTime",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "secondaryDispositionId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "serviceLevelFlag",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "skillId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "skillName",
+              "nullable": true,
+              "type": "string"
+            },
             {
               "metadata": {},
               "name": "teamId",
@@ -62,285 +368,59 @@
             },
             {
               "metadata": {},
-              "name": "isActive",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "description",
+              "name": "toAddress",
               "nullable": true,
               "type": "string"
             },
             {
               "metadata": {},
-              "name": "notes",
+              "name": "totalDurationSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "transferIndicatorId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "transferIndicatorName",
               "nullable": true,
               "type": "string"
             },
             {
               "metadata": {},
-              "name": "lastUpdateTime",
+              "name": "tags",
               "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "inViewEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "wfoEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "wfm2Enabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "qm2Enabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "maxConcurrentChats",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "agentCount",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "maxEmailAutoParkingLimit",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "inViewGamificationEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "inViewChatEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "inViewWallboardEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "inViewLMSEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "analyticsEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "requestContact",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "contactAutoFocus",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "chatThreshold",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "emailThreshold",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "workItemThreshold",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "smsThreshold",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "digitalThreshold",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "voiceThreshold",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "teamLeadId",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "deliveryMode",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "totalContactCount",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "niceAudioRecordingEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceDesktopAnalyticsEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceQmEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceScreenRecordingEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceSpeechAnalyticsEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceWfmEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceQualityOptimizationEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceSurvey_CustomerEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "nicePerformanceManagementEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceAnalyticsEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceLessonManagementEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceCoachingEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceStrategicPlannerEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceShiftBiddingEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceWfoAdvancedEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "niceWfoEssentialsEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "cxoneCustomerAuthenticationEnabled",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "socialThreshold",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "teamUuid",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "channelLock",
-              "nullable": true,
-              "type": "string"
+              "type": {
+                "containsNull": true,
+                "elementType": {
+                  "fields": [
+                    {
+                      "metadata": {},
+                      "name": "contactId",
+                      "nullable": true,
+                      "type": "integer"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "tagId",
+                      "nullable": true,
+                      "type": "integer"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "tagName",
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  ],
+                  "type": "struct"
+                },
+                "type": "array"
+              }
             }
           ],
           "type": "struct"

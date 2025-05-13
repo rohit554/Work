@@ -1,0 +1,163 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "metadata": {},
+      "name": "agentPerformance",
+      "nullable": true,
+      "type": {
+        "type": "array",
+        "containsNull": true,
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "metadata": {},
+              "name": "agentId",
+              "type": "integer",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "teamId",
+              "type": "integer",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "agentOffered",
+              "type": "integer",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "inboundHandled",
+              "type": "integer",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "inboundTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "inboundTalkTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "inboundAvgTalkTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "outboundHandled",
+              "type": "integer",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "outboundTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "outboundTalkTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "outboundAvgTalkTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "totalHandled",
+              "type": "integer",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "totalTalkTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "totalAvgTalkTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "totalAvgHandleTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "consultTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "availableTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "unavailableTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "acwTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "refused",
+              "type": "integer",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "percentRefused",
+              "type": "integer",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "loginTime",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "workingRate",
+              "type": "integer",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "occupancy",
+              "type": "integer",
+              "nullable": true
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

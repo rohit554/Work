@@ -1,0 +1,97 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "wfM_OB_StatsV9",
+      "nullable": true,
+      "type": {
+        "containsNull": true,
+        "elementType": {
+          "fields": [
+            {
+              "metadata": {},
+              "name": "businessUnitId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "businessUnitName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "intervalStartDate",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "skillId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "skillName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "mediaTypeId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "mediaTypeName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "dials",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "connects",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "connectsAHT",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "rightPartyConnects",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "rightPartyConnectsAHT",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "abandons",
+              "nullable": true,
+              "type": "integer"
+            }
+          ],
+          "type": "struct"
+        },
+        "type": "array"
+      }
+    }
+  ],
+  "type": "struct"
+}

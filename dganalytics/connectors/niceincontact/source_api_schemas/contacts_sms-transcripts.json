@@ -1,0 +1,83 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "metadata": {},
+      "name": "_links",
+      "type": {
+        "type": "struct",
+        "fields": [
+          {
+            "metadata": {},
+            "name": "self",
+            "type": "string",
+            "nullable": true
+          },
+          {
+            "metadata": {},
+            "name": "next",
+            "type": "string",
+            "nullable": true
+          },
+          {
+            "metadata": {},
+            "name": "previous",
+            "type": "string",
+            "nullable": true
+          }
+        ]
+      },
+      "nullable": true
+    },
+    {
+      "metadata": {},
+      "name": "businessUnitId",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "metadata": {},
+      "name": "totalRecords",
+      "type": "integer",
+      "nullable": true
+    },
+    {
+      "metadata": {},
+      "name": "smsTranscripts",
+      "type": {
+        "type": "array",
+        "containsNull": true,
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "metadata": {},
+              "name": "messageStart",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "messageBody",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "from",
+              "type": "string",
+              "nullable": true
+            },
+            {
+              "metadata": {},
+              "name": "contactId",
+              "type": "integer",
+              "nullable": true
+            }
+          ]
+        }
+      },
+      "nullable": true
+    }
+  ]
+}

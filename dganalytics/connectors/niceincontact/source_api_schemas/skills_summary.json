@@ -2,53 +2,7 @@
   "fields": [
     {
       "metadata": {},
-      "name": "totalRecords",
-      "nullable": true,
-      "type": "integer"
-    },
-    {
-      "metadata": {},
-      "name": "_links",
-      "nullable": true,
-      "type": {
-        "fields": [
-          {
-            "metadata": {},
-            "name": "self",
-            "nullable": true,
-            "type": "string"
-          },
-          {
-            "metadata": {},
-            "name": "next",
-            "nullable": true,
-            "type": "string"
-          },
-          {
-            "metadata": {},
-            "name": "previous",
-            "nullable": true,
-            "type": "string"
-          }
-        ],
-        "type": "struct"
-      }
-    },
-    {
-      "metadata": {},
-      "name": "lastPollTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "businessUnitId",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "agentSkillAssignments",
+      "name": "skillSummaries",
       "nullable": true,
       "type": {
         "containsNull": true,
@@ -56,43 +10,91 @@
           "fields": [
             {
               "metadata": {},
-              "name": "isActive",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "agentProficiencyValue",
+              "name": "businessUnitId",
               "nullable": true,
               "type": "integer"
             },
             {
               "metadata": {},
-              "name": "agentProficiencyName",
+              "name": "businessUnitName",
               "nullable": true,
               "type": "string"
             },
             {
               "metadata": {},
-              "name": "internalId",
+              "name": "abandonCount",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "abandonRate",
+              "nullable": true,
+              "type": "float"
+            },
+            {
+              "metadata": {},
+              "name": "agentsAcw",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "agentsAvailable",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "agentsIdle",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "agentsLoggedIn",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "agentsUnavailable",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "agentsWorking",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "averageHandleTime",
               "nullable": true,
               "type": "string"
             },
             {
               "metadata": {},
-              "name": "agentId",
+              "name": "averageInqueueTime",
               "nullable": true,
-              "type": "integer"
+              "type": "string"
             },
             {
               "metadata": {},
-              "name": "teamId",
+              "name": "averageSpeedToAnswer",
               "nullable": true,
-              "type": "integer"
+              "type": "string"
             },
             {
               "metadata": {},
-              "name": "agentName",
+              "name": "averageTalkTime",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "averageWrapTime",
               "nullable": true,
               "type": "string"
             },
@@ -104,27 +106,51 @@
             },
             {
               "metadata": {},
-              "name": "emailFromAddress",
+              "name": "campaignName",
               "nullable": true,
               "type": "string"
             },
             {
               "metadata": {},
-              "name": "isSkillActive",
+              "name": "contactsActive",
               "nullable": true,
-              "type": "boolean"
+              "type": "integer"
             },
             {
               "metadata": {},
-              "name": "isDialer",
+              "name": "contactsHandled",
               "nullable": true,
-              "type": "boolean"
+              "type": "integer"
             },
             {
               "metadata": {},
-              "name": "isNaturalCalling",
+              "name": "contactsOffered",
               "nullable": true,
-              "type": "boolean"
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "contactsQueued",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "contactsOutOfSLA",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "contactsWithinSLA",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "holdTime",
+              "nullable": true,
+              "type": "string"
             },
             {
               "metadata": {},
@@ -134,85 +160,13 @@
             },
             {
               "metadata": {},
-              "name": "lastUpdateTime",
+              "name": "longestQueueDur",
               "nullable": true,
               "type": "string"
             },
             {
               "metadata": {},
-              "name": "mediaType",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "notes",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "requireDisposition",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "scriptDisposition",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "skillId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "skillName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "useACW",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "useDisposition",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "useSecondaryDispositions",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "outboundStrategy",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "campaignName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "priorityBlending",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "isNaturalCallingRunning",
+              "name": "mediaTypeId",
               "nullable": true,
               "type": "integer"
             },
@@ -224,21 +178,75 @@
             },
             {
               "metadata": {},
-              "name": "screenPopTriggerEvent",
+              "name": "queueCount",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "serviceLevel",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "skillName",
               "nullable": true,
               "type": "string"
             },
             {
               "metadata": {},
-              "name": "lastPollTime",
+              "name": "skillId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "serviceLevelGoal",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "serviceLevelThreshold",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "totalContactTime",
               "nullable": true,
               "type": "string"
             },
             {
               "metadata": {},
-              "name": "isAgentActive",
+              "name": "dials",
               "nullable": true,
-              "type": "boolean"
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "connects",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "connectsAHT",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "rightPartyConnects",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "rightPartyConnectsAHT",
+              "nullable": true,
+              "type": "string"
             }
           ],
           "type": "struct"

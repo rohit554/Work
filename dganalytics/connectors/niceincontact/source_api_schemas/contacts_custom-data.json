@@ -30,13 +30,19 @@
     },
     {
       "metadata": {},
-      "name": "totalRecords",
+      "name": "businessUnitId",
       "nullable": true,
       "type": "integer"
     },
     {
       "metadata": {},
-      "name": "groups",
+      "name": "lastPollTime",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "ContactCustomData",
       "nullable": true,
       "type": {
         "containsNull": true,
@@ -44,31 +50,19 @@
           "fields": [
             {
               "metadata": {},
-              "name": "groupId",
+              "name": "contactId",
               "nullable": true,
               "type": "integer"
             },
             {
               "metadata": {},
-              "name": "groupName",
+              "name": "name",
               "nullable": true,
               "type": "string"
             },
             {
               "metadata": {},
-              "name": "notes",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "isActive",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "lastUpdated",
+              "name": "value",
               "nullable": true,
               "type": "string"
             }
