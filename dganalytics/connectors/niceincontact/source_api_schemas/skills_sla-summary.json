@@ -1,0 +1,95 @@
+{
+  "fields": [
+    {
+      "metadata": {},
+      "name": "totalRecords",
+      "nullable": true,
+      "type": "integer"
+    },
+    {
+      "metadata": {},
+      "name": "_links",
+      "nullable": true,
+      "type": {
+        "fields": [
+          {
+            "metadata": {},
+            "name": "self",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "next",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "previous",
+            "nullable": true,
+            "type": "string"
+          }
+        ],
+        "type": "struct"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "serviceLevelSummaries",
+      "nullable": true,
+      "type": {
+        "containsNull": true,
+        "elementType": {
+          "fields": [
+            {
+              "metadata": {},
+              "name": "BusinessUnitId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "SkillId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "SkillName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "ContactsWithinSLA",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "ContactsOutOfSLA",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "TotalContacts",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "ServiceLevel",
+              "nullable": true,
+              "type": "integer"
+            }
+          ],
+          "type": "struct"
+        },
+        "type": "array"
+      }
+    }
+  ],
+  "type": "struct"
+}
