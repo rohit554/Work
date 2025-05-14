@@ -11,9 +11,8 @@ niceincontact_end_points={
         "params": {
             "pageSize": 500
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "agents_Id":{
@@ -23,9 +22,8 @@ niceincontact_end_points={
         "interval": False,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "agents_groups":{
@@ -35,9 +33,8 @@ niceincontact_end_points={
         "interval": False,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "agents_skills":{
@@ -48,9 +45,8 @@ niceincontact_end_points={
         "params": {
             "pageSize": 500
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "groups":{
@@ -61,9 +57,8 @@ niceincontact_end_points={
         "params": {
             "pageSize": 500
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "groups_agents":{
@@ -74,9 +69,8 @@ niceincontact_end_points={
         "params": {
             "pageSize": 500
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "teams":{
@@ -87,9 +81,8 @@ niceincontact_end_points={
         "params": {
             "pageSize": 500
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "teams_Id_agents":{
@@ -100,9 +93,8 @@ niceincontact_end_points={
         "params": {
             "pageSize": 500
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "teams_agents":{
@@ -112,9 +104,8 @@ niceincontact_end_points={
         "interval": False,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "schedules_export":{
@@ -122,9 +113,8 @@ niceincontact_end_points={
         "request_type": "POST",
         "paging": False,
         "interval": True,
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "wfmdata_agents":{
@@ -134,9 +124,8 @@ niceincontact_end_points={
         "interval": True,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "wfmdata_agents_schedule_adherence":{
@@ -146,9 +135,8 @@ niceincontact_end_points={
         "interval": True,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "wfmdata_agents_scorecards":{
@@ -158,9 +146,8 @@ niceincontact_end_points={
         "interval": True,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "wfmdata_agent_performance_skills":{
@@ -170,9 +157,8 @@ niceincontact_end_points={
         "interval": True,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "wfmdata_contacts_skills":{
@@ -182,9 +168,8 @@ niceincontact_end_points={
         "interval": True,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "wfmdata_dialer_contacts_skills":{
@@ -194,9 +179,8 @@ niceincontact_end_points={
         "interval": True,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "agents_interaction_history":{
@@ -207,9 +191,8 @@ niceincontact_end_points={
         "params": {
             "pageSize": 500
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "agents_performance":{
@@ -219,9 +202,8 @@ niceincontact_end_points={
         "interval": True,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "contacts":{
@@ -232,9 +214,8 @@ niceincontact_end_points={
         "params": {
             "pageSize": 500
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "contacts_smstranscripts":{
@@ -245,9 +226,8 @@ niceincontact_end_points={
         "params": {
             "pageSize": 500
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "contacts_completed":{
@@ -258,9 +238,8 @@ niceincontact_end_points={
         "params": {
             "pageSize": 500
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "contacts_customdata":{
@@ -271,9 +250,8 @@ niceincontact_end_points={
         "params": {
             "pageSize": 500
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "skills_summary":{
@@ -283,9 +261,8 @@ niceincontact_end_points={
         "interval": True,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "skills_slasummary":{
@@ -296,9 +273,8 @@ niceincontact_end_points={
         "params": {
             "pageSize": 500
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "teams_performancetotal":{
@@ -308,9 +284,8 @@ niceincontact_end_points={
         "interval": True,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "data_extraction_jobs":{
@@ -320,9 +295,8 @@ niceincontact_end_points={
         "interval": False,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "media_playback_segments":{
@@ -332,9 +306,8 @@ niceincontact_end_points={
         "interval": False,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "interaction_analytics_gateway_segments_analyzed":{
@@ -345,9 +318,8 @@ niceincontact_end_points={
         "interval": False,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
     "interaction_analytics_gateway_segments_nalyzed_transcript":{
@@ -357,9 +329,8 @@ niceincontact_end_points={
         "interval": False,
         "params": {
         },
-        "entity_name": "entities",
         "spark_partitions": {"max_records_per_partition": 20000},
-        "tbl_overwrite": True,
+        "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     }
 }
