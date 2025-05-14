@@ -1,0 +1,243 @@
+{
+  "fields": [
+    { "metadata": {}, "name": "type", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "recordSource", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "fromInterwovenTranscript", "nullable": true, "type": "boolean" },
+    { "metadata": {}, "name": "annotatedDateTime", "nullable": true, "type": "string" },
+    { "metadata": {}, "name": "voiceFile", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "transcriptBlocks",
+      "nullable": true,
+      "type": {
+        "type": "array",
+        "containsNull": true,
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            { "metadata": {}, "name": "channelId", "nullable": true, "type": "integer" },
+            { "metadata": {}, "name": "channelName", "nullable": true, "type": "string" },
+            { "metadata": {}, "name": "offset", "nullable": true, "type": "integer" },
+            { "metadata": {}, "name": "length", "nullable": true, "type": "integer" },
+            { "metadata": {}, "name": "blockId", "nullable": true, "type": "integer" },
+            { "metadata": {}, "name": "text", "nullable": true, "type": "string" },
+            { "metadata": {}, "name": "userId", "nullable": true, "type": "string" },
+            {
+              "metadata": {},
+              "name": "voiceMetadata",
+              "nullable": true,
+              "type": {
+                "type": "struct",
+                "fields": [
+                  { "metadata": {}, "name": "startTime", "nullable": true, "type": "integer" },
+                  { "metadata": {}, "name": "endTime", "nullable": true, "type": "integer" },
+                  { "metadata": {}, "name": "confidence", "nullable": true, "type": "integer" }
+                ]
+              }
+            },
+            {
+              "metadata": {},
+              "name": "chatMetadata",
+              "nullable": true,
+              "type": {
+                "type": "struct",
+                "fields": [
+                  { "metadata": {}, "name": "timestamp", "nullable": true, "type": "integer" }
+                ]
+              }
+            },
+            {
+              "metadata": {},
+              "name": "emailMetadata",
+              "nullable": true,
+              "type": {
+                "type": "struct",
+                "fields": [
+                  { "metadata": {}, "name": "sentDate", "nullable": true, "type": "integer" },
+                  { "metadata": {}, "name": "subject", "nullable": true, "type": "string" },
+                  { "metadata": {}, "name": "from", "nullable": true, "type": "string" },
+                  { "metadata": {}, "name": "to", "nullable": true, "type": "string" }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "metadata": {},
+      "name": "annotations",
+      "nullable": true,
+      "type": {
+        "type": "array",
+        "containsNull": true,
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            { "metadata": {}, "name": "objectType", "nullable": true, "type": "string" },
+            { "metadata": {}, "name": "type", "nullable": true, "type": "string" },
+            { "metadata": {}, "name": "value", "nullable": true, "type": "string" },
+            { "metadata": {}, "name": "offset", "nullable": true, "type": "integer" },
+            { "metadata": {}, "name": "highlightLength", "nullable": true, "type": "integer" },
+            { "metadata": {}, "name": "transcriptOffset", "nullable": true, "type": "integer" },
+            { "metadata": {}, "name": "transcriptChunk", "nullable": true, "type": "integer" },
+            { "metadata": {}, "name": "channelName", "nullable": true, "type": "string" },
+            { "metadata": {}, "name": "categoryPath", "nullable": true, "type": "string" },
+            {
+              "metadata": {},
+              "name": "datasetIds",
+              "nullable": true,
+              "type": {
+                "type": "array",
+                "containsNull": true,
+                "elementType": "integer"
+              }
+            },
+            { "metadata": {}, "name": "domainRole", "nullable": true, "type": "string" },
+            { "metadata": {}, "name": "stem", "nullable": true, "type": "string" },
+            { "metadata": {}, "name": "displayText", "nullable": true, "type": "string" },
+            { "metadata": {}, "name": "sentimentCueStrength", "nullable": true, "type": "integer" }
+          ]
+        }
+      }
+    },
+    {
+      "metadata": {},
+      "name": "enlightenMetrics",
+      "nullable": true,
+      "type": {
+        "type": "array",
+        "containsNull": true,
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            { "metadata": {}, "name": "behaviorName", "nullable": true, "type": "string" },
+            { "metadata": {}, "name": "indexScore", "nullable": true, "type": "integer" },
+            { "metadata": {}, "name": "rawScore", "nullable": true, "type": "integer" },
+            {
+              "metadata": {},
+              "name": "enlightenPackageModels",
+              "nullable": true,
+              "type": {
+                "type": "array",
+                "containsNull": true,
+                "elementType": "string"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "metadata": {},
+      "name": "metrics",
+      "nullable": true,
+      "type": {
+        "type": "struct",
+        "fields": [
+          { "metadata": {}, "name": "additionalProp1", "nullable": true, "type": "string" },
+          { "metadata": {}, "name": "additionalProp2", "nullable": true, "type": "string" },
+          { "metadata": {}, "name": "additionalProp3", "nullable": true, "type": "string" }
+        ]
+      }
+    },
+    {
+      "metadata": {},
+      "name": "segmentSummary",
+      "nullable": true,
+      "type": {
+        "type": "struct",
+        "fields": [
+          { "metadata": {}, "name": "summary", "nullable": true, "type": "string" },
+          {
+            "metadata": {},
+            "name": "actions",
+            "nullable": true,
+            "type": {
+              "type": "array",
+              "containsNull": true,
+              "elementType": {
+                "type": "struct",
+                "fields": [
+                  { "metadata": {}, "name": "text", "nullable": true, "type": "string" },
+                  {
+                    "metadata": {},
+                    "name": "snippet",
+                    "nullable": true,
+                    "type": {
+                      "type": "struct",
+                      "fields": [
+                        { "metadata": {}, "name": "snippet", "nullable": true, "type": "string" },
+                        { "metadata": {}, "name": "text", "nullable": true, "type": "string" },
+                        { "metadata": {}, "name": "startOffset", "nullable": true, "type": "integer" },
+                        { "metadata": {}, "name": "endOffset", "nullable": true, "type": "integer" }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "metadata": {},
+            "name": "primaryIntent",
+            "nullable": true,
+            "type": {
+              "type": "struct",
+              "fields": [
+                { "metadata": {}, "name": "category", "nullable": true, "type": "string" },
+                { "metadata": {}, "name": "topic", "nullable": true, "type": "string" },
+                { "metadata": {}, "name": "name", "nullable": true, "type": "string" },
+                {
+                  "metadata": {},
+                  "name": "snippet",
+                  "nullable": true,
+                  "type": {
+                    "type": "struct",
+                    "fields": [
+                      { "metadata": {}, "name": "snippet", "nullable": true, "type": "string" },
+                      { "metadata": {}, "name": "text", "nullable": true, "type": "string" },
+                      { "metadata": {}, "name": "startOffset", "nullable": true, "type": "integer" },
+                      { "metadata": {}, "name": "endOffset", "nullable": true, "type": "integer" }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "metadata": {},
+            "name": "outcomes",
+            "nullable": true,
+            "type": {
+              "type": "array",
+              "containsNull": true,
+              "elementType": {
+                "type": "struct",
+                "fields": [
+                  { "metadata": {}, "name": "name", "nullable": true, "type": "string" },
+                  { "metadata": {}, "name": "score", "nullable": true, "type": "integer" },
+                  {
+                    "metadata": {},
+                    "name": "snippet",
+                    "nullable": true,
+                    "type": {
+                      "type": "struct",
+                      "fields": [
+                        { "metadata": {}, "name": "snippet", "nullable": true, "type": "string" },
+                        { "metadata": {}, "name": "text", "nullable": true, "type": "string" },
+                        { "metadata": {}, "name": "startOffset", "nullable": true, "type": "integer" },
+                        { "metadata": {}, "name": "endOffset", "nullable": true, "type": "integer" }
+                      ]
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "type": "struct"
+}

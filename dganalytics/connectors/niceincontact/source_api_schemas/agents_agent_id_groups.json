@@ -1,0 +1,24 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "name": "agentGroups",
+      "type": {
+        "type": "array",
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            { "name": "groupId", "type": "long", "nullable": true, "metadata": {} },
+            { "name": "groupName", "type": "string", "nullable": true, "metadata": {} },
+            { "name": "isActive", "type": "boolean", "nullable": true, "metadata": {} },
+            { "name": "notes", "type": "string", "nullable": true, "metadata": {} },
+            { "name": "lastUpdated", "type": "string", "nullable": true, "metadata": {} }
+          ]
+        },
+        "containsNull": true
+      },
+      "nullable": true,
+      "metadata": {}
+    }
+  ]
+}
