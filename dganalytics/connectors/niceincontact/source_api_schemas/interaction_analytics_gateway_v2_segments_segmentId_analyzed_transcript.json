@@ -1,10 +1,35 @@
 {
   "fields": [
-    { "metadata": {}, "name": "type", "nullable": true, "type": "string" },
-    { "metadata": {}, "name": "recordSource", "nullable": true, "type": "string" },
-    { "metadata": {}, "name": "fromInterwovenTranscript", "nullable": true, "type": "boolean" },
-    { "metadata": {}, "name": "annotatedDateTime", "nullable": true, "type": "string" },
-    { "metadata": {}, "name": "voiceFile", "nullable": true, "type": "string" },
+    {
+      "metadata": {},
+      "name": "type",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "recordSource",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "fromInterwovenTranscript",
+      "nullable": true,
+      "type": "boolean"
+    },
+    {
+      "metadata": {},
+      "name": "annotatedDateTime",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "voiceFile",
+      "nullable": true,
+      "type": "string"
+    },
     {
       "metadata": {},
       "name": "transcriptBlocks",
@@ -15,13 +40,48 @@
         "elementType": {
           "type": "struct",
           "fields": [
-            { "metadata": {}, "name": "channelId", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "channelName", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "offset", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "length", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "blockId", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "text", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "userId", "nullable": true, "type": "string" },
+            {
+              "metadata": {},
+              "name": "channelId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "channelName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "offset",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "length",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "blockId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "text",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "userId",
+              "nullable": true,
+              "type": "string"
+            },
             {
               "metadata": {},
               "name": "voiceMetadata",
@@ -29,9 +89,24 @@
               "type": {
                 "type": "struct",
                 "fields": [
-                  { "metadata": {}, "name": "startTime", "nullable": true, "type": "integer" },
-                  { "metadata": {}, "name": "endTime", "nullable": true, "type": "integer" },
-                  { "metadata": {}, "name": "confidence", "nullable": true, "type": "integer" }
+                  {
+                    "metadata": {},
+                    "name": "startTime",
+                    "nullable": true,
+                    "type": "integer"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "endTime",
+                    "nullable": true,
+                    "type": "integer"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "confidence",
+                    "nullable": true,
+                    "type": "integer"
+                  }
                 ]
               }
             },
@@ -42,7 +117,12 @@
               "type": {
                 "type": "struct",
                 "fields": [
-                  { "metadata": {}, "name": "timestamp", "nullable": true, "type": "integer" }
+                  {
+                    "metadata": {},
+                    "name": "timestamp",
+                    "nullable": true,
+                    "type": "integer"
+                  }
                 ]
               }
             },
@@ -53,10 +133,30 @@
               "type": {
                 "type": "struct",
                 "fields": [
-                  { "metadata": {}, "name": "sentDate", "nullable": true, "type": "integer" },
-                  { "metadata": {}, "name": "subject", "nullable": true, "type": "string" },
-                  { "metadata": {}, "name": "from", "nullable": true, "type": "string" },
-                  { "metadata": {}, "name": "to", "nullable": true, "type": "string" }
+                  {
+                    "metadata": {},
+                    "name": "sentDate",
+                    "nullable": true,
+                    "type": "integer"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "subject",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "from",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "to",
+                    "nullable": true,
+                    "type": "string"
+                  }
                 ]
               }
             }
@@ -74,15 +174,60 @@
         "elementType": {
           "type": "struct",
           "fields": [
-            { "metadata": {}, "name": "objectType", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "type", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "value", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "offset", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "highlightLength", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "transcriptOffset", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "transcriptChunk", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "channelName", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "categoryPath", "nullable": true, "type": "string" },
+            {
+              "metadata": {},
+              "name": "objectType",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "type",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "value",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "offset",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "highlightLength",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "transcriptOffset",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "transcriptChunk",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "channelName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "categoryPath",
+              "nullable": true,
+              "type": "string"
+            },
             {
               "metadata": {},
               "name": "datasetIds",
@@ -93,10 +238,30 @@
                 "elementType": "integer"
               }
             },
-            { "metadata": {}, "name": "domainRole", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "stem", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "displayText", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "sentimentCueStrength", "nullable": true, "type": "integer" }
+            {
+              "metadata": {},
+              "name": "domainRole",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "stem",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "displayText",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "sentimentCueStrength",
+              "nullable": true,
+              "type": "integer"
+            }
           ]
         }
       }
@@ -111,9 +276,24 @@
         "elementType": {
           "type": "struct",
           "fields": [
-            { "metadata": {}, "name": "behaviorName", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "indexScore", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "rawScore", "nullable": true, "type": "integer" },
+            {
+              "metadata": {},
+              "name": "behaviorName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "indexScore",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "rawScore",
+              "nullable": true,
+              "type": "integer"
+            },
             {
               "metadata": {},
               "name": "enlightenPackageModels",
@@ -135,9 +315,24 @@
       "type": {
         "type": "struct",
         "fields": [
-          { "metadata": {}, "name": "additionalProp1", "nullable": true, "type": "string" },
-          { "metadata": {}, "name": "additionalProp2", "nullable": true, "type": "string" },
-          { "metadata": {}, "name": "additionalProp3", "nullable": true, "type": "string" }
+          {
+            "metadata": {},
+            "name": "additionalProp1",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "additionalProp2",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "additionalProp3",
+            "nullable": true,
+            "type": "string"
+          }
         ]
       }
     },
@@ -148,7 +343,12 @@
       "type": {
         "type": "struct",
         "fields": [
-          { "metadata": {}, "name": "summary", "nullable": true, "type": "string" },
+          {
+            "metadata": {},
+            "name": "summary",
+            "nullable": true,
+            "type": "string"
+          },
           {
             "metadata": {},
             "name": "actions",
@@ -159,7 +359,12 @@
               "elementType": {
                 "type": "struct",
                 "fields": [
-                  { "metadata": {}, "name": "text", "nullable": true, "type": "string" },
+                  {
+                    "metadata": {},
+                    "name": "text",
+                    "nullable": true,
+                    "type": "string"
+                  },
                   {
                     "metadata": {},
                     "name": "snippet",
@@ -167,10 +372,30 @@
                     "type": {
                       "type": "struct",
                       "fields": [
-                        { "metadata": {}, "name": "snippet", "nullable": true, "type": "string" },
-                        { "metadata": {}, "name": "text", "nullable": true, "type": "string" },
-                        { "metadata": {}, "name": "startOffset", "nullable": true, "type": "integer" },
-                        { "metadata": {}, "name": "endOffset", "nullable": true, "type": "integer" }
+                        {
+                          "metadata": {},
+                          "name": "snippet",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        {
+                          "metadata": {},
+                          "name": "text",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        {
+                          "metadata": {},
+                          "name": "startOffset",
+                          "nullable": true,
+                          "type": "integer"
+                        },
+                        {
+                          "metadata": {},
+                          "name": "endOffset",
+                          "nullable": true,
+                          "type": "integer"
+                        }
                       ]
                     }
                   }
@@ -185,9 +410,24 @@
             "type": {
               "type": "struct",
               "fields": [
-                { "metadata": {}, "name": "category", "nullable": true, "type": "string" },
-                { "metadata": {}, "name": "topic", "nullable": true, "type": "string" },
-                { "metadata": {}, "name": "name", "nullable": true, "type": "string" },
+                {
+                  "metadata": {},
+                  "name": "category",
+                  "nullable": true,
+                  "type": "string"
+                },
+                {
+                  "metadata": {},
+                  "name": "topic",
+                  "nullable": true,
+                  "type": "string"
+                },
+                {
+                  "metadata": {},
+                  "name": "name",
+                  "nullable": true,
+                  "type": "string"
+                },
                 {
                   "metadata": {},
                   "name": "snippet",
@@ -195,10 +435,30 @@
                   "type": {
                     "type": "struct",
                     "fields": [
-                      { "metadata": {}, "name": "snippet", "nullable": true, "type": "string" },
-                      { "metadata": {}, "name": "text", "nullable": true, "type": "string" },
-                      { "metadata": {}, "name": "startOffset", "nullable": true, "type": "integer" },
-                      { "metadata": {}, "name": "endOffset", "nullable": true, "type": "integer" }
+                      {
+                        "metadata": {},
+                        "name": "snippet",
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      {
+                        "metadata": {},
+                        "name": "text",
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      {
+                        "metadata": {},
+                        "name": "startOffset",
+                        "nullable": true,
+                        "type": "integer"
+                      },
+                      {
+                        "metadata": {},
+                        "name": "endOffset",
+                        "nullable": true,
+                        "type": "integer"
+                      }
                     ]
                   }
                 }
@@ -215,8 +475,18 @@
               "elementType": {
                 "type": "struct",
                 "fields": [
-                  { "metadata": {}, "name": "name", "nullable": true, "type": "string" },
-                  { "metadata": {}, "name": "score", "nullable": true, "type": "integer" },
+                  {
+                    "metadata": {},
+                    "name": "name",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  {
+                    "metadata": {},
+                    "name": "score",
+                    "nullable": true,
+                    "type": "integer"
+                  },
                   {
                     "metadata": {},
                     "name": "snippet",
@@ -224,10 +494,30 @@
                     "type": {
                       "type": "struct",
                       "fields": [
-                        { "metadata": {}, "name": "snippet", "nullable": true, "type": "string" },
-                        { "metadata": {}, "name": "text", "nullable": true, "type": "string" },
-                        { "metadata": {}, "name": "startOffset", "nullable": true, "type": "integer" },
-                        { "metadata": {}, "name": "endOffset", "nullable": true, "type": "integer" }
+                        {
+                          "metadata": {},
+                          "name": "snippet",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        {
+                          "metadata": {},
+                          "name": "text",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        {
+                          "metadata": {},
+                          "name": "startOffset",
+                          "nullable": true,
+                          "type": "integer"
+                        },
+                        {
+                          "metadata": {},
+                          "name": "endOffset",
+                          "nullable": true,
+                          "type": "integer"
+                        }
                       ]
                     }
                   }

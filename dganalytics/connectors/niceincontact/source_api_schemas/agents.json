@@ -2,40 +2,6 @@
   "type": "struct",
   "fields": [
     {
-      "name": "_links",
-      "type": {
-        "type": "struct",
-        "fields": [
-          {
-            "name": "self",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "next",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "previous",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          }
-        ]
-      },
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "totalRecords",
-      "type": "long",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
       "name": "agents",
       "type": {
         "type": "array",
@@ -68,6 +34,12 @@
             },
             {
               "name": "lastName",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "userId",
               "type": "string",
               "nullable": true,
               "metadata": {}
@@ -320,7 +292,7 @@
             },
             {
               "name": "hiringSource",
-              "type": "integer",
+              "type": "string",
               "nullable": true,
               "metadata": {}
             },
@@ -475,6 +447,66 @@
               "metadata": {}
             },
             {
+              "name": "customerCard",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "locked",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "userNameDomain",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "combinedUserNameDomain",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "rowNumber",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "SmsThreshold",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "UseTeamsmsThreshold",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "LoginAuthenticatorId",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "DigitalThreshold",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "UseTeamDigitalThreshold",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
               "name": "contactAutoFocus",
               "type": "boolean",
               "nullable": true,
@@ -505,6 +537,18 @@
               "metadata": {}
             },
             {
+              "name": "voiceThreshold",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "useTeamVoiceThreshold",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
               "name": "recordingNumbers",
               "type": {
                 "type": "array",
@@ -527,6 +571,224 @@
             {
               "name": "isOpenIdProfileComplete",
               "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "teamUuid",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "maxPreview",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "deliveryMode",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "totalContactCount",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "useTeamDeliveryModeSettings",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "emailRefusalTimeout",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "voicemailRefusalTimeout",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "smsRefusalTimeout",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "isBillable",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "agentVoiceThreshold",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "agentChatThreshold",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "agentEmailThreshold",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "agentWorkItemThreshold",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "agentDeliveryMode",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "agentTotalContactCount",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "agentContactAutoFocus",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "agentRequestContact",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "agentMaxVersion",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "integratedSoftphoneWebRtcUrls",
+              "type": {
+                "type": "array",
+                "elementType": {
+                  "type": "struct",
+                  "fields": [
+                    {
+                      "name": "urlName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "weight",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    }
+                  ]
+                },
+                "containsNull": true
+              },
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "AgentPhoneTimeout",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "AgentPhoneTimeoutSeconds",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "address1",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "address2",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "zipCode",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "noFixedAddress",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "DigitalRefusalTimeout",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "agentCxaClientVersion",
+              "type": "integer",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "agentCxaReleasePrevious",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "stateCode",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "AgentIntegration",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "channelLock",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "digitalEngagementEnabled",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "teams_channel_Id",
+              "type": "string",
               "nullable": true,
               "metadata": {}
             }

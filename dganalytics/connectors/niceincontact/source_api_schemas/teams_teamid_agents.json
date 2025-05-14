@@ -12,9 +12,24 @@
       "type": {
         "type": "struct",
         "fields": [
-          { "name": "self", "type": "string", "nullable": true, "metadata": {} },
-          { "name": "next", "type": "string", "nullable": true, "metadata": {} },
-          { "name": "previous", "type": "string", "nullable": true, "metadata": {} }
+          {
+            "name": "self",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "next",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          },
+          {
+            "name": "previous",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+          }
         ]
       },
       "nullable": true,
@@ -33,34 +48,174 @@
         "elementType": {
           "type": "struct",
           "fields": [
-            { "name": "teamId", "type": "long", "nullable": true, "metadata": {} },
-            { "name": "teamName", "type": "string", "nullable": true, "metadata": {} },
-            { "name": "isActive", "type": "boolean", "nullable": true, "metadata": {} },
-            { "name": "description", "type": "string", "nullable": true, "metadata": {} },
-            { "name": "notes", "type": "string", "nullable": true, "metadata": {} },
-            { "name": "lastUpdateTime", "type": "string", "nullable": true, "metadata": {} },
-            { "name": "inViewEnabled", "type": "boolean", "nullable": true, "metadata": {} },
-            { "name": "wfoEnabled", "type": "boolean", "nullable": true, "metadata": {} },
-            { "name": "wfm2Enabled", "type": "boolean", "nullable": true, "metadata": {} },
-            { "name": "qm2Enabled", "type": "boolean", "nullable": true, "metadata": {} },
-            { "name": "maxConcurrentChats", "type": "long", "nullable": true, "metadata": {} },
-            { "name": "agentCount", "type": "long", "nullable": true, "metadata": {} },
-            { "name": "maxEmailAutoParkingLimit", "type": "long", "nullable": true, "metadata": {} },
-            { "name": "inViewGamificationEnabled", "type": "boolean", "nullable": true, "metadata": {} },
-            { "name": "inViewChatEnabled", "type": "boolean", "nullable": true, "metadata": {} },
-            { "name": "inViewLMSEnabled", "type": "boolean", "nullable": true, "metadata": {} },
-            { "name": "analyticsEnabled", "type": "boolean", "nullable": true, "metadata": {} },
-            { "name": "voiceThreshold", "type": "long", "nullable": true, "metadata": {} },
-            { "name": "chatThreshold", "type": "long", "nullable": true, "metadata": {} },
-            { "name": "emailThreshold", "type": "long", "nullable": true, "metadata": {} },
-            { "name": "socialThreshold", "type": "long", "nullable": true, "metadata": {} },
-            { "name": "workItemThreshold", "type": "long", "nullable": true, "metadata": {} },
-            { "name": "smsThreshold", "type": "long", "nullable": true, "metadata": {} },
-            { "name": "digitalThreshold", "type": "long", "nullable": true, "metadata": {} },
-            { "name": "requestContact", "type": "boolean", "nullable": true, "metadata": {} },
-            { "name": "contactAutoFocus", "type": "boolean", "nullable": true, "metadata": {} },
-            { "name": "inViewWallboardEnabled", "type": "boolean", "nullable": true, "metadata": {} },
-            { "name": "channelLock", "type": "boolean", "nullable": true, "metadata": {} },
+            {
+              "name": "teamId",
+              "type": "long",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "teamName",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "isActive",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "description",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "notes",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "lastUpdateTime",
+              "type": "string",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "inViewEnabled",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "wfoEnabled",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "wfm2Enabled",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "qm2Enabled",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "maxConcurrentChats",
+              "type": "long",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "agentCount",
+              "type": "long",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "maxEmailAutoParkingLimit",
+              "type": "long",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "inViewGamificationEnabled",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "inViewChatEnabled",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "inViewLMSEnabled",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "analyticsEnabled",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "voiceThreshold",
+              "type": "long",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "chatThreshold",
+              "type": "long",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "emailThreshold",
+              "type": "long",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "socialThreshold",
+              "type": "long",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "workItemThreshold",
+              "type": "long",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "smsThreshold",
+              "type": "long",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "digitalThreshold",
+              "type": "long",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "requestContact",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "contactAutoFocus",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "inViewWallboardEnabled",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
+            {
+              "name": "channelLock",
+              "type": "boolean",
+              "nullable": true,
+              "metadata": {}
+            },
             {
               "name": "agents",
               "type": {
@@ -68,125 +223,672 @@
                 "elementType": {
                   "type": "struct",
                   "fields": [
-                    { "name": "agentId", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "userName", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "firstName", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "middleName", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "lastName", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "emailAddress", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "isActive", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "teamId", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "teamName", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "reportToId", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "reportToName", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "isSupervisor", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "lastLogin", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "lastUpdated", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "locationId", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "custom1", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "custom2", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "custom3", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "custom4", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "custom5", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "internalId", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "profileId", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "profileName", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "timeZone", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "country", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "state", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "city", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "chatRefusalTimeout", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "phoneRefusalTimeout", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "voicemailRefusalTimeout", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "workItemRefusalTimeout", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "defaultDialingPattern", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "defaultDialingPatternName", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "maxConcurrentChats", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "notes", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "hireDate", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "terminationDate", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "hourlyCost", "type": "double", "nullable": true, "metadata": {} },
-                    { "name": "rehireStatus", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "employmentType", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "referral", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "atHome", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "hiringSource", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "ntLoginName", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "scheduleNotification", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "federatedId", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "apiKey", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "chatThreshold", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "contactAutoFocus", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "countryName", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "createDate", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "crmUserName", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "deliveryMode", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "emailRefusalTimeout", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "emailThreshold", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "employmentTypeName", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "inactiveDate", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "isBillable", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "isOpenIdProfileComplete", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "isWhatIfAgent", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "issuer", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "location", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "maxEmailAutoParkingLimit", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "maxPreview", "type": "boolean", "nullable": true, "metadata": {} },
+                    {
+                      "name": "agentId",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "userName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "firstName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "middleName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "lastName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "emailAddress",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "isActive",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "teamId",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "teamName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "reportToId",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "reportToName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "isSupervisor",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "lastLogin",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "lastUpdated",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "locationId",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "custom1",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "custom2",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "custom3",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "custom4",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "custom5",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "internalId",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "profileId",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "profileName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "timeZone",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "country",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "state",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "city",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "chatRefusalTimeout",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "phoneRefusalTimeout",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "voicemailRefusalTimeout",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "workItemRefusalTimeout",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "defaultDialingPattern",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "defaultDialingPatternName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "maxConcurrentChats",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "notes",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "hireDate",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "terminationDate",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "hourlyCost",
+                      "type": "double",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "rehireStatus",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "employmentType",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "referral",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "atHome",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "hiringSource",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "ntLoginName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "scheduleNotification",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "federatedId",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "apiKey",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "chatThreshold",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "contactAutoFocus",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "countryName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "createDate",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "crmUserName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "deliveryMode",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "emailRefusalTimeout",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "emailThreshold",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "employmentTypeName",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "inactiveDate",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "isBillable",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "isOpenIdProfileComplete",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "isWhatIfAgent",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "issuer",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "location",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "maxEmailAutoParkingLimit",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "maxPreview",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
                     {
                       "name": "recordingNumbers",
                       "type": {
                         "type": "array",
-                        "elementType": { "type": "string" },
+                        "elementType": {
+                          "type": "string"
+                        },
                         "containsNull": true
                       },
                       "nullable": true,
                       "metadata": {}
                     },
-                    { "name": "requestContact", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "sendEmailNotifications", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "sipUser", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "smsRefusalTimeout", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "subject", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "systemDomain", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "systemUser", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "teamUuid", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "telephone1", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "telephone2", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "timeDisplayFormat", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "timeZoneOffset", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "totalContactCount", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "useAgentTimeZone", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "useTeamChatThreshold", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "useTeamContactAutoFocus", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "useTeamDeliveryModeSettings", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "useTeamEmailAutoParkingLimit", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "useTeamEmailThreshold", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "useTeamMaxConcurrentChats", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "useTeamRequestContact", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "useTeamWorkItemThreshold", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "useTeamSmsThreshold", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "useTeamDigitalThreshold", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "userType", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "userId", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "voiceThreshold", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "workItemThreshold", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "smsThreshold", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "digitalThreshold", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "agentVoiceThreshold", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "agentChatThreshold", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "agentEmailThreshold", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "agentWorkItemThreshold", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "agentSmsThreshold", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "agentDigitalThreshold", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "agentTotalContactCount", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "agentDeliveryMode", "type": "string", "nullable": true, "metadata": {} },
-                    { "name": "useTeamVoiceThreshold", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "agentRequestContact", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "agentContactAutoFocus", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "agentMaxVersion", "type": "long", "nullable": true, "metadata": {} },
-                    { "name": "channelLock", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "agentChannelLock", "type": "boolean", "nullable": true, "metadata": {} },
-                    { "name": "useTeamChannelLock", "type": "boolean", "nullable": true, "metadata": {} }
+                    {
+                      "name": "requestContact",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "sendEmailNotifications",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "sipUser",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "smsRefusalTimeout",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "subject",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "systemDomain",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "systemUser",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "teamUuid",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "telephone1",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "telephone2",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "timeDisplayFormat",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "timeZoneOffset",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "totalContactCount",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useAgentTimeZone",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useTeamChatThreshold",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useTeamContactAutoFocus",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useTeamDeliveryModeSettings",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useTeamEmailAutoParkingLimit",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useTeamEmailThreshold",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useTeamMaxConcurrentChats",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useTeamRequestContact",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useTeamWorkItemThreshold",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useTeamSmsThreshold",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useTeamDigitalThreshold",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "userType",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "userId",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "voiceThreshold",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "workItemThreshold",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "smsThreshold",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "digitalThreshold",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "agentVoiceThreshold",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "agentChatThreshold",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "agentEmailThreshold",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "agentWorkItemThreshold",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "agentSmsThreshold",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "agentDigitalThreshold",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "agentTotalContactCount",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "agentDeliveryMode",
+                      "type": "string",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useTeamVoiceThreshold",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "agentRequestContact",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "agentContactAutoFocus",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "agentMaxVersion",
+                      "type": "long",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "channelLock",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "agentChannelLock",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    },
+                    {
+                      "name": "useTeamChannelLock",
+                      "type": "boolean",
+                      "nullable": true,
+                      "metadata": {}
+                    }
                   ]
                 },
                 "containsNull": true

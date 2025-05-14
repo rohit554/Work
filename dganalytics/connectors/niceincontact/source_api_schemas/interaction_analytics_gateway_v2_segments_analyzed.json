@@ -16,14 +16,54 @@
         "elementType": {
           "type": "struct",
           "fields": [
-            { "metadata": {}, "name": "tenantId", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "segmentId", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "acdContactId", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "agentContactId", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "resolved", "nullable": true, "type": "boolean" },
-            { "metadata": {}, "name": "publishedAt", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "startTime", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "endTime", "nullable": true, "type": "string" },
+            {
+              "metadata": {},
+              "name": "tenantId",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "segmentId",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "acdContactId",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "agentContactId",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "resolved",
+              "nullable": true,
+              "type": "boolean"
+            },
+            {
+              "metadata": {},
+              "name": "publishedAt",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "startTime",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "endTime",
+              "nullable": true,
+              "type": "string"
+            },
             {
               "metadata": {},
               "name": "enlightenMetrics",
@@ -34,9 +74,24 @@
                 "elementType": {
                   "type": "struct",
                   "fields": [
-                    { "metadata": {}, "name": "behaviorName", "nullable": true, "type": "string" },
-                    { "metadata": {}, "name": "indexScore", "nullable": true, "type": "integer" },
-                    { "metadata": {}, "name": "rawScore", "nullable": true, "type": "integer" },
+                    {
+                      "metadata": {},
+                      "name": "behaviorName",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "indexScore",
+                      "nullable": true,
+                      "type": "integer"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "rawScore",
+                      "nullable": true,
+                      "type": "integer"
+                    },
                     {
                       "metadata": {},
                       "name": "enlightenPackageModels",
@@ -61,7 +116,12 @@
                 "elementType": {
                   "type": "struct",
                   "fields": [
-                    { "metadata": {}, "name": "name", "nullable": true, "type": "string" },
+                    {
+                      "metadata": {},
+                      "name": "name",
+                      "nullable": true,
+                      "type": "string"
+                    },
                     {
                       "metadata": {},
                       "name": "sentiment",
@@ -69,7 +129,12 @@
                       "type": {
                         "type": "struct",
                         "fields": [
-                          { "metadata": {}, "name": "value", "nullable": true, "type": "string" }
+                          {
+                            "metadata": {},
+                            "name": "value",
+                            "nullable": true,
+                            "type": "string"
+                          }
                         ]
                       }
                     },
@@ -80,7 +145,12 @@
                       "type": {
                         "type": "struct",
                         "fields": [
-                          { "metadata": {}, "name": "value", "nullable": true, "type": "string" }
+                          {
+                            "metadata": {},
+                            "name": "value",
+                            "nullable": true,
+                            "type": "string"
+                          }
                         ]
                       }
                     },
@@ -91,7 +161,12 @@
                       "type": {
                         "type": "struct",
                         "fields": [
-                          { "metadata": {}, "name": "value", "nullable": true, "type": "string" }
+                          {
+                            "metadata": {},
+                            "name": "value",
+                            "nullable": true,
+                            "type": "string"
+                          }
                         ]
                       }
                     },
@@ -102,7 +177,12 @@
                       "type": {
                         "type": "struct",
                         "fields": [
-                          { "metadata": {}, "name": "type", "nullable": true, "type": "string" }
+                          {
+                            "metadata": {},
+                            "name": "type",
+                            "nullable": true,
+                            "type": "string"
+                          }
                         ]
                       }
                     }
@@ -120,7 +200,12 @@
                 "elementType": {
                   "type": "struct",
                   "fields": [
-                    { "metadata": {}, "name": "channelName", "nullable": true, "type": "string" },
+                    {
+                      "metadata": {},
+                      "name": "channelName",
+                      "nullable": true,
+                      "type": "string"
+                    },
                     {
                       "metadata": {},
                       "name": "fullPaths",
@@ -145,17 +230,52 @@
                 "elementType": {
                   "type": "struct",
                   "fields": [
-                    { "metadata": {}, "name": "channelName", "nullable": true, "type": "string" },
-                    { "metadata": {}, "name": "displayText", "nullable": true, "type": "string" },
-                    { "metadata": {}, "name": "type", "nullable": true, "type": "string" },
-                    { "metadata": {}, "name": "sentimentValue", "nullable": true, "type": "string" },
-                    { "metadata": {}, "name": "custom", "nullable": true, "type": "boolean" }
+                    {
+                      "metadata": {},
+                      "name": "channelName",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "displayText",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "type",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "sentimentValue",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    {
+                      "metadata": {},
+                      "name": "custom",
+                      "nullable": true,
+                      "type": "boolean"
+                    }
                   ]
                 }
               }
             },
-            { "metadata": {}, "name": "mediaType", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "firstAnnotatedAt", "nullable": true, "type": "string" },
+            {
+              "metadata": {},
+              "name": "mediaType",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "firstAnnotatedAt",
+              "nullable": true,
+              "type": "string"
+            },
             {
               "metadata": {},
               "name": "contactNo",
@@ -166,20 +286,90 @@
                 "elementType": "string"
               }
             },
-            { "metadata": {}, "name": "interactionId", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "holdCount", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "holdSeconds", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "contactEndReason", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "dispositionCode", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "nonHoldNotableSilenceSeconds", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "nonHoldNotableSilencePercentage", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "notableSilenceSeconds", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "notableSilencePercentage", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "enlightenSentimentRawScore", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "enlightenSentimentIndexScore", "nullable": true, "type": "integer" },
-            { "metadata": {}, "name": "segmentSummaryPrimaryIntentCategory", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "segmentSummaryPrimaryIntentTopic", "nullable": true, "type": "string" },
-            { "metadata": {}, "name": "segmentSummaryPrimaryIntentName", "nullable": true, "type": "string" },
+            {
+              "metadata": {},
+              "name": "interactionId",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "holdCount",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "holdSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "contactEndReason",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "dispositionCode",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "nonHoldNotableSilenceSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "nonHoldNotableSilencePercentage",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "notableSilenceSeconds",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "notableSilencePercentage",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "enlightenSentimentRawScore",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "enlightenSentimentIndexScore",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "metadata": {},
+              "name": "segmentSummaryPrimaryIntentCategory",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "segmentSummaryPrimaryIntentTopic",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "segmentSummaryPrimaryIntentName",
+              "nullable": true,
+              "type": "string"
+            },
             {
               "metadata": {},
               "name": "segmentSummaryActions",
@@ -211,9 +401,24 @@
       "type": {
         "type": "struct",
         "fields": [
-          { "metadata": {}, "name": "self", "nullable": true, "type": "string" },
-          { "metadata": {}, "name": "previous", "nullable": true, "type": "string" },
-          { "metadata": {}, "name": "next", "nullable": true, "type": "string" }
+          {
+            "metadata": {},
+            "name": "self",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "previous",
+            "nullable": true,
+            "type": "string"
+          },
+          {
+            "metadata": {},
+            "name": "next",
+            "nullable": true,
+            "type": "string"
+          }
         ]
       }
     }
