@@ -1,96 +1,68 @@
+
+
 import os
-from dganalytics.utils.utils import get_logger
 from os.path import expanduser
+from dganalytics.utils.utils import get_logger
 from pyspark.sql.types import StructType
 import json
 from pathlib import Path
 
-
-
-class NiceInContactClient:
+def niceincontact_utils_logger(tenant, app_name):
     """
-    Client for managing configuration and utilities related to NICE inContact data processing.
+    Initialize and return a logger for the given tenant and application name.
 
-    This client sets environment-based paths, initializes logging, generates the database name,
-    and provides a method to load Spark schemas from predefined JSON files.
+    This function sets a global `logger` variable using the `get_logger` utility,
+    allowing other functions in the module to reuse it.
+
+    Args:
+        tenant (str): The tenant identifier.
+        app_name (str): The name of the application.
+
+    Returns:
+        Logger: A configured logger instance for the given tenant and application.
     """
-    def __init__(self, tenant: str, app_name: str, env: str = "prod"):
-        """
-        Initialize the NiceInContactClient.
+    global logger
+    logger = get_logger(tenant, app_name)
+    return logger
 
-        Args:
-            tenant (str): The tenant identifier.
-            app_name (str): Name of the application using the client.
-            env (str): Deployment environment. Options: 'local', 'prod'. Defaults to 'prod'.
-        """
-        self.tenant = tenant
-        self.app_name = app_name
-        self.env = env.lower()
-        self.prefix = "niceincontact"
-        self.logger = get_logger(tenant, app_name)
+def get_dbname(tenant: str, app_name: str = "niceincontact") -> str:
+    """
+    Generate a standardized database name using the application and tenant names.
 
-        self.db_name = self._get_dbname()
-        self.tenant_path = ""
-        self.db_path = ""
-        self.log_path = ""
-        self._get_path_vars()
+    Args:
+        tenant (str): The tenant identifier.
+        app_name (str, optional): The application name prefix. Defaults to "niceincontact".
 
-    def _get_path_vars(self):
-        """
-        Set environment-specific file paths for tenant data, database location, and logs.
+    Returns:
+        str: A string representing the formatted database name.
+    """
+    db_name = f"{app_name}_{tenant}"
+    return db_name
 
-        In 'local' mode, paths are relative to the user's home directory.
-        In other environments, paths are set for DBFS (Databricks File System).
-        """
-        if self.env == "local":
-            home = expanduser("~")
-            self.tenant_path = os.path.join(home, "datagamz", "analytics", self.tenant)
-            self.db_path = "file:///" + self.tenant_path.replace("\\", "/") + "/data/databases"
-            self.log_path = os.path.join(self.tenant_path, 'logs')
-        else:
-            self.tenant_path = f"/dbfs/mnt/datagamz/{self.tenant}"
-            self.db_path = f"dbfs:/mnt/datagamz/{self.tenant}/data/databases"
-            self.log_path = f"/dbfs/mnt/datagamz/{self.tenant}/logs"
+def get_schema(api_name: str) -> StructType:
+    """
+    Load the Spark schema for a given API from a corresponding JSON file.
 
-        self.logger.info(f"Path variables set for env={self.env}")
-        self.logger.debug(f"tenant_path={self.tenant_path}, db_path={self.db_path}, log_path={self.log_path}")
+    Args:
+        api_name (str): The name of the API whose schema needs to be loaded.
 
-    def _get_dbname(self):
-        """
-        Generate a standardized database name based on the tenant.
+    Returns:
+        StructType: A PySpark StructType object representing the schema.
 
-        Returns:
-            str: The fully qualified database name.
-        """
-        return f"{self.prefix}_{self.tenant}"
+    Raises:
+        FileNotFoundError: If the schema JSON file does not exist.
+        ValueError: If the JSON content cannot be parsed into a StructType.
+    """
+    schema_path = os.path.join(
+        Path(__file__).parent, 'source_api_schemas', f'{api_name}.json'
+    )
     
-    def get_schema(self, api_name: str) -> StructType:
-        """
-        Load the Spark schema for the given API from a JSON file.
-
-        Args:
-            api_name (str): Name of the API whose schema needs to be loaded.
-
-        Returns:
-            StructType: A PySpark StructType object representing the schema.
-
-        Raises:
-            FileNotFoundError: If the schema file is missing.
-            Exception: For any other issues in reading/parsing the schema.
-        """
-        self.logger.info(f"Reading Spark schema for API: {api_name}")
-        schema_path = os.path.join(
-            Path(__file__).parent, 'source_api_schemas', f'{api_name}.json'
-        )
-
-        try:
-            with open(schema_path, 'r') as f:
-                schema_json = f.read()
-            schema = StructType.fromJson(json.loads(schema_json))
-            return schema
-        except FileNotFoundError:
-            self.logger.error(f"Schema file not found: {schema_path}")
-            raise
-        except Exception as e:
-            self.logger.exception(f"Failed to load schema for {api_name}: {e}")
-            raise
+    try:
+        with open(schema_path, 'r') as f:
+            schema_json = f.read()
+        schema = StructType.fromJson(json.loads(schema_json))
+        return schema
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Schema file not found: {schema_path}")
+    except Exception as e:
+        raise ValueError(f"Failed to parse schema for API '{api_name}': {e}")
