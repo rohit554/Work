@@ -12,6 +12,7 @@ niceincontact_end_points={
             "pageSize": 500
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -23,6 +24,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -34,6 +36,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -46,6 +49,7 @@ niceincontact_end_points={
             "pageSize": 500
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -58,6 +62,7 @@ niceincontact_end_points={
             "pageSize": 500
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -70,6 +75,7 @@ niceincontact_end_points={
             "pageSize": 500
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -82,6 +88,7 @@ niceincontact_end_points={
             "pageSize": 500
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -94,6 +101,7 @@ niceincontact_end_points={
             "pageSize": 500
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -105,6 +113,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -125,6 +134,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -136,6 +146,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -147,6 +158,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -158,6 +170,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -169,6 +182,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "entities",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -180,6 +194,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "entities",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -203,6 +218,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -215,6 +231,7 @@ niceincontact_end_points={
             "pageSize": 500
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -227,6 +244,7 @@ niceincontact_end_points={
             "pageSize": 500
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -239,6 +257,7 @@ niceincontact_end_points={
             "pageSize": 500
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -251,6 +270,7 @@ niceincontact_end_points={
             "pageSize": 500
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "agents",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -262,6 +282,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "entities",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -274,6 +295,7 @@ niceincontact_end_points={
             "pageSize": 500
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "entities",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -285,6 +307,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "entities",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -296,6 +319,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "results",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -307,6 +331,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "results",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -319,6 +344,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "entities",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
@@ -330,6 +356,7 @@ niceincontact_end_points={
         "params": {
         },
         "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "entities",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     }
