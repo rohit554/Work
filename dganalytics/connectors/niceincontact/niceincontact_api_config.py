@@ -348,7 +348,7 @@ niceincontact_end_points={
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
-    "interaction_analytics_gateway_segments_nalyzed_transcript":{
+    "interaction_analytics_gateway_segments_analyzed_transcript":{
         "endpoint": "/interaction-analytics-gateway/v2/segments/{segmentId}/analyzed-transcript",
         "request_type": "GET",
         "paging": False,
