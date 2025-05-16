@@ -1,3 +1,8 @@
+"""
+This module provides utility functions for interacting with the NICE inContact API.
+It includes functions for authorization, making API requests, and handling responses.
+"""
+
 import os
 from dganalytics.utils.utils import get_logger
 from pyspark.sql.types import StructType
@@ -10,7 +15,7 @@ from dganalytics.connectors.niceincontact.niceincontact_config import niceincont
 from dganalytics.utils.utils import get_secret
 import requests
 import time
-
+import base64
 
 retry = 0
 def niceincontact_utils_logger(tenant, app_name):
@@ -151,6 +156,47 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
         message = f"Nice InContact API Extraction failed - {tenant} - {api_name} - {run_id}"
         logger.exception(message + str(resp.text))
         raise Exception
+    
+def authorize(tenant: str):
+    """
+    Authorize the NICE inContact API using OAuth2 client credentials.
+    Args:
+        tenant (str): The tenant identifier.
+    Returns:
+        dict: A dictionary containing the authorization headers.
+    Raises:
+        Exception: If the authorization fails.
+    """
+    global secrets
+    global access_token
+
+    if access_token is None:
+        logger.info("Authorizing Nice InContact")
+        client_id = get_secret(f'{tenant}niceincontactOAuthClientId')
+        client_secret = get_secret(f'{tenant}niceincontactOAuthClientSecret')
+        auth_key = base64.b64encode(
+            bytes(client_id + ":" + client_secret, "ISO-8859-1")).decode("ascii")
+
+        headers = {"Content-Type": "application/x-www-form-urlencoded",
+                   "Authorization": f"Basic {auth_key}"}
+
+        auth_url = get_api_url(tenant).replace(
+            "https://api.", "https://login.")
+        auth_request = requests.post(
+            f"{auth_url}/oauth/token?grant_type=client_credentials", headers=headers)
+
+        access_token = ""
+        if auth_request.status_code == 200:
+            access_token = auth_request.json()['access_token']
+        else:
+            logger.exception(
+                "Autohrization failed while requesting Access Token for tenant - {}".format(tenant))
+            raise Exception
+    api_headers = {
+        "Authorization": "Bearer {}".format(access_token),
+        "Content-Type": "application/json"
+    }
+    return api_headers
 
 def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_start_time: str, extract_end_time: str, overwrite_niceincontact_config: dict = None,
@@ -170,9 +216,9 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
         list: A list of responses from the API."""
     logger.info(
         f"Nice InContact Request Start for {api_name} with extract_date {extract_start_time}_{extract_end_time}")
-    # auth_headers = authorize(tenant)
-    gepc = niceincontact_end_points
-    config = gepc[api_name]
+    auth_headers = authorize(tenant)
+    niceincontact = niceincontact_end_points
+    config = niceincontact[api_name]
     if overwrite_niceincontact_config:
         config.update(overwrite_niceincontact_config[api_name])
 
@@ -206,10 +252,10 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
 
         if req_type == "GET":
             resp = requests.request(method=req_type, url=url,
-                                    params=params)#, headers=auth_headers)
+                                    params=params, headers=auth_headers)
         elif req_type == "POST":
             resp = requests.request(method=req_type, url=url,
-                                    data=json.dumps(params))#, headers=auth_headers)
+                                    data=json.dumps(params), headers=auth_headers)
         else:
             raise Exception("Unknown request type in config")
 
