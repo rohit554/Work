@@ -110,6 +110,73 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     logger.info("Raw tables creation completed.")
     return True
 
+def create_dim_agents_table(spark, db_name: str, db_path: str):
+    spark.sql(
+        f"""
+        CREATE TABLE IF NOT EXISTS {db_name}.dim_agents (
+            agentId LONG,
+            userName STRING,
+            firstName STRING,
+            middleName STRING,
+            lastName STRING,
+            userId STRING,
+            emailAddress STRING,
+            isActive BOOLEAN,
+            teamId LONG,
+            teamName STRING,
+            reportToId LONG,
+            reportToName STRING,
+            isSupervisor BOOLEAN,
+            lastLogin TIMESTAMP,
+            location STRING,
+            profileId LONG,
+            profileName STRING,
+            timeZone STRING,
+            country STRING,
+            state STRING,
+            city STRING,
+            hireDate TIMESTAMP,
+            terminationDate TIMESTAMP,
+            employmentType INT,
+            employmentTypeName STRING,
+            atHome BOOLEAN,
+            hourlyCost DOUBLE,
+            maxConcurrentChats INT,
+            maxEmailAutoParkingLimit INT,
+            userType STRING,
+            agentVoiceThreshold INT,
+            agentChatThreshold INT,
+            agentEmailThreshold INT,
+            agentWorkItemThreshold INT,
+            agentDeliveryMode STRING,
+            agentTotalContactCount INT,
+            agentContactAutoFocus BOOLEAN,
+            agentRequestContact BOOLEAN,
+            address1 STRING,
+            address2 STRING,
+            zipCode STRING,
+            timeZoneOffset STRING,
+            systemUser STRING,
+            crmUserName STRING,
+            lastUpdated TIMESTAMP,
+            createDate TIMESTAMP,
+            sourceRecordIdentifier LONG,
+            sourcePartition STRING
+        )
+        USING DELTA
+        PARTITIONED BY (isActive, teamId)
+        LOCATION '{db_path}/{db_name}/dim_agents'
+        """
+    )
+
+
+def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
+    logger.info("Setting genesys dim/fact tables")
+    create_dim_agents_table(spark, db_name, db_path)
+    logger.info("agent dim table creation completed")
+
+
+
 if __name__ == "__main__":
     app_name = "NICEINCONTACT_Setup"
     parser = argparse.ArgumentParser()
@@ -129,3 +196,4 @@ if __name__ == "__main__":
     create_database(spark, db_path, db_name, logger)
     create_ingestion_stats_table(spark, db_name, db_path, logger)
     raw_tables(spark, db_name, db_path, tenant_path, logger)
+    create_dim_tables(spark, db_name, db_path, logger)
