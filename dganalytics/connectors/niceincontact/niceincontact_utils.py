@@ -17,7 +17,11 @@ import requests
 import time
 import base64
 
+access_token = ""
+refresh_token = ""
 retry = 0
+
+
 def niceincontact_utils_logger(tenant, app_name):
     """
     Initialize and return a logger for the given tenant and application name.
@@ -103,8 +107,8 @@ def get_api_url(tenant: str) -> str:
     Returns:
         str: The formatted API URL. 
     """
-    url = get_secret(f'{tenant}gpcAPIURL')
-    url = "https://api." + url
+    url = get_secret(f'{tenant}niceincontactAPIURL')
+    url = "https://api-na1." + url
     return url
 
 def get_interval(extract_start_time: str, extract_end_time: str):
@@ -167,33 +171,45 @@ def authorize(tenant: str):
     Raises:
         Exception: If the authorization fails.
     """
-    global secrets
     global access_token
-
+    global refresh_token
     if access_token is None:
         logger.info("Authorizing Nice InContact")
+
+        username = get_secret(f'{tenant}niceincontactUsername')
+        password = get_secret(f'{tenant}niceincontactPassword')
         client_id = get_secret(f'{tenant}niceincontactOAuthClientId')
         client_secret = get_secret(f'{tenant}niceincontactOAuthClientSecret')
-        auth_key = base64.b64encode(
-            bytes(client_id + ":" + client_secret, "ISO-8859-1")).decode("ascii")
 
-        headers = {"Content-Type": "application/x-www-form-urlencoded",
-                   "Authorization": f"Basic {auth_key}"}
+        payload = (
+            f"grant_type=password&"
+            f"username={username}&"
+            f"password={password}&"
+            f"client_id={client_id}&"
+            f"client_secret={client_secret}"
+        )
 
-        auth_url = get_api_url(tenant).replace(
-            "https://api.", "https://login.")
-        auth_request = requests.post(
-            f"{auth_url}/oauth/token?grant_type=client_credentials", headers=headers)
+        headers = {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Cache-Control": "no-cache"
+        }
 
-        access_token = ""
+        api_base_url = get_api_url(tenant)
+        auth_base_url = api_base_url.split("/incontactapi")[0].replace("api-na1", "cxone")
+        url = f"{auth_base_url}/auth/token"
+        auth_request = requests.post(url, headers=headers, data=payload)
+
         if auth_request.status_code == 200:
-            access_token = auth_request.json()['access_token']
+            access_token = auth_request.json().get('access_token', "")
+            refresh_token = auth_request.json().get('refresh_token', "")
+            if not access_token:
+                logger.error(f"access_token is empty for the tenant : {tenant}")
+                raise Exception
         else:
-            logger.exception(
-                "Autohrization failed while requesting Access Token for tenant - {}".format(tenant))
+            logger.exception(f"Autohrization failed while requesting Access Token for tenant - {tenant}")
             raise Exception
     api_headers = {
-        "Authorization": "Bearer {}".format(access_token),
+        "Authorization": f"Bearer {access_token}",
         "Content-Type": "application/json"
     }
     return api_headers
