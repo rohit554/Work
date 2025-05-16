@@ -103,8 +103,8 @@ def get_api_url(tenant: str) -> str:
     Returns:
         str: The formatted API URL. 
     """
-    url = get_secret(f'{tenant}gpcAPIURL')
-    url = "https://api." + url
+    # url = get_secret(f'{tenant}gpcAPIURL')
+    url = "https://api-na1.niceincontact.com/incontactapi/services/v32.0"
     return url
 
 def get_interval(extract_start_time: str, extract_end_time: str):
@@ -142,7 +142,7 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
         logger.info(f"retrying - {tenant} - {api_name} - {run_id} - {retry}")
         time.sleep(180)
         if retry > 5:
-            message = f"GPC API Extraction failed - {tenant} - {api_name} - {run_id}"
+            message = f"Nice In Contact API Extraction failed - {tenant} - {api_name} - {run_id}"
             logger.exception(message + str(resp.text))
             raise Exception
         return "SLEEP"
@@ -153,13 +153,13 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
                 "exceeded 40k limit of cursor. ignoring error as delta conversations will be extracted tomorrow.")
             return "OK"
 
-        message = f"Nice InContact API Extraction failed - {tenant} - {api_name} - {run_id}"
+        message = f"Nice In Contact API Extraction failed - {tenant} - {api_name} - {run_id}"
         logger.exception(message + str(resp.text))
         raise Exception
     
 def authorize(tenant: str):
     """
-    Authorize the NICE inContact API using OAuth2 client credentials.
+    Authorize the NICE In Contact API using OAuth2 client credentials.
     Args:
         tenant (str): The tenant identifier.
     Returns:
@@ -171,7 +171,7 @@ def authorize(tenant: str):
     global access_token
 
     if access_token is None:
-        logger.info("Authorizing Nice InContact")
+        logger.info("Authorizing Nice In Contact")
         client_id = get_secret(f'{tenant}niceincontactOAuthClientId')
         client_secret = get_secret(f'{tenant}niceincontactOAuthClientSecret')
         auth_key = base64.b64encode(
@@ -222,13 +222,14 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
     if overwrite_niceincontact_config:
         config.update(overwrite_niceincontact_config[api_name])
 
-    req_type = config['request_type']
+    req_type = config.get('request_type', 'GET')
     url = get_api_url(tenant) + config['endpoint']
-    params = config['params']
-    entity = config['entity_name']
-    paging = config['paging']
-    cursor = config['cursor']
-    interval = config['interval']
+    params = config.get('params', {})
+    cursor = config.get('cursor', None)
+    entity = config.get('entity_name', "")
+    paging = config.get('paging', False)
+    interval = config.get('interval', False)
+    cursor= config.get('cursor', False)
 
     resp_list = []
     page_count = 1
@@ -249,7 +250,6 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
                 }
         if cursor and cursor_param != "":
             params['cursor'] = cursor_param
-
         if req_type == "GET":
             resp = requests.request(method=req_type, url=url,
                                     params=params, headers=auth_headers)

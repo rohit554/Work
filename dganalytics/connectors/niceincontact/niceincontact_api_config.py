@@ -16,7 +16,7 @@ niceincontact_end_points={
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
-    "agents_Id":{
+    "agents_agentId":{
         "endpoint": "/agents/{agentId}",
         "request_type": "GET",
         "paging": False,
