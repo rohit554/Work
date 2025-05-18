@@ -13,7 +13,7 @@ if __name__ == "__main__":
     try:
         logger.info(f"Extracting Nice In Contact API {api_name}")
 
-        if api_name in ["agents", "agents_agentId", "agents_skills", "agents_groups", "groups", "groups_agents", "teams","teams_Id_agents","teams_agents"                       ]:
+        if api_name in ["agents", "agents_agentId", "agents_skills", "agents_groups", "groups", "groups_agents", "teams","teams_Id_agents","teams_agents"]:
             df = niceincontact_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
         else:
@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     except Exception as e:
         logger.exception(
-            f"Error Occured in GPC Extraction for {extract_start_time}_{extract_end_time}_{tenant}_{api_name}")
+            f"Error Occured in Nice In Contact Extraction for {extract_start_time}_{extract_end_time}_{tenant}_{api_name}")
         logger.exception(e, stack_info=True, exc_info=True)
         raise Exception
     finally:
