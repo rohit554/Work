@@ -15,7 +15,6 @@ from dganalytics.connectors.niceincontact.niceincontact_config import niceincont
 from dganalytics.utils.utils import get_secret
 import requests
 import time
-import base64
 
 access_token = ""
 refresh_token = ""
@@ -154,7 +153,7 @@ def check_api_response(resp: requests.Response, api_name: str, tenant: str, run_
         if "message" in resp.json().keys() and \
                 "pagination may not exceed 400000 results" in (resp.json()['message']).lower():
             logger.info(
-                "exceeded 40k limit of cursor. ignoring error as delta conversations will be extracted tomorrow.")
+                "Exceeded 40k limit of cursor. ignoring error as delta conversations will be extracted tomorrow.")
             return "OK"
 
         message = f"Nice In Contact API Extraction failed - {tenant} - {api_name} - {run_id}"
@@ -203,7 +202,7 @@ def authorize(tenant: str):
             access_token = auth_request.json().get('access_token', "")
             refresh_token = auth_request.json().get('refresh_token', "")
             if not access_token:
-                logger.error(f"access_token is empty for the tenant : {tenant}")
+                logger.error(f"Access_token is empty for the tenant : {tenant}")
                 raise Exception
         else:
             logger.exception(f"Autohrization failed while requesting Access Token for tenant - {tenant}")

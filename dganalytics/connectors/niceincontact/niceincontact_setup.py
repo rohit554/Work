@@ -70,7 +70,7 @@ def create_raw_table(api_name: str, spark: SparkSession, db_name: str, db_path: 
     """
     schema = get_schema(api_name)
     table_name = "raw_" + f"{api_name}"
-    logger.info(f"creating genesys raw table - {table_name}")
+    logger.info(f"Creating niceincontact raw table - {table_name}")
     spark.createDataFrame(spark.sparkContext.emptyRDD(),
                           schema=schema).createOrReplaceTempView(table_name)
     create_qry = f"""create table if not exists {db_name}.{table_name}
@@ -101,7 +101,7 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     Returns:
         bool: True if all raw tables are created.
     """
-    logger.info("Setting genesys raw tables")
+    logger.info("Setting niceincontact raw tables")
     apis = ["agents"]
     for api in apis:
         logger.info(f"Creating raw table for API: {api}")
@@ -171,9 +171,9 @@ def create_dim_agents_table(spark, db_name: str, db_path: str):
 
 
 def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
-    logger.info("Setting genesys dim/fact tables")
+    logger.info("Setting niceincontact dim/fact tables")
     create_dim_agents_table(spark, db_name, db_path)
-    logger.info("agent dim table creation completed")
+    logger.info("Agent dim table creation completed")
 
 
 
