@@ -18,7 +18,7 @@ def create_database(spark: SparkSession, path: str, db_name: str, logger):
     Returns:
         bool: True if the database creation command is issued.
     """
-    logger.info("Creating database for genesys")
+    logger.info("Creating database for NICE inContact")
     spark.sql(
         f"create database if not exists {db_name}  LOCATION '{path}/{db_name}'")
     return True
@@ -36,7 +36,7 @@ def create_ingestion_stats_table(spark: SparkSession, db_name: str, db_path: str
     Returns:
         bool: True if the table creation command is issued.
     """
-    logger.info("Creating Ingestion stats table for genesys")
+    logger.info("Creating Ingestion stats table for NICE inContact")
     spark.sql(
         f"""
                 create table if not exists {db_name}.ingestion_stats
