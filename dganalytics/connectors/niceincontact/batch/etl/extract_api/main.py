@@ -17,7 +17,7 @@ if __name__ == "__main__":
             df = niceincontact_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
         else:
-            logger.exception("Invalid api name")
+            logger.exception("Invalid API name")
             raise Exception
 
     except Exception as e:

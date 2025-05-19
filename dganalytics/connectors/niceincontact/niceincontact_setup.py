@@ -101,7 +101,7 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     Returns:
         bool: True if all raw tables are created.
     """
-    logger.info("Setting niceincontact raw tables")
+    logger.info("Setting Nice InContact raw tables")
     apis = ["agents"]
     for api in apis:
         logger.info(f"Creating raw table for API: {api}")
@@ -171,7 +171,7 @@ def create_dim_agents_table(spark, db_name: str, db_path: str):
 
 
 def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
-    logger.info("Setting niceincontact dim/fact tables")
+    logger.info("Setting Nice InContact dim/fact tables")
     create_dim_agents_table(spark, db_name, db_path)
     logger.info("Agent dim table creation completed")
 
