@@ -218,6 +218,9 @@ def get_secret(secret_key: str):
             with open(os.path.join(os.path.expanduser("~"), "datagamz", "analytics", "secrets.json")) as f:
                 secrets = json.loads(f.read())
         return secrets[secret_key]
+    elif env == "uat":
+        dbutils = get_dbutils()
+        return dbutils.secrets.get(scope='dgsecretsuat', key='{}'.format(secret_key))
     else:
         dbutils = get_dbutils()
         return dbutils.secrets.get(scope='dgsecretscope', key='{}'.format(secret_key))
