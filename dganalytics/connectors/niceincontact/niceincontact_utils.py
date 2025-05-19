@@ -110,6 +110,27 @@ def get_api_url(tenant: str) -> str:
     url = "https://api-na1." + url
     return url
 
+def get_auth_url(tenant: str) -> str:
+    """
+    Retrieves the NICE inContact authentication URL for a given tenant.
+
+    This function accesses a secret management system to retrieve the 
+    authentication URL associated with the specified tenant identifier.
+
+    Args:
+        tenant (str): The unique identifier for the tenant. This is used to 
+                      construct the key for retrieving the corresponding 
+                      authentication URL from the secret store.
+
+    Returns:
+        str: The authentication URL retrieved from the secret store.
+
+    Raises:
+        Exception: If the secret cannot be retrieved or the key does not exist.
+    """
+    url = get_secret(f'{tenant}niceincontactAUTHURL')
+    return url
+
 def get_interval(extract_start_time: str, extract_end_time: str):
     """
     Generate the interval string for the API request based on the start and end times.
@@ -193,10 +214,8 @@ def authorize(tenant: str):
             "Cache-Control": "no-cache"
         }
 
-        api_base_url = get_api_url(tenant)
-        auth_base_url = api_base_url.split("/incontactapi")[0].replace("api-na1", "cxone")
-        url = f"{auth_base_url}/auth/token"
-        auth_request = requests.post(url, headers=headers, data=payload)
+        auth_url = get_auth_url(tenant)
+        auth_request = requests.post(auth_url, headers=headers, data=payload)
 
         if auth_request.status_code == 200:
             access_token = auth_request.json().get('access_token', "")
@@ -212,6 +231,63 @@ def authorize(tenant: str):
         "Content-Type": "application/json"
     }
     return api_headers
+
+def refresh_access_token(tenant: str) -> dict:
+    """
+    Refresh the NICE inContact access token using the stored refresh token 
+    and return the API authorization headers.
+
+    Args:
+        tenant (str): The tenant identifier used to retrieve secrets.
+
+    Returns:
+        dict: A dictionary containing the updated authorization headers.
+
+    Raises:
+        Exception: If the token refresh request fails or access token is missing.
+    """
+    global access_token
+    global refresh_token
+
+    logger.info(f"Refreshing access token for tenant: {tenant}")
+
+    client_id = get_secret(f'{tenant}niceincontactOAuthClientId')
+    client_secret = get_secret(f'{tenant}niceincontactOAuthClientSecret')
+
+    payload = (
+        f"grant_type=refresh_token&"
+        f"refresh_token={refresh_token}&"
+        f"client_id={client_id}&"
+        f"client_secret={client_secret}"
+    )
+
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Cache-Control": "no-cache"
+    }
+
+    auth_url = get_auth_url(tenant)
+    response = requests.post(auth_url, headers=headers, data=payload)
+
+    if response.status_code == 200:
+        data = response.json()
+        access_token = data.get("access_token", "")
+        refresh_token = data.get("refresh_token", refresh_token)  # update if rotated
+
+        if not access_token:
+            logger.error(f"Refreshed access token is empty for tenant: {tenant}")
+            raise Exception("Access token is missing in refresh response.")
+
+        logger.info(f"Access token refreshed successfully for tenant: {tenant}")
+
+        api_headers = {
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        }
+        return api_headers
+    else:
+        logger.exception(f"Failed to refresh access token for tenant: {tenant}")
+        raise Exception(f"Token refresh failed with status code {response.status_code}: {response.text}")
 
 def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_start_time: str, extract_end_time: str, overwrite_niceincontact_config: dict = None,
@@ -265,14 +341,12 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
                 }
         if cursor and cursor_param != "":
             params['cursor'] = cursor_param
-        if req_type == "GET":
-            resp = requests.request(method=req_type, url=url,
-                                    params=params, headers=auth_headers)
-        elif req_type == "POST":
-            resp = requests.request(method=req_type, url=url,
-                                    data=json.dumps(params), headers=auth_headers)
-        else:
-            raise Exception("Unknown request type in config")
+        resp = make_niceincontact_request(req_type, url, params, auth_headers)
+
+        if resp.status_code == 401:
+            logger.warning(f"Received 401 Unauthorized for {api_name}. Attempting token refresh for tenant: {tenant}")
+            auth_headers = refresh_access_token(tenant)
+            resp = make_niceincontact_request(req_type, url, params, auth_headers)
 
         if check_api_response(resp, api_name, tenant, run_id) == "SLEEP":
             continue
@@ -308,3 +382,26 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
     return resp_list
 
 
+
+def make_niceincontact_request(req_type: str, url: str, params: dict, headers: dict) -> requests.Response:
+    """
+    Make an HTTP request to the NICE inContact API.
+
+    Args:
+        req_type (str): The request method ('GET' or 'POST').
+        url (str): The full API endpoint URL.
+        params (dict): The parameters or payload for the request.
+        headers (dict): The headers including the authorization token.
+
+    Returns:
+        requests.Response: The HTTP response object.
+
+    Raises:
+        ValueError: If an unsupported request type is provided.
+    """
+    if req_type == "GET":
+        return requests.request(method="GET", url=url, params=params, headers=headers)
+    elif req_type == "POST":
+        return requests.request(method="POST", url=url, data=json.dumps(params), headers=headers)
+    else:
+        raise ValueError(f"Unsupported request type: {req_type}")
