@@ -11,7 +11,7 @@ from pathlib import Path
 import argparse
 from datetime import datetime
 from pyspark.sql import SparkSession, DataFrame
-from dganalytics.connectors.niceincontact.niceincontact_config import niceincontact_end_points
+from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
 from dganalytics.utils.utils import get_secret
 import requests
 import time

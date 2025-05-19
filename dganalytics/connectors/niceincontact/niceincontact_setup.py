@@ -178,7 +178,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
 
 
 if __name__ == "__main__":
-    app_name = "NICEINCONTACT_Setup"
+    app_name = "niceincontact_setup"
     parser = argparse.ArgumentParser()
     parser.add_argument("--tenant", required=True)
 
@@ -196,4 +196,4 @@ if __name__ == "__main__":
     create_database(spark, db_path, db_name, logger)
     create_ingestion_stats_table(spark, db_name, db_path, logger)
     raw_tables(spark, db_name, db_path, tenant_path, logger)
-    create_dim_tables(spark, db_name, db_path, logger)
+    # create_dim_tables(spark, db_name, db_path, logger)
