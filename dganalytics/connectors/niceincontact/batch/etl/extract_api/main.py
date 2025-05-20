@@ -13,7 +13,7 @@ if __name__ == "__main__":
     try:
         logger.info(f"Extracting Nice In Contact API {api_name}")
 
-        if api_name in ["agents", "agents_skills", "agents_groups", "groups", "groups_agents", "teams","teams_Id_agents","teams_agents"]:
+        if api_name in ["agents", "contacts", "teams"]:
             df = niceincontact_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
         else:

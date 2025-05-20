@@ -1,6 +1,5 @@
 import argparse
-from dganalytics.connectors.gpc.gpc_utils import get_dbname
-from dganalytics.connectors.niceincontact.niceincontact_utils import niceincontact_utils_logger, get_schema
+from dganalytics.connectors.niceincontact.niceincontact_utils import niceincontact_utils_logger, get_schema, get_dbname
 from dganalytics.utils.utils import get_path_vars, get_spark_session
 from pyspark.sql import SparkSession
 
@@ -102,7 +101,7 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
         bool: True if all raw tables are created.
     """
     logger.info("Setting Nice InContact raw tables")
-    apis = ["agents"]
+    apis = ["agents","teams","contacts"]
     for api in apis:
         logger.info(f"Creating raw table for API: {api}")
         create_raw_table(api, spark, db_name, db_path, logger)
