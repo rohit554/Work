@@ -4,7 +4,7 @@ It includes functions for authorization, making API requests, and handling respo
 """
 
 import os
-from dganalytics.utils.utils import get_logger
+from typing import List
 from pyspark.sql.types import StructType
 import json
 from pathlib import Path
@@ -12,9 +12,13 @@ import argparse
 from datetime import datetime
 from pyspark.sql import SparkSession, DataFrame
 from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
-from dganalytics.utils.utils import get_secret
-import requests
+from dganalytics.utils.utils import env, get_path_vars, get_logger, delta_table_partition_ovrewrite, delta_table_ovrewrite, get_secret
+from pyspark.sql.functions import lit, monotonically_increasing_id, to_date, to_timestamp
 import time
+import math
+import requests
+import logging
+logger = logging.getLogger(__name__)
 
 access_token = ""
 refresh_token = ""
@@ -289,6 +293,63 @@ def refresh_access_token(tenant: str) -> dict:
         logger.exception(f"Failed to refresh access token for tenant: {tenant}")
         raise Exception(f"Token refresh failed with status code {response.status_code}: {response.text}")
 
+def get_spark_partitions_num(api_name: str, record_count: int):
+    n_partitions = niceincontact_end_points[api_name]['spark_partitions']
+    n_partitions = math.ceil(
+        record_count / n_partitions['max_records_per_partition'])
+    if n_partitions < 1:
+        n_partitions = 1
+    return n_partitions
+
+def get_raw_tbl_name(api_name: str):
+    if 'table_name' in niceincontact_end_points[api_name].keys():
+        return 'raw_' + niceincontact_end_points[api_name]['table_name']
+    else:
+        return 'raw_' + api_name
+
+def get_tbl_overwrite(api_name: str):
+
+    return niceincontact_end_points[api_name]['tbl_overwrite']
+
+def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name: str,
+                     extract_start_time: str, extract_end_time: str):
+    
+    logger.info(
+        f"updating raw table for {api_name} {extract_start_time}_{extract_end_time}")
+    tenant_path, db_path, log_path = get_path_vars(tenant)
+    n_partitions = get_spark_partitions_num(api_name, len(resp_list))
+    schema = get_schema(api_name)
+    db_name = get_dbname(tenant)
+    df = spark.read.option("mode", "FAILFAST").option("multiline", "true").json(
+        spark._sc.parallelize(resp_list, n_partitions), schema=schema).drop_duplicates()
+
+    df = df.withColumn("extractDate", to_date(lit(extract_start_time[0:10])))
+    df = df.withColumn("extractIntervalStartTime", to_timestamp(lit(extract_start_time)))
+    df = df.withColumn("extractIntervalEndTime", to_timestamp(lit(extract_end_time)))
+    df = df.withColumn("recordInsertTime", to_timestamp(
+        lit(datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"))))
+    df = df.withColumn("recordIdentifier", monotonically_increasing_id())
+    table_name = get_raw_tbl_name(api_name)
+    logger.info(f"updating raw table for {api_name} {db_name}.{table_name}")
+
+    cols = spark.table(f"{db_name}.{table_name}").columns
+    cols = ",".join(cols)
+
+    if not get_tbl_overwrite(api_name):
+        delta_table_partition_ovrewrite(df, f"{db_name}.{table_name}", [
+                                        'extractDate', 'extractIntervalStartTime', 'extractIntervalEndTime'])
+    else:
+        delta_table_ovrewrite(df, f"{db_name}.{table_name}")
+    return True
+
+def process_raw_data(spark: SparkSession, tenant: str, api_name: str, run_id: str, resp_list: list,
+                     extract_start_time: str, extract_end_time: str,
+                     page_count: int, re_process: bool = False):
+    logger.info(f"processing raw data extracted for {tenant} and {api_name}")
+    update_raw_table(spark, tenant, resp_list, api_name,
+                     extract_start_time, extract_end_time)
+    return True
+
 def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_start_time: str, extract_end_time: str, overwrite_niceincontact_config: dict = None,
                 skip_raw_load: bool = False):
@@ -354,7 +415,7 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
         if not resp_json or entity not in resp_json or not resp_json[entity]:
             break
 
-        resp_list.extend(resp_json[entity])
+        resp_list.extend([json.dumps(res) for res in resp_json[entity]])
 
         if not paging and not cursor:
             break
@@ -375,9 +436,9 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
         if 'pageCount' in resp_json.keys() and resp_json['pageCount'] < page_count:
             break
 
-    # if not skip_raw_load:
-    #     process_raw_data(spark, tenant, api_name, run_id,
-    #                      resp_list, extract_start_time, extract_end_time, page_count)
+    if not skip_raw_load:
+        process_raw_data(spark, tenant, api_name, run_id,
+                         resp_list, extract_start_time, extract_end_time, page_count)
 
     return resp_list
 
