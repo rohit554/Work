@@ -9,7 +9,7 @@ from pyspark.sql.types import StructType
 import json
 from pathlib import Path
 import argparse
-from datetime import datetime
+from datetime import datetime, timedelta
 from pyspark.sql import SparkSession, DataFrame
 from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
 from dganalytics.utils.utils import env, get_path_vars, get_logger, delta_table_partition_ovrewrite, delta_table_ovrewrite, get_secret
@@ -467,3 +467,160 @@ def make_niceincontact_request(req_type: str, url: str, params: dict, headers: d
         return requests.request(method="POST", url=url, data=json.dumps(params), headers=headers)
     else:
         raise ValueError(f"Unsupported request type: {req_type}")
+    
+
+def get_base_api_url(tenant: str) -> str:
+    """
+    Retrieve the base API URL for the NICE inContact service for the given tenant.
+
+    This function securely fetches the base API URL for the specified tenant 
+    from a secrets manager or configuration store.
+
+    Args:
+        tenant (str): The tenant identifier.
+
+    Returns:
+        str: The base API URL for NICE inContact.
+    """
+    url = get_secret(f'{tenant}niceincontactBaseAPIURL')
+    return url
+    
+
+def extract_media_playback(master_contact_id, auth_headers, tenant, niceincontact, api_name):
+    """
+    Fetch media playback data for a given contact from NICE inContact API.
+
+    This function attempts to retrieve media playback data using the provided 
+    master_contact_id. If a 401 Unauthorized status is received, it will attempt
+    to refresh the access token and retry the request.
+
+    Args:
+        master_contact_id (str): The unique identifier of the contact.
+        auth_headers (dict): Authorization headers for the API request.
+        tenant (str): The tenant identifier used for logging and token refresh.
+        niceincontact (dict): Dictionary of NICE inContact API configurations.
+        api_name (str): Name of the specific API configuration to use.
+
+    Returns:
+        dict: Media playback data if successful, otherwise an empty dictionary.
+    """
+    media_playback_url = get_base_api_url(tenant)
+    config = niceincontact[api_name]
+    params = config.get('params', {})
+    params.update({"acd-call-id": master_contact_id})
+
+    req_type = config.get('request_type', 'GET')
+    
+    resp = make_niceincontact_request(req_type, media_playback_url, params, auth_headers)
+    
+    if resp.status_code == 401:
+        logger.warning(f"Received 401 Unauthorized for Media Playback. Attempting token refresh for tenant: {tenant}")
+        auth_headers = refresh_access_token(tenant)
+        resp = make_niceincontact_request(req_type, media_playback_url, params, auth_headers)
+    
+    if resp.status_code == 200:
+        logger.info(f"Successfully fetched media playback data for master_contact_id: {master_contact_id}")
+        return resp.json()
+    else:
+        logger.error(f"Failed to fetch media playback for master_contact_id: {master_contact_id}. "
+                     f"Status Code: {resp.status_code}, Response: {resp.text}")
+        return {}
+    
+    
+def fetct_contacts(startDate, endDate, auth_headers, tenant, niceincontact):
+    """
+    Fetch contact data from NICE inContact API within a date range.
+
+    Args:
+        startDate (str): The start datetime in ISO 8601 format.
+        endDate (str): The end datetime in ISO 8601 format.
+        auth_headers (dict): Authorization headers for the API request.
+        tenant (str): The tenant identifier used for logging and token refresh.
+        niceincontact (dict): Dictionary of NICE inContact API configurations.
+
+    Returns:
+        list: List of master contact IDs retrieved from the API.
+    """
+    config = niceincontact["contacts"]
+    contact_url = get_api_url(tenant) + config['endpoint']
+    params = config.get('params', {})
+    params.update({
+                "startDate": startDate, 
+                "endDate": endDate
+            }) 
+    resp = make_niceincontact_request("GET", contact_url, params, auth_headers)
+    if resp.status_code == 401:
+            logger.warning(f"Received 401 Unauthorized for Contacts. Attempting token refresh for tenant: {tenant}")
+            auth_headers = refresh_access_token(tenant)
+            resp = make_niceincontact_request("GET", contact_url, params, auth_headers)
+    contact_data = resp.json().get("contacts", [])
+    master_contact_id = [contact.get("masterContactId") for contact in contact_data]
+    return master_contact_id
+
+def get_master_contact_id(startDate, endDate, auth_headers, spark, tenant, api_name, run_id):
+    """
+    Retrieve media playback data for all master contact IDs within a date range and process it.
+
+    Args:
+        startDate (str): Start date in ISO 8601 format.
+        endDate (str): End date in ISO 8601 format.
+        auth_headers (dict): Authorization headers for API requests.
+        spark (SparkSession): Active Spark session for data processing.
+        tenant (str): Tenant identifier.
+        api_name (str): API configuration name for media playback.
+        run_id (str): Identifier for the current run.
+
+    Returns:
+        None
+    """
+    start_date = datetime.strptime(startDate, "%Y-%m-%dT%H:%M:%SZ")
+    end_date = datetime.strptime(endDate, "%Y-%m-%dT%H:%M:%SZ")
+    current_start = start_date
+    
+    while current_start < end_date:
+        current_end = current_start + timedelta(days=1)
+
+        # Format back to ISO 8601 string
+        start_str = current_start.strftime("%Y-%m-%dT%H:%M:%SZ")
+        end_str = current_end.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        logger.info(f"Calling API for: {start_str} → {end_str}")
+        niceincontact = niceincontact_end_points
+
+        contact_ids = fetct_contacts(start_str, end_str, auth_headers, tenant, niceincontact)
+        contact_ids = list(set(contact_ids))
+        count = 1
+        media_playback_data_list = []
+        for contact_id in contact_ids:
+            logger.info(f"staring media playback for contact_id : {contact_id}, count : {count}")
+            media_playback_data = extract_media_playback(contact_id, auth_headers, tenant, niceincontact, api_name)
+            if media_playback_data:
+                media_playback_data_list.append(json.dumps(media_playback_data))
+            else:
+                logger.warning(f"No media playback data found for contact_id: {contact_id}")
+            logger.info(f"process_raw_data completed for contact_id : {contact_id}")
+            count +=1
+        
+        logger.info("Starting process_raw_data")
+        process_raw_data(spark, tenant, api_name, run_id,
+                         media_playback_data_list, start_str, end_str, 1)
+        logger.info(f"process_raw_data completed for: {start_str} → {end_str} ")
+        current_start = current_end
+
+def fetch_media_playback_data(spark: SparkSession, tenant: str, api_name: str, run_id: str, extract_start_time: str, extract_end_time: str):
+    """
+    Entry point to fetch and process media playback data within a time window.
+
+    Args:
+        spark (SparkSession): Active Spark session for data processing.
+        tenant (str): Tenant identifier.
+        api_name (str): API configuration name for media playback.
+        run_id (str): Identifier for the current run.
+        extract_start_time (str): Start datetime in ISO 8601 format.
+        extract_end_time (str): End datetime in ISO 8601 format.
+
+    Returns:
+        None
+    """
+    auth_headers = authorize(tenant)
+    get_master_contact_id(extract_start_time, extract_end_time, auth_headers, spark, tenant, api_name, run_id)

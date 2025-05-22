@@ -1,5 +1,5 @@
 from dganalytics.utils.utils import get_spark_session, flush_utils
-from dganalytics.connectors.niceincontact.niceincontact_utils import get_dbname, niceincontact_request, extract_parser, niceincontact_utils_logger
+from dganalytics.connectors.niceincontact.niceincontact_utils import get_dbname, niceincontact_request, extract_parser, niceincontact_utils_logger, fetch_media_playback_data
 
 
 if __name__ == "__main__":
@@ -15,6 +15,9 @@ if __name__ == "__main__":
 
         if api_name in ["agents", "contacts", "teams", "teams_agents", "agents_skills", "skills"]:
             df = niceincontact_request(spark, tenant, api_name, run_id,
+                             extract_start_time, extract_end_time)
+        elif api_name == "media_playback_v1_contacts_acdContactId":
+            fetch_media_playback_data(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
         else:
             logger.exception("Invalid API name")
