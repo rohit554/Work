@@ -1,251 +1,36 @@
 {
   "fields": [
-    {
-      "metadata": {},
-      "name": "totalRecords",
-      "nullable": true,
-      "type": "integer"
-    },
-    {
-      "metadata": {},
-      "name": "_links",
-      "nullable": true,
-      "type": {
-        "fields": [
-          {
-            "metadata": {},
-            "name": "self",
-            "nullable": true,
-            "type": "string"
-          },
-          {
-            "metadata": {},
-            "name": "next",
-            "nullable": true,
-            "type": "string"
-          },
-          {
-            "metadata": {},
-            "name": "previous",
-            "nullable": true,
-            "type": "string"
-          }
-        ],
-        "type": "struct"
-      }
-    },
-    {
-      "metadata": {},
-      "name": "lastPollTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "businessUnitId",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "agentSkillAssignments",
-      "nullable": true,
-      "type": {
-        "containsNull": true,
-        "elementType": {
-          "fields": [
-            {
-              "metadata": {},
-              "name": "isActive",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "agentProficiencyValue",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "agentProficiencyName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "internalId",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "agentId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "teamId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "agentName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "campaignId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "emailFromAddress",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "isSkillActive",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "isDialer",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "isNaturalCalling",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "isOutbound",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "lastUpdateTime",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "mediaType",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "notes",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "requireDisposition",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "scriptDisposition",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "skillId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "skillName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "useACW",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "useDisposition",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "useSecondaryDispositions",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "outboundStrategy",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "campaignName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "priorityBlending",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "isNaturalCallingRunning",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "mediaTypeName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "screenPopTriggerEvent",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "lastPollTime",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "isAgentActive",
-              "nullable": true,
-              "type": "boolean"
-            }
-          ],
-          "type": "struct"
-        },
-        "type": "array"
-      }
-    }
+    { "name": "isActive", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "agentProficiencyValue", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "agentProficiencyName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "internalId", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "agentId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "teamId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "agentName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "campaignId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "emailFromAddress", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "isSkillActive", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "isDialer", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "isNaturalCalling", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "isOutbound", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "lastUpdateTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "mediaType", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "notes", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "requireDisposition", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "scriptDisposition", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "skillId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "skillName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "useACW", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "useDisposition", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "useSecondaryDispositions", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "outboundStrategy", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "campaignName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "priorityBlending", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "isNaturalCallingRunning", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "mediaTypeName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "screenPopTriggerEvent", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "lastPollTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "isAgentActive", "type": "boolean", "nullable": true, "metadata": {} }
   ],
   "type": "struct"
 }

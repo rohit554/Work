@@ -7,9 +7,9 @@ niceincontact_end_points = {
     "agents": {
         "endpoint": "/agents",
         "request_type": "GET",
-        "paging": True,
+        "paging": False,
         "interval": False,
-        "params": {"pageSize": 500},
+        "params": {},
         "spark_partitions": {"max_records_per_partition": 20000},
         "entity_name": "agents",
         "tbl_overwrite": False,
@@ -29,9 +29,12 @@ niceincontact_end_points = {
     "agents_skills": {
         "endpoint": "/agents/skills",
         "request_type": "GET",
-        "paging": True,
+        "paging": False,
         "interval": False,
-        "params": {"pageSize": 500},
+        "params": {
+            "isActive": True,
+            "isAgentActive": True,
+        },
         "spark_partitions": {"max_records_per_partition": 20000},
         "entity_name": "agentSkillAssignments",
         "tbl_overwrite": False,
@@ -276,6 +279,24 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
+    "media_playback_v1_contacts_acdContactId": {
+        "endpoint": "/media-playback/v1/contacts",
+        "request_type": "GET",
+        "paging": False,
+        "interval": False,
+        "params": {
+            "media-type": ["voice-only", "voice-and-screen", "chat", "email"],
+            "exclude-waveforms": True,
+            "exclude-qm-categories": False,
+            "isDownload": False
+        },
+        "spark_partitions": {
+            "max_records_per_partition": 20000
+        },
+        "entity_name": "mediaPlaybackContacts",
+        "tbl_overwrite": False,
+        "raw_primary_key": ["acd-call-id"]
+    },
     "media_playback_segments": {
         "endpoint": "/media-playback/v1/segments/{segmentId}",
         "request_type": "GET",
@@ -306,6 +327,28 @@ niceincontact_end_points = {
         "interval": False,
         "params": {},
         "spark_partitions": {"max_records_per_partition": 20000},
+        "tbl_overwrite": False,
+        "raw_primary_key": ["id"],
+    },
+    "skills": {
+        "endpoint": "/skills",
+        "request_type": "GET",
+        "paging": False,
+        "interval": False,
+        "params": {},
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "skills",
+        "tbl_overwrite": False,
+        "raw_primary_key": ["id"],
+    },
+    "dispositions": {
+        "endpoint": "/dispositions",
+        "request_type": "GET",
+        "paging": False,
+        "interval": False,
+        "params": {},
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "dispositions",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },

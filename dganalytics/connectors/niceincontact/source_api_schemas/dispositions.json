@@ -2,45 +2,51 @@
   "fields": [
     {
       "metadata": {},
-      "name": "businessUnitId",
+      "name": "dispositionId",
       "nullable": true,
       "type": "long"
     },
     {
       "metadata": {},
-      "name": "skillId",
-      "nullable": true,
-      "type": "long"
-    },
-    {
-      "metadata": {},
-      "name": "skillName",
+      "name": "dispositionName",
       "nullable": true,
       "type": "string"
     },
     {
       "metadata": {},
-      "name": "contactsWithinSLA",
+      "name": "notes",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "lastUpdated",
+      "nullable": true,
+      "type": "timestamp"
+    },
+    {
+      "metadata": {},
+      "name": "classificationId",
       "nullable": true,
       "type": "long"
     },
     {
       "metadata": {},
-      "name": "contactsOutOfSLA",
+      "name": "systemOutcome",
       "nullable": true,
-      "type": "long"
+      "type": "string"
     },
     {
       "metadata": {},
-      "name": "totalContacts",
+      "name": "isActive",
       "nullable": true,
-      "type": "long"
+      "type": "boolean"
     },
     {
       "metadata": {},
-      "name": "serviceLevel",
+      "name": "isPreviewDisposition",
       "nullable": true,
-      "type": "double"
+      "type": "boolean"
     }
   ],
   "type": "struct"

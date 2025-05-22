@@ -29,9 +29,11 @@
       "name": "agents",
       "nullable": true,
       "type": {
+        "type": "array",
         "containsNull": true,
         "elementType": {
           "type": "struct",
+          "containsNull": true,
           "fields": [
             { "metadata": {}, "name": "agentId", "nullable": true, "type": "long" },
             { "metadata": {}, "name": "userName", "nullable": true, "type": "string" },

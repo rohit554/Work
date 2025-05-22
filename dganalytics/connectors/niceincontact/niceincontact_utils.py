@@ -394,12 +394,13 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
     while True:
         if paging:
             if req_type == "GET":
-                params['pageNumber'] = page_count
+                params['skip'] = (page_count*int(params['pageSize']))-int(params['pageSize'])+1
+                params['top'] = page_count*int(params['pageSize'])
             else:
-                params['paging'] = {
-                    "pageSize": params['pageSize'],
-                    "pageNumber": page_count
-                }
+                params.update({
+                    "skip": (page_count*int(params['pageSize']))-int(params['pageSize'])+1,
+                    "top": page_count*int(params['pageSize'])
+                })
         if cursor and cursor_param != "":
             params['cursor'] = cursor_param
         resp = make_niceincontact_request(req_type, url, params, auth_headers)
