@@ -13,9 +13,12 @@ if __name__ == "__main__":
     try:
         logger.info(f"Extracting Nice In Contact API {api_name}")
 
-        if api_name in ["agents", "contacts", "teams", "teams_agents", "agents_skills", "skills"]:
+        if api_name in ["agents",  "teams", "teams_agents", "agents_skills", "skills"]:
             df = niceincontact_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
+        elif api_name in ["contacts", "interaction_analytics_gateway_v2_segments_analyzed"]:
+            df = niceincontact_request(spark, tenant, api_name, run_id,
+                             extract_start_time, extract_end_time, base_url=True)
         elif api_name == "media_playback_v1_contacts_acdContactId":
             fetch_media_playback_data(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)

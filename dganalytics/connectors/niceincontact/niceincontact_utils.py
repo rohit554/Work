@@ -5,10 +5,10 @@ It includes functions for authorization, making API requests, and handling respo
 
 import os
 from typing import List
+import argparse
 from pyspark.sql.types import StructType
 import json
 from pathlib import Path
-import argparse
 from datetime import datetime, timedelta
 from pyspark.sql import SparkSession, DataFrame
 from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
@@ -352,7 +352,7 @@ def process_raw_data(spark: SparkSession, tenant: str, api_name: str, run_id: st
 
 def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_start_time: str, extract_end_time: str, overwrite_niceincontact_config: dict = None,
-                skip_raw_load: bool = False):
+                skip_raw_load: bool = False, base_url :bool = False):
     """
     Make a request to the NICE inContact API and process the response.
     Args:
@@ -375,7 +375,10 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
         config.update(overwrite_niceincontact_config[api_name])
 
     req_type = config.get('request_type', 'GET')
-    url = get_api_url(tenant) + config['endpoint']
+    if not base_url:
+        url = get_api_url(tenant) + config['endpoint']
+    else:
+        url = get_base_api_url(tenant) + config['endpoint']
     params = config.get('params', {})
     cursor = config.get('cursor', None)
     entity = config.get('entity_name', "")

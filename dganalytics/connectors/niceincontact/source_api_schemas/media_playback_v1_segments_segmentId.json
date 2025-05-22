@@ -1,511 +1,225 @@
 {
+  "type": "struct",
   "fields": [
+    { "name": "contactId", "type": "string", "nullable": true },
+    { "name": "acdcontactId", "type": "string", "nullable": true },
     {
-      "metadata": {},
-      "name": "contactId",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "acdcontactId",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "elevatedInteraction",
-      "nullable": true,
-      "type": "boolean"
-    },
-    {
-      "metadata": {},
-      "name": "interactions",
-      "nullable": true,
+      "name": "brandEmbassyConfig",
       "type": {
-        "containsNull": true,
+        "type": "struct",
+        "fields": [
+          { "name": "threadId", "type": "string", "nullable": true },
+          { "name": "caseId", "type": "string", "nullable": true },
+          { "name": "sessionId", "type": "string", "nullable": true }
+        ]
+      },
+      "nullable": true
+    },
+    { "name": "elevatedInteraction", "type": "boolean", "nullable": true },
+    {
+      "name": "interactions",
+      "type": {
+        "type": "array",
         "elementType": {
+          "type": "struct",
           "fields": [
+            { "name": "mediaType", "type": "string", "nullable": true },
+            { "name": "channelType", "type": "string", "nullable": true },
+            { "name": "startTime", "type": "string", "nullable": true },
+            { "name": "endTime", "type": "string", "nullable": true },
             {
-              "metadata": {},
-              "name": "mediaType",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "channelType",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "startTime",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "endTime",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
               "name": "data",
-              "nullable": true,
               "type": {
+                "type": "struct",
                 "fields": [
+                  { "name": "startTime", "type": "string", "nullable": true },
+                  { "name": "endTime", "type": "string", "nullable": true },
+                  { "name": "acwEndTime", "type": "string", "nullable": true },
+                  { "name": "fileToPlayUrl", "type": "string", "nullable": true },
                   {
-                    "metadata": {},
-                    "name": "startTime",
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  {
-                    "metadata": {},
-                    "name": "endTime",
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  {
-                    "metadata": {},
-                    "name": "acwEndTime",
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  {
-                    "metadata": {},
-                    "name": "fileToPlayUrl",
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  {
-                    "metadata": {},
-                    "name": "videoImageUrl",
-                    "nullable": true,
-                    "type": "string"
-                  },
-                  {
-                    "metadata": {},
-                    "name": "waveformDataList",
-                    "nullable": true,
+                    "name": "participants",
                     "type": {
-                      "containsNull": true,
+                      "type": "array",
                       "elementType": {
+                        "type": "struct",
                         "fields": [
+                          { "name": "participantType", "type": "string", "nullable": true },
+                          { "name": "participantName", "type": "string", "nullable": true },
                           {
-                            "metadata": {},
-                            "name": "channel",
-                            "nullable": true,
-                            "type": "integer"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "normalizedPcmData",
-                            "nullable": true,
+                            "name": "actions",
                             "type": {
-                              "containsNull": true,
-                              "elementType": "double",
-                              "type": "array"
-                            }
-                          }
-                        ],
-                        "type": "struct"
-                      },
-                      "type": "array"
-                    }
-                  },
-                  {
-                    "metadata": {},
-                    "name": "participantDataList",
-                    "nullable": true,
-                    "type": {
-                      "containsNull": true,
-                      "elementType": {
-                        "fields": [
-                          {
-                            "metadata": {},
-                            "name": "participantType",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "agentName",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "participantId",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "userId",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "segmentId",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "voiceStages",
-                            "nullable": true,
-                            "type": {
-                              "containsNull": true,
+                              "type": "array",
                               "elementType": {
+                                "type": "struct",
                                 "fields": [
+                                  { "name": "timeStamp", "type": "string", "nullable": true },
+                                  { "name": "action", "type": "string", "nullable": true }
+                                ]
+                              },
+                              "containsNull": true
+                            },
+                            "nullable": true
+                          },
+                          {
+                            "name": "screenStages",
+                            "type": {
+                              "type": "array",
+                              "elementType": {
+                                "type": "struct",
+                                "fields": [
+                                  { "name": "stageType", "type": "string", "nullable": true },
+                                  { "name": "startTime", "type": "string", "nullable": true },
+                                  { "name": "endTime", "type": "string", "nullable": true },
                                   {
-                                    "metadata": {},
-                                    "name": "stageType",
-                                    "nullable": true,
-                                    "type": "string"
-                                  },
-                                  {
-                                    "metadata": {},
-                                    "name": "startTime",
-                                    "nullable": true,
-                                    "type": "string"
-                                  },
-                                  {
-                                    "metadata": {},
-                                    "name": "endTime",
-                                    "nullable": true,
-                                    "type": "string"
-                                  },
-                                  {
-                                    "metadata": {},
-                                    "name": "recordingID",
-                                    "nullable": true,
-                                    "type": "string"
-                                  },
-                                  {
-                                    "metadata": {},
                                     "name": "displays",
-                                    "nullable": true,
                                     "type": {
                                       "type": "array",
-                                      "elementType": "string",
-                                      "containsNull": true
-                                    }
-                                  }
-                                ],
-                                "type": "struct"
-                              },
-                              "type": "array"
-                            }
-                          },
-                          {
-                            "metadata": {},
-                            "name": "screenStages",
-                            "nullable": true,
-                            "type": {
-                              "containsNull": true,
-                              "elementType": {
-                                "fields": [
-                                  {
-                                    "metadata": {},
-                                    "name": "stageType",
-                                    "nullable": true,
-                                    "type": "string"
-                                  },
-                                  {
-                                    "metadata": {},
-                                    "name": "startTime",
-                                    "nullable": true,
-                                    "type": "string"
-                                  },
-                                  {
-                                    "metadata": {},
-                                    "name": "endTime",
-                                    "nullable": true,
-                                    "type": "string"
-                                  },
-                                  {
-                                    "metadata": {},
-                                    "name": "recordingID",
-                                    "nullable": true,
-                                    "type": "string"
-                                  },
-                                  {
-                                    "metadata": {},
-                                    "name": "displays",
-                                    "nullable": true,
-                                    "type": {
-                                      "containsNull": true,
                                       "elementType": {
+                                        "type": "struct",
                                         "fields": [
-                                          {
-                                            "metadata": {},
-                                            "name": "width",
-                                            "nullable": true,
-                                            "type": "integer"
-                                          },
-                                          {
-                                            "metadata": {},
-                                            "name": "height",
-                                            "nullable": true,
-                                            "type": "integer"
-                                          },
-                                          {
-                                            "metadata": {},
-                                            "name": "topLeftX",
-                                            "nullable": true,
-                                            "type": "integer"
-                                          },
-                                          {
-                                            "metadata": {},
-                                            "name": "topLeftY",
-                                            "nullable": true,
-                                            "type": "integer"
-                                          }
-                                        ],
-                                        "type": "struct"
+                                          { "name": "width", "type": "integer", "nullable": true },
+                                          { "name": "height", "type": "integer", "nullable": true },
+                                          { "name": "topLeftX", "type": "integer", "nullable": true },
+                                          { "name": "topLeftY", "type": "integer", "nullable": true }
+                                        ]
                                       },
-                                      "type": "array"
-                                    }
-                                  }
-                                ],
-                                "type": "struct"
+                                      "containsNull": true
+                                    },
+                                    "nullable": true
+                                  },
+                                  { "name": "mergedParentId", "type": "string", "nullable": true }
+                                ]
                               },
-                              "type": "array"
-                            }
-                          },
-                          {
-                            "metadata": {},
-                            "name": "channel",
-                            "nullable": true,
-                            "type": "integer"
+                              "containsNull": true
+                            },
+                            "nullable": true
                           }
-                        ],
-                        "type": "struct"
+                        ]
                       },
-                      "type": "array"
-                    }
+                      "containsNull": true
+                    },
+                    "nullable": true
                   },
                   {
-                    "metadata": {},
+                    "name": "content",
+                    "type": {
+                      "type": "struct",
+                      "fields": [
+                        { "name": "sentTime", "type": "string", "nullable": true },
+                        { "name": "from", "type": "string", "nullable": true },
+                        {
+                          "name": "to",
+                          "type": {
+                            "type": "array",
+                            "elementType": "string",
+                            "containsNull": true
+                          },
+                          "nullable": true
+                        },
+                        {
+                          "name": "cc",
+                          "type": {
+                            "type": "array",
+                            "elementType": "string",
+                            "containsNull": true
+                          },
+                          "nullable": true
+                        },
+                        {
+                          "name": "bcc",
+                          "type": {
+                            "type": "array",
+                            "elementType": "string",
+                            "containsNull": true
+                          },
+                          "nullable": true
+                        },
+                        { "name": "subject", "type": "string", "nullable": true },
+                        { "name": "body", "type": "string", "nullable": true }
+                      ]
+                    },
+                    "nullable": true
+                  },
+                  {
                     "name": "segmentsDataList",
-                    "nullable": true,
                     "type": {
-                      "containsNull": true,
+                      "type": "array",
                       "elementType": {
+                        "type": "struct",
                         "fields": [
-                          {
-                            "metadata": {},
-                            "name": "startTime",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "endTime",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "acwEndTime",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "openReasonType",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "closeReasonType",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "directionType",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "source",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "firstSegment",
-                            "nullable": true,
-                            "type": "boolean"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "originalSourceFromSdr",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "segmentId",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "channelType",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "customerRestricted",
-                            "nullable": true,
-                            "type": "boolean"
-                          }
-                        ],
-                        "type": "struct"
+                          { "name": "startTime", "type": "string", "nullable": true },
+                          { "name": "endTime", "type": "string", "nullable": true },
+                          { "name": "acwEndTime", "type": "string", "nullable": true },
+                          { "name": "openReasonType", "type": "string", "nullable": true },
+                          { "name": "closeReasonType", "type": "string", "nullable": true },
+                          { "name": "directionType", "type": "string", "nullable": true },
+                          { "name": "source", "type": "string", "nullable": true },
+                          { "name": "firstSegment", "type": "boolean", "nullable": true },
+                          { "name": "originalSourceFromSdr", "type": "string", "nullable": true },
+                          { "name": "isCustomerRestricted", "type": "boolean", "nullable": true },
+                          { "name": "segmentId", "type": "string", "nullable": true },
+                          { "name": "channelType", "type": "string", "nullable": true },
+                          { "name": "customerRestricted", "type": "boolean", "nullable": true }
+                        ]
                       },
-                      "type": "array"
-                    }
+                      "containsNull": true
+                    },
+                    "nullable": true
                   },
                   {
-                    "metadata": {},
-                    "name": "categoryMatchesList",
-                    "nullable": true,
+                    "name": "dfoStages",
                     "type": {
-                      "containsNull": true,
+                      "type": "array",
                       "elementType": {
+                        "type": "struct",
                         "fields": [
+                          { "name": "stageType", "type": "string", "nullable": true },
+                          { "name": "startTime", "type": "string", "nullable": true },
+                          { "name": "endTime", "type": "string", "nullable": true },
                           {
-                            "metadata": {},
-                            "name": "categoryHierarchy",
-                            "nullable": true,
+                            "name": "displays",
                             "type": {
                               "type": "array",
                               "elementType": "string",
                               "containsNull": true
-                            }
+                            },
+                            "nullable": true
                           },
-                          {
-                            "metadata": {},
-                            "name": "secondsOffsets",
-                            "nullable": true,
-                            "type": {
-                              "type": "array",
-                              "elementType": "integer",
-                              "containsNull": true
-                            }
-                          },
-                          {
-                            "metadata": {},
-                            "name": "confidence",
-                            "nullable": true,
-                            "type": "integer"
-                          }
-                        ],
-                        "type": "struct"
+                          { "name": "mergedParentId", "type": "string", "nullable": true }
+                        ]
                       },
-                      "type": "array"
-                    }
-                  },
-                  {
-                    "metadata": {},
-                    "name": "sentiments",
-                    "nullable": true,
-                    "type": {
-                      "containsNull": true,
-                      "elementType": {
-                        "fields": [
-                          {
-                            "metadata": {},
-                            "name": "overallSentiment",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "segmentStartTime",
-                            "nullable": true,
-                            "type": "string"
-                          },
-                          {
-                            "metadata": {},
-                            "name": "channel",
-                            "nullable": true,
-                            "type": "integer"
-                          }
-                        ],
-                        "type": "struct"
-                      },
-                      "type": "array"
-                    }
-                  },
-                  {
-                    "metadata": {},
-                    "name": "dfoStages",
-                    "nullable": true,
-                    "type": "string"
-                  }
-                ],
-                "type": "struct"
-              }
-            },
-            {
-              "metadata": {},
-              "name": "@type",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "callTaggingList",
-              "nullable": true,
-              "type": {
-                "type": "array",
-                "elementType": {
-                  "type": "struct",
-                  "fields": [
-                    {
-                      "metadata": {},
-                      "name": "updateTime",
-                      "nullable": true,
-                      "type": "string"
+                      "containsNull": true
                     },
-                    {
-                      "metadata": {},
-                      "name": "value",
-                      "nullable": true,
-                      "type": "string"
-                    }
-                  ]
-                },
-                "containsNull": true
-              }
+                    "nullable": true
+                  }
+                ]
+              },
+              "nullable": true
             },
+            { "name": "@type", "type": "string", "nullable": true },
             {
-              "metadata": {},
-              "name": "dynamicBusinessData",
-              "nullable": true,
+              "name": "callTaggingList",
               "type": {
                 "type": "array",
                 "elementType": "string",
                 "containsNull": true
-              }
+              },
+              "nullable": true
+            },
+            {
+              "name": "dynamicBusinessData",
+              "type": {
+                "type": "array",
+                "elementType": "string",
+                "containsNull": true
+              },
+              "nullable": true
             }
-          ],
-          "type": "struct"
+          ]
         },
-        "type": "array"
-      }
+        "containsNull": true
+      },
+      "nullable": true
     }
-  ],
-  "type": "struct"
+  ]
 }
