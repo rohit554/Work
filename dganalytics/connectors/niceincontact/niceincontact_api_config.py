@@ -224,7 +224,7 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
-    "contacts_customdata": {
+    "contacts_custom_data": {
         "endpoint": "/contacts/custom-data",
         "request_type": "GET",
         "paging": True,
@@ -369,5 +369,40 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
+    "media_playback_v1_segments_segmentId": {
+        "endpoint": "/media-playback/v1/segments/{segmentId}",
+        "request_type": "GET",
+        "paging": False,
+        "interval": False,
+        "params": {
+            "media-type": ["voice-only", "voice-and-screen", "chat", "email", "all"],
+            "exclude-waveforms": True,
+            "exclude-qm-categories": False
+        },
+        "spark_partitions": {
+            "max_records_per_partition": 20000
+        },
+        "entity_name": "interactions",
+        "tbl_overwrite": False,
+        "raw_primary_key": ["segmentId"]
+    },
+    "media_segment_voice_only": {
+        "endpoint": "/media-playback/v1/segments/{segmentId}",
+        "request_type": "GET",
+        "paging": False,
+        "interval": False,
+        "params": {
+            "media-type": ["voice-only", "voice-and-screen", "chat", "email", "all"],
+            "exclude-waveforms": True,
+            "exclude-qm-categories": False
+        },
+        "spark_partitions": {
+            "max_records_per_partition": 20000
+        },
+        "entity_name": "interactions",
+        "tbl_overwrite": False,
+        "raw_primary_key": ["segmentId"]
+    }
+
 
 }

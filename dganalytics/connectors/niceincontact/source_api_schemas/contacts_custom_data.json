@@ -1,77 +1,23 @@
 {
+  "type": "struct",
   "fields": [
     {
-      "metadata": {},
-      "name": "_links",
+      "name": "contactId",
+      "type": "long",
       "nullable": true,
-      "type": {
-        "fields": [
-          {
-            "metadata": {},
-            "name": "self",
-            "nullable": true,
-            "type": "string"
-          },
-          {
-            "metadata": {},
-            "name": "next",
-            "nullable": true,
-            "type": "string"
-          },
-          {
-            "metadata": {},
-            "name": "previous",
-            "nullable": true,
-            "type": "string"
-          }
-        ],
-        "type": "struct"
-      }
+      "metadata": {}
     },
     {
-      "metadata": {},
-      "name": "businessUnitId",
+      "name": "name",
+      "type": "string",
       "nullable": true,
-      "type": "integer"
+      "metadata": {}
     },
     {
-      "metadata": {},
-      "name": "lastPollTime",
+      "name": "value",
+      "type": "string",
       "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "ContactCustomData",
-      "nullable": true,
-      "type": {
-        "containsNull": true,
-        "elementType": {
-          "fields": [
-            {
-              "metadata": {},
-              "name": "contactId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "name",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "value",
-              "nullable": true,
-              "type": "string"
-            }
-          ],
-          "type": "struct"
-        },
-        "type": "array"
-      }
+      "metadata": {}
     }
-  ],
-  "type": "struct"
+  ]
 }

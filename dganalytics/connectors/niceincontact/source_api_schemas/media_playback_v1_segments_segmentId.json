@@ -36,6 +36,101 @@
                   { "name": "endTime", "type": "string", "nullable": true },
                   { "name": "acwEndTime", "type": "string", "nullable": true },
                   { "name": "fileToPlayUrl", "type": "string", "nullable": true },
+                  { "name": "videoImageUrl", "type": "string", "nullable": true },
+                  {
+                    "name": "waveformDataList",
+                    "type": {
+                      "type": "array",
+                      "elementType": {
+                        "type": "struct",
+                        "fields": [
+                          { "name": "channel", "type": "integer", "nullable": true },
+                          {
+                            "name": "normalizedPcmData",
+                            "type": {
+                              "type": "array",
+                              "elementType": "double",
+                              "containsNull": true
+                            },
+                            "nullable": true
+                          }
+                        ]
+                      },
+                      "containsNull": true
+                    },
+                    "nullable": true
+                  },
+                  {
+                    "name": "participantDataList",
+                    "type": {
+                      "type": "array",
+                      "elementType": {
+                        "type": "struct",
+                        "fields": [
+                          { "name": "participantType", "type": "string", "nullable": true },
+                          { "name": "agentName", "type": "string", "nullable": true },
+                          { "name": "participantId", "type": "string", "nullable": true },
+                          { "name": "segmentId", "type": "string", "nullable": true },
+                          { "name": "userId", "type": "string", "nullable": true },
+                          {
+                            "name": "voiceStages",
+                            "type": {
+                              "type": "array",
+                              "elementType": {
+                                "type": "struct",
+                                "fields": [
+                                  { "name": "stageType", "type": "string", "nullable": true },
+                                  { "name": "startTime", "type": "string", "nullable": true },
+                                  { "name": "endTime", "type": "string", "nullable": true },
+                                  { "name": "recordingID", "type": "string", "nullable": true },
+                                  { "name": "displays", "type": "string", "nullable": true }
+                                ]
+                              },
+                              "containsNull": true
+                            },
+                            "nullable": true
+                          },
+                          {
+                            "name": "screenStages",
+                            "type": {
+                              "type": "array",
+                              "elementType": {
+                                "type": "struct",
+                                "fields": [
+                                  { "name": "stageType", "type": "string", "nullable": true },
+                                  { "name": "startTime", "type": "string", "nullable": true },
+                                  { "name": "endTime", "type": "string", "nullable": true },
+                                  { "name": "recordingID", "type": "string", "nullable": true },
+                                  {
+                                    "name": "displays",
+                                    "type": {
+                                      "type": "array",
+                                      "elementType": {
+                                        "type": "struct",
+                                        "fields": [
+                                          { "name": "width", "type": "integer", "nullable": true },
+                                          { "name": "height", "type": "integer", "nullable": true },
+                                          { "name": "topLeftX", "type": "integer", "nullable": true },
+                                          { "name": "topLeftY", "type": "integer", "nullable": true }
+                                        ]
+                                      },
+                                      "containsNull": true
+                                    },
+                                    "nullable": true
+                                  }
+                                ]
+                              },
+                              "containsNull": true
+                            },
+                            "nullable": true
+                          },
+                          { "name": "channel", "type": "integer", "nullable": true }
+                        ]
+                      },
+                      "containsNull": true
+                    },
+                    "nullable": true
+                  },
                   {
                     "name": "participants",
                     "type": {
@@ -167,6 +262,22 @@
                     "nullable": true
                   },
                   {
+                    "name": "sentiments",
+                    "type": {
+                      "type": "array",
+                      "elementType": {
+                        "type": "struct",
+                        "fields": [
+                          { "name": "overallSentiment", "type": "string", "nullable": true },
+                          { "name": "segmentStartTime", "type": "string", "nullable": true },
+                          { "name": "channel", "type": "integer", "nullable": true }
+                        ]
+                      },
+                      "containsNull": true
+                    },
+                    "nullable": true
+                  },
+                  {
                     "name": "dfoStages",
                     "type": {
                       "type": "array",
@@ -186,6 +297,38 @@
                             "nullable": true
                           },
                           { "name": "mergedParentId", "type": "string", "nullable": true }
+                        ]
+                      },
+                      "containsNull": true
+                    },
+                    "nullable": true
+                  },
+                  {
+                    "name": "categoryMatchesList",
+                    "type": {
+                      "type": "array",
+                      "elementType": {
+                        "type": "struct",
+                        "fields": [
+                          {
+                            "name": "categoryHierarchy",
+                            "type": {
+                              "type": "array",
+                              "elementType": "string",
+                              "containsNull": true
+                            },
+                            "nullable": true
+                          },
+                          {
+                            "name": "secondsOffsets",
+                            "type": {
+                              "type": "array",
+                              "elementType": "double",
+                              "containsNull": true
+                            },
+                            "nullable": true
+                          },
+                          { "name": "confidence", "type": "integer", "nullable": true }
                         ]
                       },
                       "containsNull": true
