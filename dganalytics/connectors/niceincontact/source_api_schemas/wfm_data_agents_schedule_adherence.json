@@ -1,85 +1,71 @@
 {
+  "type": "struct",
   "fields": [
     {
-      "metadata": {},
-      "name": "agentStateHistory",
+      "name": "businessUnitId",
+      "type": "long",
       "nullable": true,
-      "type": {
-        "type": "array",
-        "containsNull": true,
-        "elementType": {
-          "type": "struct",
-          "fields": [
-            {
-              "metadata": {},
-              "name": "businessUnitId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "businessUnitName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "agentId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "stateIndex",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "startDate",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "agentStateId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "agentSessionId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "skillId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "outStateId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "outStateDescription",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "duration",
-              "nullable": true,
-              "type": "integer"
-            }
-          ]
-        }
-      }
+      "metadata": {}
+    },
+    {
+      "name": "businessUnitName",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "agentId",
+      "type": "long",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "stateIndex",
+      "type": "long",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "startDate",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "agentStateId",
+      "type": "long",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "agentSessionId",
+      "type": "long",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "skillId",
+      "type": "long",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "outStateId",
+      "type": "long",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "outStateDescription",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "duration",
+      "type": "long",
+      "nullable": true,
+      "metadata": {}
     }
-  ],
-  "type": "struct"
+  ]
 }

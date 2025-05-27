@@ -1,7 +1,8 @@
 from dganalytics.utils.utils import get_spark_session, flush_utils
 from dganalytics.connectors.niceincontact.niceincontact_utils import (get_dbname, niceincontact_request, extract_parser, niceincontact_utils_logger, 
                                                                       fetch_media_playback_data, generate_daily_date_ranges, fetch_media_segments,
-                                                                      fetch_contacts_email_transcript)
+                                                                      fetch_contacts_email_transcript, analytics_api_call, 
+                                                                       generate_wfmdata_agents )
 
 
 if __name__ == "__main__":
@@ -18,15 +19,12 @@ if __name__ == "__main__":
         if api_name in ["agents", "teams", "teams_agents", "agents_skills", "skills", "dispositions","dispositions_skills"]:
             df = niceincontact_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
-        elif api_name in ["interaction_analytics_gateway_v2_segments_analyzed"]:
-            df = niceincontact_request(spark, tenant, api_name, run_id,
-                             extract_start_time, extract_end_time, base_url=True)
         elif api_name == "media_playback_v1_segments_segmentId":
             fetch_media_segments(spark, tenant, api_name,None, extract_start_time, extract_end_time, skip_raw_load=True, base_url=True)
         elif api_name in ["contacts_custom_data", "contacts_completed", "contacts"]:
             generate_daily_date_ranges(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time,)
-        elif api_name in ["contacts", "interaction_analytics_gateway_v2_segments_analyzed"]:
+        elif api_name in ["interaction_analytics_gateway_v2_segments_analyzed"]:
             df = niceincontact_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time, base_url=True)
         elif api_name == "media_playback_v1_contacts_acdContactId":
@@ -34,6 +32,10 @@ if __name__ == "__main__":
                              extract_start_time, extract_end_time)
         elif api_name == "contacts_contactId_email_transcript":
             fetch_contacts_email_transcript(spark, tenant, api_name, run_id, extract_start_time, extract_end_time)
+        elif api_name == "interaction_analytics_gateway_segments_analyzed_transcript":
+            analytics_api_call(spark, tenant, api_name, run_id, extract_start_time, extract_end_time)
+        elif api_name == "wfm_data_agents":
+            generate_wfmdata_agents(spark, tenant, api_name, run_id, extract_start_time, extract_end_time)
         else:
             logger.exception("Invalid API name")
             raise Exception

@@ -1,85 +1,89 @@
 {
+  "type": "struct",
   "fields": [
     {
       "metadata": {},
-      "name": "agentStateHistory",
+      "name": "businessUnitId",
       "nullable": true,
-      "type": {
-        "type": "array",
-        "elementType": {
-          "type": "struct",
-          "fields": [
-            {
-              "metadata": {},
-              "name": "businessUnitId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "businessUnitName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "agentId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "stateIndex",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "startDate",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "agentStateId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "agentSessionId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "skillId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "outStateId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "outStateDescription",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "duration",
-              "nullable": true,
-              "type": "integer"
-            }
-          ]
-        },
-        "containsNull": true
-      }
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "agentId",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "startDate",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "totalTime",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "talkTime",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "acwTime",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "holdTime",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "totalCalls",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "abandonedCalls",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "auxTime",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "auxInTime",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "auxOutTime",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "idleTime",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "actualCalls",
+      "nullable": true,
+      "type": "long"
     }
-  ],
-  "type": "struct"
+  ]
 }

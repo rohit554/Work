@@ -845,3 +845,78 @@ def fetch_media_segments(spark: SparkSession, tenant: str, api_name: str, run_id
             media_playback_segments_list = voice_only_data_list
         process_raw_data(spark, tenant, api_, run_id,
                          media_playback_segments_list, extract_start_time, extract_end_time, 1)
+
+def fetch_analyzed_transcript_by_segment(tenant, api_name, segmentId):
+    """"""
+    auth_headers = authorize(tenant)
+    niceincontact = niceincontact_end_points
+    config = niceincontact[api_name]
+
+    req_type = config.get('request_type', 'GET')
+    url = f"{get_base_api_url(tenant)}{config['endpoint']}".format(segmentId=segmentId)
+    params = config.get('params', {})
+
+    resp = make_niceincontact_request(req_type, url, params, auth_headers)
+
+    if resp.status_code == 401:
+        logger.warning(f"Received 401 Unauthorized for {api_name}. Attempting token refresh for tenant: {tenant}")
+        auth_headers = refresh_access_token(tenant)
+        resp = make_niceincontact_request(req_type, url, params, auth_headers)
+
+    if resp.status_code == 200:
+        return resp.json()
+    else:
+        logger.error(f"for url : {url} resposne is {resp.text()}")
+        return None
+    
+
+def analytics_api_call(spark: SparkSession,tenant: str, api_name: str, run_id: str, start_date: str, end_date: str):
+    """
+    Make an API call to the NICE inContact Analytics API.
+
+    Args:
+        tenant (str): The tenant identifier.
+        api (str): The API endpoint to call.
+        start_date (str): The start date for the API call.
+        end_date (str): The end date for the API call.
+        skip_raw_load (bool, optional): Whether to skip the raw data load. Defaults to False.
+        base_url (bool, optional): Whether to use the base URL. Defaults to False.
+
+    Returns:
+        dict: The response from the API call.
+    """
+    resp_list = niceincontact_request(
+        spark, tenant, "interaction_analytics_gateway_v2_segments_analyzed", None, start_date, end_date, skip_raw_load=True, base_url=True
+    )
+    segmentId_list = [json.loads(res)['segmentId'] for res in resp_list]
+    count = 1
+    transcript_list = []
+    for segmentId in segmentId_list:
+        logger.info(f"Processing count: {count}, Remaining: {len(segmentId_list) - count}")
+        
+        transcript = fetch_analyzed_transcript_by_segment(tenant, api_name, segmentId)
+        if transcript:
+            logger.info("data is there")
+            transcript_list.append(json.dumps(transcript))
+        else:
+            logger.info(f"for segmentId : {segmentId} transcript is empty")
+        count += 1
+    process_raw_data(spark, tenant, api_name, run_id,
+                         transcript_list, start_date, end_date, 1)
+    
+
+def generate_wfmdata_agents(spark: SparkSession, tenant: str, api_name: str, run_id: str,start_str, end_str, max_days=14):
+    start_date = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
+    end_date = datetime.fromisoformat(end_str.replace("Z", "+00:00"))
+    
+    current_start = start_date
+    
+    while current_start < end_date:
+        current_end = min(current_start + timedelta(days=max_days), end_date)
+        extract_start_time = current_start.isoformat(timespec='seconds').replace('+00:00', 'Z')
+        extract_end_time = current_end.isoformat(timespec='seconds').replace('+00:00', 'Z')
+        print(f"extract_start_time : {extract_start_time}, extract_end_time :{extract_end_time}")
+
+        niceincontact_request(spark, tenant, api_name,None, extract_start_time,extract_end_time)
+        
+        current_start = current_end
