@@ -1,0 +1,91 @@
+{
+    "type": "struct",
+    "fields": [
+    {
+        "name": "emailTypeId",
+        "type": "long",
+        "nullable": true,
+        "metadata": {}
+    },
+    {
+        "name": "sentDate",
+        "type": "string",
+        "nullable": true,
+        "metadata": {}
+    },
+    {
+        "name": "fromAddress",
+        "type": "string",
+        "nullable": true,
+        "metadata": {}
+    },
+    {
+        "name": "toAddress",
+        "type": "string",
+        "nullable": true,
+        "metadata": {}
+    },
+    {
+        "name": "ccAddress",
+        "type": "string",
+        "nullable": true,
+        "metadata": {}
+    },
+    {
+        "name": "bccAddress",
+        "type": "string",
+        "nullable": true,
+        "metadata": {}
+    },
+    {
+        "name": "subject",
+        "type": "string",
+        "nullable": true,
+        "metadata": {}
+    },
+    {
+        "name": "rawFileName",
+        "type": "string",
+        "nullable": true,
+        "metadata": {}
+    },
+    {
+        "name": "bodyHtml",
+        "type": "string",
+        "nullable": true,
+        "metadata": {}
+    },
+    {
+        "name": "hasAttachments",
+        "type": "boolean",
+        "nullable": true,
+        "metadata": {}
+    },
+    {
+        "name": "attachments",
+        "type": {
+        "type": "array",
+        "elementType": {
+            "type": "struct",
+            "fields": [
+            {
+                "name": "attachmentName",
+                "type": "string",
+                "nullable": true,
+                "metadata": {}
+            },
+            {
+                "name": "attachment",
+                "type": "string",
+                "nullable": true,
+                "metadata": {}
+            }
+            ]
+        },
+        "containsNull": true
+        },
+        "nullable": true,
+        "metadata": {}
+    }
+    ]
+}

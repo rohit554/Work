@@ -352,4 +352,32 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
+    "contacts_contactId_email_transcript": {
+        "endpoint": "/contacts/{{contactId}}/email-transcript",
+        "request_type": "GET",
+        "paging": False,
+        "interval": False,
+        "params": {},
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "dispositions",
+        "tbl_overwrite": False,
+        "raw_primary_key": ["id"],
+    },
+    "interaction_analytics_gateway_v2_segments_analyzed": {
+        "endpoint": "/interaction-analytics-gateway/v2/segments/analyzed",
+        "request_type": "GET",
+        "paging": False,
+        "cursor": True,
+        "interval": True,
+        "params": {
+            "pageSize": 500,
+            "order": "asc"
+        },
+        "spark_partitions": {
+            "max_records_per_partition": 20000
+        },
+        "entity_name": "segmentsAnalyzed",
+        "tbl_overwrite": False,
+        "raw_primary_key": ["id"]
+    },
 }

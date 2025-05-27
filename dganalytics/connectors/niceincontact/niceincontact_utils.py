@@ -4,20 +4,21 @@ It includes functions for authorization, making API requests, and handling respo
 """
 
 import os
-from typing import List
-from pyspark.sql.types import StructType
-import json
-from pathlib import Path
 import argparse
-from datetime import datetime, timedelta
-from pyspark.sql import SparkSession, DataFrame
-from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
-from dganalytics.utils.utils import env, get_path_vars, get_logger, delta_table_partition_ovrewrite, delta_table_ovrewrite, get_secret
-from pyspark.sql.functions import lit, monotonically_increasing_id, to_date, to_timestamp
+import json
 import time
 import math
 import requests
 import logging
+from typing import List
+from pathlib import Path
+from datetime import datetime, timedelta
+from pyspark.sql.types import StructType
+from pyspark.sql import SparkSession, DataFrame
+from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
+from dganalytics.utils.utils import env, get_path_vars, get_logger, delta_table_partition_ovrewrite, delta_table_ovrewrite, get_secret
+from pyspark.sql.functions import lit, monotonically_increasing_id, to_date, to_timestamp
+
 logger = logging.getLogger(__name__)
 
 access_token = ""
@@ -624,3 +625,109 @@ def fetch_media_playback_data(spark: SparkSession, tenant: str, api_name: str, r
     """
     auth_headers = authorize(tenant)
     get_master_contact_id(extract_start_time, extract_end_time, auth_headers, spark, tenant, api_name, run_id)
+
+def extract_email_transcript(master_contact_id, auth_headers, tenant, niceincontact, api_name):
+    """
+    Fetch email transcript data for a given contact from NICE inContact API.
+
+    This function attempts to retrieve email transcript data using the provided 
+    master_contact_id. If a 401 Unauthorized status is received, it will attempt
+    to refresh the access token and retry the request.
+
+    Args:
+        master_contact_id (str): The unique identifier of the contact.
+        auth_headers (dict): Authorization headers for the API request.
+        tenant (str): The tenant identifier used for logging and token refresh.
+        niceincontact (dict): Dictionary of NICE inContact API configurations.
+        api_name (str): Name of the specific API configuration to use.
+
+    Returns:
+        dict: email transcript if successful, otherwise an empty dictionary.
+    """
+    media_playback_url = get_base_api_url(tenant)
+    config = niceincontact[api_name]
+    params = config.get('params', {})
+
+    req_type = config.get('request_type', 'GET')
+    
+    resp = make_niceincontact_request(req_type, media_playback_url, params, auth_headers)
+    
+    if resp.status_code == 401:
+        logger.warning(f"Received 401 Unauthorized for Contact Email Transcript. Attempting token refresh for tenant: {tenant}")
+        auth_headers = refresh_access_token(tenant)
+        resp = make_niceincontact_request(req_type, media_playback_url, params, auth_headers)
+    
+    if resp.status_code == 200:
+        logger.info(f"Successfully fetched email transcript data for master_contact_id: {master_contact_id}")
+        return resp.json()
+    else:
+        logger.error(f"Failed to fetch media playback for master_contact_id: {master_contact_id}. "
+                     f"Status Code: {resp.status_code}, Response: {resp.text}")
+        return {}
+
+def get_master_contact_id_for_email_transcript(startDate, endDate, auth_headers, spark, tenant, api_name, run_id):
+    """
+    Retrieve email transcript data for all master contact IDs within a date range and process it.
+
+    Args:
+        startDate (str): Start date in ISO 8601 format.
+        endDate (str): End date in ISO 8601 format.
+        auth_headers (dict): Authorization headers for API requests.
+        spark (SparkSession): Active Spark session for data processing.
+        tenant (str): Tenant identifier.
+        api_name (str): API configuration name for media playback.
+        run_id (str): Identifier for the current run.
+
+    Returns:
+        None
+    """
+    start_date = datetime.strptime(startDate, "%Y-%m-%dT%H:%M:%SZ")
+    end_date = datetime.strptime(endDate, "%Y-%m-%dT%H:%M:%SZ")
+    current_start = start_date
+    
+    while current_start < end_date:
+        current_end = current_start + timedelta(days=1)
+
+        start_str = current_start.strftime("%Y-%m-%dT%H:%M:%SZ")
+        end_str = current_end.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        logger.info(f"Calling API for: {start_str} → {end_str}")
+        niceincontact = niceincontact_end_points
+
+        contact_ids = fetct_contacts(start_str, end_str, auth_headers, tenant, niceincontact)
+        contact_ids = list(set(contact_ids))
+        email_transcript_data_list = []
+        count = 1
+        for contact_id in contact_ids:
+            logger.info(f"Staring email transcript data fetch for contact_id : {contact_id}, count : {count}")
+            email_transcript_data = extract_email_transcript(contact_id, auth_headers, tenant, niceincontact, api_name)
+            if email_transcript_data:
+                email_transcript_data_list.append(json.dumps(email_transcript_data))
+            else:
+                logger.warning(f"No transcript data found for contact_id: {contact_id}")
+            logger.info(f"process_raw_data completed for contact_id : {contact_id}")
+            count +=1
+        logger.info("Starting process_raw_data")
+        process_raw_data(spark, tenant, api_name, run_id,
+                            email_transcript_data_list, start_str, end_str, 1)
+        logger.info(f"Process_raw_data completed for: {start_str} → {end_str} ")
+        current_start = current_end
+
+def fetch_contacts_email_transcript(spark: SparkSession, tenant: str, api_name: str, run_id: str, extract_start_time: str, extract_end_time: str):
+    """
+    Entry point to fetch and process email transcript data within a time window.
+
+    Args:
+        spark (SparkSession): Active Spark session for data processing.
+        tenant (str): Tenant identifier.
+        api_name (str): API configuration name for media playback.
+        run_id (str): Identifier for the current run.
+        extract_start_time (str): Start datetime in ISO 8601 format.
+        extract_end_time (str): End datetime in ISO 8601 format.
+
+    Returns:
+        None
+    """
+    auth_headers = authorize(tenant)
+    get_master_contact_id_for_email_transcript(extract_start_time, extract_end_time, auth_headers, spark, tenant, api_name, run_id)
+    
