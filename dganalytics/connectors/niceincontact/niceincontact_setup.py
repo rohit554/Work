@@ -101,7 +101,10 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
         bool: True if all raw tables are created.
     """
     logger.info("Setting Nice InContact raw tables")
-    apis = ["agents","teams","contacts", "contacts_custom_data", "contacts_completed","interaction_analytics_gateway_v2_segments_analyzed","media_playback_v1_contacts_acdContactId", "media_playback_v1_segments_segmentId"]
+    apis = ["agents","teams","contacts", "contacts_custom_data", "contacts_completed",
+            "interaction_analytics_gateway_v2_segments_analyzed","media_playback_v1_contacts_acdContactId", 
+            "media_playback_v1_segments_segmentId", "interaction_analytics_gateway_segments_analyzed_transcript",
+            "wfm_data_agents"]
     for api in apis:
         logger.info(f"Creating raw table for API: {api}")
         create_raw_table(api, spark, db_name, db_path, logger)

@@ -4,7 +4,7 @@
       "metadata": {},
       "name": "businessUnitId",
       "nullable": true,
-      "type": "integer"
+      "type": "long"
     },
     {
       "metadata": {},
@@ -16,7 +16,7 @@
       "metadata": {},
       "name": "skillId",
       "nullable": true,
-      "type": "integer"
+      "type": "long"
     },
     {
       "metadata": {},
@@ -28,7 +28,7 @@
       "metadata": {},
       "name": "agentId",
       "nullable": true,
-      "type": "integer"
+      "type": "long"
     },
     {
       "metadata": {},
@@ -46,25 +46,25 @@
       "metadata": {},
       "name": "halfHour",
       "nullable": true,
-      "type": "integer"
+      "type": "long"
     },
     {
       "metadata": {},
       "name": "totalHandled",
       "nullable": true,
-      "type": "integer"
+      "type": "long"
     },
     {
       "metadata": {},
       "name": "totalHandledTime",
       "nullable": true,
-      "type": "integer"
+      "type": "long"
     },
     {
       "metadata": {},
       "name": "totalACWTime",
       "nullable": true,
-      "type": "integer"
+      "type": "long"
     }
   ],
   "type": "struct"

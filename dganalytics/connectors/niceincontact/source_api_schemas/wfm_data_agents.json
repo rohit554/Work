@@ -1,97 +1,18 @@
 {
+  "type": "struct",
   "fields": [
-    {
-      "metadata": {},
-      "name": "wfM_Data_Agents",
-      "nullable": true,
-      "type": {
-        "type": "array",
-        "containsNull": true,
-        "elementType": {
-          "type": "struct",
-          "fields": [
-            {
-              "metadata": {},
-              "name": "agentNo",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "teamName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "teamNo",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "businessUnitId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "businessUnitName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "firstName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "middleName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "lastName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "status",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "createDate",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "modDateTime",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "productId",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "ntLoginName",
-              "nullable": true,
-              "type": "string"
-            }
-          ]
-        }
-      }
-    }
-  ],
-  "type": "struct"
+    { "name": "agentId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "teamName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "teamId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "businessUnitId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "businessUnitName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "firstName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "middleName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "lastName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "status", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "createDate", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "modDateTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "productId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "ntLoginName", "type": "string", "nullable": true, "metadata": {} }
+  ]
 }
