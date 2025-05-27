@@ -224,7 +224,7 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
-    "contacts_customdata": {
+    "contacts_custom_data": {
         "endpoint": "/contacts/custom-data",
         "request_type": "GET",
         "paging": True,
@@ -352,6 +352,7 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
+<<<<<<< HEAD
     "contacts_contactId_email_transcript": {
         "endpoint": "/contacts/{{contactId}}/email-transcript",
         "request_type": "GET",
@@ -363,6 +364,8 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
+=======
+>>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af
     "interaction_analytics_gateway_v2_segments_analyzed": {
         "endpoint": "/interaction-analytics-gateway/v2/segments/analyzed",
         "request_type": "GET",
@@ -376,8 +379,51 @@ niceincontact_end_points = {
         "spark_partitions": {
             "max_records_per_partition": 20000
         },
+<<<<<<< HEAD
         "entity_name": "segmentsAnalyzed",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"]
     },
+=======
+        "entity_name": "interactions",
+        "tbl_overwrite": False,
+        "raw_primary_key": ["id"]
+    },
+    "media_playback_v1_segments_segmentId": {
+        "endpoint": "/media-playback/v1/segments/{segmentId}",
+        "request_type": "GET",
+        "paging": False,
+        "interval": False,
+        "params": {
+            "media-type": ["voice-only", "voice-and-screen", "chat", "email", "all"],
+            "exclude-waveforms": True,
+            "exclude-qm-categories": False
+        },
+        "spark_partitions": {
+            "max_records_per_partition": 20000
+        },
+        "entity_name": "interactions",
+        "tbl_overwrite": False,
+        "raw_primary_key": ["segmentId"]
+    },
+    "media_segment_voice_only": {
+        "endpoint": "/media-playback/v1/segments/{segmentId}",
+        "request_type": "GET",
+        "paging": False,
+        "interval": False,
+        "params": {
+            "media-type": ["voice-only", "voice-and-screen", "chat", "email", "all"],
+            "exclude-waveforms": True,
+            "exclude-qm-categories": False
+        },
+        "spark_partitions": {
+            "max_records_per_partition": 20000
+        },
+        "entity_name": "interactions",
+        "tbl_overwrite": False,
+        "raw_primary_key": ["segmentId"]
+    }
+
+
+>>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af
 }

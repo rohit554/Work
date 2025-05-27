@@ -1,6 +1,68 @@
+<<<<<<< HEAD
  {
+=======
+{
+  "type": "struct",
+>>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af
   "fields": [
+    { "name": "abandoned", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "abandonSeconds", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "acwSeconds", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "agentId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "agentSeconds", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "analyticsProcessedDate", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "callbackTime", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "campaignId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "campaignName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "conferenceSeconds", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "contactId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "contactStartDate", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "dateACWWarehoused", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "dateContactWarehoused", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "dispositionNotes", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "endReason", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "firstName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "fromAddress", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "highProficiency", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "holdCount", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "holdSeconds", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "inQueueSeconds", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "isAnalyticsProcessed", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "isLogged", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "isOutbound", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "isRefused", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "isShortAbandon", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "isTakeover", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "lastName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "lastUpdateTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "lowProficiency", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "masterContactId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "mediaSubTypeId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "mediaSubTypeName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "mediaTypeId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "mediaTypeName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "pointOfContactId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "pointOfContactName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "postQueueSeconds", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "preQueueSeconds", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "primaryDispositionId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "refuseReason", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "refuseTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "releaseSeconds", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "routingAttribute", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "routingTime", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "secondaryDispositionId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "serviceLevelFlag", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "skillId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "skillName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "teamId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "teamName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "toAddress", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "totalDurationSeconds", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "transferIndicatorId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "transferIndicatorName", "type": "string", "nullable": true, "metadata": {} },
     {
+<<<<<<< HEAD
       "metadata": {},
       "name": "abandoned",
       "nullable": true,
@@ -340,10 +402,16 @@
       "metadata": {},
       "name": "tags",
       "nullable": true,
+=======
+      "name": "tags",
+>>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af
       "type": {
+        "type": "array",
         "containsNull": true,
         "elementType": {
+          "type": "struct",
           "fields": [
+<<<<<<< HEAD
             {
               "metadata": {},
               "name": "contactId",
@@ -367,7 +435,16 @@
         },
         "type": "array"
       }
+=======
+            { "name": "contactId", "type": "long", "nullable": true, "metadata": {} },
+            { "name": "tagId", "type": "integer", "nullable": true, "metadata": {} },
+            { "name": "tagName", "type": "string", "nullable": true, "metadata": {} }
+          ]
+        }
+      },
+      "nullable": true,
+      "metadata": {}
+>>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af
     }
-  ],
-  "type": "struct"
+  ]
 }

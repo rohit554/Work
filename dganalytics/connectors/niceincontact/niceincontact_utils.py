@@ -4,8 +4,21 @@ It includes functions for authorization, making API requests, and handling respo
 """
 
 import os
+<<<<<<< HEAD
 import argparse
 import json
+=======
+from typing import List
+import argparse
+from pyspark.sql.types import StructType
+import json
+from pathlib import Path
+from datetime import datetime, timedelta
+from pyspark.sql import SparkSession, DataFrame
+from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
+from dganalytics.utils.utils import env, get_path_vars, get_logger, delta_table_partition_ovrewrite, delta_table_ovrewrite, get_secret
+from pyspark.sql.functions import lit, monotonically_increasing_id, to_date, to_timestamp
+>>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af
 import time
 import math
 import requests
@@ -353,7 +366,7 @@ def process_raw_data(spark: SparkSession, tenant: str, api_name: str, run_id: st
 
 def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_start_time: str, extract_end_time: str, overwrite_niceincontact_config: dict = None,
-                skip_raw_load: bool = False):
+                skip_raw_load: bool = False, base_url :bool = False):
     """
     Make a request to the NICE inContact API and process the response.
     Args:
@@ -376,7 +389,10 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
         config.update(overwrite_niceincontact_config[api_name])
 
     req_type = config.get('request_type', 'GET')
-    url = get_api_url(tenant) + config['endpoint']
+    if not base_url:
+        url = get_api_url(tenant) + config['endpoint']
+    else:
+        url = get_base_api_url(tenant) + config['endpoint']
     params = config.get('params', {})
     cursor = config.get('cursor', None)
     entity = config.get('entity_name', "")
@@ -390,7 +406,8 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
     cursor_param = ""
 
     if interval:
-        params['interval'] = get_interval(extract_start_time, extract_end_time)
+        params['startDate'] = extract_start_time
+        params['endDate'] = extract_end_time
 
     while True:
         if paging:
@@ -626,6 +643,7 @@ def fetch_media_playback_data(spark: SparkSession, tenant: str, api_name: str, r
     auth_headers = authorize(tenant)
     get_master_contact_id(extract_start_time, extract_end_time, auth_headers, spark, tenant, api_name, run_id)
 
+<<<<<<< HEAD
 def extract_email_transcript(master_contact_id, auth_headers, tenant, niceincontact, api_name):
     """
     Fetch email transcript data for a given contact from NICE inContact API.
@@ -731,3 +749,115 @@ def fetch_contacts_email_transcript(spark: SparkSession, tenant: str, api_name: 
     auth_headers = authorize(tenant)
     get_master_contact_id_for_email_transcript(extract_start_time, extract_end_time, auth_headers, spark, tenant, api_name, run_id)
     
+=======
+
+
+def generate_daily_date_ranges(spark, tenant, api_name, run_id, startDate, endDate):
+    """
+    Generate daily time intervals between startDate and endDate, inclusive of startDate and exclusive of endDate.
+    Prints each interval in ISO 8601 format.
+
+    Args:
+        startDate (str): Start date in ISO format (e.g., "2025-04-01T00:00:00Z").
+        endDate (str): End date in ISO format (e.g., "2025-04-10T00:00:00Z").
+        auth_headers (dict): Placeholder for authentication headers (not used in this function).
+        spark (SparkSession): Placeholder for Spark session (not used in this function).
+        tenant (str): Placeholder for tenant info (not used in this function).
+        api_name (str): Placeholder for API name (not used in this function).
+        run_id (str): Placeholder for run identifier (not used in this function).
+
+    Returns:
+        list of tuple: Each tuple contains a start and end timestamp string for a 1-day interval.
+    """
+    current_start = datetime.strptime(startDate, "%Y-%m-%dT%H:%M:%SZ")
+    end_datetime = datetime.strptime(endDate, "%Y-%m-%dT%H:%M:%SZ")
+
+    while current_start < end_datetime:
+        current_end = current_start + timedelta(days=1)
+
+        # Convert to ISO 8601 string
+        start_str = current_start.strftime("%Y-%m-%dT%H:%M:%SZ")
+        end_str = current_end.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+        logger.info(f"Date Range: {start_str} → {end_str}")
+        _ = niceincontact_request(spark, tenant, api_name, run_id,
+                             start_str, end_str)
+        
+
+        current_start = current_end
+
+def fetch_media_playback_segments(spark: SparkSession, tenant: str, api_name: str, run_id: str,
+                                  extract_start_time: str, extract_end_time: str, segmentId: int, auth_headers: dict,
+                                  skip_raw_load: bool = False, base_url: bool = False):
+    niceincontact = niceincontact_end_points
+    config = niceincontact[api_name]
+    req_type = config.get('request_type', 'GET')
+    url = f"{get_base_api_url(tenant)}{config['endpoint']}".format(segmentId=segmentId)
+    logger.info(f"ur : {url}")
+    params = config.get('params', {})
+    cursor = config.get('cursor', None)
+    entity = config.get('entity_name', "")
+    paging = config.get('paging', False)
+    interval = config.get('interval', False)
+    cursor = config.get('cursor', False)
+    resp = ""
+    cursor_param = ""
+
+    if interval:
+        params['startDate'] = extract_start_time
+        params['endDate'] = extract_end_time
+
+    if paging:
+        if req_type == "GET":
+            params['skip'] = (1 * int(params['pageSize'])) - int(params['pageSize']) + 1
+            params['top'] = 1 * int(params['pageSize'])
+        else:
+            params.update({
+                "skip": (1 * int(params['pageSize'])) - int(params['pageSize']) + 1,
+                "top": 1 * int(params['pageSize'])
+            })
+
+    if cursor and cursor_param != "":
+        params['cursor'] = cursor_param
+
+    resp = make_niceincontact_request(req_type, url, params, auth_headers)
+
+    if resp.status_code == 401:
+        logger.warning(f"Received 401 Unauthorized for {api_name}. Attempting token refresh for tenant: {tenant}")
+        auth_headers = refresh_access_token(tenant)
+        resp = make_niceincontact_request(req_type, url, params, auth_headers)
+
+    if resp.status_code == 200:
+        return resp.json()
+    else:
+        logger.error(f"Failed to fetch media playback segments for segmentId {segmentId}. "
+                     f"Status Code: {resp.status_code}, Response: {resp.text}")
+        return None
+
+
+def fetch_media_segments(spark: SparkSession, tenant: str, api_name: str, run_id: str,
+                extract_start_time: str, extract_end_time: str, 
+                skip_raw_load: bool = False, base_url :bool = False):
+    resp_list = niceincontact_request(spark, tenant, "interaction_analytics_gateway_v2_segments_analyzed",None, extract_start_time,extract_end_time, skip_raw_load=True, base_url=True)
+    segmentId_list = [json.loads(res)['segmentId'] for res in resp_list]
+    auth_headers = authorize(tenant)
+    media_playback_segments_list = []
+    voice_only_data_list = []
+    count = 1
+    for segmentId in segmentId_list:
+        logger.info(f"Processing count: {count}, Remaining: {len(segmentId_list) - count}")
+        media_playback_segments_data = fetch_media_playback_segments(spark, tenant, api_name,None,   extract_start_time,extract_end_time, segmentId, auth_headers)
+        if media_playback_segments_data:
+            for interactions in media_playback_segments_data.get("interactions", []):
+                if interactions.get("mediaType", {}) != "voice-only":
+                    media_playback_segments_list.append(json.dumps(media_playback_segments_data))
+                else:
+                    voice_only_data_list.append(json.dumps(media_playback_segments_data))
+        count +=1
+    apis = ["media_playback_v1_segments_segmentId", "media_segment_voice_only"]
+    for api_ in apis:
+        if api_ == "media_segment_voice_only":
+            media_playback_segments_list = voice_only_data_list
+        process_raw_data(spark, tenant, api_, run_id,
+                         media_playback_segments_list, extract_start_time, extract_end_time, 1)
+>>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af

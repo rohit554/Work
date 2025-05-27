@@ -1,14 +1,57 @@
 {
+  "type": "struct",
   "fields": [
     {
       "metadata": {},
-      "name": "totalRecords",
+      "name": "tenantId",
       "nullable": true,
-      "type": "integer"
+      "type": "string"
     },
     {
       "metadata": {},
-      "name": "interactions",
+      "name": "segmentId",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "acdContactId",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "agentContactId",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "resolved",
+      "nullable": true,
+      "type": "boolean"
+    },
+    {
+      "metadata": {},
+      "name": "publishedAt",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "startTime",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "endTime",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "enlightenMetrics",
       "nullable": true,
       "type": {
         "type": "array",
@@ -18,371 +61,25 @@
           "fields": [
             {
               "metadata": {},
-              "name": "tenantId",
+              "name": "behaviorName",
               "nullable": true,
               "type": "string"
             },
             {
               "metadata": {},
-              "name": "segmentId",
+              "name": "indexScore",
               "nullable": true,
-              "type": "string"
+              "type": "long"
             },
             {
               "metadata": {},
-              "name": "acdContactId",
+              "name": "rawScore",
               "nullable": true,
-              "type": "integer"
+              "type": "long"
             },
             {
               "metadata": {},
-              "name": "agentContactId",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "resolved",
-              "nullable": true,
-              "type": "boolean"
-            },
-            {
-              "metadata": {},
-              "name": "publishedAt",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "startTime",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "endTime",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "enlightenMetrics",
-              "nullable": true,
-              "type": {
-                "type": "array",
-                "containsNull": true,
-                "elementType": {
-                  "type": "struct",
-                  "fields": [
-                    {
-                      "metadata": {},
-                      "name": "behaviorName",
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    {
-                      "metadata": {},
-                      "name": "indexScore",
-                      "nullable": true,
-                      "type": "integer"
-                    },
-                    {
-                      "metadata": {},
-                      "name": "rawScore",
-                      "nullable": true,
-                      "type": "integer"
-                    },
-                    {
-                      "metadata": {},
-                      "name": "enlightenPackageModels",
-                      "nullable": true,
-                      "type": {
-                        "type": "array",
-                        "containsNull": true,
-                        "elementType": "string"
-                      }
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "metadata": {},
-              "name": "channels",
-              "nullable": true,
-              "type": {
-                "type": "array",
-                "containsNull": true,
-                "elementType": {
-                  "type": "struct",
-                  "fields": [
-                    {
-                      "metadata": {},
-                      "name": "name",
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    {
-                      "metadata": {},
-                      "name": "sentiment",
-                      "nullable": true,
-                      "type": {
-                        "type": "struct",
-                        "fields": [
-                          {
-                            "metadata": {},
-                            "name": "value",
-                            "nullable": true,
-                            "type": "string"
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "metadata": {},
-                      "name": "beginSentiment",
-                      "nullable": true,
-                      "type": {
-                        "type": "struct",
-                        "fields": [
-                          {
-                            "metadata": {},
-                            "name": "value",
-                            "nullable": true,
-                            "type": "string"
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "metadata": {},
-                      "name": "endSentiment",
-                      "nullable": true,
-                      "type": {
-                        "type": "struct",
-                        "fields": [
-                          {
-                            "metadata": {},
-                            "name": "value",
-                            "nullable": true,
-                            "type": "string"
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "metadata": {},
-                      "name": "frustration",
-                      "nullable": true,
-                      "type": {
-                        "type": "struct",
-                        "fields": [
-                          {
-                            "metadata": {},
-                            "name": "type",
-                            "nullable": true,
-                            "type": "string"
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "metadata": {},
-              "name": "categoryMatches",
-              "nullable": true,
-              "type": {
-                "type": "array",
-                "containsNull": true,
-                "elementType": {
-                  "type": "struct",
-                  "fields": [
-                    {
-                      "metadata": {},
-                      "name": "channelName",
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    {
-                      "metadata": {},
-                      "name": "fullPaths",
-                      "nullable": true,
-                      "type": {
-                        "type": "array",
-                        "containsNull": true,
-                        "elementType": "string"
-                      }
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "metadata": {},
-              "name": "entities",
-              "nullable": true,
-              "type": {
-                "type": "array",
-                "containsNull": true,
-                "elementType": {
-                  "type": "struct",
-                  "fields": [
-                    {
-                      "metadata": {},
-                      "name": "channelName",
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    {
-                      "metadata": {},
-                      "name": "displayText",
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    {
-                      "metadata": {},
-                      "name": "type",
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    {
-                      "metadata": {},
-                      "name": "sentimentValue",
-                      "nullable": true,
-                      "type": "string"
-                    },
-                    {
-                      "metadata": {},
-                      "name": "custom",
-                      "nullable": true,
-                      "type": "boolean"
-                    }
-                  ]
-                }
-              }
-            },
-            {
-              "metadata": {},
-              "name": "mediaType",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "firstAnnotatedAt",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "contactNo",
-              "nullable": true,
-              "type": {
-                "type": "array",
-                "containsNull": true,
-                "elementType": "string"
-              }
-            },
-            {
-              "metadata": {},
-              "name": "interactionId",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "holdCount",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "holdSeconds",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "contactEndReason",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "dispositionCode",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "nonHoldNotableSilenceSeconds",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "nonHoldNotableSilencePercentage",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "notableSilenceSeconds",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "notableSilencePercentage",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "enlightenSentimentRawScore",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "enlightenSentimentIndexScore",
-              "nullable": true,
-              "type": "integer"
-            },
-            {
-              "metadata": {},
-              "name": "segmentSummaryPrimaryIntentCategory",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "segmentSummaryPrimaryIntentTopic",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "segmentSummaryPrimaryIntentName",
-              "nullable": true,
-              "type": "string"
-            },
-            {
-              "metadata": {},
-              "name": "segmentSummaryActions",
-              "nullable": true,
-              "type": {
-                "type": "array",
-                "containsNull": true,
-                "elementType": "string"
-              }
-            },
-            {
-              "metadata": {},
-              "name": "segmentSummaryOutcomes",
+              "name": "enlightenPackageModels",
               "nullable": true,
               "type": {
                 "type": "array",
@@ -396,32 +93,287 @@
     },
     {
       "metadata": {},
-      "name": "links",
+      "name": "channels",
       "nullable": true,
       "type": {
-        "type": "struct",
-        "fields": [
-          {
-            "metadata": {},
-            "name": "self",
-            "nullable": true,
-            "type": "string"
-          },
-          {
-            "metadata": {},
-            "name": "previous",
-            "nullable": true,
-            "type": "string"
-          },
-          {
-            "metadata": {},
-            "name": "next",
-            "nullable": true,
-            "type": "string"
-          }
-        ]
+        "type": "array",
+        "containsNull": true,
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "metadata": {},
+              "name": "name",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "sentiment",
+              "nullable": true,
+              "type": {
+                "type": "struct",
+                "fields": [
+                  {
+                    "metadata": {},
+                    "name": "value",
+                    "nullable": true,
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            {
+              "metadata": {},
+              "name": "beginSentiment",
+              "nullable": true,
+              "type": {
+                "type": "struct",
+                "fields": [
+                  {
+                    "metadata": {},
+                    "name": "value",
+                    "nullable": true,
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            {
+              "metadata": {},
+              "name": "endSentiment",
+              "nullable": true,
+              "type": {
+                "type": "struct",
+                "fields": [
+                  {
+                    "metadata": {},
+                    "name": "value",
+                    "nullable": true,
+                    "type": "string"
+                  }
+                ]
+              }
+            },
+            {
+              "metadata": {},
+              "name": "frustration",
+              "nullable": true,
+              "type": {
+                "type": "struct",
+                "fields": [
+                  {
+                    "metadata": {},
+                    "name": "type",
+                    "nullable": true,
+                    "type": "string"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "metadata": {},
+      "name": "categoryMatches",
+      "nullable": true,
+      "type": {
+        "type": "array",
+        "containsNull": true,
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "metadata": {},
+              "name": "channelName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "fullPaths",
+              "nullable": true,
+              "type": {
+                "type": "array",
+                "containsNull": true,
+                "elementType": "string"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "metadata": {},
+      "name": "entities",
+      "nullable": true,
+      "type": {
+        "type": "array",
+        "containsNull": true,
+        "elementType": {
+          "type": "struct",
+          "fields": [
+            {
+              "metadata": {},
+              "name": "channelName",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "displayText",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "type",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "sentimentValue",
+              "nullable": true,
+              "type": "string"
+            },
+            {
+              "metadata": {},
+              "name": "custom",
+              "nullable": true,
+              "type": "boolean"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "metadata": {},
+      "name": "mediaType",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "firstAnnotatedAt",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "contactNo",
+      "nullable": true,
+      "type": {
+        "type": "array",
+        "containsNull": true,
+        "elementType": "string"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "interactionId",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "holdCount",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "holdSeconds",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "contactEndReason",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "dispositionCode",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "nonHoldNotableSilenceSeconds",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "nonHoldNotableSilencePercentage",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "notableSilenceSeconds",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "notableSilencePercentage",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "enlightenSentimentRawScore",
+      "nullable": true,
+      "type": "double"
+    },
+    {
+      "metadata": {},
+      "name": "enlightenSentimentIndexScore",
+      "nullable": true,
+      "type": "long"
+    },
+    {
+      "metadata": {},
+      "name": "segmentSummaryPrimaryIntentCategory",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "segmentSummaryPrimaryIntentTopic",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "segmentSummaryPrimaryIntentName",
+      "nullable": true,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "segmentSummaryActions",
+      "nullable": true,
+      "type": {
+        "type": "array",
+        "containsNull": true,
+        "elementType": "string"
+      }
+    },
+    {
+      "metadata": {},
+      "name": "segmentSummaryOutcomes",
+      "nullable": true,
+      "type": {
+        "type": "array",
+        "containsNull": true,
+        "elementType": "string"
       }
     }
-  ],
-  "type": "struct"
+  ]
 }

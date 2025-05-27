@@ -1,5 +1,10 @@
 from dganalytics.utils.utils import get_spark_session, flush_utils
+<<<<<<< HEAD
 from dganalytics.connectors.niceincontact.niceincontact_utils import get_dbname, niceincontact_request, extract_parser, niceincontact_utils_logger, fetch_media_playback_data, fetch_contacts_email_transcript
+=======
+from dganalytics.connectors.niceincontact.niceincontact_utils import (get_dbname, niceincontact_request, extract_parser, niceincontact_utils_logger, 
+                                                                      fetch_media_playback_data, generate_daily_date_ranges, fetch_media_segments)
+>>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af
 
 
 if __name__ == "__main__":
@@ -13,9 +18,24 @@ if __name__ == "__main__":
     try:
         logger.info(f"Extracting Nice In Contact API {api_name}")
 
+<<<<<<< HEAD
         if api_name in ["agents", "contacts", "teams", "teams_agents", "agents_skills", "skills", "dispositions","dispositions_skills"]:
+=======
+        if api_name in ["agents",  "teams", "teams_agents", "agents_skills", "skills"]:
+>>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af
             df = niceincontact_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
+        elif api_name in ["interaction_analytics_gateway_v2_segments_analyzed"]:
+            df = niceincontact_request(spark, tenant, api_name, run_id,
+                             extract_start_time, extract_end_time, base_url=True)
+        elif api_name == "media_playback_v1_segments_segmentId":
+            fetch_media_segments(spark, tenant, api_name,None, extract_start_time, extract_end_time, skip_raw_load=True, base_url=True)
+        elif api_name in ["contacts_custom_data", "contacts_completed", "contacts"]:
+            generate_daily_date_ranges(spark, tenant, api_name, run_id,
+                             extract_start_time, extract_end_time,)
+        elif api_name in ["contacts", "interaction_analytics_gateway_v2_segments_analyzed"]:
+            df = niceincontact_request(spark, tenant, api_name, run_id,
+                             extract_start_time, extract_end_time, base_url=True)
         elif api_name == "media_playback_v1_contacts_acdContactId":
             fetch_media_playback_data(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
