@@ -4,21 +4,8 @@ It includes functions for authorization, making API requests, and handling respo
 """
 
 import os
-<<<<<<< HEAD
 import argparse
 import json
-=======
-from typing import List
-import argparse
-from pyspark.sql.types import StructType
-import json
-from pathlib import Path
-from datetime import datetime, timedelta
-from pyspark.sql import SparkSession, DataFrame
-from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
-from dganalytics.utils.utils import env, get_path_vars, get_logger, delta_table_partition_ovrewrite, delta_table_ovrewrite, get_secret
-from pyspark.sql.functions import lit, monotonically_increasing_id, to_date, to_timestamp
->>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af
 import time
 import math
 import requests
@@ -643,7 +630,6 @@ def fetch_media_playback_data(spark: SparkSession, tenant: str, api_name: str, r
     auth_headers = authorize(tenant)
     get_master_contact_id(extract_start_time, extract_end_time, auth_headers, spark, tenant, api_name, run_id)
 
-<<<<<<< HEAD
 def extract_email_transcript(master_contact_id, auth_headers, tenant, niceincontact, api_name):
     """
     Fetch email transcript data for a given contact from NICE inContact API.
@@ -749,7 +735,6 @@ def fetch_contacts_email_transcript(spark: SparkSession, tenant: str, api_name: 
     auth_headers = authorize(tenant)
     get_master_contact_id_for_email_transcript(extract_start_time, extract_end_time, auth_headers, spark, tenant, api_name, run_id)
     
-=======
 
 
 def generate_daily_date_ranges(spark, tenant, api_name, run_id, startDate, endDate):
@@ -860,4 +845,3 @@ def fetch_media_segments(spark: SparkSession, tenant: str, api_name: str, run_id
             media_playback_segments_list = voice_only_data_list
         process_raw_data(spark, tenant, api_, run_id,
                          media_playback_segments_list, extract_start_time, extract_end_time, 1)
->>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af

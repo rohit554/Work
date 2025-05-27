@@ -1,9 +1,4 @@
-<<<<<<< HEAD
  {
-=======
-{
-  "type": "struct",
->>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af
   "fields": [
     { "name": "abandoned", "type": "boolean", "nullable": true, "metadata": {} },
     { "name": "abandonSeconds", "type": "double", "nullable": true, "metadata": {} },
@@ -62,7 +57,6 @@
     { "name": "transferIndicatorId", "type": "integer", "nullable": true, "metadata": {} },
     { "name": "transferIndicatorName", "type": "string", "nullable": true, "metadata": {} },
     {
-<<<<<<< HEAD
       "metadata": {},
       "name": "abandoned",
       "nullable": true,
@@ -402,16 +396,12 @@
       "metadata": {},
       "name": "tags",
       "nullable": true,
-=======
-      "name": "tags",
->>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af
       "type": {
         "type": "array",
         "containsNull": true,
         "elementType": {
           "type": "struct",
           "fields": [
-<<<<<<< HEAD
             {
               "metadata": {},
               "name": "contactId",
@@ -435,16 +425,6 @@
         },
         "type": "array"
       }
-=======
-            { "name": "contactId", "type": "long", "nullable": true, "metadata": {} },
-            { "name": "tagId", "type": "integer", "nullable": true, "metadata": {} },
-            { "name": "tagName", "type": "string", "nullable": true, "metadata": {} }
-          ]
-        }
-      },
-      "nullable": true,
-      "metadata": {}
->>>>>>> f903e2594275a8e48e13a67fd1cb5f49d61b50af
     }
   ]
 }
