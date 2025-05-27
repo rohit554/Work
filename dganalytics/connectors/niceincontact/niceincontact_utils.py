@@ -14,7 +14,7 @@ from typing import List
 from pathlib import Path
 from datetime import datetime, timedelta
 from pyspark.sql.types import StructType
-from pyspark.sql import SparkSession, DataFrame
+from pyspark.sql import SparkSession
 from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
 from dganalytics.utils.utils import env, get_path_vars, get_logger, delta_table_partition_ovrewrite, delta_table_ovrewrite, get_secret
 from pyspark.sql.functions import lit, monotonically_increasing_id, to_date, to_timestamp
@@ -316,7 +316,6 @@ def update_raw_table(spark: SparkSession, tenant: str, resp_list: List, api_name
     
     logger.info(
         f"updating raw table for {api_name} {extract_start_time}_{extract_end_time}")
-    tenant_path, db_path, log_path = get_path_vars(tenant)
     n_partitions = get_spark_partitions_num(api_name, len(resp_list))
     schema = get_schema(api_name)
     db_name = get_dbname(tenant)
@@ -822,7 +821,7 @@ def fetch_media_playback_segments(spark: SparkSession, tenant: str, api_name: st
 def fetch_media_segments(spark: SparkSession, tenant: str, api_name: str, run_id: str,
                 extract_start_time: str, extract_end_time: str, 
                 skip_raw_load: bool = False, base_url :bool = False):
-    resp_list = niceincontact_request(spark, tenant, "interaction_analytics_gateway_v2_segments_analyzed",None, extract_start_time,extract_end_time, skip_raw_load=True, base_url=True)
+    resp_list = niceincontact_request(spark, tenant, "segments_analyzed",None, extract_start_time,extract_end_time, skip_raw_load=True, base_url=True)
     segmentId_list = [json.loads(res)['segmentId'] for res in resp_list]
     auth_headers = authorize(tenant)
     media_playback_segments_list = []
@@ -885,7 +884,7 @@ def analytics_api_call(spark: SparkSession,tenant: str, api_name: str, run_id: s
         dict: The response from the API call.
     """
     resp_list = niceincontact_request(
-        spark, tenant, "interaction_analytics_gateway_v2_segments_analyzed", None, start_date, end_date, skip_raw_load=True, base_url=True
+        spark, tenant, "segments_analyzed", None, start_date, end_date, skip_raw_load=True, base_url=True
     )
     segmentId_list = [json.loads(res)['segmentId'] for res in resp_list]
     count = 1

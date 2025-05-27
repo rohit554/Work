@@ -108,11 +108,6 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     for api in apis:
         logger.info(f"Creating raw table for API: {api}")
         create_raw_table(api, spark, db_name, db_path, logger)
-        # Special case: run additional table creation
-        if api == "media_playback_v1_segments_segmentId":
-            extra_table = "media_segment_voice_only"
-            logger.info(f"Also creating raw table for: {extra_table}")
-            create_raw_table(extra_table, spark, db_name, db_path, logger)
 
     logger.info("Raw tables creation completed.")
     return True
@@ -645,11 +640,9 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
 
 
 if __name__ == "__main__":
-    """
-    Main entry point for the Nice inContact setup script.
-    This script initializes the necessary Spark SQL database and tables for Nice inContact data ingestion.
-    It requires a tenant name as an argument to configure the database and paths accordingly.
-    """
+    #Main entry point for the Nice inContact setup script.
+    #This script initializes the necessary Spark SQL database and tables for Nice inContact data ingestion.
+    #It requires a tenant name as an argument to configure the database and paths accordingly.
     app_name = "niceincontact_setup"
     parser = argparse.ArgumentParser()
     parser.add_argument("--tenant", required=True)
