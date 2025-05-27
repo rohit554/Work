@@ -11,30 +11,26 @@ def fact_agents_skills(spark: SparkSession):
     :param spark: SparkSession object
     :return: None
     """
-    spark.sql("""
+    spark.sql(
+        """
         INSERT OVERWRITE spark_catalog.niceincontact_infobell.fact_agents_skills
         SELECT
-            a.agentId,
-            a.internalId,
-            a.teamId,
-            a.firstName,
-            a.lastName,
-            s.campaignId,
-            s.emailFromAddress,
-            s.skillId,
-            s.skillName,
-            s.isActive AS isSkillActive,
-            a.isActive AS isAgentActive,
-            s.outboundStrategy,
-            s.requireDisposition,
-            s.priorityBlending,
-            s.mediaTypeId,
-            s.mediaTypeName,
-            current_date() AS extractDate,
-            current_timestamp() AS extractIntervalStartTime,
-            current_timestamp() AS extractIntervalEndTime,
-            current_timestamp() AS recordInsertTime
-        FROM spark_catalog.niceincontact_infobell.raw_agents a
-        JOIN spark_catalog.niceincontact_infobell.raw_skills s
-          ON a.teamId = s.campaignId
+            agentId,
+            skillId,
+            campaignId,
+            agentProficiencyValue,
+            agentProficiencyName,
+            isSkillActive,
+            isDialer,
+            isNaturalCalling,
+            isNaturalCallingRunning,
+            screenPopTriggerEvent,
+            lastUpdateTime,
+            lastPollTime,
+            extractDate,
+            extractIntervalStartTime,
+            extractIntervalEndTime,
+            recordInsertTime,
+            recordIdentifier
+        FROM spark_catalog.niceincontact_infobell.raw_agents_skills
     """)

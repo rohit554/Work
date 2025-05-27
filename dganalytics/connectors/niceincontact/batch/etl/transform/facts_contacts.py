@@ -8,8 +8,10 @@ def fact_contacts(spark: SparkSession):
     Transforms the raw contacts data into the fact table `fact_contacts`.
     This function reads from the raw contacts data and writes to the fact table
     with necessary transformations.
+    
     :param spark: SparkSession object
-    :return: None"""
+    :return: None
+    """
     spark.sql(
         """
         INSERT OVERWRITE TABLE niceincontact_infobell.fact_contacts
@@ -21,17 +23,17 @@ def fact_contacts(spark: SparkSession):
             campaignId,
             primaryDispositionId,
             secondaryDispositionId,
-            CAST(abandonSeconds AS DOUBLE),
-            CAST(acwSeconds AS DOUBLE),
-            CAST(agentSeconds AS DOUBLE),
+            abandonSeconds,
+            acwSeconds,
+            agentSeconds,
             callbackTime,
-            CAST(conferenceSeconds AS DOUBLE),
-            CAST(holdSeconds AS DOUBLE),
-            CAST(inQueueSeconds AS DOUBLE),
-            CAST(postQueueSeconds AS DOUBLE),
-            CAST(preQueueSeconds AS DOUBLE),
-            CAST(releaseSeconds AS DOUBLE),
-            CAST(totalDurationSeconds AS DOUBLE),
+            conferenceSeconds,
+            holdSeconds,
+            inQueueSeconds,
+            postQueueSeconds,
+            preQueueSeconds,
+            releaseSeconds,
+            totalDurationSeconds,
             serviceLevelFlag,
             isOutbound,
             isRefused,

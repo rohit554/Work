@@ -1,5 +1,6 @@
 """
-This module contains the function to transform raw agent data into a dimension table for Nice inContact."""
+This module contains the function to transform raw agent data into a dimension table for Nice inContact.
+"""
 from pyspark.sql import SparkSession
 
 def dim_contacts(spark: SparkSession):
@@ -7,8 +8,10 @@ def dim_contacts(spark: SparkSession):
     Transforms the raw contacts data into the dimension table `dim_contacts`.
     This function reads from the raw contacts data and writes to the dimension table
     with necessary transformations.
+    
     :param spark: SparkSession object
-    :return: None"""
+    :return: None
+    """
     spark.sql("""
         INSERT OVERWRITE spark_catalog.niceincontact_infobell.dim_contacts
         SELECT

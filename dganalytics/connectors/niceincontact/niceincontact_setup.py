@@ -123,216 +123,9 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
     Returns:
         None
     """
-    logger.info("Creating full dim_agents table with all available fields")
+    logger.info("Creating dimensions and facts tables with all required fields")
     spark.sql(f"CREATE DATABASE IF NOT EXISTS {db_name}")
     spark.sql(f"USE {db_name}")
-
-    spark.sql(
-        f"""
-        CREATE TABLE IF NOT EXISTS spark_catalog.niceincontact_infobell.fact_agents_skills (
-            agentId BIGINT,
-            internalId STRING,
-            teamId BIGINT,
-            firstName STRING,
-            lastName STRING,
-            campaignId BIGINT,
-            emailFromAddress STRING,
-            skillId BIGINT,
-            skillName STRING,
-            isSkillActive BOOLEAN,
-            isAgentActive BOOLEAN,
-            outboundStrategy STRING,
-            requireDisposition BOOLEAN,
-            priorityBlending BOOLEAN,
-            mediaTypeId LONG,
-            mediaTypeName STRING,
-            extractDate DATE,
-            extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP
-        )
-        USING DELTA
-        PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
-        LOCATION '{db_path}/{db_name}/fact_agents_skills'
-        """
-    )
-
-    spark.sql(
-        f"""
-        CREATE TABLE IF NOT EXISTS {db_name}.dim_contacts_completed (
-            contactId BIGINT,
-            masterContactId BIGINT,
-            contactStartDate TIMESTAMP,
-            lastUpdateTime TIMESTAMP,
-            endReason STRING,
-            fromAddress STRING,
-            toAddress STRING,
-            mediaTypeId BIGINT,
-            mediaTypeName STRING,
-            mediaSubTypeId BIGINT,
-            mediaSubTypeName STRING,
-            pointOfContactId BIGINT,
-            pointOfContactName STRING,
-            refuseReason STRING,
-            refuseTime TIMESTAMP,
-            routingAttribute STRING,
-            routingTime TIMESTAMP,
-            transferIndicatorId BIGINT,
-            transferIndicatorName STRING,
-            isTakeover BOOLEAN,
-            isLogged BOOLEAN,
-            isAnalyticsProcessed BOOLEAN,
-            analyticsProcessedDate TIMESTAMP,
-            dateACWWarehoused TIMESTAMP,
-            dateContactWarehoused TIMESTAMP,
-            extractDate DATE,
-            recordInsertTime TIMESTAMP
-        )
-        USING DELTA
-        LOCATION '{db_path}/{db_name}/dim_contacts_completed'
-        """
-    )
-
-    spark.sql(
-        f"""
-        CREATE TABLE IF NOT EXISTS {db_name}.fact_contacts_completed (
-            contactId BIGINT,
-            agentId BIGINT,
-            skillId BIGINT,
-            teamId BIGINT,
-            campaignId BIGINT,
-            primaryDispositionId BIGINT,
-            secondaryDispositionId BIGINT,
-            abandoned BOOLEAN,
-            abandonSeconds DOUBLE,
-            acwSeconds DOUBLE,
-            agentSeconds DOUBLE,
-            callbackTime BIGINT,
-            conferenceSeconds DOUBLE,
-            holdSeconds DOUBLE,
-            holdCount BIGINT,
-            inQueueSeconds DOUBLE,
-            postQueueSeconds DOUBLE,
-            preQueueSeconds DOUBLE,
-            releaseSeconds DOUBLE,
-            totalDurationSeconds DOUBLE,
-            serviceLevelFlag BIGINT,           ---->#validate
-            isOutbound BOOLEAN,
-            isRefused BOOLEAN,
-            isShortAbandon BOOLEAN,
-            highProficiency BIGINT,-----#validate
-            lowProficiency BIGINT,----------#validate
-            extractDate DATE,
-            extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
-        )
-        USING DELTA
-        LOCATION '{db_path}/{db_name}/fact_contacts_completed'
-        """
-    )
-
-    spark.sql(
-        f"""
-        CREATE TABLE IF NOT EXISTS {db_name}.dim_contacts_custom_data (
-            contactId BIGINT,
-            name STRING,
-            value STRING,
-            extractDate DATE,
-            extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
-        )
-        USING DELTA
-        LOCATION '{db_path}/{db_name}/dim_contacts_custom_data'
-        """
-    )
-
-    spark.sql(
-        f"""
-        CREATE TABLE IF NOT EXISTS {db_name}.dim_contacts (
-            contactId BIGINT,
-            masterContactId BIGINT,
-            contactStartDate TIMESTAMP,
-            agentStartDate TIMESTAMP,
-            digitalContactStateId BIGINT,
-            digitalContactStateName STRING,
-            contactStateCategory STRING,
-            endReason STRING,
-            fromAddress STRING,
-            toAddress STRING,
-            fileName STRING,
-            mediaTypeId BIGINT,
-            mediaTypeName STRING,
-            mediaSubTypeId BIGINT,
-            mediaSubTypeName STRING,
-            pointOfContactId BIGINT,
-            pointOfContactName STRING,
-            refuseReason STRING,
-            refuseTime TIMESTAMP,
-            routingAttribute STRING,
-            routingTime TIMESTAMP,
-            stateId BIGINT,
-            stateName STRING,
-            targetAgentId BIGINT,
-            transferIndicatorId BIGINT,
-            transferIndicatorName STRING,
-            isTakeover BOOLEAN,
-            isLogged BOOLEAN,
-            isWarehoused BOOLEAN,
-            isAnalyticsProcessed BOOLEAN,
-            analyticsProcessedDate TIMESTAMP,
-            dateACWWarehoused TIMESTAMP,
-            dateContactWarehoused TIMESTAMP,
-            extractDate DATE,
-            recordInsertTime TIMESTAMP
-        )
-        USING DELTA
-        LOCATION '{db_path}/{db_name}/dim_contacts'
-        """
-    )
-
-    spark.sql(
-        f"""
-        CREATE TABLE IF NOT EXISTS {db_name}.fact_contacts (
-            contactId BIGINT,
-            agentId BIGINT,
-            skillId BIGINT,
-            teamId BIGINT,
-            campaignId BIGINT,
-            primaryDispositionId INT,
-            secondaryDispositionId INT,
-            abandonSeconds DOUBLE,
-            acwSeconds DOUBLE,
-            agentSeconds DOUBLE,
-            callbackTime INT,
-            conferenceSeconds DOUBLE,
-            holdSeconds DOUBLE,
-            inQueueSeconds DOUBLE,
-            postQueueSeconds DOUBLE,
-            preQueueSeconds DOUBLE,
-            releaseSeconds DOUBLE,
-            totalDurationSeconds DOUBLE,
-            serviceLevelFlag INT,
-            isOutbound BOOLEAN,
-            isRefused BOOLEAN,
-            isShortAbandon BOOLEAN,
-            abandoned BOOLEAN,
-            holdCount INT,
-            highProficiency INT,
-            lowProficiency INT,
-            extractDate DATE,
-            extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
-        )
-        USING DELTA
-        LOCATION '{db_path}/{db_name}/fact_contacts'
-        """
-    )
 
     spark.sql(
         f"""
@@ -634,6 +427,223 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         )
         USING DELTA
         LOCATION '{db_path}/{db_name}/dim_dispositions'
+        """
+    )
+
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS {db_name}.dim_agents_skills (
+            skillId BIGINT,
+            useDisposition BOOLEAN,
+            useSecondaryDispositions BOOLEAN,
+            requireDisposition BOOLEAN,
+            useACW BOOLEAN,
+            outboundStrategy STRING,
+            extractDate DATE,
+            recordInsertTime TIMESTAMP
+        )
+        USING DELTA
+        LOCATION '{db_path}/{db_name}/dim_agents_skills'
+    """)
+
+    spark.sql(
+        f"""
+        CREATE TABLE IF NOT EXISTS {db_name}.fact_agents_skills (
+            agentId BIGINT,
+            skillId BIGINT,
+            campaignId BIGINT,
+            agentProficiencyValue BIGINT,
+            agentProficiencyName STRING,
+            isSkillActive BOOLEAN,
+            isDialer BOOLEAN,
+            isNaturalCalling BOOLEAN,
+            isNaturalCallingRunning BIGINT,
+            screenPopTriggerEvent STRING,
+            lastUpdateTime STRING,
+            lastPollTime STRING,
+            extractDate DATE,
+            extractIntervalStartTime TIMESTAMP,
+            extractIntervalEndTime TIMESTAMP,
+            recordInsertTime TIMESTAMP,
+            recordIdentifier BIGINT
+        )
+        USING DELTA
+        LOCATION '{db_path}/{db_name}/fact_agents_skills'
+    """)
+
+    spark.sql(
+            f"""
+            CREATE TABLE IF NOT EXISTS {db_name}.dim_contacts (
+                contactId BIGINT,
+                masterContactId BIGINT,
+                contactStartDate STRING,
+                agentStartDate STRING,
+                digitalContactStateId STRING,
+                digitalContactStateName STRING,
+                contactStateCategory STRING,
+                endReason STRING,
+                fromAddress STRING,
+                toAddress STRING,
+                fileName STRING,
+                mediaTypeId INT,
+                mediaTypeName STRING,
+                mediaSubTypeId INT,
+                mediaSubTypeName STRING,
+                pointOfContactId BIGINT,
+                pointOfContactName STRING,
+                refuseReason STRING,
+                refuseTime STRING,
+                routingAttribute INT,
+                routingTime INT,
+                stateId INT,
+                stateName STRING,
+                targetAgentId INT,
+                transferIndicatorId INT,
+                transferIndicatorName STRING,
+                isTakeover BOOLEAN,
+                isLogged BOOLEAN,
+                isWarehoused BOOLEAN,
+                isAnalyticsProcessed BOOLEAN,
+                analyticsProcessedDate STRING,
+                dateACWWarehoused STRING,
+                dateContactWarehoused STRING,
+                extractDate DATE,
+                recordInsertTime TIMESTAMP
+            )
+            USING DELTA
+            LOCATION '{db_path}/{db_name}/dim_contacts'
+            """
+        )
+
+    spark.sql(
+            f"""
+            CREATE TABLE IF NOT EXISTS {db_name}.fact_contacts (
+                contactId BIGINT,
+                agentId BIGINT,
+                skillId BIGINT,
+                teamId BIGINT,
+                campaignId BIGINT,
+                primaryDispositionId INT,
+                secondaryDispositionId INT,
+                abandonSeconds DOUBLE,
+                acwSeconds DOUBLE,
+                agentSeconds DOUBLE,
+                callbackTime INT,
+                conferenceSeconds DOUBLE,
+                holdSeconds DOUBLE,
+                inQueueSeconds DOUBLE,
+                postQueueSeconds DOUBLE,
+                preQueueSeconds DOUBLE,
+                releaseSeconds DOUBLE,
+                totalDurationSeconds DOUBLE,
+                serviceLevelFlag INT,
+                isOutbound BOOLEAN,
+                isRefused BOOLEAN,
+                isShortAbandon BOOLEAN,
+                abandoned BOOLEAN,
+                holdCount INT,
+                highProficiency INT,
+                lowProficiency INT,
+                extractDate DATE,
+                extractIntervalStartTime TIMESTAMP,
+                extractIntervalEndTime TIMESTAMP,
+                recordInsertTime TIMESTAMP,
+                recordIdentifier BIGINT
+            )
+            USING DELTA
+            LOCATION '{db_path}/{db_name}/fact_contacts'
+            """
+        )
+
+    spark.sql(
+        f"""
+        CREATE TABLE IF NOT EXISTS {db_name}.dim_contacts_completed (
+            contactId BIGINT,
+            masterContactId BIGINT,
+            contactStartDate TIMESTAMP,
+            lastUpdateTime TIMESTAMP,
+            endReason STRING,
+            fromAddress STRING,
+            toAddress STRING,
+            mediaTypeId BIGINT,
+            mediaTypeName STRING,
+            mediaSubTypeId BIGINT,
+            mediaSubTypeName STRING,
+            pointOfContactId BIGINT,
+            pointOfContactName STRING,
+            refuseReason STRING,
+            refuseTime TIMESTAMP,
+            routingAttribute STRING,
+            routingTime TIMESTAMP,
+            transferIndicatorId BIGINT,
+            transferIndicatorName STRING,
+            isTakeover BOOLEAN,
+            isLogged BOOLEAN,
+            isAnalyticsProcessed BOOLEAN,
+            analyticsProcessedDate TIMESTAMP,
+            dateACWWarehoused TIMESTAMP,
+            dateContactWarehoused TIMESTAMP,
+            extractDate DATE,
+            recordInsertTime TIMESTAMP
+        )
+        USING DELTA
+        LOCATION '{db_path}/{db_name}/dim_contacts_completed'
+        """
+    )
+
+    spark.sql(
+        f"""
+        CREATE TABLE IF NOT EXISTS {db_name}.fact_contacts_completed (
+            contactId BIGINT,
+            agentId BIGINT,
+            skillId BIGINT,
+            teamId BIGINT,
+            campaignId BIGINT,
+            primaryDispositionId BIGINT,
+            secondaryDispositionId BIGINT,
+            abandoned BOOLEAN,
+            abandonSeconds DOUBLE,
+            acwSeconds DOUBLE,
+            agentSeconds DOUBLE,
+            callbackTime BIGINT,
+            conferenceSeconds DOUBLE,
+            holdSeconds DOUBLE,
+            holdCount BIGINT,
+            inQueueSeconds DOUBLE,
+            postQueueSeconds DOUBLE,
+            preQueueSeconds DOUBLE,
+            releaseSeconds DOUBLE,
+            totalDurationSeconds DOUBLE,
+            serviceLevelFlag BIGINT,
+            isOutbound BOOLEAN,
+            isRefused BOOLEAN,
+            isShortAbandon BOOLEAN,
+            highProficiency BIGINT,
+            lowProficiency BIGINT,
+            extractDate DATE,
+            extractIntervalStartTime TIMESTAMP,
+            extractIntervalEndTime TIMESTAMP,
+            recordInsertTime TIMESTAMP,
+            recordIdentifier BIGINT
+        )
+        USING DELTA
+        LOCATION '{db_path}/{db_name}/fact_contacts_completed'
+        """
+    )
+
+    spark.sql(
+        f"""
+        CREATE TABLE IF NOT EXISTS {db_name}.dim_contacts_custom_data (
+            contactId BIGINT,
+            name STRING,
+            value STRING,
+            extractDate DATE,
+            extractIntervalStartTime TIMESTAMP,
+            extractIntervalEndTime TIMESTAMP,
+            recordInsertTime TIMESTAMP,
+            recordIdentifier BIGINT
+        )
+        USING DELTA
+        LOCATION '{db_path}/{db_name}/dim_contacts_custom_data'
         """
     )
     
