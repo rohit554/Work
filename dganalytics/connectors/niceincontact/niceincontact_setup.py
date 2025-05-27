@@ -118,8 +118,17 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     return True
 
 def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
+    """
+    Create dimension tables for NICE inContact with all available fields.
+    Args:
+        spark (SparkSession): Spark session object.
+        db_name (str): Name of the database where the tables will be created.
+        db_path (str): Base path for storing table data.
+        logger: Logger object for logging progress.
+    Returns:
+        None
+    """
     logger.info("Creating full dim_agents table with all available fields")
-
     spark.sql(f"CREATE DATABASE IF NOT EXISTS {db_name}")
     spark.sql(f"USE {db_name}")
 
@@ -636,6 +645,11 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
 
 
 if __name__ == "__main__":
+    """
+    Main entry point for the Nice inContact setup script.
+    This script initializes the necessary Spark SQL database and tables for Nice inContact data ingestion.
+    It requires a tenant name as an argument to configure the database and paths accordingly.
+    """
     app_name = "niceincontact_setup"
     parser = argparse.ArgumentParser()
     parser.add_argument("--tenant", required=True)

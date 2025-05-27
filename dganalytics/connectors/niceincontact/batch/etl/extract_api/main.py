@@ -6,6 +6,11 @@ from dganalytics.connectors.niceincontact.niceincontact_utils import (get_dbname
 
 
 if __name__ == "__main__":
+    """
+    Main function to execute the Nice In Contact API extraction.
+    This function initializes the Spark session, sets up logging, and calls the appropriate extraction functions
+    based on the API name provided in the command line arguments.
+    """
     tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()
     db_name = get_dbname(tenant)
     app_name = "niceincontact_extract_" + api_name
