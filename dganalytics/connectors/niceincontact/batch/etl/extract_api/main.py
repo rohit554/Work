@@ -6,11 +6,9 @@ from dganalytics.connectors.niceincontact.niceincontact_utils import (get_dbname
 
 
 if __name__ == "__main__":
-    """
-    Main function to execute the Nice In Contact API extraction.
-    This function initializes the Spark session, sets up logging, and calls the appropriate extraction functions
-    based on the API name provided in the command line arguments.
-    """
+    # Main function to execute the Nice In Contact API extraction.
+    # This function initializes the Spark session, sets up logging, and calls the appropriate extraction functions
+    # based on the API name provided in the command line arguments.
     tenant, run_id, extract_start_time, extract_end_time, api_name = extract_parser()
     db_name = get_dbname(tenant)
     app_name = "niceincontact_extract_" + api_name
@@ -19,25 +17,25 @@ if __name__ == "__main__":
     logger = niceincontact_utils_logger(tenant, app_name)
 
     try:
-        logger.info(f"Extracting Nice In Contact API {api_name}")
+        logger.info("Extracting Nice In Contact API %s", api_name)
 
         if api_name in ["agents", "teams", "teams_agents", "agents_skills", "skills", "dispositions","dispositions_skills"]:
             df = niceincontact_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
-        elif api_name == "media_playback_v1_segments_segmentId":
-            fetch_media_segments(spark, tenant, api_name,None, extract_start_time, extract_end_time, skip_raw_load=True, base_url=True)
+        elif api_name == "media_playback_chat_email_segment":
+            fetch_media_segments(spark, tenant, api_name, run_id, extract_start_time, extract_end_time, skip_raw_load=True, base_url=True)
         elif api_name in ["contacts_custom_data", "contacts_completed", "contacts"]:
             generate_daily_date_ranges(spark, tenant, api_name, run_id,
-                             extract_start_time, extract_end_time,)
-        elif api_name in ["interaction_analytics_gateway_v2_segments_analyzed"]:
+                             extract_start_time, extract_end_time)
+        elif api_name in ["segments_analyzed"]:
             df = niceincontact_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time, base_url=True)
-        elif api_name == "media_playback_v1_contacts_acdContactId":
+        elif api_name == "media_playback_contact":
             fetch_media_playback_data(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
         elif api_name == "contacts_contactId_email_transcript":
             fetch_contacts_email_transcript(spark, tenant, api_name, run_id, extract_start_time, extract_end_time)
-        elif api_name == "interaction_analytics_gateway_segments_analyzed_transcript":
+        elif api_name == "segments_analyzed_transcript":
             analytics_api_call(spark, tenant, api_name, run_id, extract_start_time, extract_end_time)
         elif api_name == "wfm_data_agents":
             generate_wfmdata_agents(spark, tenant, api_name, run_id, extract_start_time, extract_end_time)

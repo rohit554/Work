@@ -101,10 +101,10 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
         bool: True if all raw tables are created.
     """
     logger.info("Setting Nice InContact raw tables")
-    apis = ["agents","teams","contacts", "contacts_custom_data", "contacts_completed",
-            "interaction_analytics_gateway_v2_segments_analyzed","media_playback_v1_contacts_acdContactId", 
-            "media_playback_v1_segments_segmentId", "interaction_analytics_gateway_segments_analyzed_transcript",
-            "wfm_data_agents"]
+    apis = ["agents", "teams", "teams_agents", "skills", "agents_skills", "contacts",
+            "contacts_completed", "contacts_custom_data", "dispositions", "dispositions_skills"
+            "segments_analyzed", "media_playback_contact", "media_playback_chat_email_segment", 
+            "media_playback_voice_segment", "segments_analyzed_transcript", "wfm_data_agents"]
     for api in apis:
         logger.info(f"Creating raw table for API: {api}")
         create_raw_table(api, spark, db_name, db_path, logger)
@@ -221,12 +221,12 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             preQueueSeconds DOUBLE,
             releaseSeconds DOUBLE,
             totalDurationSeconds DOUBLE,
-            serviceLevelFlag BIGINT,
+            serviceLevelFlag BIGINT,           ---->#validate
             isOutbound BOOLEAN,
             isRefused BOOLEAN,
             isShortAbandon BOOLEAN,
-            highProficiency BIGINT,
-            lowProficiency BIGINT,
+            highProficiency BIGINT,-----#validate
+            lowProficiency BIGINT,----------#validate
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
             extractIntervalEndTime TIMESTAMP,

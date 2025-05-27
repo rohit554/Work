@@ -111,8 +111,7 @@ def get_api_url(tenant: str) -> str:
     Returns:
         str: The formatted API URL. 
     """
-    url = get_secret(f'{tenant}niceincontactAPIURL')
-    url = "https://api-na1." + url
+    url = get_secret(f'{tenant}NiceincontactBaseUrl')
     return url
 
 def get_auth_url(tenant: str) -> str:
@@ -133,7 +132,7 @@ def get_auth_url(tenant: str) -> str:
     Raises:
         Exception: If the secret cannot be retrieved or the key does not exist.
     """
-    url = get_secret(f'{tenant}niceincontactAUTHURL')
+    url = get_secret(f'{tenant}NiceincontactAuthUrl')
     return url
 
 def get_interval(extract_start_time: str, extract_end_time: str):
@@ -201,10 +200,10 @@ def authorize(tenant: str):
     if access_token is None:
         logger.info("Authorizing Nice InContact")
 
-        username = get_secret(f'{tenant}niceincontactUsername')
-        password = get_secret(f'{tenant}niceincontactPassword')
-        client_id = get_secret(f'{tenant}niceincontactOAuthClientId')
-        client_secret = get_secret(f'{tenant}niceincontactOAuthClientSecret')
+        username = get_secret(f'{tenant}NiceincontactUsername')
+        password = get_secret(f'{tenant}NiceincontactPassword')
+        client_id = get_secret(f'{tenant}NiceincontactClientId')
+        client_secret = get_secret(f'{tenant}NiceincontactClientSecret')
 
         payload = (
             f"grant_type=password&"
@@ -256,8 +255,8 @@ def refresh_access_token(tenant: str) -> dict:
 
     logger.info(f"Refreshing access token for tenant: {tenant}")
 
-    client_id = get_secret(f'{tenant}niceincontactOAuthClientId')
-    client_secret = get_secret(f'{tenant}niceincontactOAuthClientSecret')
+    client_id = get_secret(f'{tenant}infobellNiceincontactClientId')
+    client_secret = get_secret(f'{tenant}NiceincontactClientSecret')
 
     payload = (
         f"grant_type=refresh_token&"
@@ -487,7 +486,7 @@ def get_base_api_url(tenant: str) -> str:
     Returns:
         str: The base API URL for NICE inContact.
     """
-    url = get_secret(f'{tenant}niceincontactBaseAPIURL')
+    url = get_secret(f'{tenant}NiceincontactBaseUrl')
     return url
     
 
@@ -839,9 +838,9 @@ def fetch_media_segments(spark: SparkSession, tenant: str, api_name: str, run_id
                 else:
                     voice_only_data_list.append(json.dumps(media_playback_segments_data))
         count +=1
-    apis = ["media_playback_v1_segments_segmentId", "media_segment_voice_only"]
+    apis = ["media_playback_chat_email_segment", "media_playback_voice_segment"]
     for api_ in apis:
-        if api_ == "media_segment_voice_only":
+        if api_ == "media_playback_chat_email_segment":
             media_playback_segments_list = voice_only_data_list
         process_raw_data(spark, tenant, api_, run_id,
                          media_playback_segments_list, extract_start_time, extract_end_time, 1)
