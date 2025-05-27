@@ -1,8 +1,8 @@
 from pyspark.sql import SparkSession
 
-def dim_contacts_custom_data(spark):
+def dim_contacts_custom_data(spark: SparkSession):
     spark.sql(
-        f"""
+        """
         INSERT INTO spark_catalog.niceincontact_infobell.dim_contacts_custom_data
         SELECT
             contactId,

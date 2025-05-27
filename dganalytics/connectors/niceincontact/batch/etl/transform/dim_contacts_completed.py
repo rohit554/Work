@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 
 def dim_contacts_completed(spark: SparkSession):
     spark.sql(
-        f"""
+        """
         INSERT INTO spark_catalog.niceincontact_infobell.dim_contacts_completed
         SELECT
             contactId,

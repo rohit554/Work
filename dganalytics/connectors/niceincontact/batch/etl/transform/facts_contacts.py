@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 
 def fact_contacts(spark: SparkSession):
     spark.sql(
-        f"""
+        """
         INSERT OVERWRITE TABLE niceincontact_infobell.fact_contacts
         SELECT
             contactId,

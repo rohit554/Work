@@ -1,6 +1,6 @@
 def fact_contacts_completed(spark):
     spark.sql(
-        f"""
+        """
         INSERT INTO spark_catalog.niceincontact_infobell.fact_contacts_completed
         SELECT
             contactId,
