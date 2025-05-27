@@ -1,6 +1,15 @@
+"""
+This file contains the transformation logic for the `dim_agents` table in the Nice InContact data warehouse.
+"""
 from pyspark.sql import SparkSession
 
 def dim_agents(spark: SparkSession):
+    """
+    Transforms the raw agents data into the dimension table `dim_agents`.
+    This function reads from the raw agents data and writes to the dimension table with necessary transformations.
+    :param spark: SparkSession object
+    :return: None
+    """
     spark.sql("""
         INSERT OVERWRITE spark_catalog.niceincontact_infobell.dim_agents
         SELECT

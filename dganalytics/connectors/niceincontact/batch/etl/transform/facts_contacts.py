@@ -1,6 +1,15 @@
+"""
+"This module contains the function to transform raw contact data into a fact table for Nice inContact.
+"""
 from pyspark.sql import SparkSession
 
 def fact_contacts(spark: SparkSession):
+    """
+    Transforms the raw contacts data into the fact table `fact_contacts`.
+    This function reads from the raw contacts data and writes to the fact table
+    with necessary transformations.
+    :param spark: SparkSession object
+    :return: None"""
     spark.sql(
         """
         INSERT OVERWRITE TABLE niceincontact_infobell.fact_contacts

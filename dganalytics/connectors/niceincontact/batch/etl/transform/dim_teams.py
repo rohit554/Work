@@ -1,6 +1,18 @@
+
+"""
+This module contains the function to transform and load the dim_contacts_completed table
+in the Nice InContact data warehouse.
+"""
 from pyspark.sql import SparkSession
 
 def dim_teams(spark: SparkSession):
+    """
+    Transforms the raw teams data into the dimension table `dim_teams`.
+    This function reads from the raw teams data and writes to the dimension table
+    with necessary transformations.
+    :param spark: SparkSession object
+    :return: None
+    """
     spark.sql("""
         INSERT OVERWRITE spark_catalog.niceincontact_infobell.dim_teams
         SELECT
