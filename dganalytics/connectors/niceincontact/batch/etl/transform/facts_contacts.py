@@ -1,5 +1,5 @@
 """
-"This module contains the function to transform raw contact data into a fact table for Nice inContact.
+This module contains the function to transform raw contact data into a fact table for Nice inContact.
 """
 from pyspark.sql import SparkSession
 
