@@ -128,7 +128,7 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
-    "wfmdata_agents_scorecards": {
+    "wfm_data_agents_scorecards": {
         "endpoint": "/incontactapi/services/v32.0/wfm-data/agents/scorecards",
         "request_type": "GET",
         "paging": False,
@@ -139,7 +139,7 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
-    "wfmdata_agent_performance_skills": {
+    "wfm_data_skills_agent_performance": {
         "endpoint": "/incontactapi/services/v32.0/wfm-data/skills/agent-performance",
         "request_type": "GET",
         "paging": False,
@@ -149,7 +149,7 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
-    "wfmdata_contacts_skills": {
+    "wfm_data_skills_contacts": {
         "endpoint": "/incontactapi/services/v32.0/wfm-data/skills/contacts",
         "request_type": "GET",
         "paging": False,
@@ -159,7 +159,7 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
-    "wfmdata_dialer_contacts_skills": {
+    "wfm_data_skills_dialer_contacts": {
         "endpoint": "/incontactapi/services/v32.0/wfm-data/skills/dialer-contacts",
         "request_type": "GET",
         "paging": False,

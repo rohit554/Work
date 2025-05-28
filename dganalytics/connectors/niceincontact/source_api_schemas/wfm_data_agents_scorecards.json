@@ -1,89 +1,19 @@
 {
   "type": "struct",
   "fields": [
-    {
-      "metadata": {},
-      "name": "businessUnitId",
-      "nullable": true,
-      "type": "long"
-    },
-    {
-      "metadata": {},
-      "name": "agentId",
-      "nullable": true,
-      "type": "long"
-    },
-    {
-      "metadata": {},
-      "name": "startDate",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "totalTime",
-      "nullable": true,
-      "type": "double"
-    },
-    {
-      "metadata": {},
-      "name": "talkTime",
-      "nullable": true,
-      "type": "double"
-    },
-    {
-      "metadata": {},
-      "name": "acwTime",
-      "nullable": true,
-      "type": "double"
-    },
-    {
-      "metadata": {},
-      "name": "holdTime",
-      "nullable": true,
-      "type": "double"
-    },
-    {
-      "metadata": {},
-      "name": "totalCalls",
-      "nullable": true,
-      "type": "long"
-    },
-    {
-      "metadata": {},
-      "name": "abandonedCalls",
-      "nullable": true,
-      "type": "long"
-    },
-    {
-      "metadata": {},
-      "name": "auxTime",
-      "nullable": true,
-      "type": "double"
-    },
-    {
-      "metadata": {},
-      "name": "auxInTime",
-      "nullable": true,
-      "type": "double"
-    },
-    {
-      "metadata": {},
-      "name": "auxOutTime",
-      "nullable": true,
-      "type": "double"
-    },
-    {
-      "metadata": {},
-      "name": "idleTime",
-      "nullable": true,
-      "type": "double"
-    },
-    {
-      "metadata": {},
-      "name": "actualCalls",
-      "nullable": true,
-      "type": "long"
-    }
+    { "name": "businessUnitId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "agentId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "startDate", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "totalTime", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "talkTime", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "acwTime", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "holdTime", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "totalCalls", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "abandonedCalls", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "auxTime", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "auxInTime", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "auxOutTime", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "idleTime", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "actualCalls", "type": "long", "nullable": true, "metadata": {} }
   ]
 }

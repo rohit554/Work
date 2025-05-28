@@ -1,71 +1,16 @@
 {
   "type": "struct",
   "fields": [
-    {
-      "name": "businessUnitId",
-      "type": "long",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "businessUnitName",
-      "type": "string",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "agentId",
-      "type": "long",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "stateIndex",
-      "type": "long",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "startDate",
-      "type": "string",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "agentStateId",
-      "type": "long",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "agentSessionId",
-      "type": "long",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "skillId",
-      "type": "long",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "outStateId",
-      "type": "long",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "outStateDescription",
-      "type": "string",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "duration",
-      "type": "long",
-      "nullable": true,
-      "metadata": {}
-    }
+    { "name": "businessUnitId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "businessUnitName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "agentId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "stateIndex", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "startDate", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "agentStateId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "agentSessionId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "skillId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "outStateId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "outStateDescription", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "duration", "type": "long", "nullable": true, "metadata": {} }
   ]
 }

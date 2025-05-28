@@ -256,7 +256,7 @@ def refresh_access_token(tenant: str) -> dict:
 
     logger.info(f"Refreshing access token for tenant: {tenant}")
 
-    client_id = get_secret(f'{tenant}infobellNiceincontactClientId')
+    client_id = get_secret(f'{tenant}NiceincontactClientId')
     client_secret = get_secret(f'{tenant}NiceincontactClientSecret')
 
     payload = (

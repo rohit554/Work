@@ -1,0 +1,16 @@
+{
+  "type": "struct",
+  "fields": [
+    { "name": "businessUnitId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "businessUnitName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "skillId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "skillName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "agentId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "firstName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "lastName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "halfHour", "type": "timestamp", "nullable": true, "metadata": {} },
+    { "name": "totalHandled", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "totalHandledTime", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "totalACWTime", "type": "long", "nullable": true, "metadata": {} }
+  ]
+}

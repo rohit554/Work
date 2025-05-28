@@ -21,7 +21,9 @@ if __name__ == "__main__":
         logger.info("Starting extraction for Nice In Contact API's: %s", api_name)
 
         if api_name in ["agents", "teams", "teams_agents", "agents_skills", "skills", "dispositions","dispositions_skills",
-                        "contacts_custom_data", "contacts_completed", "contacts", "segments_analyzed", "wfm_data_agents"]:
+                        "contacts_custom_data", "contacts_completed", "contacts", "segments_analyzed", "wfm_data_agents",
+                        "wfm_data_agents_schedule_adherence", "wfm_data_agents_scorecards", "wfm_data_agents_schedule_adherence",
+                        "wfm_data_skills_contacts"]:
             df = niceincontact_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
         elif api_name == "media_playback_chat_email_segment":

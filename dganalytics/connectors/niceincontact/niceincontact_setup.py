@@ -104,7 +104,9 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     apis = ["agents", "teams", "teams_agents", "skills", "agents_skills", "contacts",
             "contacts_completed", "contacts_custom_data", "dispositions", "dispositions_skills"
             "segments_analyzed", "media_playback_contact", "media_playback_chat_email_segment", 
-            "media_playback_voice_segment", "segments_analyzed_transcript", "wfm_data_agents"]
+            "media_playback_voice_segment", "segments_analyzed_transcript", "wfm_data_agents",
+            "wfm_data_agents_schedule_adherence", "wfm_data_agents_scorecards", "wfm_data_agents_schedule_adherence",
+            "wfm_data_skills_contacts"]
     for api in apis:
         logger.info(f"Creating raw table for API: {api}")
         create_raw_table(api, spark, db_name, db_path, logger)

@@ -1,0 +1,20 @@
+{
+  "type": "struct",
+  "fields": [
+    { "name": "businessUnitId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "businessUnitName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "intervalStartDate", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "skillId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "skillName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "isOutbound", "type": "boolean", "nullable": true, "metadata": {} },
+    { "name": "serviceLevel", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "mediaTypeId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "mediaTypeName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "totalContacts", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "totalHandled", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "averageHandleTime", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "abandonCount", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "averageSpeedOfAnswer", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "totalContactTime", "type": "double", "nullable": true, "metadata": {} }
+  ]
+}
