@@ -219,7 +219,7 @@ def authorize(tenant: str):
             "Cache-Control": "no-cache"
         }
 
-        auth_url = get_auth_url(tenant)
+        auth_url = get_auth_url(tenant) + "/auth/token"
         auth_request = requests.post(auth_url, headers=headers, data=payload)
 
         if auth_request.status_code == 200:
@@ -271,7 +271,7 @@ def refresh_access_token(tenant: str) -> dict:
         "Cache-Control": "no-cache"
     }
 
-    auth_url = get_auth_url(tenant)
+    auth_url = get_auth_url(tenant) + "/auth/token"
     response = requests.post(auth_url, headers=headers, data=payload)
 
     if response.status_code == 200:

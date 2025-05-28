@@ -26,11 +26,13 @@ def extract_media_playback(master_contact_id: str, auth_headers: dict, tenant: s
     Returns:
         dict: Media playback data if successful; empty dict otherwise.
     """
-    media_playback_url = get_api_url(tenant)
+    url = get_api_url(tenant)
     config = niceincontact[api_name]
     params = config.get('params', {})
     params.update({"acd-call-id": master_contact_id})
     req_type = config.get('request_type', 'GET')
+    endpoint = config.get('endpoint', '')
+    media_playback_url = url + endpoint
 
     logger.info(f"Requesting media playback for master_contact_id: {master_contact_id}")
     resp = make_niceincontact_request(req_type, media_playback_url, params, auth_headers)
