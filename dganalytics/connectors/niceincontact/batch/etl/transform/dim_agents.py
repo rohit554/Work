@@ -1,6 +1,7 @@
 """
 This file contains the transformation logic for the `dim_agents` table in the Nice InContact data warehouse.
 """
+
 from pyspark.sql import SparkSession
 
 def dim_agents(spark: SparkSession):
@@ -87,7 +88,7 @@ def dim_agents(spark: SparkSession):
             ReportToFirstName,
             ReportToMiddleName,
             ReportToLastName,
-            extractDate,
-            recordInsertTime
+            current_timestamp() AS extractDate,
+            current_timestamp() AS recordInsertTime
         FROM spark_catalog.niceincontact_infobell.raw_agents
     """)
