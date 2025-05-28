@@ -22,8 +22,8 @@ from urllib.parse import urlparse, parse_qs
 
 logger = logging.getLogger(__name__)
 
-access_token = ""
-refresh_token = ""
+access_token = None
+refresh_token = None
 retry = 0
 
 
