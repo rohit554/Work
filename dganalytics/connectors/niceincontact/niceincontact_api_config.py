@@ -252,7 +252,7 @@ niceincontact_end_points = {
         "endpoint": "/incontactapi/services/v32.0/skills/sla-summary",
         "request_type": "GET",
         "paging": False,
-        "interval": False,
+        "interval": True,
         "params": {},
         "spark_partitions": {"max_records_per_partition": 20000},
         "entity_name": "serviceLevelSummaries",
