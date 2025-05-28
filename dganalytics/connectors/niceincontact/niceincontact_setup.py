@@ -128,30 +128,29 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
     spark.sql(f"USE {db_name}")
 
     logger.info("Creating dim_agents table with all available fields")
-    spark.sql(
-        f"""
+    spark.sql(f"""
         CREATE TABLE IF NOT EXISTS {db_name}.dim_agents (
-            AgentId BIGINT,
-            UserName STRING,
-            FirstName STRING,
-            MiddleName STRING,
-            LastName STRING,
-            Email STRING,
-            IsActive BOOLEAN,
-            TeamId BIGINT,
-            TeamName STRING,
-            ReportToId BIGINT,
-            IsSupervisor BOOLEAN,
-            LastLogin TIMESTAMP,
+            agentId BIGINT,
+            userName STRING,
+            firstName STRING,
+            middleName STRING,
+            lastName STRING,
+            emailAddress STRING,
+            isActive BOOLEAN,
+            teamId BIGINT,
+            teamName STRING,
+            reportToId BIGINT,
+            isSupervisor BOOLEAN,
+            lastLogin TIMESTAMP,
             lastUpdated TIMESTAMP,
-            LastModified TIMESTAMP,
-            Location STRING,
-            Custom1 STRING,
-            Custom2 STRING,
-            Custom3 STRING,
-            Custom4 STRING,
-            Custom5 STRING,
-            InternalId STRING,
+            lastModified TIMESTAMP,
+            location STRING,
+            custom1 STRING,
+            custom2 STRING,
+            custom3 STRING,
+            custom4 STRING,
+            custom5 STRING,
+            internalId STRING,
             userId STRING,
             reportToName STRING,
             profileId BIGINT,
@@ -186,7 +185,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             useTeamEmailAutoParkingLimit BOOLEAN,
             maxEmailAutoParkingLimit BIGINT,
             sipUser STRING,
-            systemUser STRING,
+            systemUser BOOLEAN,
             systemDomain STRING,
             crmUserName STRING,
             useAgentTimeZone BOOLEAN,
@@ -198,17 +197,16 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             userType STRING,
             isWhatIfAgent BOOLEAN,
             timeZoneOffset STRING,
-            requestContact BOOLEAN,
+            requestContact STRING,
             recordingNumbers ARRAY<STRING>,
-            BusinessUnitId BIGINT,
-            ReportToFirstName STRING,
-            ReportToMiddleName STRING,
-            ReportToLastName STRING
+            businessUnitId BIGINT,
+            reportToFirstName STRING,
+            reportToMiddleName STRING,
+            reportToLastName STRING
         )
         USING DELTA
         LOCATION '{db_path}/{db_name}/dim_agents'
-        """
-)
+        """)
 
     logger.info("Creating dim_teams table with all available fields")
     spark.sql(
