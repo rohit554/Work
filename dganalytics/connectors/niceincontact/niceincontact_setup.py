@@ -127,132 +127,72 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
     spark.sql(f"CREATE DATABASE IF NOT EXISTS {db_name}")
     spark.sql(f"USE {db_name}")
 
+    logger.info("Creating dim_agents table with all available fields")
     spark.sql(
         f"""
         CREATE TABLE IF NOT EXISTS {db_name}.dim_agents (
             agentId BIGINT,
+            AgentId BIGINT,
             userName STRING,
-            userId STRING,
+            UserName STRING,
             firstName STRING,
+            FirstName STRING,
             middleName STRING,
+            MiddleName STRING,
             lastName STRING,
+            LastName STRING,
             emailAddress STRING,
+            Email STRING,
             isActive BOOLEAN,
+            IsActive BOOLEAN,
             teamId BIGINT,
+            TeamId BIGINT,
             teamName STRING,
+            TeamName STRING,
             reportToId BIGINT,
-            reportToName STRING,
+            ReportToId BIGINT,
             isSupervisor BOOLEAN,
-            lastLogin STRING,
-            lastUpdated STRING,
+            IsSupervisor BOOLEAN,
+            lastLogin TIMESTAMP,
+            LastLogin TIMESTAMP,
+            lastUpdated TIMESTAMP,
+            LastModified TIMESTAMP,
             location STRING,
+            Location STRING,
             custom1 STRING,
+            Custom1 STRING,
             custom2 STRING,
+            Custom2 STRING,
             custom3 STRING,
+            Custom3 STRING,
             custom4 STRING,
+            Custom4 STRING,
             custom5 STRING,
+            Custom5 STRING,
             internalId STRING,
+            InternalId STRING,
+            userId STRING,
+            reportToName STRING,
             profileId BIGINT,
             profileName STRING,
             timeZone STRING,
             country STRING,
             countryName STRING,
             state STRING,
-            stateCode STRING,
             city STRING,
             chatRefusalTimeout BIGINT,
             phoneRefusalTimeout BIGINT,
             workItemRefusalTimeout BIGINT,
-            emailRefusalTimeout BIGINT,
-            voicemailRefusalTimeout BIGINT,
-            smsRefusalTimeout BIGINT,
-            digitalRefusalTimeout BIGINT,
             defaultDialingPattern BIGINT,
             defaultDialingPatternName STRING,
             useTeamMaxConcurrentChats BOOLEAN,
             maxConcurrentChats BIGINT,
             notes STRING,
-            createDate STRING,
-            inactiveDate STRING,
-            hireDate STRING,
-            terminationDate STRING,
+            createDate TIMESTAMP,
+            inactiveDate TIMESTAMP,
+            hireDate TIMESTAMP,
+            terminationDate TIMESTAMP,
             hourlyCost DOUBLE,
-            rehireStatus BOOLEAN,
-            employmentType BIGINT,
-            employmentTypeName STRING,
-            referral STRING,
-            atHome BOOLEAN,
-            hiringSource STRING,
-            ntLoginName STRING,
-            scheduleNotification BIGINT,
-            federatedId STRING,
-            useTeamEmailAutoParkingLimit BOOLEAN,
-            maxEmailAutoParkingLimit BIGINT,
-            sipUser STRING,
-            systemUser STRING,
-            systemDomain STRING,
-            crmUserName STRING,
-            useAgentTimeZone BOOLEAN,
-            timeDisplayFormat STRING,
-            sendEmailNotifications BOOLEAN,
-            apiKey STRING,
-            telephone1 STRING,
-            telephone2 STRING,
-            userType STRING,
-            isWhatIfAgent BOOLEAN,
-            timeZoneOffset STRING,
-            requestContact BOOLEAN,
-            chatThreshold BIGINT,
-            useTeamChatThreshold BOOLEAN,
-            emailThreshold BIGINT,
-            useTeamEmailThreshold BOOLEAN,
-            workItemThreshold BIGINT,
-            useTeamWorkItemThreshold BOOLEAN,
-            contactAutoFocus BOOLEAN,
-            useTeamContactAutoFocus BOOLEAN,
-            useTeamRequestContact BOOLEAN,
-            voiceThreshold BIGINT,
-            useTeamVoiceThreshold BOOLEAN,
-            subject STRING,
-            issuer STRING,
-            isOpenIdProfileComplete BOOLEAN,
-            teamUuid STRING,
-            maxPreview BOOLEAN,
-            deliveryMode STRING,
-            totalContactCount BIGINT,
-            useTeamDeliveryModeSettings BOOLEAN,
-            isBillable BOOLEAN,
-            agentVoiceThreshold BIGINT,
-            agentChatThreshold BIGINT,
-            agentEmailThreshold BIGINT,
-            agentWorkItemThreshold BIGINT,
-            agentDeliveryMode STRING,
-            agentTotalContactCount BIGINT,
-            agentContactAutoFocus BOOLEAN,
-            agentRequestContact BOOLEAN,
-            agentMaxVersion BIGINT,
-            userNameDomain STRING,
-            combinedUserNameDomain STRING,
-            rowNumber BIGINT,
-            SmsThreshold BIGINT,
-            UseTeamsmsThreshold BOOLEAN,
-            LoginAuthenticatorId STRING,
-            DigitalThreshold BIGINT,
-            UseTeamDigitalThreshold BOOLEAN,
-            AgentPhoneTimeout BIGINT,
-            AgentPhoneTimeoutSeconds BIGINT,
-            address1 STRING,
-            address2 STRING,
-            zipCode STRING,
-            noFixedAddress BOOLEAN,
-            agentCxaClientVersion BIGINT,
-            agentCxaReleasePrevious BOOLEAN,
-            AgentIntegration BOOLEAN,
-            channelLock BOOLEAN,
-            digitalEngagementEnabled BOOLEAN,
-            teams_channel_Id STRING,
-            recordingNumbers STRING,
-            integratedSoftphoneWebRtcUrls STRING,
             extractDate DATE,
             recordInsertTime TIMESTAMP
         )
@@ -261,6 +201,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         """
     )
 
+    logger.info("Creating dim_teams table with all available fields")
     spark.sql(
         f"""
         CREATE TABLE IF NOT EXISTS {db_name}.dim_teams (
@@ -408,6 +349,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         """
     )
 
+    logger.info("Creating dim_dispositions table with all available fields")
     spark.sql(
         f"""
         CREATE TABLE IF NOT EXISTS {db_name}.dim_dispositions (
@@ -430,6 +372,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         """
     )
 
+    logger.info("Creating dim_dispositions_skills table with all available fields")
     spark.sql(f"""
         CREATE TABLE IF NOT EXISTS {db_name}.dim_agents_skills (
             skillId BIGINT,
@@ -445,6 +388,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         LOCATION '{db_path}/{db_name}/dim_agents_skills'
     """)
 
+    logger.info("Creating dim_segments_analyzed table with all available fields")
     spark.sql(
         f"""
         CREATE TABLE IF NOT EXISTS {db_name}.fact_agents_skills (
@@ -470,6 +414,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         LOCATION '{db_path}/{db_name}/fact_agents_skills'
     """)
 
+    logger.info("Creating dim_segments_analyzed table with all available fields")
     spark.sql(
             f"""
             CREATE TABLE IF NOT EXISTS {db_name}.dim_contacts (
@@ -514,6 +459,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             """
         )
 
+    logger.info("Creating fact_contacts table with all available fields")
     spark.sql(
             f"""
             CREATE TABLE IF NOT EXISTS {db_name}.fact_contacts (
@@ -554,6 +500,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             """
         )
 
+    logger.info("Creating dim_contacts_completed table with all available fields")
     spark.sql(
         f"""
         CREATE TABLE IF NOT EXISTS {db_name}.dim_contacts_completed (
@@ -590,6 +537,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         """
     )
 
+    logger.info("Creating fact_contacts_completed table with all available fields")
     spark.sql(
         f"""
         CREATE TABLE IF NOT EXISTS {db_name}.fact_contacts_completed (
@@ -630,6 +578,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         """
     )
 
+    logger.info("Creating dim_contacts_custom_data table with all available fields")
     spark.sql(
         f"""
         CREATE TABLE IF NOT EXISTS {db_name}.dim_contacts_custom_data (
@@ -648,7 +597,6 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
     )
     
 
-
 if __name__ == "__main__":
     #Main entry point for the Nice inContact setup script.
     #This script initializes the necessary Spark SQL database and tables for Nice inContact data ingestion.
@@ -660,7 +608,7 @@ if __name__ == "__main__":
     args, unknown_args = parser.parse_known_args()
     tenant = args.tenant
     logger = niceincontact_utils_logger(tenant, app_name.lower())
-    logger.info("Setup started...")
+    logger.info(f"Setup started for tenant: {tenant}")
 
     db_name = get_dbname(tenant)
     tenant_path, db_path, log_path = get_path_vars(tenant)
