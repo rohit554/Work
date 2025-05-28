@@ -13,11 +13,11 @@
         "elementType": {
           "type": "struct",
           "fields": [
-            { "name": "channelId", "type": "integer", "nullable": true },
+            { "name": "channelId", "type": "long", "nullable": true },
             { "name": "channelName", "type": "string", "nullable": true },
-            { "name": "offset", "type": "integer", "nullable": true },
-            { "name": "length", "type": "integer", "nullable": true },
-            { "name": "blockId", "type": "integer", "nullable": true },
+            { "name": "offset", "type": "long", "nullable": true },
+            { "name": "length", "type": "long", "nullable": true },
+            { "name": "blockId", "type": "long", "nullable": true },
             { "name": "text", "type": "string", "nullable": true },
             { "name": "userId", "type": "string", "nullable": true },
             {
@@ -25,8 +25,8 @@
               "type": {
                 "type": "struct",
                 "fields": [
-                  { "name": "startTime", "type": "integer", "nullable": true },
-                  { "name": "endTime", "type": "integer", "nullable": true },
+                  { "name": "startTime", "type": "long", "nullable": true },
+                  { "name": "endTime", "type": "long", "nullable": true },
                   { "name": "confidence", "type": "double", "nullable": true }
                 ]
               },
@@ -37,7 +37,7 @@
               "type": {
                 "type": "struct",
                 "fields": [
-                  { "name": "timestamp", "type": "integer", "nullable": true }
+                  { "name": "timestamp", "type": "long", "nullable": true }
                 ]
               },
               "nullable": true
@@ -47,7 +47,7 @@
               "type": {
                 "type": "struct",
                 "fields": [
-                  { "name": "sentDate", "type": "integer", "nullable": true },
+                  { "name": "sentDate", "type": "long", "nullable": true },
                   { "name": "subject", "type": "string", "nullable": true },
                   { "name": "from", "type": "string", "nullable": true },
                   { "name": "to", "type": "string", "nullable": true }
@@ -71,17 +71,17 @@
             { "name": "objectType", "type": "string", "nullable": true },
             { "name": "type", "type": "string", "nullable": true },
             { "name": "value", "type": "string", "nullable": true },
-            { "name": "offset", "type": "integer", "nullable": true },
-            { "name": "highlightLength", "type": "integer", "nullable": true },
-            { "name": "transcriptOffset", "type": "integer", "nullable": true },
-            { "name": "transcriptChunk", "type": "integer", "nullable": true },
+            { "name": "offset", "type": "long", "nullable": true },
+            { "name": "highlightLength", "type": "long", "nullable": true },
+            { "name": "transcriptOffset", "type": "long", "nullable": true },
+            { "name": "transcriptChunk", "type": "long", "nullable": true },
             { "name": "channelName", "type": "string", "nullable": true },
             { "name": "categoryPath", "type": "string", "nullable": true },
             {
               "name": "datasetIds",
               "type": {
                 "type": "array",
-                "elementType": "integer",
+                "elementType": "long",
                 "containsNull": true
               },
               "nullable": true
@@ -122,12 +122,60 @@
       "nullable": true
     },
     {
-      "name": "metrics",
+    "name": "metrics",
       "type": {
-        "type": "map",
-        "keyType": "string",
-        "valueType": "string",
-        "valueContainsNull": true
+        "type": "struct",
+        "fields": [
+          { "name": "clientdialedin", "type": "string", "nullable": true },
+          { "name": "wrapuptime", "type": "string", "nullable": true },
+          { "name": "segmentcontactstarttime", "type": "string", "nullable": true },
+          { "name": "agentstreamid", "type": "string", "nullable": true },
+          { "name": "clientphonenumber", "type": "string", "nullable": true },
+          { "name": "starttime", "type": "string", "nullable": true },
+          { "name": "source", "type": "string", "nullable": true },
+          { "name": "recorderid", "type": "string", "nullable": true },
+          { "name": "closereasontype", "type": "string", "nullable": true },
+          { "name": "clientstreamid", "type": "string", "nullable": true },
+          { "name": "recordingstarttime", "type": "string", "nullable": true },
+          { "name": "acdcontactid", "type": "string", "nullable": true },
+          { "name": "teamid", "type": "string", "nullable": true },
+          { "name": "agentuserid", "type": "string", "nullable": true },
+          { "name": "agentid", "type": "string", "nullable": true },
+          { "name": "interactionId", "type": "string", "nullable": true },
+          { "name": "statusdescription", "type": "string", "nullable": true },
+          { "name": "iscomplex", "type": "string", "nullable": true },
+          { "name": "totaldurationseconds", "type": "string", "nullable": true },
+          { "name": "clientani", "type": "string", "nullable": true },
+          { "name": "openreasontype", "type": "string", "nullable": true },
+          { "name": "agentname", "type": "string", "nullable": true },
+          { "name": "agentcontactid", "type": "string", "nullable": true },
+          { "name": "clientrecordingid", "type": "string", "nullable": true },
+          { "name": "mediatype", "type": "string", "nullable": true },
+          { "name": "status", "type": "string", "nullable": true },
+          { "name": "directiontype", "type": "string", "nullable": true },
+          { "name": "contactid", "type": "string", "nullable": true },
+          { "name": "agentrecordingid", "type": "string", "nullable": true },
+          { "name": "versionid", "type": "string", "nullable": true },
+          { "name": "IS_RESOLVED", "type": "string", "nullable": true },
+          { "name": "segmentcontactid", "type": "string", "nullable": true },
+          { "name": "skill", "type": "string", "nullable": true },
+          { "name": "tenantid", "type": "string", "nullable": true },
+          { "name": "channeltype", "type": "string", "nullable": true },
+          { "name": "recordingid", "type": "string", "nullable": true },
+          { "name": "openreason", "type": "string", "nullable": true },
+          { "name": "skillname", "type": "string", "nullable": true },
+          { "name": "closereason", "type": "string", "nullable": true },
+          { "name": "updatetype", "type": "string", "nullable": true },
+          { "name": "endtime", "type": "string", "nullable": true },
+          { "name": "nrt-autosummary-exists", "type": "string", "nullable": true },
+          { "name": "threadid", "type": "string", "nullable": true },
+          { "name": "autosummary-start-timestamp-ms", "type": "string", "nullable": true },
+          { "name": "segmentid", "type": "string", "nullable": true },
+          { "name": "recordingendtime", "type": "string", "nullable": true },
+          { "name": "updatetime", "type": "string", "nullable": true },
+          { "name": "teamname", "type": "string", "nullable": true },
+          { "name": "contactNo", "type": "string", "nullable": true }
+        ]
       },
       "nullable": true
     },
@@ -152,8 +200,8 @@
                       "fields": [
                         { "name": "snippet", "type": "string", "nullable": true },
                         { "name": "text", "type": "string", "nullable": true },
-                        { "name": "startOffset", "type": "integer", "nullable": true },
-                        { "name": "endOffset", "type": "integer", "nullable": true }
+                        { "name": "startOffset", "type": "long", "nullable": true },
+                        { "name": "endOffset", "type": "long", "nullable": true }
                       ]
                     },
                     "nullable": true
@@ -179,8 +227,8 @@
                     "fields": [
                       { "name": "snippet", "type": "string", "nullable": true },
                       { "name": "text", "type": "string", "nullable": true },
-                      { "name": "startOffset", "type": "integer", "nullable": true },
-                      { "name": "endOffset", "type": "integer", "nullable": true }
+                      { "name": "startOffset", "type": "long", "nullable": true },
+                      { "name": "endOffset", "type": "long", "nullable": true }
                     ]
                   },
                   "nullable": true
@@ -205,8 +253,8 @@
                       "fields": [
                         { "name": "snippet", "type": "string", "nullable": true },
                         { "name": "text", "type": "string", "nullable": true },
-                        { "name": "startOffset", "type": "integer", "nullable": true },
-                        { "name": "endOffset", "type": "integer", "nullable": true }
+                        { "name": "startOffset", "type": "long", "nullable": true },
+                        { "name": "endOffset", "type": "long", "nullable": true }
                       ]
                     },
                     "nullable": true

@@ -295,7 +295,7 @@ niceincontact_end_points = {
         "spark_partitions": {
             "max_records_per_partition": 20000
         },
-        "entity_name": "mediaPlaybackContacts",
+        "entity_name": "interactions",
         "tbl_overwrite": False,
         "raw_primary_key": ["acd-call-id"]
     },
