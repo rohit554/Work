@@ -342,13 +342,13 @@ niceincontact_end_points = {
         "raw_primary_key": ["id"],
     },
     "segments_analyzed": {
-        "endpoint": "/incontactapi/services/v32.0/interaction-analytics-gateway/v2/segments/analyzed",
+        "endpoint": "/interaction-analytics-gateway/v2/segments/analyzed",
         "request_type": "GET",
         "paging": False,
         "cursor": True,
         "interval": True,
         "params": {
-            "pageSize": 500,
+            "pageSize": 1000,
             "order": "asc"
         },
         "spark_partitions": {

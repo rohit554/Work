@@ -18,6 +18,7 @@ from pyspark.sql import SparkSession
 from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
 from dganalytics.utils.utils import env, get_path_vars, get_logger, delta_table_partition_ovrewrite, delta_table_ovrewrite, get_secret
 from pyspark.sql.functions import lit, monotonically_increasing_id, to_date, to_timestamp
+from urllib.parse import urlparse, parse_qs
 
 logger = logging.getLogger(__name__)
 
@@ -432,6 +433,11 @@ def niceincontact_request(spark: SparkSession, tenant: str, api_name: str, run_i
         if cursor:
             if 'cursor' in resp_json.keys():
                 cursor_param = resp_json['cursor']
+            elif "links" in resp_json and "next" in resp_json["links"]:
+                url = resp_json["links"]["next"]
+                parsed_url = urlparse(url)
+                query_params = parse_qs(parsed_url.query)
+                cursor_param = query_params.get("cursor", [None])[0]
             else:
                 break
         if 'pageCount' in resp_json.keys() and resp_json['pageCount'] < page_count:

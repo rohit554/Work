@@ -6,7 +6,32 @@ from dganalytics.connectors.niceincontact.niceincontact_utils import (
     niceincontact_request, make_niceincontact_request, refresh_access_token, 
     authorize, process_raw_data, get_api_url
 )
+from typing import List
 
+def fetch_segment_ids(spark: SparkSession, logger: logging.Logger) -> List[str]:
+    """
+    Fetch segmentId values from niceincontact_infobell.raw_segments_analyzed table.
+
+    Args:
+        spark (SparkSession): The active Spark session.
+        logger (logging.Logger): Logger for tracking progress and errors.
+
+    Returns:
+        List[str]: List of segmentId strings.
+    """
+    try:
+        logger.info("Loading table: niceincontact_infobell.raw_segments_analyzed")
+        df = spark.table("niceincontact_infobell.raw_segments_analyzed")
+        
+        logger.info("Selecting segmentId column")
+        segment_ids = [row["segmentId"] for row in df.select("segmentId").dropna().distinct().collect()]
+        
+        logger.info(f"Fetched {len(segment_ids)} segmentId values")
+        return segment_ids
+    
+    except Exception as e:
+        logger.error(f"Error fetching segmentId values: {e}", exc_info=True)
+        return []
 
 def fetch_analyzed_transcript_by_segment(
         tenant: str,
@@ -81,13 +106,8 @@ def analytics_api_call(
     """
     logger.info(f"Starting analytics API call for tenant: {tenant}, run_id: {run_id}, "
                 f"date range: {start_date} to {end_date}")
-
-    resp_list = niceincontact_request(
-        spark, tenant, "segments_analyzed", run_id,
-        start_date, end_date, skip_raw_load=True
-    )
     
-    segmentId_list = [json.loads(res).get('segmentId') for res in resp_list if res]
+    segmentId_list = fetch_segment_ids(spark, logger)
     logger.info(f"Total segments fetched: {len(segmentId_list)}")
 
     transcript_list = []
