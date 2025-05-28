@@ -102,7 +102,8 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
     """
     logger.info("Setting Nice InContact raw tables")
     apis = ["agents", "teams", "teams_agents", "skills", "agents_skills", "contacts",
-            "contacts_completed", "contacts_custom_data", "dispositions", "dispositions_skills"
+            "contacts_completed", "contacts_custom_data", "dispositions", "dispositions_skills",
+            "skills_summary", "skills_sla_summary",
             "segments_analyzed", "media_playback_contact", "media_playback_chat_email_segment", 
             "media_playback_voice_segment", "segments_analyzed_transcript", "wfm_data_agents",
             "wfm_data_agents_schedule_adherence", "wfm_data_agents_scorecards", "wfm_data_agents_schedule_adherence",
@@ -381,7 +382,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         """
     )
 
-    logger.info("Creating dim_dispositions_skills table with all available fields")
+    logger.info("Creating dim_agents_skills table with all available fields")
     spark.sql(f"""
         CREATE TABLE IF NOT EXISTS {db_name}.dim_agents_skills (
             skillId BIGINT,
@@ -397,7 +398,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         LOCATION '{db_path}/{db_name}/dim_agents_skills'
     """)
 
-    logger.info("Creating dim_segments_analyzed table with all available fields")
+    logger.info("Creating fact_agents_skills table with all available fields")
     spark.sql(
         f"""
         CREATE TABLE IF NOT EXISTS {db_name}.fact_agents_skills (
@@ -423,7 +424,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         LOCATION '{db_path}/{db_name}/fact_agents_skills'
     """)
 
-    logger.info("Creating dim_segments_analyzed table with all available fields")
+    logger.info("Creating dim_contacts table with all available fields")
     spark.sql(
             f"""
             CREATE TABLE IF NOT EXISTS {db_name}.dim_contacts (

@@ -3,7 +3,6 @@ Api configuration for Nice inContact
 This module contains the API configuration for Nice inContact, including endpoints, request types
 """
 
-
 niceincontact_end_points = {
     "agents": {
         "endpoint": "/incontactapi/services/v32.0/agents",
@@ -135,7 +134,7 @@ niceincontact_end_points = {
         "interval": True,
         "params": {},
         "spark_partitions": {"max_records_per_partition": 20000},
-        "entity_name": "agentStateHistory",
+        "entity_name": "wfmScorecardStats",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
@@ -147,6 +146,7 @@ niceincontact_end_points = {
         "params": {},
         "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": False,
+        "entity_name": "skillsPerformance",
         "raw_primary_key": ["id"],
     },
     "wfm_data_skills_contacts": {
@@ -157,6 +157,7 @@ niceincontact_end_points = {
         "params": {},
         "spark_partitions": {"max_records_per_partition": 20000},
         "tbl_overwrite": False,
+        "entity_name": "contactStats",
         "raw_primary_key": ["id"],
     },
     "wfm_data_skills_dialer_contacts": {
@@ -166,7 +167,7 @@ niceincontact_end_points = {
         "interval": True,
         "params": {},
         "spark_partitions": {"max_records_per_partition": 20000},
-        "entity_name": "wfM_OB_StatsV9",
+        "entity_name": "outboundStats",
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },

@@ -25,7 +25,7 @@ if __name__ == "__main__":
                          "contacts", "contacts_custom_data", "contacts_completed", "segments_analyzed", "wfm_data_agents",
                         "wfm_data_agents_schedule_adherence", "wfm_data_agents_scorecards", "wfm_data_agents_schedule_adherence",
                         "wfm_data_skills_contacts"]:
-            df = niceincontact_request(spark, tenant, api_name, run_id,
+            niceincontact_request(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time)
         elif api_name == "media_playback_chat_email_segment":
             fetch_media_segments(spark, tenant, api_name, run_id, extract_start_time, extract_end_time, logger)
