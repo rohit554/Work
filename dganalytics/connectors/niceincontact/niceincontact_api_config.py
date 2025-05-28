@@ -248,12 +248,12 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
-    "skills_slasummary": {
+    "skills_sla_summary": {
         "endpoint": "/incontactapi/services/v32.0/skills/sla-summary",
         "request_type": "GET",
-        "paging": True,
-        "interval": True,
-        "params": {"pageSize": 500},
+        "paging": False,
+        "interval": False,
+        "params": {},
         "spark_partitions": {"max_records_per_partition": 20000},
         "entity_name": "serviceLevelSummaries",
         "tbl_overwrite": False,
@@ -331,6 +331,17 @@ niceincontact_end_points = {
         "tbl_overwrite": False,
         "raw_primary_key": ["id"],
     },
+    "dispositions_skills": {
+        "endpoint": "/incontactapi/services/v32.0/dispositions/skills",
+        "request_type": "GET",
+        "paging": False,
+        "interval": False,
+        "params": {},
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "entity_name": "dispositions",
+        "tbl_overwrite": False,
+        "raw_primary_key": ["id"],
+    },
     "contacts_contactId_email_transcript": {
         "endpoint": "/incontactapi/services/v32.0/contacts/{{contactId}}/email-transcript",
         "request_type": "GET",
@@ -360,7 +371,7 @@ niceincontact_end_points = {
         "raw_primary_key": ["id"]
     },
     "media_playback_chat_email_segment": {
-        "endpoint": "media-playback/v1/segments/{segmentId}",
+        "endpoint": "/media-playback/v1/segments/{segmentId}",
         "request_type": "GET",
         "paging": False,
         "interval": False,
@@ -377,7 +388,7 @@ niceincontact_end_points = {
         "raw_primary_key": ["segmentId"]
     },
     "media_playback_voice_segment": {
-        "endpoint": "media-playback/v1/segments/{segmentId}",
+        "endpoint": "/media-playback/v1/segments/{segmentId}",
         "request_type": "GET",
         "paging": False,
         "interval": False,
