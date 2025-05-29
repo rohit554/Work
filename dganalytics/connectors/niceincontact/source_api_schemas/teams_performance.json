@@ -1,161 +1,31 @@
 {
   "fields": [
-    {
-      "metadata": {},
-      "name": "teamId",
-      "nullable": true,
-      "type": "integer"
-    },
-    {
-      "metadata": {},
-      "name": "agentOffered",
-      "nullable": true,
-      "type": "integer"
-    },
-    {
-      "metadata": {},
-      "name": "inboundHandled",
-      "nullable": true,
-      "type": "integer"
-    },
-    {
-      "metadata": {},
-      "name": "inboundTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "inboundTalkTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "inboundAvgTalkTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "outboundHandled",
-      "nullable": true,
-      "type": "integer"
-    },
-    {
-      "metadata": {},
-      "name": "outboundTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "outboundTalkTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "outboundAvgTalkTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "totalHandled",
-      "nullable": true,
-      "type": "integer"
-    },
-    {
-      "metadata": {},
-      "name": "totalAvgHandled",
-      "nullable": true,
-      "type": "integer"
-    },
-    {
-      "metadata": {},
-      "name": "totalTalkTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "totalAvgTalkTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "totalAvgHandleTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "consultTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "availableTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "unavailableTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "avgAvailableTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "avgUnavailableTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "acwTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "refused",
-      "nullable": true,
-      "type": "integer"
-    },
-    {
-      "metadata": {},
-      "name": "percentRefused",
-      "nullable": true,
-      "type": "integer"
-    },
-    {
-      "metadata": {},
-      "name": "loginTime",
-      "nullable": true,
-      "type": "string"
-    },
-    {
-      "metadata": {},
-      "name": "workingRate",
-      "nullable": true,
-      "type": "integer"
-    },
-    {
-      "metadata": {},
-      "name": "occupancy",
-      "nullable": true,
-      "type": "integer"
-    }
+    { "name": "teamId", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "agentOffered", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "inboundHandled", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "inboundTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "inboundTalkTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "inboundAvgTalkTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "outboundHandled", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "outboundTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "outboundTalkTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "outboundAvgTalkTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "totalHandled", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "totalAvgHandled", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "totalTalkTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "totalAvgTalkTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "totalAvgHandleTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "consultTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "availableTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "unavailableTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "avgAvailableTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "avgUnavailableTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "acwTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "refused", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "percentRefused", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "loginTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "workingRate", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "occupancy", "type": "string", "nullable": true, "metadata": {} }
   ],
   "type": "struct"
 }

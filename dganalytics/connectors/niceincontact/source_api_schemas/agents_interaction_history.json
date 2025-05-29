@@ -1,221 +1,31 @@
 {
   "fields": [
-    {
-      "name": "totalRecords",
-      "type": "integer",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "_links",
-      "type": {
-        "type": "struct",
-        "fields": [
-          {
-            "name": "self",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "next",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          },
-          {
-            "name": "previous",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-          }
-        ]
-      },
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "businessUnitId",
-      "type": "integer",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "lastPollTime",
-      "type": "string",
-      "nullable": true,
-      "metadata": {}
-    },
-    {
-      "name": "contactStates",
-      "type": {
-        "type": "array",
-        "elementType": {
-          "type": "struct",
-          "fields": [
-            {
-              "name": "contactId",
-              "type": "integer",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "masterContactId",
-              "type": "integer",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "contactStartDate",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "targetAgentId",
-              "type": "integer",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "fileName",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "pointOfContact",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "lastUpdateTime",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "mediaTypeId",
-              "type": "integer",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "mediaTypeName",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "mediaSubTypeId",
-              "type": "integer",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "mediaSubTypeName",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "agentId",
-              "type": "integer",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "firstName",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "lastName",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "teamId",
-              "type": "integer",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "teamName",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "campaignId",
-              "type": "integer",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "campaignName",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "skillId",
-              "type": "integer",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "skillName",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "isOutbound",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "fromAddr",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "toAddr",
-              "type": "string",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "primaryDispositionId",
-              "type": "integer",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "secondaryDispositionId",
-              "type": "integer",
-              "nullable": true,
-              "metadata": {}
-            },
-            {
-              "name": "transferIndicatorId",
-              "type": "integer",
-              "nullable": true,
-              "metadata": {}
-            }
-          ]
-        },
-        "containsNull": true
-      },
-      "nullable": true,
-      "metadata": {}
-    }
+    { "name": "contactId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "masterContactId", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "contactStartDate", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "targetAgentId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "fileName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "pointOfContact", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "lastUpdateTime", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "mediaTypeId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "mediaTypeName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "mediaSubTypeId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "mediaSubTypeName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "agentId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "firstName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "lastName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "teamId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "teamName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "campaignId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "campaignName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "skillId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "skillName", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "isOutbound", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "fromAddr", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "toAddr", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "primaryDispositionId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "secondaryDispositionId", "type": "integer", "nullable": true, "metadata": {} },
+    { "name": "transferIndicatorId", "type": "integer", "nullable": true, "metadata": {} }
   ],
   "type": "struct"
 }

@@ -176,7 +176,7 @@ niceincontact_end_points = {
         "request_type": "GET",
         "paging": True,
         "interval": True,
-        "params": {"pageSize": 500},
+        "params": {"pageSize": 1000},
         "spark_partitions": {"max_records_per_partition": 20000},
         "entity_name": "contactStates",
         "tbl_overwrite": False,
