@@ -101,7 +101,8 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
         bool: True if all raw tables are created.
     """
     logger.info("Setting Nice InContact raw tables")
-    apis = ["agents", "teams", "teams_agents", "skills", "agents_skills", "contacts",
+    apis = ["agents", "teams", "teams_agents", "teams_performace", "skills", "agents_skills", 
+            "agents_performance", "agents_interaction_history", "contacts",
             "contacts_completed", "contacts_custom_data", "dispositions", "dispositions_skills",
             "skills_summary", "skills_sla_summary",
             "segments_analyzed", "media_playback_contact", "media_playback_chat_email_segment", 

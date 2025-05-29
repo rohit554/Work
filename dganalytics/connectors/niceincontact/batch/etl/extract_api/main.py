@@ -20,7 +20,9 @@ if __name__ == "__main__":
     try:
         logger.info("Starting extraction for Nice In Contact API's: %s", api_name)
 
-        if api_name in ["agents", "teams", "teams_agents", "agents_skills", "skills", "dispositions","dispositions_skills",
+        if api_name in ["agents", "teams", "teams_agents", "teams_performance",
+                         "agents_performance", "agents_inetraction_history",
+                         "agents_skills", "skills", "dispositions","dispositions_skills",
                          "skills_summary", "skills_sla_summary",
                          "contacts", "contacts_custom_data", "contacts_completed", "segments_analyzed", "wfm_data_agents",
                         "wfm_data_agents_schedule_adherence", "wfm_data_agents_scorecards", "wfm_data_agents_schedule_adherence",
