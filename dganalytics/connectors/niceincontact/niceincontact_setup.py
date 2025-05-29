@@ -497,6 +497,49 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         LOCATION '{db_path}/{db_name}/fact_agents_skills'
     """)
 
+    logger.info("Creating fact_skills_summary table with all available fields")
+
+    spark.sql(f"""
+            CREATE TABLE IF NOT EXISTS {db_name}.fact_skills_summary (
+            skillId BIGINT,
+            mediaTypeId BIGINT,
+            campaignId BIGINT,
+            extractIntervalStartTime TIMESTAMP,
+            contactsOffered BIGINT,
+            contactsHandled BIGINT,
+            abandonCount BIGINT,
+            averageHandleTime STRING,
+            abandonRate FLOAT,
+            extractDate DATE,
+            extractIntervalEndTime TIMESTAMP,
+            recordInsertTime TIMESTAMP,
+            recordIdentifier BIGINT
+        )
+        USING DELTA
+        PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
+        LOCATION '{db_path}/{db_name}/fact_skills_summary'
+    """)
+
+    logger.info("Creating fact_skills_sla_summary table with all available fields")
+
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS {db_name}.fact_skills_sla_summary (
+            skillId BIGINT,
+            contactsWithinSLA BIGINT,
+            contactsOutOfSLA BIGINT,
+            totalContacts BIGINT,
+            serviceLevel DOUBLE,
+            extractDate DATE,
+            extractIntervalStartTime TIMESTAMP,
+            extractIntervalEndTime TIMESTAMP,
+            recordInsertTime TIMESTAMP,
+            recordIdentifier BIGINT
+        )
+        USING DELTA
+        PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
+        LOCATION '{db_path}/{db_name}/fact_skills_sla_summary'
+    """)
+
     logger.info("Creating dim_contacts table with all available fields")
     spark.sql(
             f"""
