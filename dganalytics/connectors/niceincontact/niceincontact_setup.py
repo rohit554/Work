@@ -347,6 +347,124 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         LOCATION '{db_path}/{db_name}/dim_agents'
         """)
 
+    logger.info("Creating fact_teams_agents table with all available fields")
+
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS spark_catalog.niceincontact_infobell.fact_teams_agents (
+            teamId BIGINT,
+            teamName STRING,
+            isActive BOOLEAN,
+            inViewEnabled BOOLEAN,
+            wfoEnabled BOOLEAN,
+            wfm2Enabled BOOLEAN,
+            qm2Enabled BOOLEAN,
+            description STRING,
+            notes STRING,
+            lastUpdateTime STRING,
+            inViewGamificationEnabled BOOLEAN,
+            inViewChatEnabled BOOLEAN,
+            inViewLMSEnabled BOOLEAN,
+            analyticsEnabled BOOLEAN,
+            voiceThreshold BIGINT,
+            chatThreshold BIGINT,
+            emailThreshold BIGINT,
+            socialThreshold BIGINT,
+            workItemThreshold BIGINT,
+            requestContact BOOLEAN,
+            contactAutoFocus BOOLEAN,
+            agentId BIGINT,
+            userName STRING,
+            firstName STRING,
+            middleName STRING,
+            lastName STRING,
+            emailAddress STRING,
+            isActive BOOLEAN,
+            reportToId BIGINT,
+            isSupervisor BOOLEAN,
+            lastLogin STRING,
+            lastModified STRING,
+            locationId BIGINT,
+            custom1 STRING,
+            custom2 STRING,
+            custom3 STRING,
+            custom4 STRING,
+            custom5 STRING,
+            internalId STRING,
+            securityProfileId BIGINT,
+            timeZone STRING,
+            country STRING,
+            state STRING,
+            city STRING,
+            chatRefusalTimeout BIGINT,
+            phoneRefusalTimeout BIGINT,
+            voicemailRefusalTimeout BIGINT,
+            workItemRefusalTimeout BIGINT,
+            defaultDialingPattern STRING,
+            maxConcurrentChats BIGINT,
+            notes_agent STRING,
+            hireDate STRING,
+            terminationDate STRING,
+            hourlyCost DOUBLE,
+            rehireStatus BOOLEAN,
+            employmentType STRING,
+            referral STRING,
+            atHome BOOLEAN,
+            hiringSource STRING,
+            ntLoginName STRING,
+            scheduleNotification STRING,
+            federatedIdValue STRING,
+            extractDate DATE,
+            extractIntervalStartTime TIMESTAMP,
+            extractIntervalEndTime TIMESTAMP,
+            recordInsertTime TIMESTAMP,
+            recordIdentifier BIGINT
+        )
+        USING DELTA
+        PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
+        LOCATION '{db_path}/{db_name}/fact_teams_agents'
+    """)
+
+    logger.info("Creating fact_teams_performance table with all available fields")
+
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS {db_name}.fact_teams_performance (
+            teamId STRING,
+            agentOffered STRING,
+            inboundHandled STRING,
+            inboundTime STRING,
+            inboundTalkTime STRING,
+            inboundAvgTalkTime STRING,
+            outboundHandled STRING,
+            outboundTime STRING,
+            outboundTalkTime STRING,
+            outboundAvgTalkTime STRING,
+            totalHandled STRING,
+            totalAvgHandled STRING,
+            totalTalkTime STRING,
+            totalAvgTalkTime STRING,
+            totalAvgHandleTime STRING,
+            consultTime STRING,
+            availableTime STRING,
+            unavailableTime STRING,
+            avgAvailableTime STRING,
+            avgUnavailableTime STRING,
+            acwTime STRING,
+            refused STRING,
+            percentRefused STRING,
+            loginTime STRING,
+            workingRate STRING,
+            occupancy STRING,
+            extractDate DATE,
+            extractIntervalStartTime TIMESTAMP,
+            extractIntervalEndTime TIMESTAMP,
+            recordInsertTime TIMESTAMP,
+            recordIdentifier BIGINT
+        )
+        USING DELTA
+        PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
+        LOCATION '{db_path}/{db_name}/fact_teams_performance'
+        """
+    )
 
     logger.info("Creating dim_skills table with all available fields")
     spark.sql(
@@ -456,7 +574,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
     )
 
     logger.info("Creating dim_dispositions_skills table with all available fields")
-    
+
     spark.sql(f"""
         CREATE TABLE IF NOT EXISTS {db_name}.dim_dispositions_skills (
             dispositionId BIGINT,
@@ -514,6 +632,86 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         USING DELTA
         LOCATION '{db_path}/{db_name}/fact_agents_skills'
     """)
+
+    logger.info("Creating fact_agent_performance table with all available fields")
+
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS {db_name}.fact_agent_performance (
+            agentId STRING,
+            teamId STRING,
+            agentOffered STRING,
+            inboundHandled STRING,
+            inboundTime STRING,
+            inboundTalkTime STRING,
+            inboundAvgTalkTime STRING,
+            outboundHandled STRING,
+            outboundTime STRING,
+            outboundTalkTime STRING,
+            outboundAvgTalkTime STRING,
+            totalHandled STRING,
+            totalTalkTime STRING,
+            totalAvgTalkTime STRING,
+            totalAvgHandleTime STRING,
+            consultTime STRING,
+            availableTime STRING,
+            unavailableTime STRING,
+            acwTime STRING,
+            refused STRING,
+            percentRefused STRING,
+            loginTime STRING,
+            workingRate STRING,
+            occupancy STRING,
+            extractDate DATE,
+            extractIntervalStartTime TIMESTAMP,
+            extractIntervalEndTime TIMESTAMP,
+            recordInsertTime TIMESTAMP
+        )
+        USING DELTA
+        PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
+        LOCATION '{db_path}/{db_name}/fact_agent_performance'
+    """)
+
+
+    logger.info("Creating fact_agent_interaction table with all available fields")
+
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS {db_name}.fact_agent_interaction_history (
+            contactId BIGINT,
+            masterContactId BIGINT,
+            contactStartDate STRING,
+            targetAgentId BIGINT,
+            fileName STRING,
+            pointOfContact STRING,
+            lastUpdateTime STRING,
+            mediaTypeId BIGINT,
+            mediaTypeName STRING,
+            mediaSubTypeId BIGINT,
+            mediaSubTypeName STRING,
+            agentId BIGINT,
+            firstName STRING,
+            lastName STRING,
+            teamId BIGINT,
+            teamName STRING,
+            campaignId BIGINT,
+            campaignName STRING,
+            skillId BIGINT,
+            skillName STRING,
+            isOutbound STRING,
+            fromAddr STRING,
+            toAddr STRING,
+            primaryDispositionId BIGINT,
+            secondaryDispositionId BIGINT,
+            transferIndicatorId BIGINT,
+            extractDate DATE,
+            extractIntervalStartTime TIMESTAMP,
+            extractIntervalEndTime TIMESTAMP,
+            recordInsertTime TIMESTAMP
+        )
+        USING DELTA
+        PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
+        LOCATION '{db_path}/{db_name}/fact_agent_interaction_history'
+    """)
+
 
     logger.info("Creating fact_skills_summary table with all available fields")
 
@@ -739,6 +937,153 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         LOCATION '{db_path}/{db_name}/dim_contacts_custom_data'
         """
     )
+
+
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS {db_name}.fact_media_playback_contact (
+            contactId STRING,
+            acdcontactId STRING,
+            brandEmbassyConfig STRUCT<
+                threadId: STRING,
+                caseId: STRING,
+                sessionId: STRING
+            >,
+            elevatedInteraction BOOLEAN,
+            interactions ARRAY<STRUCT<
+                mediaType: STRING,
+                channelType: STRING,
+                startTime: STRING,
+                endTime: STRING,
+                data: STRUCT<
+                    startTime: STRING,
+                    endTime: STRING,
+                    acwEndTime: STRING,
+                    fileToPlayUrl: STRING,
+                    videoImageUrl: STRING,
+                    waveformDataList: ARRAY<STRUCT<
+                        channel: INT,
+                        normalizedPcmData: ARRAY<DOUBLE>
+                    >>,
+                    participantDataList: ARRAY<STRUCT<
+                        participantType: STRING,
+                        agentName: STRING,
+                        participantId: STRING,
+                        segmentId: STRING,
+                        userId: STRING,
+                        voiceStages: ARRAY<STRUCT<
+                            stageType: STRING,
+                            startTime: STRING,
+                            endTime: STRING,
+                            recordingID: STRING,
+                            displays: ARRAY<STRUCT<
+                                width: INT,
+                                height: INT,
+                                topLeftX: INT,
+                                topLeftY: INT
+                            >>,
+                            mergedParentId: STRING
+                        >>,
+                        screenStages: ARRAY<STRUCT<
+                            stageType: STRING,
+                            startTime: STRING,
+                            endTime: STRING,
+                            recordingID: STRING,
+                            displays: ARRAY<STRUCT<
+                                width: INT,
+                                height: INT,
+                                topLeftX: INT,
+                                topLeftY: INT
+                            >>,
+                            mergedParentId: STRING
+                        >>,
+                        channel: INT
+                    >>,
+                    segmentsDataList: ARRAY<STRUCT<
+                        startTime: STRING,
+                        endTime: STRING,
+                        acwEndTime: STRING,
+                        openReasonType: STRING,
+                        closeReasonType: STRING,
+                        directionType: STRING,
+                        source: STRING,
+                        firstSegment: BOOLEAN,
+                        originalSourceFromSdr: STRING,
+                        segmentId: STRING,
+                        channelType: STRING,
+                        customerRestricted: BOOLEAN,
+                        isCustomerRestricted: BOOLEAN
+                    >>,
+                    dfoStages: ARRAY<STRUCT<
+                        stageType: STRING,
+                        startTime: STRING,
+                        endTime: STRING,
+                        displays: STRING,
+                        mergedParentId: STRING
+                    >>,
+                    participants: ARRAY<STRUCT<
+                        participantType: STRING,
+                        participantName: STRING,
+                        actions: ARRAY<STRUCT<
+                            timeStamp: STRING,
+                            action: STRING
+                        >>,
+                        screenStages: ARRAY<STRUCT<
+                            stageType: STRING,
+                            startTime: STRING,
+                            endTime: STRING,
+                            displays: ARRAY<STRUCT<
+                                width: INT,
+                                height: INT,
+                                topLeftX: INT,
+                                topLeftY: INT
+                            >>,
+                            mergedParentId: STRING
+                        >>
+                    >>,
+                    content: STRUCT<
+                        sentTime: STRING,
+                        from: STRING,
+                        to: ARRAY<STRING>,
+                        cc: ARRAY<STRING>,
+                        bcc: ARRAY<STRING>,
+                        subject: STRING,
+                        body: STRING
+                    >,
+                    transferPoints: ARRAY<STRING>,
+                    messages: ARRAY<STRUCT<
+                        participantType: STRING,
+                        participantName: STRING,
+                        text: STRING,
+                        timeStamp: STRING
+                    >>,
+                    categoryMatchesList: ARRAY<STRUCT<
+                        categoryHierarchy: ARRAY<STRING>,
+                        secondsOffsets: ARRAY<DOUBLE>,
+                        confidence: INT
+                    >>,
+                    sentiments: ARRAY<STRUCT<
+                        overallSentiment: STRING,
+                        segmentStartTime: STRING,
+                        channel: INT
+                    >>
+                >,
+                `@type`: STRING,
+                callTaggingList: ARRAY<STRUCT<
+                    updateTime: STRING,
+                    value: STRING
+                >>,
+                dynamicBusinessData: ARRAY<STRING>
+            >>,
+            extractDate DATE,
+            extractIntervalStartTime TIMESTAMP,
+            extractIntervalEndTime TIMESTAMP,
+            recordInsertTime TIMESTAMP,
+            recordIdentifier BIGINT
+        )
+        USING DELTA
+        LOCATION '{db_path}/{db_name}/fact_media_playback_contact'
+    """)
+
     
 
 if __name__ == "__main__":

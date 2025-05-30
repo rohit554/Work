@@ -12,6 +12,7 @@ def dim_contacts(spark: SparkSession):
     :param spark: SparkSession object
     :return: None
     """
+    #select vals and write merge query if maths else insert new records
     spark.sql("""
         INSERT OVERWRITE spark_catalog.niceincontact_infobell.dim_contacts
         SELECT

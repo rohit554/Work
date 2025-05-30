@@ -12,6 +12,7 @@ def dim_agents(spark: SparkSession):
     :param spark: SparkSession object
     :return: None
     """
+    #override data in the dimension table
     spark.sql("""
         INSERT INTO spark_catalog.niceincontact_infobell.dim_agents
         SELECT

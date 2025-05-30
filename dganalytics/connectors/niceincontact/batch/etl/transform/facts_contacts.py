@@ -12,6 +12,7 @@ def fact_contacts(spark: SparkSession):
     :param spark: SparkSession object
     :return: None
     """
+    #update or insert based on data 
     spark.sql(
         """
         INSERT OVERWRITE TABLE niceincontact_infobell.fact_contacts
