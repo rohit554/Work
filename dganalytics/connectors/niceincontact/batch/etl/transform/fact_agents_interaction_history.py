@@ -3,7 +3,7 @@ This module contains the function to transform raw interaction history into the 
 """
 from pyspark.sql import SparkSession
 
-def fact_agent_interaction_history(spark: SparkSession):
+def fact_agent_interaction_history(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     """
     Transforms raw interaction history into the fact table.
 
@@ -11,7 +11,7 @@ def fact_agent_interaction_history(spark: SparkSession):
     :return: None
     """
     spark.sql("""
-        INSERT OVERWRITE park_catalog.niceincontact_infobell.fact_agent_interaction_history
+        INSERT OVERWRITE fact_agent_interaction_history
         SELECT
             contactId,
             masterContactId,
@@ -41,7 +41,6 @@ def fact_agent_interaction_history(spark: SparkSession):
             transferIndicatorId,
             extractDate,
             extractIntervalStartTime,
-            extractIntervalEndTime,
-            recordInsertTime
+            extractIntervalEndTime
         FROM park_catalog.niceincontact_infobell.raw_agents_interaction_history
     """)

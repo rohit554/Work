@@ -26,6 +26,27 @@ access_token = None
 refresh_token = None
 retry = 0
 
+def transform_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--tenant', required=True)
+    parser.add_argument('--run_id', required=True)
+    parser.add_argument('--extract_start_time', required=True,
+                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ'))
+    parser.add_argument('--extract_end_time', required=True,
+                        type=lambda s: datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%SZ'))
+    parser.add_argument('--transformation', required=True)
+
+    args, unknown_args = parser.parse_known_args()
+    tenant = args.tenant
+    run_id = args.run_id
+    transformation = args.transformation
+    extract_start_time = args.extract_start_time.strftime('%Y-%m-%dT%H:%M:%S')
+    extract_end_time = args.extract_end_time.strftime('%Y-%m-%dT%H:%M:%S')
+    extract_date = args.extract_start_time.strftime('%Y-%m-%d')
+
+    return tenant, run_id, extract_date, extract_start_time, extract_end_time, transformation
+
+
 
 def niceincontact_utils_logger(tenant, app_name):
     """

@@ -85,22 +85,22 @@ def export_powerbi_parquet(tenant, df, file_name):
 
 def get_env():
     try:
-        environment = os.environ['datagamz_env']
+        environment = os.environ['livedcx_env']
         # if environment not in ["local", "dev", "uat", "prd"]:
         #     raise Exception(
         #         "Please configure datagamz_env - local/dev/uat/prd")
     except Exception as e:
         try:
-            secret_name = 'datagamz-env'
+            secret_name = 'livedcx-env'
             dbutils = get_dbutils()
             environment = dbutils.secrets.get(
-                scope='dgsecretscope', key=secret_name)
+                scope='lcxsecretscope', key=secret_name)
         except Exception as e:
             try:
                 logging.warning(
                     "Failed to read secrets from dbutils. Reading secrets.json")
                 print("Falling back to reading secrets.json")
-                with open(os.path.join(os.path.expanduser("~"), "datagamz", "analytics", "secrets.json")) as f:
+                with open(os.path.join(os.path.expanduser("~"), "livedcx", "analytics", "secrets.json")) as f:
                     secrets = json.loads(f.read())
                 environment = secrets[secret_name]
             except:
@@ -119,18 +119,18 @@ def get_path_vars(tenant: str):
         from os.path import expanduser
         home = expanduser("~")
         tenant_path = os.path.join(
-            home, "datagamz", "analytics", "{}".format(tenant))
+            home, "livedcx", "analytics", "{}".format(tenant))
         db_path = "file:///" + \
             tenant_path.replace("\\", "/") + "/data/databases"
         log_path = os.path.join(tenant_path, 'logs')
-    # if tenant == 'datagamz':
-    #     tenant_path = "/dbfs/mnt/datagamz/datagamz/{}".format(tenant)
-    #     db_path = "dbfs:/mnt/datagamz/{}/data/databases".format(tenant)
-    #     log_path = "/dbfs/mnt/datagamz/{}/logs".format(tenant)
+    if tenant == 'livedcx':
+        tenant_path = "/dbfs/mnt/livedcx/livedcx/{}".format(tenant)
+        db_path = "dbfs:/mnt/livedcx/{}/data/databases".format(tenant)
+        log_path = "/dbfs/mnt/livedcx/{}/logs".format(tenant)
     else:
-        tenant_path = "/dbfs/mnt/datagamz/{}".format(tenant)
-        db_path = "dbfs:/mnt/datagamz/{}/data/databases".format(tenant)
-        log_path = "/dbfs/mnt/datagamz/{}/logs".format(tenant)
+        tenant_path = "/dbfs/mnt/livedcx/{}".format(tenant)
+        db_path = "dbfs:/mnt/livedcx/{}/data/databases".format(tenant)
+        log_path = "/dbfs/mnt/livedcx/{}/logs".format(tenant)
     return tenant_path, db_path, log_path
 
 
@@ -146,7 +146,7 @@ def get_logger(tenant: str, app_name: str):
     os.makedirs(os.path.dirname(log_file), exist_ok=True)
     os.makedirs(os.path.dirname(temp_log_file_name), exist_ok=True)
     '''
-    logger = logging.getLogger(f'dganalytics-{tenant}-{app_name}')
+    logger = logging.getLogger(f'lcxanalytics-{tenant}-{app_name}')
 
     existing_handlers = [
         handler.__class__.__name__ for handler in logger.handlers]
@@ -215,15 +215,15 @@ def get_secret(secret_key: str):
     global secrets
     if env == "local":
         if secrets is None:
-            with open(os.path.join(os.path.expanduser("~"), "datagamz", "analytics", "secrets.json")) as f:
+            with open(os.path.join(os.path.expanduser("~"), "livedcx", "analytics", "secrets.json")) as f:
                 secrets = json.loads(f.read())
         return secrets[secret_key]
-    elif env == "uat":
-        dbutils = get_dbutils()
-        return dbutils.secrets.get(scope='dgsecretsuat', key='{}'.format(secret_key))
+        # elif env == "uat":
+        #     dbutils = get_dbutils()
+        #     return dbutils.secrets.get(scope='lcxsecretsuat', key='{}'.format(secret_key))
     else:
         dbutils = get_dbutils()
-        return dbutils.secrets.get(scope='dgsecretscope', key='{}'.format(secret_key))
+        return dbutils.secrets.get(scope='lcxsecretscope', key='{}'.format(secret_key))
 
 
 def get_gamification_token():
@@ -372,7 +372,7 @@ def get_spark_session(app_name: str, tenant: str, default_db: str = None, addtl_
 
 def exec_mongo_pipeline(spark, pipeline, collection, schema, mongodb=None):
     if mongodb is None:
-        mongodb = f"dggamification{env if env != 'local' else 'uat'}"
+        mongodb = f"livedcxus{env if env != 'local' else 'uat'}"
     # mongodb = 'dggamificationprd'
     df = spark.read.format("mongo").option("uri", get_secret('mongodbconnurl')).option(
         "collection", collection).option("database", mongodb).option(
@@ -678,7 +678,7 @@ def get_mongodb_teams(orgId, spark):
     return exec_mongo_pipeline(spark, teamPipeline, 'Organization', teamSchema)
 
 def get_active_org():
-    tenant_path, db_path, log_path = get_path_vars('datagamz')
+    tenant_path, db_path, log_path = get_path_vars('livedcx')
     tenants_df = pd.read_csv(os.path.join(
         tenant_path,'data', 'config', 'PowerBI_ROI_DataSets_AutoRefresh_Config.csv'))
     tenants_df = tenants_df[tenants_df['platform'] == 'new']

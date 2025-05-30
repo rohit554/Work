@@ -4,7 +4,7 @@ This file contains the transformation logic for the `dim_agents` table in the Ni
 
 from pyspark.sql import SparkSession
 
-def dim_agents(spark: SparkSession):
+def dim_agents(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     """
     Transforms the raw agents data into the dimension table `dim_agents`.
     This function reads from the raw agents data and writes to the dimension table
@@ -14,7 +14,7 @@ def dim_agents(spark: SparkSession):
     """
     #override data in the dimension table
     spark.sql("""
-        INSERT INTO spark_catalog.niceincontact_infobell.dim_agents
+        INSERT INTO dim_agents
         SELECT
             agentId,
             userName,
@@ -140,8 +140,6 @@ def dim_agents(spark: SparkSession):
             channelLock,
             extractDate,
             extractIntervalStartTime,
-            extractIntervalEndTime,
-            recordInsertTime,
-            recordIdentifier
-        FROM spark_catalog.niceincontact_infobell.raw_agents
+            extractIntervalEndTime
+        FROM raw_agents
         """)

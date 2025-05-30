@@ -5,7 +5,7 @@ in the Nice InContact data warehouse.
 """
 from pyspark.sql import SparkSession
 
-def dim_contacts_completed(spark: SparkSession):
+def dim_contacts_completed(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     """
     Transforms the raw contacts completed data into the dimension table `dim_contacts_completed`.
     This function reads from the raw contacts completed data and writes to the dimension table
@@ -14,7 +14,7 @@ def dim_contacts_completed(spark: SparkSession):
     :return: None"""
     spark.sql(
         """
-        INSERT INTO spark_catalog.niceincontact_infobell.dim_contacts_completed
+        INSERT INTO dim_contacts_completed
         SELECT
             contactId,
             masterContactId,
@@ -41,8 +41,7 @@ def dim_contacts_completed(spark: SparkSession):
             analyticsProcessedDate,
             dateACWWarehoused,
             dateContactWarehoused,
-            extractDate,
-            recordInsertTime
-        FROM spark_catalog.niceincontact_infobell.raw_contacts_completed
+            extractDate
+        FROM raw_contacts_completed
         """
     )

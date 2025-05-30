@@ -15,7 +15,7 @@ def setup_tenant_localdev(tenant: str):
     Path(os.path.join(tenant_path, "data")).mkdir(parents=True, exist_ok=True)
 
     Path(os.path.join(tenant_path, "data", "databases",
-                      "dg_{}".format(tenant))).mkdir(parents=True, exist_ok=True)
+                      "lcx_{}".format(tenant))).mkdir(parents=True, exist_ok=True)
     Path(os.path.join(tenant_path, "data", "raw")).mkdir(
         parents=True, exist_ok=True)
     Path(os.path.join(tenant_path, "data", "pbdatasets")).mkdir(
@@ -37,7 +37,7 @@ def setup_tenant_databricks(tenant: str):
         fs_client.create_directory("logs")
 
         fs_client.create_directory("data/databases")
-        fs_client.create_directory("data/databases/dg_{}".format(tenant))
+        fs_client.create_directory("data/databases/lcx_{}".format(tenant))
         fs_client.create_directory("data/raw")
         fs_client.create_directory("data/pbdatasets")
         fs_client.create_directory("data/adhoc")
@@ -54,15 +54,15 @@ def mount_tenant_container(tenant: str, dbutils) -> None:
                "fs.azure.account.oauth2.client.secret": get_secret("storagegen2mountappsecret"),
                "fs.azure.account.oauth2.client.endpoint": "https://login.microsoftonline.com/{}/oauth2/token".format(
                    get_secret("storagegen2mountapptenantid"))}
-    if not any(mount.mountPoint == '/mnt/datagamz/{}'.format(tenant) for mount in dbutils.fs.mounts()):
+    if not any(mount.mountPoint == '/mnt/livedcx/{}'.format(tenant) for mount in dbutils.fs.mounts()):
         dbutils.fs.mount(source="abfss://{}@{}.dfs.core.windows.net/".format(
-            tenant, get_secret("storageadlsgen2name")), mount_point="/mnt/datagamz/{}".format(tenant),
+            tenant, get_secret("storageadlsgen2name")), mount_point="/mnt/livedcx/{}".format(tenant),
             extra_configs=configs)
 
 
 def create_tenant_database(tenant: str, spark: SparkSession):
     db_path = get_path_vars(tenant)[1]
-    db_name = "dg_{}".format(tenant)
+    db_name = "lcx_{}".format(tenant)
     spark.sql(
         "create database if not exists {}  LOCATION '{}'".format(db_name, db_path))
 
@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     spark = get_spark_session(app_name="Tenant_Setup",
                               tenant=tenant, default_db='default')
-    logger = get_logger("datagamz", "Tenant_Setup")
+    logger = get_logger("livedcx", "Tenant_Setup")
 
     logger.info("Setting up tenant %s", tenant)
     if env == 'local':
@@ -91,6 +91,6 @@ if __name__ == "__main__":
         create_tenant_database(tenant, spark)
 
     else:
-        logger.exception("datagamz_env environment not configured correctly- local/dev/uat/prd")
+        logger.exception("livedcx_env environment not configured correctly- local/dev/uat/prd")
     
     logger.info("Tenant setup completed")

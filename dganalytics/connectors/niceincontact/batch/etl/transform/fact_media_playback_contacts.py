@@ -18,9 +18,9 @@ This module contains the function to transform raw media playback data into a fa
 """
 from pyspark.sql import SparkSession
 
-def fact_media_playback_contact(spark: SparkSession):
+def fact_media_playback_contact(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     """
-    Transforms the raw media playback contact data into the fact table `fact_media_playback_contact`.
+    Transforms the raw media playback contact data into the fact table `fact_media_playback_contacts`.
     This function reads from the raw media playback data and writes to the fact table
     with necessary transformations (currently a direct overwrite).
     
@@ -30,7 +30,7 @@ def fact_media_playback_contact(spark: SparkSession):
     # update or insert based on data
     spark.sql(
         """
-        INSERT OVERWRITE TABLE niceincontact_infobell.fact_media_playback_contact
+        INSERT OVERWRITE TABLE fact_media_playback_contacts
         SELECT
             contactId,
             acdcontactId,
@@ -39,9 +39,7 @@ def fact_media_playback_contact(spark: SparkSession):
             interactions,
             extractDate,
             extractIntervalStartTime,
-            extractIntervalEndTime,
-            recordInsertTime,
-            recordIdentifier
-        FROM spark_catalog.niceincontact_infobell.raw_media_playback_contact
+            extractIntervalEndTime
+        FROM raw_media_playback_contacts
         """
     )

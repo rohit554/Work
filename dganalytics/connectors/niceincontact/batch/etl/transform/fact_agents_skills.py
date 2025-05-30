@@ -3,7 +3,7 @@ This module contains the function to transform raw agent data into a dimension t
 """
 from pyspark.sql import SparkSession
 
-def fact_agents_skills(spark: SparkSession):
+def fact_agents_skills(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     """"
     Transforms the raw agents and skills data into the fact table `fact_agents_skills`.
     This function reads from the raw agents and skills data and writes to the fact table
@@ -13,7 +13,7 @@ def fact_agents_skills(spark: SparkSession):
     """
     spark.sql(
         """
-        INSERT OVERWRITE spark_catalog.niceincontact_infobell.fact_agents_skills
+        INSERT OVERWRITE fact_agents_skills
         SELECT
             agentId,
             skillId,
@@ -29,8 +29,6 @@ def fact_agents_skills(spark: SparkSession):
             lastPollTime,
             extractDate,
             extractIntervalStartTime,
-            extractIntervalEndTime,
-            recordInsertTime,
-            recordIdentifier
-        FROM spark_catalog.niceincontact_infobell.raw_agents_skills
+            extractIntervalEndTime
+        FROM raw_agents_skills
     """)

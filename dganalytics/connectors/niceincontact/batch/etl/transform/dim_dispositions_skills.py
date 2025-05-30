@@ -3,7 +3,7 @@ This module contains the function to transform raw agent data into a dimension t
 """
 from pyspark.sql import SparkSession
 
-def dim_dispositions_skills(spark: SparkSession):
+def dim_dispositions_skills(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     """
     Transforms the raw dispositions skills data into the dimension table `dim_dispositions_skills`.
     This function reads from the raw dispositions skills data and writes to the dimension table
@@ -12,7 +12,7 @@ def dim_dispositions_skills(spark: SparkSession):
     :return: None
     """
     spark.sql("""
-        INSERT OVERWRITE spark_catalog.niceincontact_infobell.dim_dispositions_skills
+        INSERT OVERWRITE dim_dispositions_skills
         SELECT
             dispositionId,
             dispositionName,
@@ -20,8 +20,6 @@ def dim_dispositions_skills(spark: SparkSession):
             skills,
             extractDate,
             extractIntervalStartTime,
-            extractIntervalEndTime,
-            recordInsertTime,
-            recordIdentifier
-        FROM spark_catalog.niceincontact_infobell.raw_dispositions_skills
+            extractIntervalEndTime
+        FROM raw_dispositions_skills
     """)

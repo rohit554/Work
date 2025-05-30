@@ -131,87 +131,6 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
     spark.sql(f"CREATE DATABASE IF NOT EXISTS {db_name}")
     spark.sql(f"USE {db_name}")
 
-    logger.info("Creating dim_agents table with all available fields")
-    spark.sql(f"""
-        CREATE TABLE IF NOT EXISTS {db_name}.dim_agents (
-            agentId BIGINT,
-            userName STRING,
-            firstName STRING,
-            middleName STRING,
-            lastName STRING,
-            emailAddress STRING,
-            isActive BOOLEAN,
-            teamId BIGINT,
-            teamName STRING,
-            reportToId BIGINT,
-            isSupervisor BOOLEAN,
-            lastLogin TIMESTAMP,
-            lastUpdated TIMESTAMP,
-            lastModified TIMESTAMP,
-            location STRING,
-            custom1 STRING,
-            custom2 STRING,
-            custom3 STRING,
-            custom4 STRING,
-            custom5 STRING,
-            internalId STRING,
-            userId STRING,
-            reportToName STRING,
-            profileId BIGINT,
-            profileName STRING,
-            timeZone STRING,
-            country STRING,
-            countryName STRING,
-            state STRING,
-            city STRING,
-            chatRefusalTimeout BIGINT,
-            phoneRefusalTimeout BIGINT,
-            workItemRefusalTimeout BIGINT,
-            defaultDialingPattern BIGINT,
-            defaultDialingPatternName STRING,
-            useTeamMaxConcurrentChats BOOLEAN,
-            maxConcurrentChats BIGINT,
-            notes STRING,
-            createDate TIMESTAMP,
-            inactiveDate TIMESTAMP,
-            hireDate TIMESTAMP,
-            terminationDate TIMESTAMP,
-            hourlyCost DOUBLE,
-            rehireStatus BOOLEAN,
-            employmentType BIGINT,
-            employmentTypeName STRING,
-            referral STRING,
-            atHome BOOLEAN,
-            hiringSource STRING,
-            ntLoginName STRING,
-            scheduleNotification BIGINT,
-            federatedId STRING,
-            useTeamEmailAutoParkingLimit BOOLEAN,
-            maxEmailAutoParkingLimit BIGINT,
-            sipUser STRING,
-            systemUser BOOLEAN,
-            systemDomain STRING,
-            crmUserName STRING,
-            useAgentTimeZone BOOLEAN,
-            timeDisplayFormat STRING,
-            sendEmailNotifications BOOLEAN,
-            apiKey STRING,
-            telephone1 STRING,
-            telephone2 STRING,
-            userType STRING,
-            isWhatIfAgent BOOLEAN,
-            timeZoneOffset STRING,
-            requestContact STRING,
-            recordingNumbers ARRAY<STRING>,
-            businessUnitId BIGINT,
-            reportToFirstName STRING,
-            reportToMiddleName STRING,
-            reportToLastName STRING
-        )
-        USING DELTA
-        LOCATION '{db_path}/{db_name}/dim_agents'
-        """)
-
     logger.info("Creating dim_teams table with all available fields")
     spark.sql(f"""
         CREATE TABLE IF NOT EXISTS {db_name}.dim_agents (
@@ -339,9 +258,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             channelLock BOOLEAN,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         LOCATION '{db_path}/{db_name}/dim_agents'
@@ -415,9 +332,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             federatedIdValue STRING,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
@@ -456,9 +371,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             occupancy STRING,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
@@ -541,9 +454,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             requireManualAccept BOOLEAN,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         LOCATION '{db_path}/{db_name}/dim_skills'
@@ -564,9 +475,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             isPreviewDisposition BOOLEAN,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         LOCATION '{db_path}/{db_name}/dim_dispositions'
@@ -583,9 +492,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             skills ARRAY<STRUCT<skillId: BIGINT, mediaTypeId: BIGINT, mediaTypeName: STRING>>,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         LOCATION '{db_path}/{db_name}/dim_dispositions_skills'
@@ -600,8 +507,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             requireDisposition BOOLEAN,
             useACW BOOLEAN,
             outboundStrategy STRING,
-            extractDate DATE,
-            recordInsertTime TIMESTAMP
+            extractDate DATE
         )
         USING DELTA
         LOCATION '{db_path}/{db_name}/dim_agents_skills'
@@ -625,18 +531,16 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             lastPollTime STRING,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         LOCATION '{db_path}/{db_name}/fact_agents_skills'
     """)
 
-    logger.info("Creating fact_agent_performance table with all available fields")
+    logger.info("Creating fact_agents_performance table with all available fields")
 
     spark.sql(f"""
-        CREATE TABLE IF NOT EXISTS {db_name}.fact_agent_performance (
+        CREATE TABLE IF NOT EXISTS {db_name}.fact_agents_performance (
             agentId STRING,
             teamId STRING,
             agentOffered STRING,
@@ -663,19 +567,18 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             occupancy STRING,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
-        LOCATION '{db_path}/{db_name}/fact_agent_performance'
+        LOCATION '{db_path}/{db_name}/fact_agents_performance'
     """)
 
 
-    logger.info("Creating fact_agent_interaction table with all available fields")
+    logger.info("Creating fact_agents_interaction table with all available fields")
 
     spark.sql(f"""
-        CREATE TABLE IF NOT EXISTS {db_name}.fact_agent_interaction_history (
+        CREATE TABLE IF NOT EXISTS {db_name}.fact_agents_interaction_history (
             contactId BIGINT,
             masterContactId BIGINT,
             contactStartDate STRING,
@@ -704,12 +607,11 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             transferIndicatorId BIGINT,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
-        LOCATION '{db_path}/{db_name}/fact_agent_interaction_history'
+        LOCATION '{db_path}/{db_name}/fact_agents_interaction_history'
     """)
 
 
@@ -728,8 +630,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             abandonRate FLOAT,
             extractDate DATE,
             extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
+            recordInsertTime TIMESTAMP
         )
         USING DELTA
         PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
@@ -747,9 +648,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             serviceLevel DOUBLE,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
@@ -793,8 +692,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
                 analyticsProcessedDate STRING,
                 dateACWWarehoused STRING,
                 dateContactWarehoused STRING,
-                extractDate DATE,
-                recordInsertTime TIMESTAMP
+                extractDate DATE
             )
             USING DELTA
             LOCATION '{db_path}/{db_name}/dim_contacts'
@@ -833,9 +731,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
                 lowProficiency INT,
                 extractDate DATE,
                 extractIntervalStartTime TIMESTAMP,
-                extractIntervalEndTime TIMESTAMP,
-                recordInsertTime TIMESTAMP,
-                recordIdentifier BIGINT
+                extractIntervalEndTime TIMESTAMP
             )
             USING DELTA
             LOCATION '{db_path}/{db_name}/fact_contacts'
@@ -871,8 +767,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             analyticsProcessedDate TIMESTAMP,
             dateACWWarehoused TIMESTAMP,
             dateContactWarehoused TIMESTAMP,
-            extractDate DATE,
-            recordInsertTime TIMESTAMP
+            extractDate DATE
         )
         USING DELTA
         LOCATION '{db_path}/{db_name}/dim_contacts_completed'
@@ -911,9 +806,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             lowProficiency BIGINT,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         LOCATION '{db_path}/{db_name}/fact_contacts_completed'
@@ -929,9 +822,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             value STRING,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         LOCATION '{db_path}/{db_name}/dim_contacts_custom_data'
@@ -940,7 +831,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
 
 
     spark.sql(f"""
-        CREATE TABLE IF NOT EXISTS {db_name}.fact_media_playback_contact (
+        CREATE TABLE IF NOT EXISTS {db_name}.fact_media_playback_contacts (
             contactId STRING,
             acdcontactId STRING,
             brandEmbassyConfig STRUCT<
@@ -1076,12 +967,10 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
             >>,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
-            extractIntervalEndTime TIMESTAMP,
-            recordInsertTime TIMESTAMP,
-            recordIdentifier BIGINT
+            extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
-        LOCATION '{db_path}/{db_name}/fact_media_playback_contact'
+        LOCATION '{db_path}/{db_name}/fact_media_playback_contacts'
     """)
 
     

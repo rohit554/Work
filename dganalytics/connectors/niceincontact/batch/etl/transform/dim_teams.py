@@ -5,7 +5,7 @@ in the Nice InContact data warehouse.
 """
 from pyspark.sql import SparkSession
 
-def dim_teams(spark: SparkSession):
+def dim_teams(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     """
     Transforms the raw teams data into the dimension table `dim_teams`.
     This function reads from the raw teams data and writes to the dimension table
@@ -14,7 +14,7 @@ def dim_teams(spark: SparkSession):
     :return: None
     """
     spark.sql("""
-        INSERT OVERWRITE spark_catalog.niceincontact_infobell.dim_teams
+        INSERT OVERWRITE dim_teams
         SELECT
             teamId,
             teamName,
@@ -67,8 +67,6 @@ def dim_teams(spark: SparkSession):
             channelLock,
             extractDate,
             extractIntervalStartTime,
-            extractIntervalEndTime,
-            recordInsertTime,
-            recordIdentifier
-        FROM spark_catalog.niceincontact_infobell.raw_teams
+            extractIntervalEndTime
+        FROM raw_teams
     """)

@@ -3,7 +3,7 @@ This module contains the function to transform raw agent data into a dimension t
 """
 from pyspark.sql import SparkSession
 
-def dim_contacts(spark: SparkSession):
+def dim_contacts(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     """
     Transforms the raw contacts data into the dimension table `dim_contacts`.
     This function reads from the raw contacts data and writes to the dimension table
@@ -14,7 +14,7 @@ def dim_contacts(spark: SparkSession):
     """
     #select vals and write merge query if maths else insert new records
     spark.sql("""
-        INSERT OVERWRITE spark_catalog.niceincontact_infobell.dim_contacts
+        INSERT OVERWRITE dim_contacts
         SELECT
             contactId,
             masterContactId,
@@ -48,8 +48,6 @@ def dim_contacts(spark: SparkSession):
             isAnalyticsProcessed,
             analyticsProcessedDate,
             dateACWWarehoused,
-            dateContactWarehoused,
-            current_date() AS extractDate,
-            current_timestamp() AS recordInsertTime
-        FROM spark_catalog.niceincontact_infobell.raw_contacts
+            dateContactWarehoused
+        FROM raw_contacts
     """)

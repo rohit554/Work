@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 """
 This module contains the function to transform raw skills summary data into a fact table for Nice inContact.
 """
-def fact_skills_summary(spark: SparkSession):
+def fact_skills_summary(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     """
     Loads the fact_skills_summary fact table from raw skills summary data.
     This function reads from the raw skills summary data and writes to the fact table
@@ -11,7 +11,7 @@ def fact_skills_summary(spark: SparkSession):
     :return: None
     """
     spark.sql("""
-        INSERT OVERWRITE niceincontact_infobell.fact_skills_summary
+        INSERT OVERWRITE fact_skills_summary
         SELECT
             skillId,
             mediaTypeId,
@@ -23,8 +23,6 @@ def fact_skills_summary(spark: SparkSession):
             averageHandleTime,
             abandonRate,
             extractDate,
-            extractIntervalEndTime,
-            recordInsertTime,
-            recordIdentifier
-        FROM spark_catalog.niceincontact_infobell.raw_skills_summary
+            extractIntervalEndTime
+        FROM raw_skills_summary
     """)

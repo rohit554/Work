@@ -5,7 +5,7 @@ in the Nice InContact data warehouse.
 """
 from pyspark.sql import SparkSession
 
-def dim_skills(spark: SparkSession):
+def dim_skills(spark: SparkSession, extract_date, extract_start_time, extract_end_time):
     """
     Transforms the raw skills data into the dimension table `dim_skills`.
     This function reads from the raw skills data and writes to the dimension table
@@ -13,7 +13,7 @@ def dim_skills(spark: SparkSession):
     :param spark: SparkSession object
     :return: None"""
     spark.sql("""
-        INSERT OVERWRITE spark_catalog.niceincontact_infobell.dim_skills
+        INSERT OVERWRITE dim_skills
         SELECT
             skillId,
             skillName,
@@ -86,8 +86,6 @@ def dim_skills(spark: SparkSession):
             requireManualAccept,
             extractDate,
             extractIntervalStartTime,
-            extractIntervalEndTime,
-            recordInsertTime,
-            recordIdentifier
-        FROM spark_catalog.niceincontact_infobell.raw_skills
+            extractIntervalEndTime
+        FROM raw_skills
     """)
