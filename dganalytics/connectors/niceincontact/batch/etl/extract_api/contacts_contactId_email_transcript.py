@@ -4,13 +4,13 @@ from pyspark.sql import SparkSession
 from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
 from dganalytics.connectors.niceincontact.niceincontact_utils import (
     get_api_url, make_niceincontact_request, refresh_access_token, 
-    authorize, process_raw_data
+    authorize, process_raw_data, niceincontact_utils_logger
 )
 from dganalytics.connectors.niceincontact.batch.etl.extract_api.media_playback_contact import fetch_contacts
 
 
 def extract_email_transcript(master_contact_id: str, auth_headers: dict, tenant: str,
-                             niceincontact: dict, api_name: str, logger: logging.Logger) -> dict:
+                             niceincontact: dict, api_name: str) -> dict:
     """
     Fetch email transcript data for a given contact from NICE inContact API.
 
@@ -25,6 +25,7 @@ def extract_email_transcript(master_contact_id: str, auth_headers: dict, tenant:
     Returns:
         dict: Email transcript data if successful; otherwise, an empty dictionary.
     """
+    logger = niceincontact_utils_logger(tenant, "niceincontact_extract_"+str(api_name))
     email_transcript_url = get_api_url(tenant)
     config = niceincontact[api_name]
     params = config.get('params', {})
@@ -57,8 +58,7 @@ def get_master_contact_id_for_email_transcript(
         api_name: str,
         run_id: str,
         extract_start_time: str,
-        extract_end_time: str,
-        logger: logging.Logger) -> None:
+        extract_end_time: str) -> None:
     """
     Retrieve and process email transcript data for all master contact IDs within a date range.
 
@@ -74,6 +74,7 @@ def get_master_contact_id_for_email_transcript(
     Returns:
         None
     """
+    logger = niceincontact_utils_logger(tenant, "niceincontact_extract_" + str(api_name))
     logger.info(f"Starting get_master_contact_id_for_email_transcript for tenant: {tenant}, run_id: {run_id}")
     auth_headers = authorize(tenant)
     niceincontact = niceincontact_end_points
@@ -86,7 +87,7 @@ def get_master_contact_id_for_email_transcript(
     email_transcript_data_list = []
     for count, contact_id in enumerate(contact_ids, start=1):
         logger.info(f"[{count}/{len(contact_ids)}] Fetching transcript for contact_id: {contact_id}")
-        email_transcript_data = extract_email_transcript(contact_id, auth_headers, tenant, niceincontact, api_name, logger)
+        email_transcript_data = extract_email_transcript(contact_id, auth_headers, tenant, niceincontact, api_name)
 
         if email_transcript_data:
             email_transcript_data_list.append(json.dumps(email_transcript_data))

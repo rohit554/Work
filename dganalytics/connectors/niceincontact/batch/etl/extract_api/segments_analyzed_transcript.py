@@ -4,13 +4,13 @@ from pyspark.sql import SparkSession
 from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
 from dganalytics.connectors.niceincontact.niceincontact_utils import (
     niceincontact_request, make_niceincontact_request, refresh_access_token, 
-    authorize, process_raw_data, get_api_url
+    authorize, process_raw_data, get_api_url, niceincontact_utils_logger
 )
 from typing import List
 
-def fetch_segment_ids(spark: SparkSession, logger: logging.Logger) -> List[str]:
+def fetch_segment_ids(spark: SparkSession) -> List[str]:
     """
-    Fetch segmentId values from niceincontact_infobell.raw_segments_analyzed table.
+    Fetch segmentId values from raw_segments_analyzed table.
 
     Args:
         spark (SparkSession): The active Spark session.
@@ -20,8 +20,10 @@ def fetch_segment_ids(spark: SparkSession, logger: logging.Logger) -> List[str]:
         List[str]: List of segmentId strings.
     """
     try:
-        logger.info("Loading table: niceincontact_infobell.raw_segments_analyzed")
-        df = spark.table("niceincontact_infobell.raw_segments_analyzed")
+        logger = niceincontact_utils_logger("default_tenant", "niceincontact_extract_segments_analyzed")
+        logger.info("Loading table: raw_segments_analyzed")
+        df = spark.table("raw_segments_analyzed")
+        #Todo: Need read data from dims
         
         logger.info("Selecting segmentId column")
         segment_ids = [row["segmentId"] for row in df.select("segmentId").dropna().distinct().collect()]
@@ -36,8 +38,7 @@ def fetch_segment_ids(spark: SparkSession, logger: logging.Logger) -> List[str]:
 def fetch_analyzed_transcript_by_segment(
         tenant: str,
         api_name: str,
-        segmentId: str,
-        logger: logging.Logger) -> dict:
+        segmentId: str) -> dict:
     """
     Fetch analyzed transcript data for a given segment ID from NICE inContact API.
 
@@ -50,6 +51,7 @@ def fetch_analyzed_transcript_by_segment(
     Returns:
         dict: Transcript data if available; None otherwise.
     """
+    logger = niceincontact_utils_logger(tenant, "niceincontact_extract_" + str(api_name))
     logger.info(f"Authorizing tenant: {tenant} for API: {api_name}")
     auth_headers = authorize(tenant)
     niceincontact = niceincontact_end_points
@@ -78,14 +80,13 @@ def fetch_analyzed_transcript_by_segment(
         return None
 
 
-def analytics_api_call(
+def fetch_segments_analyzed_transcript(
         spark: SparkSession,
         tenant: str,
         api_name: str,
         run_id: str,
         start_date: str,
-        end_date: str,
-        logger: logging.Logger) -> None:
+        end_date: str) -> None:
     """
     Process transcript segments using NICE inContact Analytics API.
 
@@ -104,16 +105,17 @@ def analytics_api_call(
     Returns:
         None
     """
+    logger=niceincontact_utils_logger(tenant, "niceincontact_extract_" + str(api_name))
     logger.info(f"Starting analytics API call for tenant: {tenant}, run_id: {run_id}, "
                 f"date range: {start_date} to {end_date}")
     
-    segmentId_list = fetch_segment_ids(spark, logger)
+    segmentId_list = fetch_segment_ids(spark)
     logger.info(f"Total segments fetched: {len(segmentId_list)}")
 
     transcript_list = []
     for count, segmentId in enumerate(segmentId_list, start=1):
         logger.info(f"[{count}/{len(segmentId_list)}] Fetching analyzed transcript for segmentId: {segmentId}")
-        transcript = fetch_analyzed_transcript_by_segment(tenant, api_name, segmentId, logger)
+        transcript = fetch_analyzed_transcript_by_segment(tenant, api_name, segmentId)
 
         if transcript:
             transcript_list.append(json.dumps(transcript))

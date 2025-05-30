@@ -42,5 +42,5 @@ def fact_agent_interaction_history(spark: SparkSession, extract_date, extract_st
             extractDate,
             extractIntervalStartTime,
             extractIntervalEndTime
-        FROM park_catalog.niceincontact_infobell.raw_agents_interaction_history
+        FROM raw_agents_interaction_history
     """)

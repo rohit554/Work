@@ -5,13 +5,13 @@ from pyspark.sql.functions import col
 from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
 from dganalytics.connectors.niceincontact.niceincontact_utils import (
     get_api_url, make_niceincontact_request, refresh_access_token, 
-     authorize, process_raw_data
+     authorize, process_raw_data, niceincontact_utils_logger
 )
 import logging
 from typing import List
 
 def extract_media_playback(master_contact_id: str, auth_headers: dict, tenant: str,
-                           niceincontact: dict, api_name: str, logger: logging.Logger) -> dict:
+                           niceincontact: dict, api_name: str) -> dict:
     """
     Fetch media playback data for a given contact from NICE inContact API.
 
@@ -26,6 +26,7 @@ def extract_media_playback(master_contact_id: str, auth_headers: dict, tenant: s
     Returns:
         dict: Media playback data if successful; empty dict otherwise.
     """
+    logger = niceincontact_utils_logger(tenant, "niceincontact_extract_"+str(api_name))
     url = get_api_url(tenant)
     config = niceincontact[api_name]
     params = config.get('params', {})
@@ -54,11 +55,10 @@ def extract_media_playback(master_contact_id: str, auth_headers: dict, tenant: s
 def fetch_contacts(
     spark: SparkSession,
     start_date: str,
-    end_date: str,
-    logger: logging.Logger
+    end_date: str
 ) -> List[str]:
     """
-    Fetch masterContactId list from niceincontact_infobell.raw_contacts 
+    Fetch masterContactId list from raw_contacts 
     filtered by agentStartDate between start_date and end_date.
 
     Args:
@@ -71,13 +71,20 @@ def fetch_contacts(
         List[str]: List of unique masterContactId values within the given date range.
     """
     try:
-        logger.info(f"Loading table niceincontact_infobell.raw_contacts")
-        df = spark.table("niceincontact_infobell.raw_contacts")
+        logger = niceincontact_utils_logger(tenant, "niceincontact_extract_contacts")
+        logger.info(f"Loading table raw_contacts")
+        filtered_df = spark.sql(f"""
+            SELECT DISTINCT masterContactId FROM dim_contacts 
+            WHERE extractDate = CAST('{start_date}' AS DATE)
+            AND extractIntervalStartTime = '{start_date}'
+            AND extractIntervalEndTime = '{end_date}'
+            """)
+        # df = spark.table("raw_contacts")
 
-        logger.info(f"Filtering agentStartDate between {start_date} and {end_date}")
-        filtered_df = df.filter(
-            (col("agentStartDate") >= start_date) & (col("agentStartDate") <= end_date)
-        ).select("masterContactId").dropna().dropDuplicates()
+        # logger.info(f"Filtering agentStartDate between {start_date} and {end_date}")
+        # filtered_df = df.filter(
+        #     (col("agentStartDate") >= start_date) & (col("agentStartDate") <= end_date)
+        # ).select("masterContactId").dropna().dropDuplicates()
 
         contact_ids = [row["masterContactId"] for row in filtered_df.collect()]
         logger.info(f"Fetched {len(contact_ids)} unique masterContactIds")
@@ -90,8 +97,8 @@ def fetch_contacts(
 
 
 
-def get_master_contact_id(spark: SparkSession, tenant: str, api_name: str, run_id: str,
-                          extract_start_time: str, extract_end_time: str, logger: logging.Logger) -> None:
+def fetch_media_playback_contact(spark: SparkSession, tenant: str, api_name: str, run_id: str,
+                          extract_start_time: str, extract_end_time: str) -> None:
     """
     Retrieve media playback data for all master contact IDs within a date range and process it.
 
@@ -107,18 +114,19 @@ def get_master_contact_id(spark: SparkSession, tenant: str, api_name: str, run_i
     Returns:
         None
     """
+    logger = niceincontact_utils_logger(tenant, "niceincontact_extract_" + str(api_name))
     logger.info(f"Starting get_master_contact_id for tenant: {tenant} with run_id: {run_id}")
     auth_headers = authorize(tenant)
     niceincontact = niceincontact_end_points
 
-    contact_ids = fetch_contacts(spark, extract_start_time, extract_end_time, logger)
-    contact_ids = list(set(contact_ids))  # Remove duplicates
+    contact_ids = fetch_contacts(spark, extract_start_time, extract_end_time)
+    # contact_ids = list(set(contact_ids))  # Remove duplicates
     logger.info(f"Total unique contact IDs to process: {len(contact_ids)}")
 
     media_playback_data_list = []
     for count, contact_id in enumerate(contact_ids, start=1):
         logger.info(f"[{count}/{len(contact_ids)}] Processing media playback for contact_id: {contact_id}")
-        media_playback_data = extract_media_playback(contact_id, auth_headers, tenant, niceincontact, api_name, logger)
+        media_playback_data = extract_media_playback(contact_id, auth_headers, tenant, niceincontact, api_name)
 
         if media_playback_data:
             media_playback_data_list.append(json.dumps(media_playback_data))

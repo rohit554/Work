@@ -267,7 +267,7 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
     logger.info("Creating fact_teams_agents table with all available fields")
 
     spark.sql(f"""
-        CREATE TABLE IF NOT EXISTS spark_catalog.niceincontact_infobell.fact_teams_agents (
+        CREATE TABLE IF NOT EXISTS {db_name}.fact_teams_agents (
             teamId BIGINT,
             teamName STRING,
             isActive BOOLEAN,

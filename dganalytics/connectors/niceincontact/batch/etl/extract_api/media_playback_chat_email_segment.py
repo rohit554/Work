@@ -4,13 +4,12 @@ from pyspark.sql import SparkSession
 from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
 from dganalytics.connectors.niceincontact.niceincontact_utils import (
     get_api_url, make_niceincontact_request, refresh_access_token, 
-    niceincontact_request, authorize, process_raw_data
+    niceincontact_request, authorize, process_raw_data, niceincontact_utils_logger
 )
 
 def fetch_media_playback_segments(tenant: str, api_name: str,
                                   extract_start_time: str, extract_end_time: str,
-                                  segmentId: int, auth_headers: dict,
-                                  logger: logging.Logger) -> dict | None:
+                                  segmentId: int, auth_headers: dict) -> dict | None:
     """
     Fetches media playback segments from the NICE inContact API for a given segment ID.
 
@@ -26,6 +25,7 @@ def fetch_media_playback_segments(tenant: str, api_name: str,
     Returns:
         dict or None: Parsed JSON response from the API if successful; None if request fails.
     """
+    logger = niceincontact_utils_logger(tenant, "niceincontact_extract_"+str(api_name))
     niceincontact = niceincontact_end_points
     config = niceincontact[api_name]
     req_type = config.get('request_type', 'GET')
@@ -70,8 +70,7 @@ def fetch_media_playback_segments(tenant: str, api_name: str,
 
 
 def fetch_media_segments(spark: SparkSession, tenant: str, api_name: str, run_id: str,
-                         extract_start_time: str, extract_end_time: str,
-                         logger: logging.Logger) -> None:
+                         extract_start_time: str, extract_end_time: str) -> None:
     """
     Retrieves media segments for the given time range, categorizes them by media type,
     and processes the data using NICE inContact utilities.
@@ -88,6 +87,7 @@ def fetch_media_segments(spark: SparkSession, tenant: str, api_name: str, run_id
     Returns:
         None
     """
+    logger = niceincontact_utils_logger(tenant, "niceincontact_extract_"+str(api_name))
     resp_list = niceincontact_request(
         spark, tenant, "segments_analyzed", None,
         extract_start_time, extract_end_time, skip_raw_load=True
@@ -102,8 +102,7 @@ def fetch_media_segments(spark: SparkSession, tenant: str, api_name: str, run_id
         logger.info(f"Processing count: {count}, Remaining: {len(segmentId_list) - count}")
         media_playback_segments_data = fetch_media_playback_segments(
             tenant, api_name, extract_start_time, extract_end_time,
-            segmentId, auth_headers, logger
-        )
+            segmentId, auth_headers)
         if media_playback_segments_data:
             for interactions in media_playback_segments_data.get("interactions", []):
                 if interactions.get("mediaType", {}) != "voice-only":

@@ -2,13 +2,13 @@ import json
 import time
 import requests
 from pyspark.sql import SparkSession
-from dganalytics.connectors.niceincontact.niceincontact_utils import authorize, get_api_url, make_niceincontact_request, process_raw_data, refresh_access_token
+from dganalytics.connectors.niceincontact.niceincontact_utils import authorize, get_api_url, make_niceincontact_request, process_raw_data, refresh_access_token, niceincontact_utils_logger
 import logging
 import re
 from dganalytics.connectors.niceincontact.niceincontact_api_config import niceincontact_end_points
 
 
-def create_job(tenant, api_name, extract_start_time, extract_end_time, logger: logging.Logger):
+def create_job(tenant, api_name, extract_start_time, extract_end_time):
     """
     Creates a job in the NICE inContact API for data extraction.
 
@@ -22,6 +22,7 @@ def create_job(tenant, api_name, extract_start_time, extract_end_time, logger: l
     Returns:
         dict: JSON response from the API if successful, None otherwise.
     """
+    logger = niceincontact_utils_logger(tenant, "niceincontact_extract_"+str(api_name))
     niceincontact = niceincontact_end_points
     config = niceincontact[api_name]
     logger.info(
@@ -53,10 +54,11 @@ def create_job(tenant, api_name, extract_start_time, extract_end_time, logger: l
     logger.debug(f"[{tenant}] Job creation response: {resp_json}")
     return resp_json
 
-def get_extraction_url(tenant, api_name, job_id, retries=0, max_retries=40, wait_seconds=15, logger: logging.Logger):
+def get_extraction_url(tenant, api_name, job_id, retries=0, max_retries=40, wait_seconds=15):
     """
     Retrieves the extraction URL for a given job ID from the NICE inContact API.
     """
+    logger = niceincontact_utils_logger(tenant, "niceincontact_extract_" + str(api_name))
     niceincontact = niceincontact_end_points
     config = niceincontact[api_name]
     auth_headers = authorize(tenant)
@@ -109,7 +111,7 @@ def get_extraction_url(tenant, api_name, job_id, retries=0, max_retries=40, wait
         time.sleep(wait_seconds)
         return get_extraction_url(tenant, api_name, job_id, retries=retries+1, max_retries=max_retries, wait_seconds=wait_seconds)
 
-def load_csv_from_response(spark, url: str, tenant: str, logger: logging.Logger):
+def load_csv_from_response(spark, url: str, tenant: str):
     """
     Fetch CSV content from an HTTP endpoint and load it into a Spark DataFrame with cleaned column names.
 
@@ -124,6 +126,7 @@ def load_csv_from_response(spark, url: str, tenant: str, logger: logging.Logger)
     Raises:
     - RuntimeError if the response is unauthorized or if the resulting DataFrame is empty
     """
+    logger = niceincontact_utils_logger(tenant, "niceincontact_extract_csv")
     logger.info(f"[{tenant}] Fetching CSV from URL: {url}")
     
     # Step 1: Request the CSV data
@@ -172,9 +175,7 @@ def data_extract_jobs(
     api_name: str,
     run_id: str,
     start_str: str,
-    end_str: str,
-    logger: logging.Logger
-):
+    end_str: str):
     """
     Executes the data extraction job lifecycle for a given API:
     - Creates an extraction job
@@ -186,16 +187,17 @@ def data_extract_jobs(
         RuntimeError: If job creation fails, extraction URL is missing,
                       or no data is returned from the extraction.
     """
+    logger = niceincontact_utils_logger(tenant, "niceincontact_extract_" + str(api_name))
     logger.info(f"[{tenant}] Starting data extraction for API: {api_name} (run_id: {run_id})")
 
-    job_id = create_job(tenant, api_name, start_str, end_str, logger)
+    job_id = create_job(tenant, api_name, start_str, end_str)
     logger.info(f"[{tenant}] Created job with ID: {job_id}")
 
     if not job_id:
         msg = f"[{tenant}] Failed to create job for {api_name}"
         logger.error(msg)
         raise RuntimeError(msg)
-    extraction_url = get_extraction_url(tenant, "data_extraction_jobid", job_id, logger)
+    extraction_url = get_extraction_url(tenant, "data_extraction_jobid", job_id)
     logger.info(f"[{tenant}] Extraction URL: {extraction_url}")
 
     if not extraction_url:
@@ -203,7 +205,7 @@ def data_extract_jobs(
         logger.error(msg)
         raise RuntimeError(msg)
 
-    extraction_data = load_csv_from_response(spark, extraction_url, tenant, logger)
+    extraction_data = load_csv_from_response(spark, extraction_url, tenant)
     if not extraction_data:
         msg = f"[{tenant}] No data returned from extraction URL: {extraction_url}"
         logger.error(msg)
