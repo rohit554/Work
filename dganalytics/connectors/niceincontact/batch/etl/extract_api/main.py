@@ -1,4 +1,5 @@
 from dganalytics.connectors.niceincontact.batch.etl.extract_api.contacts_contactId_email_transcript import get_master_contact_id_for_email_transcript
+from dganalytics.connectors.niceincontact.batch.etl.extract_api.data_extraction import data_extract_jobs
 from dganalytics.connectors.niceincontact.batch.etl.extract_api.media_playback_chat_email_segment import fetch_media_segments
 from dganalytics.connectors.niceincontact.batch.etl.extract_api.media_playback_contact import get_master_contact_id
 from dganalytics.connectors.niceincontact.batch.etl.extract_api.segments_analyzed_transcript import analytics_api_call
@@ -34,10 +35,12 @@ if __name__ == "__main__":
         elif api_name == "media_playback_contact":
             get_master_contact_id(spark, tenant, api_name, run_id,
                              extract_start_time, extract_end_time, logger)
-        elif api_name == "contacts_contactId_email_transcript":
-            get_master_contact_id_for_email_transcript(spark, tenant, api_name, run_id, extract_start_time, extract_end_time, logger)
+        # elif api_name == "contacts_contactId_email_transcript":
+        #     get_master_contact_id_for_email_transcript(spark, tenant, api_name, run_id, extract_start_time, extract_end_time, logger)
         elif api_name == "segments_analyzed_transcript":
             analytics_api_call(spark, tenant, api_name, run_id, extract_start_time, extract_end_time, logger)
+        elif api_name in ["data_extraction_qm_workflows", "data_extraction_wfm_payroll"]:
+            data_extract_jobs(spark, tenant, api_name, run_id, extract_start_time, extract_end_time, logger)
         else:
             logger.error("Invalid API name provided: %s. No matching handler function.", api_name)
             raise ValueError("Invalid API name provided: %s. No matching handler function." % api_name)

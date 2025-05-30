@@ -403,5 +403,38 @@ niceincontact_end_points = {
         "entity_name": "interactions",
         "tbl_overwrite": False,
         "raw_primary_key": ["segmentId"]
+    },
+    "data_extraction_qm_workflows": {
+        "endpoint": "data-extraction/v1/jobs",
+        "request_type": "POST",
+        "paging": False,
+        "interval": True,
+        "params": {
+            "entityName": "qm-workflows",
+            "version": "4"
+        },
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "tbl_overwrite": False,
+        "raw_primary_key": ["id"],
+    },
+    "data_extraction_wfm_payroll": {
+        "endpoint": "data-extraction/v1/jobs",
+        "request_type": "POST",
+        "paging": False,
+        "interval": True,
+        "params": {
+            "entityName": "wfm-payroll",
+            "version": "1"
+        },
+        "spark_partitions": {"max_records_per_partition": 20000},
+        "tbl_overwrite": False,
+        "raw_primary_key": ["id"],
+    },
+    "data_extraction_jobid" : {
+        "endpoint": "data-extraction/v1/jobs/{jobId}",
+        "request_type": "GET",
+        "paging": False,
+        "interval": False,
+        "params": {}
     }
 }
