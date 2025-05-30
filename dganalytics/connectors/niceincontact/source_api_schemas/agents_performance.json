@@ -1,18 +1,18 @@
 {
   "type": "struct",
   "fields": [
-    { "name": "agentId", "type": "long", "nullable": true, "metadata": {} },
-    { "name": "teamId", "type": "long", "nullable": true, "metadata": {} },
-    { "name": "agentOffered", "type": "long", "nullable": true, "metadata": {} },
-    { "name": "inboundHandled", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "agentId", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "teamId", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "agentOffered", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "inboundHandled", "type": "string", "nullable": true, "metadata": {} },
     { "name": "inboundTime", "type": "string", "nullable": true, "metadata": {} },
     { "name": "inboundTalkTime", "type": "string", "nullable": true, "metadata": {} },
     { "name": "inboundAvgTalkTime", "type": "string", "nullable": true, "metadata": {} },
-    { "name": "outboundHandled", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "outboundHandled", "type": "string", "nullable": true, "metadata": {} },
     { "name": "outboundTime", "type": "string", "nullable": true, "metadata": {} },
     { "name": "outboundTalkTime", "type": "string", "nullable": true, "metadata": {} },
     { "name": "outboundAvgTalkTime", "type": "string", "nullable": true, "metadata": {} },
-    { "name": "totalHandled", "type": "long", "nullable": true, "metadata": {} },
+    { "name": "totalHandled", "type": "string", "nullable": true, "metadata": {} },
     { "name": "totalTalkTime", "type": "string", "nullable": true, "metadata": {} },
     { "name": "totalAvgTalkTime", "type": "string", "nullable": true, "metadata": {} },
     { "name": "totalAvgHandleTime", "type": "string", "nullable": true, "metadata": {} },
@@ -20,10 +20,10 @@
     { "name": "availableTime", "type": "string", "nullable": true, "metadata": {} },
     { "name": "unavailableTime", "type": "string", "nullable": true, "metadata": {} },
     { "name": "acwTime", "type": "string", "nullable": true, "metadata": {} },
-    { "name": "refused", "type": "long", "nullable": true, "metadata": {} },
-    { "name": "percentRefused", "type": "double", "nullable": true, "metadata": {} },
+    { "name": "refused", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "percentRefused", "type": "string", "nullable": true, "metadata": {} },
     { "name": "loginTime", "type": "string", "nullable": true, "metadata": {} },
-    { "name": "workingRate", "type": "double", "nullable": true, "metadata": {} },
-    { "name": "occupancy", "type": "double", "nullable": true, "metadata": {} }
+    { "name": "workingRate", "type": "string", "nullable": true, "metadata": {} },
+    { "name": "occupancy", "type": "string", "nullable": true, "metadata": {} }
   ]
 }

@@ -455,6 +455,24 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         """
     )
 
+    logger.info("Creating dim_dispositions_skills table with all available fields")
+    
+    spark.sql(f"""
+        CREATE TABLE IF NOT EXISTS {db_name}.dim_dispositions_skills (
+            dispositionId BIGINT,
+            dispositionName STRING,
+            isActive BOOLEAN,
+            skills ARRAY<STRUCT<skillId: BIGINT, mediaTypeId: BIGINT, mediaTypeName: STRING>>,
+            extractDate DATE,
+            extractIntervalStartTime TIMESTAMP,
+            extractIntervalEndTime TIMESTAMP,
+            recordInsertTime TIMESTAMP,
+            recordIdentifier BIGINT
+        )
+        USING DELTA
+        LOCATION '{db_path}/{db_name}/dim_dispositions_skills'
+    """)
+
     logger.info("Creating dim_agents_skills table with all available fields")
     spark.sql(f"""
         CREATE TABLE IF NOT EXISTS {db_name}.dim_agents_skills (
