@@ -20,7 +20,6 @@ def fetch_media_playback_segments(tenant: str, api_name: str,
         extract_end_time (str): Extraction end time (used for interval-based APIs).
         segmentId (int): The ID of the media segment to fetch.
         auth_headers (dict): Dictionary containing authentication headers for the API request.
-        logger (logging.Logger): Logger instance for logging information and errors.
 
     Returns:
         dict or None: Parsed JSON response from the API if successful; None if request fails.
@@ -82,7 +81,6 @@ def fetch_media_segments(spark: SparkSession, tenant: str, api_name: str, run_id
         run_id (str): Unique identifier for the data extraction run.
         extract_start_time (str): Start time for media segment extraction.
         extract_end_time (str): End time for media segment extraction.
-        logger (logging.Logger): Logger instance for logging status and errors.
 
     Returns:
         None

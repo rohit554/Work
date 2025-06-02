@@ -14,8 +14,6 @@ def fetch_segment_ids(spark: SparkSession) -> List[str]:
 
     Args:
         spark (SparkSession): The active Spark session.
-        logger (logging.Logger): Logger for tracking progress and errors.
-
     Returns:
         List[str]: List of segmentId strings.
     """
@@ -46,7 +44,6 @@ def fetch_analyzed_transcript_by_segment(
         tenant (str): Tenant identifier.
         api_name (str): API configuration name.
         segmentId (str): The segment ID to retrieve transcript data for.
-        logger (logging.Logger): Logger instance.
 
     Returns:
         dict: Transcript data if available; None otherwise.
@@ -100,7 +97,6 @@ def fetch_segments_analyzed_transcript(
         run_id (str): Unique identifier for this ETL run.
         start_date (str): Start date in ISO 8601 format.
         end_date (str): End date in ISO 8601 format.
-        logger (logging.Logger): Logger instance.
 
     Returns:
         None

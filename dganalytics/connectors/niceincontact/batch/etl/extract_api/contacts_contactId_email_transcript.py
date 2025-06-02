@@ -20,7 +20,6 @@ def extract_email_transcript(master_contact_id: str, auth_headers: dict, tenant:
         tenant (str): The tenant identifier used for logging and token refresh.
         niceincontact (dict): Dictionary of NICE inContact API configurations.
         api_name (str): Name of the specific API configuration to use.
-        logger (logging.Logger): Logger instance for status and error logging.
 
     Returns:
         dict: Email transcript data if successful; otherwise, an empty dictionary.
@@ -69,8 +68,6 @@ def get_master_contact_id_for_email_transcript(
         run_id (str): Unique identifier for this ETL run.
         extract_start_time (str): Start datetime for extracting data (ISO 8601 format).
         extract_end_time (str): End datetime for extracting data (ISO 8601 format).
-        logger (logging.Logger): Logger instance for capturing process status and diagnostics.
-
     Returns:
         None
     """
@@ -80,7 +77,7 @@ def get_master_contact_id_for_email_transcript(
     niceincontact = niceincontact_end_points
 
     logger.info(f"Fetching contact IDs between {extract_start_time} and {extract_end_time}")
-    contact_ids = fetch_contacts(spark, extract_start_time, extract_end_time, logger)
+    contact_ids = fetch_contacts(spark, extract_start_time, extract_end_time)
     contact_ids = list(set(contact_ids))
     logger.info(f"Total unique contact IDs fetched: {len(contact_ids)}")
 

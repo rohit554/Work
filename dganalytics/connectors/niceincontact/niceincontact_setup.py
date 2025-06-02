@@ -4,7 +4,7 @@ from dganalytics.utils.utils import get_path_vars, get_spark_session
 from pyspark.sql import SparkSession
 
 
-def create_database(spark: SparkSession, path: str, db_name: str, logger):
+def create_database(spark: SparkSession, path: str, db_name: str):
     """
     Create a Spark SQL database if it does not already exist.
 
@@ -22,7 +22,7 @@ def create_database(spark: SparkSession, path: str, db_name: str, logger):
         f"create database if not exists {db_name}  LOCATION '{path}/{db_name}'")
     return True
 
-def create_ingestion_stats_table(spark: SparkSession, db_name: str, db_path: str, logger):
+def create_ingestion_stats_table(spark: SparkSession, db_name: str, db_path: str):
     """
     Create the ingestion stats table in the specified database.
 
@@ -54,7 +54,7 @@ def create_ingestion_stats_table(spark: SparkSession, db_name: str, db_path: str
     )
     return True
 
-def create_raw_table(api_name: str, spark: SparkSession, db_name: str, db_path: str, logger):
+def create_raw_table(api_name: str, spark: SparkSession, db_name: str, db_path: str):
     """
     Create a raw delta table for the given API using its JSON schema.
 
@@ -86,7 +86,7 @@ def create_raw_table(api_name: str, spark: SparkSession, db_name: str, db_path: 
 
     return True
 
-def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str, logger):
+def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str):
     """
     Create raw tables for all NICE inContact APIs defined in the API config.
 
@@ -101,7 +101,7 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
         bool: True if all raw tables are created.
     """
     logger.info("Setting Nice InContact raw tables")
-    apis = ["agents", "teams", "teams_agents", "teams_performace", "skills", "agents_skills", 
+    apis = ["agents", "teams", "teams_agents", "teams_performance", "skills", "agents_skills", 
             "agents_performance", "agents_interaction_history", "contacts",
             "contacts_completed", "contacts_custom_data", "dispositions", "dispositions_skills",
             "skills_summary", "skills_sla_summary",
@@ -111,12 +111,12 @@ def raw_tables(spark: SparkSession, db_name: str, db_path: str, tenant_path: str
             "wfm_data_skills_contacts", "data_extraction", "data_extraction_qm_workflows", "data_extraction_wfm_payroll"]
     for api in apis:
         logger.info(f"Creating raw table for API: {api}")
-        create_raw_table(api, spark, db_name, db_path, logger)
+        create_raw_table(api, spark, db_name, db_path)
 
     logger.info("Raw tables creation completed.")
     return True
 
-def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
+def create_dim_tables(spark: SparkSession, db_name: str, db_path: str):
     """
     Create dimension tables for NICE inContact with all available fields.
     Args:
@@ -263,80 +263,66 @@ def create_dim_tables(spark: SparkSession, db_name: str, db_path: str, logger):
         USING DELTA
         LOCATION '{db_path}/{db_name}/dim_agents'
         """)
-
-    logger.info("Creating fact_teams_agents table with all available fields")
+    logger.info("Creating dim_teams table with all available fields")
 
     spark.sql(f"""
-        CREATE TABLE IF NOT EXISTS {db_name}.fact_teams_agents (
-            teamId BIGINT,
+        CREATE TABLE IF NOT EXISTS {db_name}.dim_teams (
+            teamId INT,
             teamName STRING,
             isActive BOOLEAN,
+            description STRING,
+            notes STRING,
+            lastUpdateTime STRING,
             inViewEnabled BOOLEAN,
             wfoEnabled BOOLEAN,
             wfm2Enabled BOOLEAN,
             qm2Enabled BOOLEAN,
-            description STRING,
-            notes STRING,
-            lastUpdateTime STRING,
+            maxConcurrentChats INT,
+            agentCount INT,
+            maxEmailAutoParkingLimit INT,
             inViewGamificationEnabled BOOLEAN,
             inViewChatEnabled BOOLEAN,
+            inViewWallboardEnabled BOOLEAN,
             inViewLMSEnabled BOOLEAN,
             analyticsEnabled BOOLEAN,
-            voiceThreshold BIGINT,
-            chatThreshold BIGINT,
-            emailThreshold BIGINT,
-            socialThreshold BIGINT,
-            workItemThreshold BIGINT,
             requestContact BOOLEAN,
             contactAutoFocus BOOLEAN,
-            agentId BIGINT,
-            userName STRING,
-            firstName STRING,
-            middleName STRING,
-            lastName STRING,
-            emailAddress STRING,
-            isActive BOOLEAN,
-            reportToId BIGINT,
-            isSupervisor BOOLEAN,
-            lastLogin STRING,
-            lastModified STRING,
-            locationId BIGINT,
-            custom1 STRING,
-            custom2 STRING,
-            custom3 STRING,
-            custom4 STRING,
-            custom5 STRING,
-            internalId STRING,
-            securityProfileId BIGINT,
-            timeZone STRING,
-            country STRING,
-            state STRING,
-            city STRING,
-            chatRefusalTimeout BIGINT,
-            phoneRefusalTimeout BIGINT,
-            voicemailRefusalTimeout BIGINT,
-            workItemRefusalTimeout BIGINT,
-            defaultDialingPattern STRING,
-            maxConcurrentChats BIGINT,
-            notes_agent STRING,
-            hireDate STRING,
-            terminationDate STRING,
-            hourlyCost DOUBLE,
-            rehireStatus BOOLEAN,
-            employmentType STRING,
-            referral STRING,
-            atHome BOOLEAN,
-            hiringSource STRING,
-            ntLoginName STRING,
-            scheduleNotification STRING,
-            federatedIdValue STRING,
+            chatThreshold INT,
+            emailThreshold INT,
+            workItemThreshold INT,
+            smsThreshold INT,
+            digitalThreshold INT,
+            voiceThreshold INT,
+            teamLeadId STRING,
+            deliveryMode STRING,
+            totalContactCount INT,
+            niceAudioRecordingEnabled BOOLEAN,
+            niceDesktopAnalyticsEnabled BOOLEAN,
+            niceQmEnabled BOOLEAN,
+            niceScreenRecordingEnabled BOOLEAN,
+            niceSpeechAnalyticsEnabled BOOLEAN,
+            niceWfmEnabled BOOLEAN,
+            niceQualityOptimizationEnabled BOOLEAN,
+            niceSurvey_CustomerEnabled BOOLEAN,
+            nicePerformanceManagementEnabled BOOLEAN,
+            niceAnalyticsEnabled BOOLEAN,
+            niceLessonManagementEnabled BOOLEAN,
+            niceCoachingEnabled BOOLEAN,
+            niceStrategicPlannerEnabled BOOLEAN,
+            niceShiftBiddingEnabled BOOLEAN,
+            niceWfoAdvancedEnabled BOOLEAN,
+            niceWfoEssentialsEnabled BOOLEAN,
+            cxoneCustomerAuthenticationEnabled BOOLEAN,
+            socialThreshold INT,
+            teamUuid STRING,
+            channelLock STRING,
             extractDate DATE,
             extractIntervalStartTime TIMESTAMP,
             extractIntervalEndTime TIMESTAMP
         )
         USING DELTA
         PARTITIONED BY (extractDate, extractIntervalStartTime, extractIntervalEndTime)
-        LOCATION '{db_path}/{db_name}/fact_teams_agents'
+        LOCATION '{db_path}/{db_name}/dim_teams'
     """)
 
     logger.info("Creating fact_teams_performance table with all available fields")
@@ -994,7 +980,7 @@ if __name__ == "__main__":
     spark = get_spark_session(app_name=app_name,
                               tenant=tenant, default_db='default')
     
-    create_database(spark, db_path, db_name, logger)
-    create_ingestion_stats_table(spark, db_name, db_path, logger)
-    raw_tables(spark, db_name, db_path, tenant_path, logger)
-    create_dim_tables(spark, db_name, db_path, logger)
+    create_database(spark, db_path, db_name)
+    create_ingestion_stats_table(spark, db_name, db_path)
+    raw_tables(spark, db_name, db_path, tenant_path)
+    create_dim_tables(spark, db_name, db_path)

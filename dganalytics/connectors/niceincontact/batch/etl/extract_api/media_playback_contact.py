@@ -21,7 +21,6 @@ def extract_media_playback(master_contact_id: str, auth_headers: dict, tenant: s
         tenant (str): The tenant identifier used for logging and token refresh.
         niceincontact (dict): Dictionary of NICE inContact API configurations.
         api_name (str): Name of the specific API configuration to use.
-        logger (logging.Logger): Logger instance for logging status and errors.
 
     Returns:
         dict: Media playback data if successful; empty dict otherwise.
@@ -65,13 +64,12 @@ def fetch_contacts(
         spark (SparkSession): Spark session object.
         start_date (str): Start date in ISO 8601 format (e.g. '2024-01-01T00:00:00Z').
         end_date (str): End date in ISO 8601 format (e.g. '2024-01-31T23:59:59Z').
-        logger (logging.Logger): Logger instance for logging progress and errors.
 
     Returns:
         List[str]: List of unique masterContactId values within the given date range.
     """
     try:
-        logger = niceincontact_utils_logger(tenant, "niceincontact_extract_contacts")
+        logger = niceincontact_utils_logger("default_tenant", "niceincontact_extract_contacts")
         logger.info(f"Loading table raw_contacts")
         filtered_df = spark.sql(f"""
             SELECT DISTINCT masterContactId FROM dim_contacts 
@@ -109,7 +107,6 @@ def fetch_media_playback_contact(spark: SparkSession, tenant: str, api_name: str
         run_id (str): Identifier for the current pipeline run.
         extract_start_time (str): Start datetime (ISO 8601 format) for data extraction.
         extract_end_time (str): End datetime (ISO 8601 format) for data extraction.
-        logger (logging.Logger): Logger instance for tracking progress.
 
     Returns:
         None
