@@ -1,0 +1,60 @@
+{
+    "fields": [
+      {
+        "metadata": {},
+        "name": "id",
+        "nullable": false,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "title",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "url",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "space_key",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "space_title",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "friendly_last_modified",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "excerpt",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "run_id",
+        "nullable": true,
+        "type": "string"
+      },
+      {
+        "metadata": {},
+        "name": "ingest_ts",
+        "nullable": true,
+        "type": "timestamp"
+      }
+    ],
+    "type": "struct"
+  }
+  
